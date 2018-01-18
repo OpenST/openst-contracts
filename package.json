@@ -1,0 +1,20 @@
+{
+  "name": "openst-payments",
+  "version": "0.9.2",
+  "description": "",
+  "dependencies": {
+    "assert": "^1.4.1",
+    "bignumber": "^1.1.0",
+    "bignumber.js": "^4.1.0",
+    "moment": "^2.19.2",
+    "web3": "^0.20.2"
+  },
+  "devDependencies": {
+    "truffle": "^4.0.1",
+    "ganache-cli": "^6.0.3",
+    "abi-decoder": "^1.0.9",
+    "ethereumjs-testrpc": "^6.0.3"
+  },
+  "author": "OpenST Foundation Ltd.",
+  "license": "LGPL-3.0"
+}
