@@ -144,7 +144,7 @@ contract Pricer is OpsManaged, PricerInterface {
 		bytes3 _currency,
 		uint256 _intendedPricePoint)
 		public
-		returns (bool success)
+		returns (bool /* success */)
 	{
 		require(_beneficiary != address(0));
 		require(_transferAmount != 0);
