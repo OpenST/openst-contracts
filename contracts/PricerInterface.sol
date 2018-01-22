@@ -46,9 +46,9 @@ contract PricerInterface {
         bytes3 _currency);
 
     ///Event for accepted margin update for currency
-    event AcceptedMargin(
+    event AcceptedMarginSet(
         bytes3 _currency,       
-        uint64 relativeIntendedPriceRange);
+        uint64 _acceptedMargin);
 
     /// @dev    Returns address of the branded token;
     ///         public method;
@@ -148,7 +148,7 @@ contract PricerInterface {
     ///         gets current price point and token decimal for the price oracle for the give currency; 
     ///         public method;
     /// @param _currency currency
-    /// @return (currentPrice, TokenDecimals)
+    /// @return (currentPrice, tokenDecimals)
     function getPricePoint(
         bytes3 _currency) 
         public 

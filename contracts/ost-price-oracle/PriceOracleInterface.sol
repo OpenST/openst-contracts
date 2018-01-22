@@ -22,12 +22,11 @@ pragma solidity ^0.4.17;
 // --------------------------
 
 /// @title PriceOracleInterface - Interface of PriceOracle contract
-contract PriceOracleInterface{
+contract PriceOracleInterface {
 
     /*
      *  Events
      */
-
     /// @dev event emitted whenever price is updated
     /// @return _price
     /// @return _expirationHeight
@@ -41,6 +40,14 @@ contract PriceOracleInterface{
     /*
      * Functions
      */
+    /// @dev use this function to update oracle price
+    /// @param _price price
+    /// @return expirationHeight
+    function setPrice(
+        uint256 _price)
+        external
+        returns(
+        uint256);
 
     /// @dev Price is stored as fixed point integer value similar as wei unit.
     /// Use this variable in case decimal value need to be evaluated
@@ -82,15 +89,6 @@ contract PriceOracleInterface{
         view
         returns(
         bytes3);
-
-    /// @dev use this function to update oracle price
-    /// @param _price price
-    /// @return expirationHeight
-    function setPrice(
-        uint256 _price)
-        external
-        returns(
-        uint256);
 
     /// @dev use this function to get price
     /// @return quoteCurrency/baseCurrency value

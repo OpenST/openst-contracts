@@ -153,8 +153,8 @@ contract Pricer is OpsManaged, PricerInterface {
         returns (bool /* success */)
     {
         pricerAcceptedMargins[_currency] = _acceptedMargin;
-        // Trigger AcceptedMargin event 
-        AcceptedMargin(_currency, _acceptedMargin);
+        // Trigger AcceptedMarginSet event 
+        AcceptedMarginSet(_currency, _acceptedMargin);
         return true;
     }
 
@@ -220,11 +220,11 @@ contract Pricer is OpsManaged, PricerInterface {
     ///         gets current price point and token decimal for the price oracle for the give currency; 
     ///         public method;
     /// @param _currency currency
-    /// @return (currentPrice, TokenDecimals)
+    /// @return (currentPrice, tokenDecimals)
     function getPricePoint(
         bytes3 _currency)
         public              
-        returns (uint256, uint8) /* pricePoint, TokenDecimal*/
+        returns (uint256, uint8) /* pricePoint, tokenDecimals*/
     {
         require(_currency != "");
         PriceOracleInterface  currentPriceOracle = PriceOracleInterface(pricerPriceOracles[_currency]);
