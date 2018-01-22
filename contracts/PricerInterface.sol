@@ -23,7 +23,7 @@ pragma solidity ^0.4.17;
 
 contract PricerInterface {
 
-	event Payment(address _beneficiary, 
+	event Payment(address _beneficiary,
 		uint256 _transferAmount, 
 		address _commissionBeneficiary, 
 		uint256 _commissionAmount, 

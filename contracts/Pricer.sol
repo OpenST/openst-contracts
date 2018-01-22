@@ -247,7 +247,7 @@ contract Pricer is OpsManaged, PricerInterface {
 		require(_currency != "");
 		PriceOracleInterface  currentPriceOracle = PriceOracleInterface(pricerPriceOracles[_currency]);
 		require(currentPriceOracle != address(0));
-		return (currentPriceOracle.getPrice(), currentPriceOracle.TOKEN_DECIMALS());	
+		return (currentPriceOracle.getPrice(), currentPriceOracle.tokenDecimals());	
 	}
 	
 	/// @dev	Takes _intendedPricePoint, _currentPricePoint, _acceptedMargin;
