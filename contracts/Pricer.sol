@@ -84,7 +84,7 @@ contract Pricer is OpsManaged, PricerInterface {
 	///         Public;
 	/// @return address    
 	function brandedToken() 
-		public 
+		public
 		returns (address)
 	{
 		return pricerBrandedToken;
@@ -97,7 +97,7 @@ contract Pricer is OpsManaged, PricerInterface {
 	/// @return uint64 margin
 	function acceptedMargins(
 		bytes3 _currency) 
-		public 
+		public
 		returns (uint64)
 	{		
 		return pricerAcceptedMargins[_currency];
@@ -110,7 +110,7 @@ contract Pricer is OpsManaged, PricerInterface {
 	/// @return address
 	function priceOracles(
 		bytes3 _currency) 
-		public 
+		public
 		returns (address)
 	{	
 		return pricerPriceOracles[_currency];
@@ -217,7 +217,7 @@ contract Pricer is OpsManaged, PricerInterface {
 	/// @return (currentPrice, TokenDecimals)
 	function getPricePoint(
 		bytes3 _currency)
-		public
+		public		
 		returns (uint256 /* pricePoint */, uint8 /* TokenDecimal*/)
 	{
 		require(_currency != "");
@@ -238,6 +238,7 @@ contract Pricer is OpsManaged, PricerInterface {
 		uint256 _currentPricePoint,
 		uint64 _acceptedMargin)
 		private
+		pure
 		returns (bool /*isValid*/)
 	{
 		bool isValid = true;
@@ -264,6 +265,7 @@ contract Pricer is OpsManaged, PricerInterface {
 		uint256 _transferAmount,
 		uint256 _commissionAmount)
 		private
+		view
 		returns (uint256 /* number of BT */, uint256 /*  number of commission BT */)
 	{
 		uint256 conversionRate = UtilityTokenInterface(pricerBrandedToken).conversionRate();
