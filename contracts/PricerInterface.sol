@@ -31,10 +31,15 @@ contract PricerInterface {
 		uint256 _intendedPricePoint, 
 		uint256 _actualPricePoint);
 
-	event PriceOracleSet(bytes3 _currency, 
+	event PriceOracleSet(
+		bytes3 _currency, 
 		address _address);
 	
-	event AcceptedMargin(bytes3 _currency, 
+	event PriceOracleUnset(		
+		bytes3 _currency);
+
+	event AcceptedMargin(
+		bytes3 _currency, 
 		uint64 relativeIntendedPriceRange);
 
 	/// @dev    Returns address of the branded token;
@@ -77,6 +82,18 @@ contract PricerInterface {
 		public 
 		returns (bool);
 
+	/// @dev	Takes _currency; 
+	///				Removes the Price Oracle address for a given currency
+	///				Emits PriceOracleUnSet Event;
+	///				Only called by ops
+	/// @param _currency currency	
+	/// @return bool isSuccess
+	function unsetPriceOracle(
+		bytes3 _currency)		
+		public
+		returns (bool);
+	
+
 	/// @dev    Takes _currency, _acceptedMargin; 
 	///         Updated the acceptable margin range for a given currency;
 	///         Emits AcceptedMargin Event;
@@ -111,7 +128,7 @@ contract PricerInterface {
 		bytes3 _currency, 
 		uint256 _intendedPricePoint) 
 		public 
-		returns (bool success);
+		returns (bool);
 
 	/// @dev    Takes _currency; 
 	///             gets current price point and token decimal for the priceOracle for the give currency; 

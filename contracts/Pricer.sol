@@ -62,6 +62,10 @@ contract Pricer is OpsManaged, PricerInterface {
 	event PriceOracleSet(		
 		bytes3 _currency,
 		address _address);
+	
+	///Event for priceOracles Delete
+	event PriceOracleUnset(		
+		bytes3 _currency);
 
 	///Event for AcceptedMargin update for currency
 	event AcceptedMargin(
@@ -136,6 +140,26 @@ contract Pricer is OpsManaged, PricerInterface {
 
 		//Trigger PriceOracleSet event
 		PriceOracleSet(_currency, _oracleAddress);
+		return true;
+	}
+
+	/// @dev	Takes _currency; 
+	///				Removes the Price Oracle address for a given currency
+	///				Emits PriceOracleUnSet Event;
+	///				Only called by ops
+	/// @param _currency currency	
+	/// @return bool isSuccess
+	function unsetPriceOracle(
+		bytes3 _currency)
+		onlyOps
+		public
+		returns (bool /* success */)
+	{		
+		require(pricerPriceOracles[_currency] != 0);
+		pricerPriceOracles[_currency] = 0;
+
+		//Trigger PriceOracleUnset event
+		PriceOracleUnset(_currency);
 		return true;
 	}
 
