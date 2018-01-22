@@ -24,9 +24,9 @@ pragma solidity ^0.4.17;
 
 import "./openst-protocol/EIP20Interface.sol";
 import "./openst-protocol/UtilityTokenInterface.sol";
+import "./ost-price-oracle/PriceOracleInterface.sol";
 import "./OpsManaged.sol";
 import "./SafeMath.sol";
-import "./PriceOracleInterface.sol";
 import "./PricerInterface.sol";
 
 contract Pricer is OpsManaged, PricerInterface {
@@ -36,13 +36,13 @@ contract Pricer is OpsManaged, PricerInterface {
 	 *  Storage
 	 */
 	///BrandedToken address
-	address public brandedToken;
+	address private pricerBrandedToken;
 
 	///currency to Margin mapping, Absolute +/- range in currency in which the price point will be accepted
-	mapping(bytes3 /* currency */ => uint64 /* margin */) public acceptedMargins;
+	mapping(bytes3 /* currency */ => uint64 /* margin */) private pricerAcceptedMargins;
 	
 	///currency to Price Oracles address mapping
-	mapping(bytes3 /* currency */ => address /* price oracle address */) public priceOracles;
+	mapping(bytes3 /* currency */ => address /* price oracle address */) private pricerPriceOracles;
 
 	/*
 	 *  Events
@@ -77,7 +77,43 @@ contract Pricer is OpsManaged, PricerInterface {
 		public
 		OpsManaged()
 	{
-		brandedToken = _brandedToken;
+		pricerBrandedToken = _brandedToken;
+	}
+
+	/// @dev    Returns address of the branded token;
+	///         Public;
+	/// @return address    
+	function brandedToken() 
+		public 
+		returns (address)
+	{
+		return pricerBrandedToken;
+	}    
+
+	/// @dev    Takes _currency; 
+	///         Returns Acceptable margin for the given currency;
+	///         Public;
+	/// @param _currency currency
+	/// @return uint64 margin
+	function acceptedMargins(
+		bytes3 _currency) 
+		public 
+		returns (uint64)
+	{		
+		return pricerAcceptedMargins[_currency];
+	}
+
+	/// @dev    Takes _currency; 
+	///         Returns address of Price Oracle for the given currency;
+	///         Public
+	/// @param _currency currency
+	/// @return address
+	function priceOracles(
+		bytes3 _currency) 
+		public 
+		returns (address)
+	{	
+		return pricerPriceOracles[_currency];
 	}
 
 	/// @dev	Takes _currency, _oracleAddress; 
@@ -96,7 +132,7 @@ contract Pricer is OpsManaged, PricerInterface {
 	{
 		require(_oracleAddress != address(0));
 		require(_currency != "");
-		priceOracles[_currency] = _oracleAddress;
+		pricerPriceOracles[_currency] = _oracleAddress;
 
 		//Trigger PriceOracleSet event
 		PriceOracleSet(_currency, _oracleAddress);
@@ -117,7 +153,7 @@ contract Pricer is OpsManaged, PricerInterface {
 		public
 		returns (bool /* success */)
 	{
-		acceptedMargins[_currency] = _acceptedMargin;
+		pricerAcceptedMargins[_currency] = _acceptedMargin;
 		// Trigger Event for Intended Price Acceptable Range Update
 		AcceptedMargin(_currency, _acceptedMargin);
 		return true;
@@ -160,13 +196,13 @@ contract Pricer is OpsManaged, PricerInterface {
 			uint8 tokenDecimals = 0;
 			(pricePoint, tokenDecimals) = getPricePoint(_currency);
 			require(pricePoint > 0);			
-			require(isPricePointInRange(_intendedPricePoint, pricePoint, acceptedMargins[_currency]));			
+			require(isPricePointInRange(_intendedPricePoint, pricePoint, pricerAcceptedMargins[_currency]));			
 			(tokenAmount, commissionTokenAmount) = getBTAmountFromCurrencyValue(pricePoint, tokenDecimals, _transferAmount, _commissionAmount);
 		}
 		
-		require(EIP20Interface(brandedToken).transferFrom(msg.sender, _beneficiary, tokenAmount));
+		require(EIP20Interface(pricerBrandedToken).transferFrom(msg.sender, _beneficiary, tokenAmount));
 		if(_commissionBeneficiary != address(0)) {
-			require(EIP20Interface(brandedToken).transferFrom(msg.sender, _commissionBeneficiary, commissionTokenAmount));
+			require(EIP20Interface(pricerBrandedToken).transferFrom(msg.sender, _commissionBeneficiary, commissionTokenAmount));
 		}
 		
 		//Trigger Event for PaymentComplete
@@ -185,7 +221,7 @@ contract Pricer is OpsManaged, PricerInterface {
 		returns (uint256 /* pricePoint */, uint8 /* TokenDecimal*/)
 	{
 		require(_currency != "");
-		PriceOracleInterface  currentPriceOracle = PriceOracleInterface(priceOracles[_currency]);
+		PriceOracleInterface  currentPriceOracle = PriceOracleInterface(pricerPriceOracles[_currency]);
 		require(currentPriceOracle != address(0));
 		return (currentPriceOracle.getPrice(), currentPriceOracle.TOKEN_DECIMALS());	
 	}
@@ -230,7 +266,7 @@ contract Pricer is OpsManaged, PricerInterface {
 		private
 		returns (uint256 /* number of BT */, uint256 /*  number of commission BT */)
 	{
-		uint256 conversionRate = UtilityTokenInterface(brandedToken).conversionRate();
+		uint256 conversionRate = UtilityTokenInterface(pricerBrandedToken).conversionRate();
 		require(conversionRate > 0);	
 		uint256 adjConversionRate = SafeMath.mul(conversionRate, 10**uint256(_tokenDecimals));
 		uint256 amountBT = SafeMath.div(SafeMath.mul(_transferAmount, adjConversionRate), _pricePoint);
