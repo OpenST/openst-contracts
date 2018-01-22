@@ -156,7 +156,7 @@ contract Pricer is OpsManaged, PricerInterface {
 		returns (bool /* success */)
 	{		
 		require(pricerPriceOracles[_currency] != 0);
-		pricerPriceOracles[_currency] = 0;
+		delete pricerPriceOracles[_currency];
 
 		//Trigger PriceOracleUnset event
 		PriceOracleUnset(_currency);
