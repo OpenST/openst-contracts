@@ -39,39 +39,12 @@ contract Pricer is OpsManaged, PricerInterface {
     ///BrandedToken address
     address private pricerBrandedToken;
 
-    ///currency to Margin mapping, Absolute +/- range in currency in which the price point will be accepted
+    ///currency to accepted margin mapping, absolute +/- range in currency in which the price point will be accepted
     mapping(bytes3 /* currency */ => uint64 /* margin */) private pricerAcceptedMargins;
     
-    ///currency to Price Oracles address mapping
+    ///currency to price oracles address mapping
     mapping(bytes3 /* currency */ => address /* price oracle address */) private pricerPriceOracles;
 
-    /*
-     *  Events
-     */
-    ///Event for PaymentComplete    
-    event Payment(
-        address _beneficiary,
-        uint256 _transferAmount,
-        address _commissionBeneficiary,
-        uint256 _commissionAmount,      
-        bytes3 _currency,
-        uint256 _intendedPricePoint,
-        uint256 _actualPricePoint);
-    
-    ///Event for priceOracles Updates for currency
-    event PriceOracleSet(       
-        bytes3 _currency,
-        address _address);
-    
-    ///Event for priceOracles Delete
-    event PriceOracleUnset(     
-        bytes3 _currency);
-
-    ///Event for AcceptedMargin update for currency
-    event AcceptedMargin(
-        bytes3 _currency,       
-        uint64 relativeIntendedPriceRange);
-    
     /*
      *  Public functions
      */
@@ -84,7 +57,7 @@ contract Pricer is OpsManaged, PricerInterface {
     }
 
     /// @dev    Returns address of the branded token;
-    ///         Public;
+    ///         public method;
     /// @return address    
     function brandedToken() 
         public
@@ -94,8 +67,8 @@ contract Pricer is OpsManaged, PricerInterface {
     }    
 
     /// @dev    Takes _currency; 
-    ///         Returns Acceptable margin for the given currency;
-    ///         Public;
+    ///         returns acceptable margin for the given currency;
+    ///         public method;
     /// @param _currency currency
     /// @return uint64 margin
     function acceptedMargins(
@@ -107,8 +80,8 @@ contract Pricer is OpsManaged, PricerInterface {
     }
 
     /// @dev    Takes _currency; 
-    ///         Returns address of Price Oracle for the given currency;
-    ///         Public
+    ///         returns address of price oracle for the given currency;
+    ///         public method;
     /// @param _currency currency
     /// @return address
     function priceOracles(
@@ -120,9 +93,10 @@ contract Pricer is OpsManaged, PricerInterface {
     }
 
     /// @dev    Takes _currency, _oracleAddress; 
-    ///         Updated the Price Oracle address for a given currency
-    ///         Emits PriceOracleSet Event;
-    ///         Only called by ops
+    ///         updates the price oracle address for a given currency;
+    ///         emits PriceOracleSet event;
+    ///         only called by ops;
+    ///         public method;
     /// @param _currency currency
     /// @param _oracleAddress oracleAddress
     /// @return bool isSuccess
@@ -143,9 +117,10 @@ contract Pricer is OpsManaged, PricerInterface {
     }
 
     /// @dev    Takes _currency; 
-    ///         Removes the Price Oracle address for a given currency
-    ///         Emits PriceOracleUnSet Event;
-    ///         Only called by ops
+    ///         removes the price oracle address for a given currency;
+    ///         emits PriceOracleUnSet event;
+    ///         only called by ops;
+    ///         public method;
     /// @param _currency currency   
     /// @return bool isSuccess
     function unsetPriceOracle(
@@ -163,9 +138,10 @@ contract Pricer is OpsManaged, PricerInterface {
     }
 
     /// @dev    Takes _currency, _acceptedMargin; 
-    ///         Updated the acceptable margin range for a given currency
-    ///         Emits AcceptedMargin Event;
-    ///         Only called by ops
+    ///         updates the acceptable margin range for a given currency;
+    ///         emits AcceptedMargin event;
+    ///         only called by ops;
+    ///         public method;
     /// @param _currency currency
     /// @param _acceptedMargin acceptedMargin
     /// @return bool isSuccess
@@ -177,21 +153,21 @@ contract Pricer is OpsManaged, PricerInterface {
         returns (bool /* success */)
     {
         pricerAcceptedMargins[_currency] = _acceptedMargin;
-        // Trigger Event for Intended Price Acceptable Range Update
+        // Trigger AcceptedMargin event 
         AcceptedMargin(_currency, _acceptedMargin);
         return true;
     }
 
     /// @dev    Takes _beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount, 
-    ///         _currency, _intendedPricePoint;Validates if the currentPrice from PriceOracle is 
-    ///         in accepatble margin of _intendedPricePoint (If _ currency is not 0) 
-    ///         If _currency is 0 then it transfer the Branded tokens equal to _transferAmount 
-    ///         to _beneficiary and  Branded tokens equal to _commissionAmount to _commissionBeneficiary 
-    ///         (Floating value transaction); If _currency is not 0 then it transfer the Branded tokens 
-    ///         equivalant to _transferAmount in currency value to _beneficiary and  Branded tokens 
+    ///         _currency, _intendedPricePoint;Validates if the currentPrice from price oracle is 
+    ///         in accepatble margin of _intendedPricePoint (if _ currency is not 0) 
+    ///         if _currency is 0 then it transfer the branded tokens equal to _transferAmount 
+    ///         to _beneficiary and  branded tokens equal to _commissionAmount to _commissionBeneficiary 
+    ///         (floating value transaction); if _currency is not 0 then it transfer the branded tokens 
+    ///         equivalant to _transferAmount in currency value to _beneficiary and  branded tokens 
     ///         equivalant to _commissionAmount in currency value to _commissionBeneficiary 
-    ///         (Fixed value transaction); Emits Payment Event;
-    ///         Public method
+    ///         (fixed value transaction); emits payment event;
+    ///         public method
     /// @param _beneficiary beneficiary
     /// @param _transferAmount transferAmount
     /// @param _commissionBeneficiary commissionBeneficiary
@@ -241,8 +217,8 @@ contract Pricer is OpsManaged, PricerInterface {
     }
 
     /// @dev    Takes _currency; 
-    ///         gets current price point and token decimal for the priceOracle for the give currency; 
-    ///         Public method
+    ///         gets current price point and token decimal for the price oracle for the give currency; 
+    ///         public method;
     /// @param _currency currency
     /// @return (currentPrice, TokenDecimals)
     function getPricePoint(
@@ -257,8 +233,8 @@ contract Pricer is OpsManaged, PricerInterface {
     }
     
     /// @dev    Takes _intendedPricePoint, _currentPricePoint, _acceptedMargin;
-    ///         Checks if the current price point is in the acceptable range of intendedPricePoint; 
-    ///         Private method
+    ///         checks if the current price point is in the acceptable range of intendedPricePoint; 
+    ///         private method;
     /// @param _intendedPricePoint intendedPricePoint
     /// @param _currentPricePoint currentPricePoint
     /// @param _acceptedMargin acceptedMargin   
@@ -282,8 +258,8 @@ contract Pricer is OpsManaged, PricerInterface {
     }
     
     /// @dev    Takes _pricePoint, _tokenDecimals, _transferAmount, _commissionAmount; 
-    ///         Calculated the number of branded token equivalant to the currency amount; 
-    ///         Private method
+    ///         calculates the number of branded token equivalant to the currency amount; 
+    ///         private method;
     /// @param _pricePoint pricePoint
     /// @param _tokenDecimals tokenDecimals
     /// @param _transferAmount transferAmount
