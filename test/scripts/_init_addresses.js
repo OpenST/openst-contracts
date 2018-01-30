@@ -6,10 +6,10 @@ const _addresses = {
   "opsAdd": null
 };
 
-const rootPrefix = ".."
-  , coreConstants   = require( rootPrefix + '/config/core_constants' )
-  , populateEnvVars = require( rootPrefix + "/test/populate_env_vars.js")
-  , poaGenesis = require( rootPrefix + "/test/poa-genesis.json")
+const rootPrefix = "../.."
+  , coreConstants = require( rootPrefix + '/config/core_constants' )
+  , populateEnvVars = require( rootPrefix + "/test/lib/populate_env_vars.js")
+  , poaGenesis = require( rootPrefix + "/test/scripts/poa-genesis.json")
 ;
 
 function main( addressFile ) {
@@ -43,7 +43,7 @@ function fundAddress( address ) {
 
   //Update poa-genesis-value
   updateGenesisAlloc( poaGenesis, address, "0x200000000000000000000000000000000000000000000000000000000000000");
-  writeJsonToFile(poaGenesis, "./poa-genesis.json");
+  //writeJsonToFile(poaGenesis, "./poa-genesis.json");
 
 }
 function updateGenesisAlloc( genesis, foundation, value ) {
