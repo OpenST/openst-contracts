@@ -179,10 +179,10 @@ contract PricerInterface {
         returns (bool);
 
     /// @dev    Takes _currency; 
-    ///         gets current price point for the price oracle for the give currency; 
+    ///         gets current price point and token decimal for the price oracle for the give currency;
     ///         public method;
     /// @param _currency currency
-    /// @return (currentPrice)
+    /// @return (currentPrice, tokenDecimals)
     function getPricePoint(
         bytes3 _currency) 
         public 
