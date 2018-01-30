@@ -224,8 +224,7 @@ contract Pricer is OpsManaged, PricerInterface {
         uint256 commissionTokenAmount = _commissionAmount;
         uint256 pricePoint = 0;
         if (_currency != 0) {
-            uint8 tokenDecimals = 0;
-            (pricePoint, tokenDecimals) = getPricePoint(_currency);            
+            pricePoint = getPricePoint(_currency);            
             require(pricePoint > 0);                        
             (tokenAmount, commissionTokenAmount) = getBTAmountFromCurrencyValue(pricePoint, 
                 _transferAmount, _commissionAmount);
@@ -271,8 +270,7 @@ contract Pricer is OpsManaged, PricerInterface {
         uint256 commissionTokenAmount = _commissionAmount;
         uint256 pricePoint = _intendedPricePoint;
         if (_currency != 0) {
-            uint8 tokenDecimals = 0;
-            (pricePoint, tokenDecimals) = getPricePoint(_currency);
+            pricePoint = getPricePoint(_currency);
             require(pricePoint > 0);
             require(isPricePointInRange(_intendedPricePoint, pricePoint, pricerAcceptedMargins[_currency]));            
             (tokenAmount, commissionTokenAmount) = getBTAmountFromCurrencyValue(pricePoint, 
@@ -295,16 +293,16 @@ contract Pricer is OpsManaged, PricerInterface {
     ///         gets current price point for the price oracle for the give currency; 
     ///         public method;
     /// @param _currency currency
-    /// @return (currentPrice, tokenDecimals)
+    /// @return (currentPrice)
     function getPricePoint(
         bytes3 _currency)
         public              
-        returns (uint256, uint8) /* pricePoint, tokenDecimals*/
+        returns (uint256) /* pricePoint */
     {
         require(_currency != "");
         PriceOracleInterface  currentPriceOracle = PriceOracleInterface(pricerPriceOracles[_currency]);
         require(currentPriceOracle != address(0));
-        return (currentPriceOracle.getPrice(), currentPriceOracle.tokenDecimals()); 
+        return (currentPriceOracle.getPrice()); 
     }
     
     /// @dev    Takes _intendedPricePoint, _currentPricePoint, _acceptedMargin;
