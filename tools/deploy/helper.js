@@ -14,7 +14,8 @@ const rootPrefix = '../..'
   , gasLimit = coreConstants.OST_VALUE_GAS_LIMIT // this is taken by default if no value is passed from outside
   , coreAddresses = require(rootPrefix + '/config/core_addresses')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , web3EventsFormatter = require(rootPrefix + '/lib/web3/events/formatter');
+  , web3EventsFormatter = require(rootPrefix + '/lib/web3/events/formatter')
+  , populateEnvVars = require(rootPrefix + "/test/populate_env_vars.js");
 
 const _private = {
 
@@ -103,8 +104,7 @@ const deployHelper = {
       contractAbi,
       null, // since addr is not known yet
       options
-    );
-
+    );    
     // this is needed since the contract object
     contract.setProvider(web3Provider.currentProvider);
 
@@ -118,6 +118,9 @@ const deployHelper = {
 
     console.log("Unlocking address: " + deployerAddr);
     console.log("Unlocking!!!");
+
+    console.log("deployerAddr: "+deployerAddr);
+    console.log("deployerAddrPassphrase: "+deployerAddrPassphrase);
     await web3Provider.eth.personal.unlockAccount(deployerAddr, deployerAddrPassphrase);
 
     console.log("Deploying contract " + contractName);
@@ -168,7 +171,23 @@ const deployHelper = {
     } else {
       logger.win(" event: " + eventName + " is present in Reciept.");
     }
-    ;
+  },
+
+  updateEnvContractAddress: function (type, contractAddress) {
+    return new Promise(
+      function (onResolve, onReject) {
+        logger.step("Updating Source file open_st_env_vars");
+        populateEnvVars.renderAndPopulate(type, contractAddress);
+        onResolve();
+      })
+      .then(function () {
+        logger.win("set_env_vars.sh updated.");
+      })
+      .catch(function (reason) {
+        logger.error("Failed to populate set_env_vars.sh file!");
+        logger.error(reason);
+        process.exit(1);
+      });
   }
 
 

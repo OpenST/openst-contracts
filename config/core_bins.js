@@ -5,19 +5,19 @@
  *
  */
 
-const fs = require('fs')
-  , path = require('path')
-;
+const fs = require('fs'),
+  path = require('path');
 
 function readFile(filePath, options) {
-  filePath = path.join(__dirname, '/' + filePath);
-  return fs.readFileSync(filePath, options || "utf8");
+  const absFilePath = path.join(__dirname, '/' + filePath);
+  return fs.readFileSync(absFilePath, options || "utf8");
 }
 
 const rootPrefix = "..";
 
 const coreBins = {
-  pricer: readFile(rootPrefix + '/contracts/bin/Pricer.bin', 'utf8')  
+  pricer: readFile(rootPrefix + '/contracts/bin/Pricer.bin', 'utf8'),
+  eip20tokenmock: readFile(rootPrefix + '/contracts/bin/EIP20TokenMock.bin', 'utf8')
 };
 
 module.exports = coreBins;

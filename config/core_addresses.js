@@ -16,12 +16,12 @@ const rootPrefix = ".."
 const allAddresses = {
   users: {
     deployer: {
-      address: process.env.OST_DEPLOYER_ADDR,
-      passphrase: process.env.OST_DEPLOYER_PASSPHRASE
+      address: process.env.OST_PRICER_DEPLOYER_ADDR,
+      passphrase: process.env.OST_PRICER_DEPLOYER_PASSPHRASE
     },
     ops: {
-      address: process.env.OST_OPS_ADDR,
-      passphrase: process.env.OST_OPS_PASSPHRASE
+      address: process.env.OST_PRICER_OPS_ADDR,
+      passphrase: process.env.OST_PRICER_OPS_PASSPHRASE
     }    
   },
 
@@ -31,6 +31,10 @@ const allAddresses = {
       abi: coreAbis.pricer,
       bin: coreBins.pricer
     },
+    eip20tokenmock: {
+      abi: coreAbis.eip20tokenmock,
+      bin: coreBins.eip20tokenmock
+    }
   }
 };
 

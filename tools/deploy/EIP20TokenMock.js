@@ -43,14 +43,37 @@ const deployerAddress = coreAddresses.getAddressForUser(deployerName);
  */
 async function performer(argv) {
 
-  const brandedTokenAddress = argv[2].trim();
+  logger.info("argv[0]: " + argv[0]);
+  logger.info("argv[1]: " + argv[1]);
+  logger.info("argv[2]: " + argv[2]);
+  logger.info("argv[3]: " + argv[3]);
+  logger.info("argv[4]: " + argv[4]);
+  logger.info("argv[5]: " + argv[5]);
+  logger.info("argv[6]: " + argv[6]);
+
+  if (argv.length < 6) {
+    logger.error("Invalid arguments !!!");
+    process.exit(0);
+  }
+  //argv[2] => uint256 conversionRate;
+  //argv[3] => string symbol;
+  //argv[4] => string name;
+  //argv[5] => uint8 decimals;
+  //argv[6] => string travis;
+  const conversionRate = argv[2].trim();
+  const symbol = argv[3].trim();
+  const name = argv[4].trim();
+  const decimals = argv[5].trim();
   var isTravisCIEnabled = false;
-  if (argv[3] !== undefined) {
-    isTravisCIEnabled = argv[3].trim() === 'travis';
+  if (argv[6] !== undefined) {
+    isTravisCIEnabled = argv[6].trim() === 'travis';
   }
 
   logger.info("Deployer Address: " + deployerAddress);
-  logger.info("Branded Token Address: " + brandedTokenAddress);
+  logger.info("conversionRate: " + conversionRate);
+  logger.info("symbol: " + symbol);
+  logger.info("name: " + name);
+  logger.info("decimals: " + decimals);
   logger.info("Travis CI enabled Status: " + isTravisCIEnabled);
 
   if (isTravisCIEnabled === false ) {
@@ -72,14 +95,25 @@ async function performer(argv) {
     prompts.close();
   }
 
-  const contractName = 'pricer';
+  const contractName = 'eip20tokenmock';
   const contractAbi = coreAddresses.getAbiForContract(contractName);
   const contractBin = coreAddresses.getBinForContract(contractName);
 
 
-  var constructorArgs = [brandedTokenAddress];
+  var constructorArgs = [
+    conversionRate,
+    symbol,
+    name,
+    decimals
+  ];
 
-  logger.info("Deploying contract: "+contractName);
+  //logger.info("contractName: "+contractName);
+  //logger.info(web3Provider);
+  //logger.info("contractAbi: "+contractAbi);
+  //logger.info("contractBin: "+contractBin);
+  //logger.info("deployerName: "+deployerName);
+  //logger.info("deploymentOptions: "+deploymentOptions);
+  //logger.info("constructorArgs: "+constructorArgs);
 
   var contractDeployTxReceipt = await deployHelper.perform(
     contractName,
@@ -93,8 +127,7 @@ async function performer(argv) {
 
   logger.info(contractDeployTxReceipt);
   logger.win(contractName+ " Deployed ");
-
-  await deployHelper.updateEnvContractAddress('contractPricer', {'ost_pricer_contract_address': contractDeployTxReceipt.contractAddress});
+  await deployHelper.updateEnvContractAddress('contractBT', {'ost_pricer_bt_contract_address': contractDeployTxReceipt.contractAddress});
 }
 
 performer(process.argv);
