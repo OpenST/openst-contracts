@@ -45,15 +45,32 @@ contract Pricer is OpsManaged, PricerInterface {
     ///currency to price oracles address mapping
     mapping(bytes3 /* currency */ => address /* price oracle address */) private pricerPriceOracles;
 
+    /// specifies the base currency value e.g. "OST"
+    bytes3 private pricerBaseCurrency;
+
+    /// Pricer decimal
+    uint8 private pricerDecimals;
+
+    /// conversionRate 
+    uint256 private pricerConversionRate;
+
     /*
      *  Public functions
      */
+    /// @dev    Takes _brandedToken, _baseCurrency; 
+    ///         constructor;
+    ///         public method;
+    /// @param _brandedToken _brandedToken
+    /// @param _baseCurrency _baseCurrency    
     function Pricer(
-        address _brandedToken)
+        address _brandedToken,
+        bytes3 _baseCurrency)
         public
         OpsManaged()
     {
         pricerBrandedToken = _brandedToken;
+        pricerBaseCurrency = _baseCurrency;
+        pricerDecimals = EIP20Interface(pricerBrandedToken).decimals();
     }
 
     /// @dev    Returns address of the branded token;
@@ -92,6 +109,36 @@ contract Pricer is OpsManaged, PricerInterface {
         return pricerPriceOracles[_currency];
     }
 
+    /// @dev    Returns address of the base currency;
+    ///         public method;
+    /// @return bytes3    
+    function baseCurrency() 
+        public
+        returns (bytes3)
+    {
+        return pricerBaseCurrency;
+    }
+
+    /// @dev    Returns pricer decimal;
+    ///         public method;
+    /// @return bytes3    
+    function decimals() 
+        public
+        returns (uint8)
+    {
+        return pricerDecimals;
+    }
+
+    /// @dev    Returns conversion rate;
+    ///         public method;
+    /// @return bytes3    
+    function conversionRate() 
+        public
+        returns (uint256)
+    {
+        return pricerConversionRate;
+    }
+
     /// @dev    Takes _currency, _oracleAddress; 
     ///         updates the price oracle address for a given currency;
     ///         emits PriceOracleSet event;
@@ -109,6 +156,8 @@ contract Pricer is OpsManaged, PricerInterface {
     {
         require(_oracleAddress != address(0));
         require(_currency != "");
+        require(PriceOracleInterface(_oracleAddress).baseCurrency() == pricerBaseCurrency);
+        require(PriceOracleInterface(_oracleAddress).tokenDecimals() == pricerDecimals);
         pricerPriceOracles[_currency] = _oracleAddress;
 
         //Trigger PriceOracleSet event
@@ -158,6 +207,32 @@ contract Pricer is OpsManaged, PricerInterface {
         return true;
     }
 
+    /// @dev    Takes _transferAmount, _commissionAmount, _currency;
+    ///         public method
+    /// @param _transferAmount transferAmount
+    /// @param _commissionAmount commissionAmount    
+    /// @param _currency currency
+    /// @return (pricePoint, calculatedTransferAmount, calculatedCommissionAmount)
+    function getPricePointAndCalculatedAmount(       
+        uint256 _transferAmount,        
+        uint256 _commissionAmount,      
+        bytes3 _currency)
+        public
+        returns (uint256, uint256, uint256) /* pricePoint, calculated transfer amount, calculated commission amount*/
+    {
+        uint256 tokenAmount = _transferAmount;
+        uint256 commissionTokenAmount = _commissionAmount;
+        uint256 pricePoint = 0;
+        if (_currency != 0) {
+            uint8 tokenDecimals = 0;
+            (pricePoint, tokenDecimals) = getPricePoint(_currency);            
+            require(pricePoint > 0);                        
+            (tokenAmount, commissionTokenAmount) = getBTAmountFromCurrencyValue(pricePoint, 
+                _transferAmount, _commissionAmount);
+        }        
+        return (pricePoint, tokenAmount, commissionTokenAmount);
+    }
+
     /// @dev    Takes _beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount, 
     ///         _currency, _intendedPricePoint;Validates if the currentPrice from price oracle is 
     ///         in accepatble margin of _intendedPricePoint (if _ currency is not 0) 
@@ -198,10 +273,10 @@ contract Pricer is OpsManaged, PricerInterface {
         if (_currency != 0) {
             uint8 tokenDecimals = 0;
             (pricePoint, tokenDecimals) = getPricePoint(_currency);
-            require(pricePoint > 0);            
+            require(pricePoint > 0);
             require(isPricePointInRange(_intendedPricePoint, pricePoint, pricerAcceptedMargins[_currency]));            
             (tokenAmount, commissionTokenAmount) = getBTAmountFromCurrencyValue(pricePoint, 
-                tokenDecimals, _transferAmount, _commissionAmount);
+                _transferAmount, _commissionAmount);
         }
         
         require(EIP20Interface(pricerBrandedToken).transferFrom(msg.sender, _beneficiary, tokenAmount));
@@ -217,7 +292,7 @@ contract Pricer is OpsManaged, PricerInterface {
     }
 
     /// @dev    Takes _currency; 
-    ///         gets current price point and token decimal for the price oracle for the give currency; 
+    ///         gets current price point for the price oracle for the give currency; 
     ///         public method;
     /// @param _currency currency
     /// @return (currentPrice, tokenDecimals)
@@ -257,25 +332,21 @@ contract Pricer is OpsManaged, PricerInterface {
         return isValid;     
     }
     
-    /// @dev    Takes _pricePoint, _tokenDecimals, _transferAmount, _commissionAmount; 
+    /// @dev    Takes _pricePoint, _transferAmount, _commissionAmount; 
     ///         calculates the number of branded token equivalant to the currency amount; 
     ///         private method;
     /// @param _pricePoint pricePoint
-    /// @param _tokenDecimals tokenDecimals
     /// @param _transferAmount transferAmount
     /// @param _commissionAmount commissionAmount
     /// @return (amountBT,commissionAmountBT)
     function getBTAmountFromCurrencyValue(uint256 _pricePoint,
-        uint8 _tokenDecimals,
         uint256 _transferAmount,
         uint256 _commissionAmount)
         private
         view
         returns (uint256, uint256) /* number of BT ,number of commission BT */
     {
-        uint256 conversionRate = UtilityTokenInterface(pricerBrandedToken).conversionRate();
-        require(conversionRate > 0);    
-        uint256 adjConversionRate = SafeMath.mul(conversionRate, 10**uint256(_tokenDecimals));
+        uint256 adjConversionRate = SafeMath.mul(pricerConversionRate, 10**uint256(pricerDecimals));
         uint256 amountBT = SafeMath.div(SafeMath.mul(_transferAmount, adjConversionRate), _pricePoint);
         uint256 commissionAmountBT = SafeMath.div(SafeMath.mul(_commissionAmount, adjConversionRate), _pricePoint);
         return (amountBT, commissionAmountBT);
