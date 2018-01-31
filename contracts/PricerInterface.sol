@@ -143,8 +143,8 @@ contract PricerInterface {
     /// @param _transferAmount transferAmount
     /// @param _commissionAmount commissionAmount
     /// @param _currency currency
-    /// @return (pricePoint, calculatedTransferAmount, calculatedCommissionAmount)
-    function getPricePointAndCalculatedAmount(       
+    /// @return (pricePoint, tokenAmount, commissionTokenAmount)
+    function getPricePointAndCalculatedAmounts(       
         uint256 _transferAmount,        
         uint256 _commissionAmount,      
         bytes3 _currency)
@@ -179,10 +179,10 @@ contract PricerInterface {
         returns (bool);
 
     /// @dev    Takes _currency; 
-    ///         gets current price point for the price oracle for the give currency;
+    ///         gets current price point for the price oracle for the given currency;
     ///         public method;
     /// @param _currency currency
-    /// @return (currentPrice)
+    /// @return (pricePoint)
     function getPricePoint(
         bytes3 _currency) 
         public 

@@ -43,7 +43,7 @@ contract Pricer is OpsManaged, PricerInterface {
     mapping(bytes3 /* currency */ => uint64 /* margin */) private pricerAcceptedMargins;
     
     ///currency to price oracles address mapping
-    mapping(bytes3 /* currency */ => address /* price oracle address */) private pricerPriceOracles;
+    mapping(bytes3 /* currency */ => PriceOracleInterface /* price oracle address */) private pricerPriceOracles;
 
     /// specifies the base currency value e.g. "OST"
     bytes3 private pricerBaseCurrency;
@@ -68,9 +68,12 @@ contract Pricer is OpsManaged, PricerInterface {
         public
         OpsManaged()
     {
+        require(_brandedToken != address(0));
+        require(_baseCurrency != "");
         pricerBrandedToken = _brandedToken;
         pricerBaseCurrency = _baseCurrency;
         pricerDecimals = EIP20Interface(pricerBrandedToken).decimals();
+        pricerConversionRate = UtilityTokenInterface(_brandedToken).conversionRate();
     }
 
     /// @dev    Returns address of the branded token;
@@ -157,8 +160,9 @@ contract Pricer is OpsManaged, PricerInterface {
         require(_oracleAddress != address(0));
         require(_currency != "");
         require(PriceOracleInterface(_oracleAddress).baseCurrency() == pricerBaseCurrency);
-        require(PriceOracleInterface(_oracleAddress).tokenDecimals() == pricerDecimals);
-        pricerPriceOracles[_currency] = _oracleAddress;
+        require(PriceOracleInterface(_oracleAddress).quoteCurrency() == _currency);
+        require(PriceOracleInterface(_oracleAddress).decimals() == pricerDecimals);
+        pricerPriceOracles[_currency] = PriceOracleInterface(_oracleAddress);
 
         //Trigger PriceOracleSet event
         PriceOracleSet(_currency, _oracleAddress);
@@ -178,7 +182,7 @@ contract Pricer is OpsManaged, PricerInterface {
         onlyOps
         returns (bool /* success */)
     {       
-        require(pricerPriceOracles[_currency] != 0);
+        require(pricerPriceOracles[_currency] != address(0));
         delete pricerPriceOracles[_currency];
 
         //Trigger PriceOracleUnset event
@@ -213,16 +217,19 @@ contract Pricer is OpsManaged, PricerInterface {
     /// @param _commissionAmount commissionAmount    
     /// @param _currency currency
     /// @return (pricePoint, calculatedTransferAmount, calculatedCommissionAmount)
-    function getPricePointAndCalculatedAmount(       
+    function getPricePointAndCalculatedAmounts(       
         uint256 _transferAmount,        
         uint256 _commissionAmount,      
         bytes3 _currency)
         public
-        returns (uint256, uint256, uint256) /* pricePoint, calculated transfer amount, calculated commission amount*/
+        returns (
+            uint256 pricePoint,
+            uint256 tokenAmount, 
+            uint256 commissionTokenAmount)
     {
-        uint256 tokenAmount = _transferAmount;
-        uint256 commissionTokenAmount = _commissionAmount;
-        uint256 pricePoint = 0;
+        tokenAmount = _transferAmount;
+        commissionTokenAmount = _commissionAmount;
+        pricePoint = 0;
         if (_currency != 0) {
             pricePoint = getPricePoint(_currency);            
             require(pricePoint > 0);                        
@@ -290,17 +297,16 @@ contract Pricer is OpsManaged, PricerInterface {
     }
 
     /// @dev    Takes _currency; 
-    ///         gets current price point for the price oracle for the give currency; 
+    ///         gets current price point for the price oracle for the given currency; 
     ///         public method;
     /// @param _currency currency
-    /// @return (currentPrice)
+    /// @return (pricePoint)
     function getPricePoint(
         bytes3 _currency)
         public              
         returns (uint256) /* pricePoint */
     {
-        require(_currency != "");
-        PriceOracleInterface  currentPriceOracle = PriceOracleInterface(pricerPriceOracles[_currency]);
+        PriceOracleInterface currentPriceOracle = pricerPriceOracles[_currency];
         require(currentPriceOracle != address(0));
         return (currentPriceOracle.getPrice()); 
     }
