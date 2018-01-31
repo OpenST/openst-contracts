@@ -227,15 +227,11 @@ contract Pricer is OpsManaged, PricerInterface {
             uint256 tokenAmount, 
             uint256 commissionTokenAmount)
     {
-        tokenAmount = _transferAmount;
-        commissionTokenAmount = _commissionAmount;
-        pricePoint = 0;
-        if (_currency != 0) {
-            pricePoint = getPricePoint(_currency);            
-            require(pricePoint > 0);                        
-            (tokenAmount, commissionTokenAmount) = getBTAmountFromCurrencyValue(pricePoint, 
+        require(_currency != 0);
+        pricePoint = getPricePoint(_currency);
+        require(pricePoint > 0);
+        (tokenAmount, commissionTokenAmount) = getBTAmountFromCurrencyValue(pricePoint,
                 _transferAmount, _commissionAmount);
-        }        
         return (pricePoint, tokenAmount, commissionTokenAmount);
     }
 
