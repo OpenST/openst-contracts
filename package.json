@@ -7,7 +7,8 @@
     "bignumber": "^1.1.0",
     "bignumber.js": "^4.1.0",
     "moment": "^2.19.2",
-    "web3": "1.0.0-beta.26"
+    "web3": "1.0.0-beta.26",
+    "continuation-local-storage": "^3.2.1"
   },
   "devDependencies": {
     "abi-decoder": "^1.0.9",
