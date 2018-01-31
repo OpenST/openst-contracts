@@ -77,6 +77,27 @@ contract PricerInterface {
         public 
         returns (address);
 
+    /// @dev    Returns address of the base currency;
+    ///         public method;
+    /// @return bytes3    
+    function baseCurrency() 
+        public
+        returns (bytes3);
+
+    /// @dev    Returns pricer decimal;
+    ///         public method;
+    /// @return bytes3    
+    function decimals() 
+        public
+        returns (uint8);
+
+    /// @dev    Returns conversion rate;
+    ///         public method;
+    /// @return bytes3    
+    function conversionRate() 
+        public
+        returns (uint256);
+
     /// @dev    Takes _currency, _oracleAddress; 
     ///         updates the price oracle address for a given currency;
     ///         emits PriceOracleSet event;
@@ -115,7 +136,20 @@ contract PricerInterface {
         bytes3 _currency, 
         uint64 _acceptedMargin) 
         public 
-        returns (bool);     
+        returns (bool);   
+
+    /// @dev    Takes _transferAmount, _commissionAmount, _currency;
+    ///         public method
+    /// @param _transferAmount transferAmount
+    /// @param _commissionAmount commissionAmount
+    /// @param _currency currency
+    /// @return (pricePoint, tokenAmount, commissionTokenAmount)
+    function getPricePointAndCalculatedAmounts(       
+        uint256 _transferAmount,        
+        uint256 _commissionAmount,      
+        bytes3 _currency)
+        public
+        returns (uint256, uint256, uint256);  
 
     /// @dev    Takes _beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount, 
     ///         _currency, _intendedPricePoint;Validates if the currentPrice from price oracle is 
@@ -145,14 +179,14 @@ contract PricerInterface {
         returns (bool);
 
     /// @dev    Takes _currency; 
-    ///         gets current price point and token decimal for the price oracle for the give currency; 
+    ///         gets current price point for the price oracle for the given currency;
     ///         public method;
     /// @param _currency currency
-    /// @return (currentPrice, tokenDecimals)
+    /// @return (pricePoint)
     function getPricePoint(
         bytes3 _currency) 
         public 
-        returns (uint256, uint8);
+        returns (uint256);
     
     
 }

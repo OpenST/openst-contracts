@@ -1,6 +1,6 @@
 pragma solidity ^0.4.17;
 
-// Copyright 2018 OST.com Ltd.
+// Copyright 2017 OST.com Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ contract PriceOracleInterface {
     event PriceUpdated(uint256 _price,
         uint256 _expirationHeight);
 
-    /// @dev event emitted when price expires
+    /// @dev event emitted if price has expired
     /// @return _expirationHeight
     event PriceExpired(uint256 _expirationHeight);
 
@@ -52,7 +52,7 @@ contract PriceOracleInterface {
     /// @dev Price is stored as fixed point integer value similar as wei unit.
     /// Use this variable in case decimal value need to be evaluated
     /// @return token decimals
-    function tokenDecimals()
+    function decimals()
         public
         view
         returns(
