@@ -48,7 +48,7 @@ contract PricerInterface {
     ///Event for accepted margin update for currency
     event AcceptedMarginSet(
         bytes3 _currency,       
-        uint64 _acceptedMargin);
+        uint256 _acceptedMargin);
 
     /// @dev    Returns address of the branded token;
     ///         public method;
@@ -61,11 +61,11 @@ contract PricerInterface {
     ///         returns acceptable margin for the given currency;
     ///         public method;
     /// @param _currency currency
-    /// @return uint64 margin
+    /// @return uint256 margin
     function acceptedMargins(
         bytes3 _currency) 
         public 
-        returns (uint64);
+        returns (uint256);
 
     /// @dev    Takes _currency; 
     ///         returns address of price oracle for the given currency;
@@ -134,7 +134,7 @@ contract PricerInterface {
     /// @return bool isSuccess
     function setAcceptedMargin(
         bytes3 _currency, 
-        uint64 _acceptedMargin) 
+        uint256 _acceptedMargin) 
         public 
         returns (bool);   
 
