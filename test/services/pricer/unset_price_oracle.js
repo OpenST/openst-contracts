@@ -1,7 +1,6 @@
 // Load external packages
 const assert = require('assert');
 
-// Load cache service
 const rootPrefix = "../../.."
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
   , deployer = ""

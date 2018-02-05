@@ -1,22 +1,15 @@
 // Load external packages
 const assert = require('assert');
 
-// Load cache service
 const rootPrefix = "../../.."
+  , Utils = require(rootPrefix + './test/lib/utils.js');
+  , constants = require(rootPrefix + '/test/services/pricer/constants')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
-  , deployer = ""
-  , deployerPassphrase = ""
-  , ops = ""
-  , opsPassphrase = ""
-  , account1 =""
-  , accountPassphrase1 = ""
-  , account2 =""
-  , accountPassphrase2 = ""
-  , account3 =""
-  , accountPassphrase2 = ""
-  , priceOracleOstUsdAddress = ""
-  , priceOracleOstUsdZeroPricePointAddress = ""
+  , pricerOstUsd = new pricer(pricerOstAddress)
+  , pricerOstEur = new pricer(priceOracleOstEurAddress)
+  , pricerOstUsdZeroPricePoint = new pricer(pricerOstZeroPricePointAddress)
 ;
+
 
 describe('Pay', function() {
 
@@ -28,14 +21,14 @@ describe('Pay', function() {
 
   it('should fail when beneficiary address is 0', async function() {
     var beneficiary = 0
-      , transferAmount = 1
-      , commissionBeneficiary = account3
-      , commissionAmount = 1
-      , currency = "USD"
-      , intendedPricePoint = pricer.getPricePoint(currency)
+      , transferAmount = pricerOstUsd.toWei(5)
+      , commissionBeneficiary = constants.account3
+      , commissionAmount = pricerOstUsd.toWei(1)
+      , currency = constants.currencyUSD
+      , intendedPricePoint = pricerOstUsd.getPricePoint(currency)
       ;
-    var response = pricer.pay(account1, 
-        accountPassphrase1, 
+    var response = await pricerOstUsd.pay(constants.account1, 
+        constants.accountPassphrase1, 
         beneficiary, 
         transferAmount,
         commissionBeneficiary,
@@ -47,12 +40,12 @@ describe('Pay', function() {
   });
 
   it('should fail when beneficiary transfer amount is 0', async function() {
-    var beneficiary = account2
-      , transferAmount = 0
+    var beneficiary = constants.account2
+      , transferAmount = pricerOstUsd
       , commissionBeneficiary = account3
       , commissionAmount = 1
       , currency = "USD"
-      , intendedPricePoint = pricer.getPricePoint(currency)
+      , intendedPricePoint = pricerOstUsd.getPricePoint(currency)
       ;
     var response = pricer.pay(account1, 
         accountPassphrase1, 
