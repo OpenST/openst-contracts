@@ -13,5 +13,10 @@ contracts/abi/
 # don't commit node_modules
 node_modules
 
-test/sripts/poa-genesis.json
-test/sripts/env_vars.sh
+test/scripts/env_vars.sh
+test/scripts/ost-price-oracle/
+test/scripts/poa-genesis.json
+test/scripts/pw
+test/scripts/st-poa/
+
+package-lock.json
