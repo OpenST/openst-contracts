@@ -23,23 +23,35 @@ const Pricer_utils = require('./Pricer_utils.js');
 
 ///
 /// Test stories
-/// 
-/// has decimals
+///
+/// has brandedToken
 /// has baseCurrency
+/// has decimals
+/// has conversionRate
 
 module.exports.perform = (accounts) => {
-  const TOKEN_DECIMALS = 18;
+  const TOKEN_DECIMALS = 18,
+        conversionRate = 1;
 
   before(async () => {
     contracts   = await Pricer_utils.deployPricer(artifacts, accounts);
+    token       = contracts.token;
     pricer      = contracts.pricer;
+  });
+
+  it('has brandedToken', async () => {
+    assert.equal(await pricer.brandedToken.call(), token.address);
+  });
+
+  it('has baseCurrency', async () => {
+    assert.equal(web3.toAscii(await pricer.baseCurrency.call()), Pricer_utils.currencies.ost);
   });
 
   it('has decimals', async () => {
     assert.equal((await pricer.decimals.call()).toNumber(), TOKEN_DECIMALS);
   });
 
-  it('has baseCurrency', async () => {
-    assert.equal(web3.toAscii(await pricer.baseCurrency.call()), Pricer_utils.currencies.ost);
+  it('has conversionRate', async () => {
+    assert.equal((await pricer.conversionRate.call()).toNumber(), conversionRate);
   });
 }

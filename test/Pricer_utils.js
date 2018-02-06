@@ -54,7 +54,8 @@ module.exports.deployPricer = async (artifacts, accounts) => {
   assert.ok(await eurPriceOracle.setOpsAddress(opsAddress));
 
 	return {
-		pricer         : pricer,
+    token          : token,
+    pricer         : pricer,
     usdPriceOracle : usdPriceOracle,
     eurPriceOracle : eurPriceOracle
 	};
