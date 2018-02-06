@@ -23,12 +23,7 @@ const coreConstants = require(rootPrefix + '/config/core_constants');
 const coreAddresses = require(rootPrefix + '/config/core_addresses');
 const prompts = readline.createInterface(process.stdin, process.stdout);
 const logger = require(rootPrefix + '/helpers/custom_console_logger');
-//const PriceOracle = require(rootPrefix + "/lib/contract_interact/price_oracle");
 
-const deploymentOptions = {
-  gasPrice: coreConstants.OST_GAS_PRICE,
-  gas: coreConstants.OST_GAS_LIMIT
-};
 
 // Different addresses used for deployment
 const deployerName = "deployer";
@@ -41,6 +36,8 @@ const deployerAddress = coreAddresses.getAddressForUser(deployerName);
  *
  * @return {}
  */
+
+
 async function performer(argv) {
 
   logger.info("argv[0]: " + argv[0]);
@@ -50,8 +47,10 @@ async function performer(argv) {
   logger.info("argv[4]: " + argv[4]);
   logger.info("argv[5]: " + argv[5]);
   logger.info("argv[6]: " + argv[6]);
+  logger.info("argv[7]: " + argv[7]);
+  logger.info("argv[8]: " + argv[8]);
 
-  if (argv.length < 6) {
+  if (argv.length < 7) {
     logger.error("Invalid arguments !!!");
     process.exit(0);
   }
@@ -59,21 +58,30 @@ async function performer(argv) {
   //argv[3] => string symbol;
   //argv[4] => string name;
   //argv[5] => uint8 decimals;
-  //argv[6] => string travis;
+  //argv[6] => hex gasPrice;
+  //argv[7] => string travis;
+  //argv[8] => string File name where contract address needs to write;
   const conversionRate = argv[2].trim();
   const symbol = argv[3].trim();
   const name = argv[4].trim();
   const decimals = argv[5].trim();
+  const gasPrice = argv[6].trim();
   var isTravisCIEnabled = false;
-  if (argv[6] !== undefined) {
-    isTravisCIEnabled = argv[6].trim() === 'travis';
+  if (argv[7] !== undefined) {
+    isTravisCIEnabled = argv[7].trim() === 'travis';
   }
+  const fileForContractAddress = (argv[8] !== undefined) ? argv[8].trim() : '';
+  const deploymentOptions = {
+    gasPrice: gasPrice,
+    gas: coreConstants.OST_GAS_LIMIT
+  };
 
   logger.info("Deployer Address: " + deployerAddress);
   logger.info("conversionRate: " + conversionRate);
   logger.info("symbol: " + symbol);
   logger.info("name: " + name);
   logger.info("decimals: " + decimals);
+  logger.info("gasPrice: " + gasPrice);
   logger.info("Travis CI enabled Status: " + isTravisCIEnabled);
 
   if (isTravisCIEnabled === false ) {
@@ -107,14 +115,6 @@ async function performer(argv) {
     decimals
   ];
 
-  //logger.info("contractName: "+contractName);
-  //logger.info(web3Provider);
-  //logger.info("contractAbi: "+contractAbi);
-  //logger.info("contractBin: "+contractBin);
-  //logger.info("deployerName: "+deployerName);
-  //logger.info("deploymentOptions: "+deploymentOptions);
-  //logger.info("constructorArgs: "+constructorArgs);
-
   var contractDeployTxReceipt = await deployHelper.perform(
     contractName,
     web3Provider,
@@ -127,7 +127,13 @@ async function performer(argv) {
 
   logger.info(contractDeployTxReceipt);
   logger.win(contractName+ " Deployed ");
-  await deployHelper.updateEnvContractAddress('contractBT', {'ost_pricer_bt_contract_address': contractDeployTxReceipt.contractAddress});
+  const contractAddress = contractDeployTxReceipt.receipt.contractAddress;
+  // if (isTravisCIEnabled) {
+  //   await deployHelper.updateEnvContractAddress(
+  //     'contractBT', {'ost_pricer_bt_contract_address': contractDeployTxReceipt.contractAddress});
+  // }
+  deployHelper.writeContractAddressToFile(fileForContractAddress, contractAddress);
 }
 
+// example: node ../tools/deploy/EIP20TokenMock.js 5 DKN deepeshCoin 18 0x12A05F200 travis bt.txt
 performer(process.argv);

@@ -10,7 +10,7 @@ echo "...Done Init"
 
 echo "Generate new addresses..."
 
-source ./set_env_vars.sh
+source ./env_vars.sh
 
 
 # Utility Chain Deployer Address
@@ -19,6 +19,22 @@ geth --datadir "$DATADIR" account new --password ./pw >> $ADDRESS_FILE
 
 #Ops Address
 echo $OST_PRICER_OPS_PASSPHRASE > ./pw
+geth --datadir "$DATADIR" account new --password ./pw >> $ADDRESS_FILE
+
+#Test account 1
+echo "testtest" > ./pw
+geth --datadir "$DATADIR" account new --password ./pw >> $ADDRESS_FILE
+
+#Test account 2
+echo "testtest" > ./pw
+geth --datadir "$DATADIR" account new --password ./pw >> $ADDRESS_FILE
+
+#Test account 3
+echo "testtest" > ./pw
+geth --datadir "$DATADIR" account new --password ./pw >> $ADDRESS_FILE
+
+#Test account 4
+echo "testtest" > ./pw
 geth --datadir "$DATADIR" account new --password ./pw >> $ADDRESS_FILE
 
 echo "...New addresses generated"

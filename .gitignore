@@ -12,3 +12,6 @@ contracts/abi/
 
 # don't commit node_modules
 node_modules
+
+test/sripts/poa-genesis.json
+test/sripts/env_vars.sh

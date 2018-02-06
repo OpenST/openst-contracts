@@ -3,7 +3,11 @@ const Path = require('path');
 
 const _addresses = {
   "deployerAdd": null,
-  "opsAdd": null
+  "opsAdd": null,
+  "account1": null,
+  "account2": null,
+  "account3": null,
+  "account4": null
 };
 
 const rootPrefix = "../.."
@@ -28,13 +32,29 @@ function main( addressFile ) {
       fundAddress(thisAddress);
     } else if ( !_addresses.opsAdd ) {
       _addresses.opsAdd = thisAddress;
-      fundAddress(thisAddress);  
+      fundAddress(thisAddress);
+    } else if ( !_addresses.account1 ) {
+      _addresses.account1 = thisAddress;
+      fundAddress(thisAddress);
+    } else if ( !_addresses.account2 ) {
+      _addresses.account2 = thisAddress;
+      fundAddress(thisAddress);
+    } else if ( !_addresses.account3 ) {
+      _addresses.account3 = thisAddress;
+      fundAddress(thisAddress);
+    } else if ( !_addresses.account4 ) {
+      _addresses.account4 = thisAddress;
+      fundAddress(thisAddress);
     }
   });
 
   populateEnvVars.renderAndPopulate('address', {
     ost_pricer_deployer_address: _addresses.deployerAdd,
-    ost_pricer_ops_address: _addresses.opsAdd
+    ost_pricer_ops_address: _addresses.opsAdd,
+    ost_pricer_test_account_1: _addresses.account1,
+    ost_pricer_test_account_2: _addresses.account2,
+    ost_pricer_test_account_3: _addresses.account3,
+    ost_pricer_test_account_4: _addresses.account4
   }
   );
 }
@@ -43,7 +63,7 @@ function fundAddress( address ) {
 
   //Update poa-genesis-value
   updateGenesisAlloc( poaGenesis, address, "0x200000000000000000000000000000000000000000000000000000000000000");
-  //writeJsonToFile(poaGenesis, "./poa-genesis.json");
+  writeJsonToFile(poaGenesis, "./poa-genesis.json");
 
 }
 function updateGenesisAlloc( genesis, foundation, value ) {

@@ -22,7 +22,7 @@ const allAddresses = {
     ops: {
       address: process.env.OST_PRICER_OPS_ADDR,
       passphrase: process.env.OST_PRICER_OPS_PASSPHRASE
-    }    
+    }
   },
 
   contracts: {
@@ -34,6 +34,10 @@ const allAddresses = {
     eip20tokenmock: {
       abi: coreAbis.eip20tokenmock,
       bin: coreBins.eip20tokenmock
+    },
+    opsManaged: {
+      abi: coreAbis.opsManaged,
+      bin: coreBins.opsManaged
     }
   }
 };

@@ -15,7 +15,9 @@ const rootPrefix = '../..'
   , coreAddresses = require(rootPrefix + '/config/core_addresses')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , web3EventsFormatter = require(rootPrefix + '/lib/web3/events/formatter')
-  , populateEnvVars = require(rootPrefix + "/test/lib/populate_env_vars.js");
+  , populateEnvVars = require(rootPrefix + "/test/lib/populate_env_vars.js")
+  , fs = require('fs')
+  , Path = require('path');
 
 const _private = {
 
@@ -188,6 +190,21 @@ const deployHelper = {
         logger.error(reason);
         process.exit(1);
       });
+  },
+
+  /**
+  * Write contract address to file based on parameter
+  *
+  * @param {String} fileName - file name
+  * @param {Hex} contractAddress - contract Address
+  *
+  * @return {}
+  */
+  writeContractAddressToFile: function(fileName, contractAddress) {
+    // Write contract address to file
+    if ( fileName !== '') {
+      fs.writeFileSync(Path.join(__dirname, '/' + fileName), contractAddress);
+    }
   }
 
 

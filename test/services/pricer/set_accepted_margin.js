@@ -1,3 +1,4 @@
+/*
 // Load external packages
 const assert = require('assert');
 
@@ -69,3 +70,4 @@ describe('Set accepted margins', function() {
   });
 
 });
+*/

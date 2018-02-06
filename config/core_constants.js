@@ -33,4 +33,4 @@ define('OST_PRICER_GETH_WS_PROVIDER', process.env.OST_PRICER_GETH_WS_PROVIDER);
 define('OST_PRICER_CHAIN_ID', process.env.OST_PRICER_CHAIN_ID);
 
 // Gas limit 
-define('OST_GAS_LIMIT', 9000000);
+define('OST_GAS_LIMIT', 9100000);

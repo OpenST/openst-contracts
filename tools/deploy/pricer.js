@@ -23,16 +23,38 @@ const coreConstants = require(rootPrefix + '/config/core_constants');
 const coreAddresses = require(rootPrefix + '/config/core_addresses');
 const prompts = readline.createInterface(process.stdin, process.stdout);
 const logger = require(rootPrefix + '/helpers/custom_console_logger');
-//const PriceOracle = require(rootPrefix + "/lib/contract_interact/price_oracle");
-
-const deploymentOptions = {
-  gasPrice: coreConstants.OST_GAS_PRICE,
-  gas: coreConstants.OST_GAS_LIMIT
-};
+const OpsManagedContract = require(rootPrefix + "/lib/contract_interact/ops_managed_contract");
 
 // Different addresses used for deployment
 const deployerName = "deployer";
 const deployerAddress = coreAddresses.getAddressForUser(deployerName);
+
+const opsName = "ops";
+const opsAddress = coreAddresses.getAddressForUser(opsName);
+
+
+/**
+ * Validation Method
+ *
+ * @param {Array} arguments
+ *
+ * @return {}
+ */
+function validate(argv) {
+  if (argv[2] === undefined || argv[2] === '') {
+    logger.error("Mandatory Param is missing! ( brandedTokenAddress)");
+    process.exit(0);
+  }
+
+  if (argv[3] === undefined || argv[3] === '') {
+    logger.error("Base currency is mandatory!");
+    process.exit(0);
+  }
+  if (argv[4] === undefined || argv[4] === '') {
+    logger.error("Gas Price is mandatory!");
+    process.exit(0);
+  }
+}
 
 /**
  * It is the main performer method of this deployment script
@@ -43,16 +65,36 @@ const deployerAddress = coreAddresses.getAddressForUser(deployerName);
  */
 async function performer(argv) {
 
+  logger.info("argv[0]: " + argv[0]);
+  logger.info("argv[1]: " + argv[1]);
+  logger.info("argv[2]: " + argv[2]);
+  logger.info("argv[3]: " + argv[3]);
+  logger.info("argv[4]: " + argv[4]);
+  logger.info("argv[5]: " + argv[5]);
+  logger.info("argv[6]: " + argv[6]);
+
+  validate(argv);
   const brandedTokenAddress = argv[2].trim();
+  const baseCurrency = argv[3].trim();
+  const gasPrice = argv[4].trim();
   var isTravisCIEnabled = false;
-  if (argv[3] !== undefined) {
-    isTravisCIEnabled = argv[3].trim() === 'travis';
+  if (argv[5] !== undefined) {
+    isTravisCIEnabled = argv[5].trim() === 'travis';
   }
 
-  logger.info("Deployer Address: " + deployerAddress);
-  logger.info("Branded Token Address: " + brandedTokenAddress);
-  logger.info("Travis CI enabled Status: " + isTravisCIEnabled);
+  const fileForContractAddress = (argv[6] !== undefined) ? argv[6].trim() : '';
+  const deploymentOptions = {
+    gasPrice: gasPrice,
+    gas: coreConstants.OST_GAS_LIMIT
+  };
 
+  logger.info("Deployer Address: " + deployerAddress);
+  logger.info("Ops Address: " + opsAddress);
+  logger.info("Branded Token Address: " + brandedTokenAddress);
+  logger.info("Base currency: " + brandedTokenAddress);
+  logger.info("Gas price: " + gasPrice);
+  logger.info("Travis CI enabled Status: " + isTravisCIEnabled);
+  logger.info("File to write For ContractAddress: "+fileForContractAddress);
   if (isTravisCIEnabled === false ) {
     await new Promise(
       function (onResolve, onReject) {
@@ -77,7 +119,10 @@ async function performer(argv) {
   const contractBin = coreAddresses.getBinForContract(contractName);
 
 
-  var constructorArgs = [brandedTokenAddress];
+  var constructorArgs = [
+    brandedTokenAddress,
+    web3Provider.utils.asciiToHex(baseCurrency)
+  ];
 
   logger.info("Deploying contract: "+contractName);
 
@@ -94,7 +139,21 @@ async function performer(argv) {
   logger.info(contractDeployTxReceipt);
   logger.win(contractName+ " Deployed ");
 
-  await deployHelper.updateEnvContractAddress('contractPricer', {'ost_pricer_contract_address': contractDeployTxReceipt.contractAddress});
+  const contractAddress = contractDeployTxReceipt.receipt.contractAddress;
+  logger.win(contractName+ " Contract Address: "+contractAddress);
+
+  logger.info("Setting Ops Address to: " + opsAddress);
+  var opsManaged = new OpsManagedContract(contractAddress, gasPrice);
+  var result = await opsManaged.setOpsAddress(deployerName, opsAddress, deploymentOptions);
+  logger.info(result);
+  var contractOpsAddress = await opsManaged.getOpsAddress();
+  logger.info("Ops Address Set to: " + contractOpsAddress);
+
+  // if (isTravisCIEnabled) {
+  //   await deployHelper.updateEnvContractAddress('contractPricer', {'ost_pricer_contract_address': contractDeployTxReceipt.contractAddress});
+  // }
+
+  deployHelper.writeContractAddressToFile(fileForContractAddress, contractAddress);
 }
 
 performer(process.argv);
