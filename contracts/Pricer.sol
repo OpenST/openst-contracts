@@ -157,14 +157,14 @@ contract Pricer is OpsManaged, PricerInterface {
         returns (bool /* success */)
     {
         require(_oracleAddress != address(0));
-       // require(_currency != "");
-       // require(PriceOracleInterface(_oracleAddress).baseCurrency() == pricerBaseCurrency);
-       // require(PriceOracleInterface(_oracleAddress).quoteCurrency() == _currency);
-       // require(PriceOracleInterface(_oracleAddress).decimals() == pricerDecimals);
-       // pricerPriceOracles[_currency] = PriceOracleInterface(_oracleAddress);
+        require(_currency != "");
+        require(PriceOracleInterface(_oracleAddress).baseCurrency() == pricerBaseCurrency);
+        require(PriceOracleInterface(_oracleAddress).quoteCurrency() == _currency);
+        require(PriceOracleInterface(_oracleAddress).decimals() == pricerDecimals);
+        pricerPriceOracles[_currency] = PriceOracleInterface(_oracleAddress);
 
         //Trigger PriceOracleSet event
-       // PriceOracleSet(_currency, _oracleAddress);
+        PriceOracleSet(_currency, _oracleAddress);
         return true;
     }
 
