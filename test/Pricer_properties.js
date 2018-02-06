@@ -13,24 +13,33 @@
 // limitations under the License.
 //
 // ----------------------------------------------------------------------------
-// Test: Pricer.js
+// Test: Pricer_properties.js
 //
 // http://www.simpletoken.org/
 //
 // ----------------------------------------------------------------------------
 
-const Pricer_utils            = require('./Pricer_utils.js'),
-      Pricer_constructor      = require('./Pricer_constructor.js'),
-      Pricer_properties       = require('./Pricer_properties.js'),
-      Pricer_set_price_oracle = require('./Pricer_set_price_oracle.js');
+const Pricer_utils = require('./Pricer_utils.js');
 
-contract('Pricer', function(accounts) {
+///
+/// Test stories
+/// 
+/// has decimals
+/// has baseCurrency
 
-  describe('Constructor', async () => Pricer_constructor.perform());
-  describe('Properties', async () => Pricer_properties.perform(accounts));
-  describe('SetPriceOracle', async () => Pricer_set_price_oracle.perform(accounts));
-  after(async () => {
-    Pricer_utils.utils.printGasStatistics();
-    Pricer_utils.utils.clearReceipts();
+module.exports.perform = (accounts) => {
+  const TOKEN_DECIMALS = 18;
+
+  before(async () => {
+    contracts   = await Pricer_utils.deployPricer(artifacts, accounts);
+    pricer      = contracts.pricer;
   });
-});
+
+  it('has decimals', async () => {
+    assert.equal((await pricer.decimals.call()).toNumber(), TOKEN_DECIMALS);
+  });
+
+  it('has baseCurrency', async () => {
+    assert.equal(web3.toAscii(await pricer.baseCurrency.call()), Pricer_utils.currencies.ost);
+  });
+}

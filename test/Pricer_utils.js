@@ -19,22 +19,35 @@
 //
 // ----------------------------------------------------------------------------
 
-
-const Pricer         = artifacts.require('./Pricer.sol'),
+const Utils          = require('./lib/utils.js'),
+      BigNumber      = require('bignumber.js'),
+      Pricer         = artifacts.require('./Pricer.sol'),
       EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol'),
-    	PriceOracle = artifacts.require('./ost-price-oracle/PriceOracle.sol');
+    	PriceOracle    = artifacts.require('./ost-price-oracle/PriceOracle.sol');
+
+const ost = 'OST',
+      usd = 'USD',
+      eur = 'EUR';
+
+/// @dev Export common requires
+module.exports.utils = Utils;
+module.exports.bigNumber = BigNumber;
+
+/// @dev Export constants
+module.exports.currencies = {
+  ost : ost,
+  usd : usd,
+  eur : eur
+}
 
 /// @dev Deploy
 module.exports.deployPricer = async (artifacts, accounts) => {
-	const baseCurrency   = 'OST',
-        usdCurrency    = 'USD',
-        eurCurrency    = 'EUR',
-        token          = await EIP20TokenMock.new(1, baseCurrency, 'name', 18),
+  const token          = await EIP20TokenMock.new(1, ost, 'name', 18),
         TOKEN_DECIMALS = 18,
         opsAddress     = accounts[1],
-        pricer = await Pricer.new(token.address, baseCurrency),
-        usdPriceOracle = await PriceOracle.new(baseCurrency, usdCurrency),
-        eurPriceOracle = await PriceOracle.new(baseCurrency, eurCurrency);
+        pricer         = await Pricer.new(token.address, ost),
+        usdPriceOracle = await PriceOracle.new(ost, usd),
+        eurPriceOracle = await PriceOracle.new(ost, eur);
 
   assert.ok(await pricer.setOpsAddress(opsAddress));
   assert.ok(await usdPriceOracle.setOpsAddress(opsAddress));
