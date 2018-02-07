@@ -21,16 +21,6 @@
 
 const pricer_utils = require('./pricer_utils.js');
 
-    // function getPricePointAndCalculatedAmounts(       
-    //     uint256 _transferAmount,        
-    //     uint256 _commissionAmount,      
-    //     bytes3 _currency)
-    //     public
-    //     returns (
-    //         uint256 pricePoint,
-    //         uint256 tokenAmount, 
-    //         uint256 commissionTokenAmount)
-
 ///
 /// Test stories
 ///
