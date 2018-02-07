@@ -23,13 +23,16 @@ before_install:
   - sudo apt-get install npm  
 install: 
   - npm install  
-before_script:    
+before_script:  
+  - nohup sh tools/runTestRpc.sh </dev/null >/dev/null 2>&1 &
 script:  
+  - truffle test
   - sh contracts/compile.sh
   - cd test/scripts/
   - pwd
   - sh travis_test.sh
   - pwd
 after_script:
+  - kill $(ps aux | grep 'testrpc' | awk '{print $2}')
   - kill $(ps aux | grep 'geth' | awk '{print $2}')
   
