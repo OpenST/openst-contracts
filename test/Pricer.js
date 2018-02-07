@@ -23,12 +23,14 @@ const Pricer_utils            = require('./Pricer_utils.js'),
       Pricer_constructor      = require('./Pricer_constructor.js'),
       Pricer_properties       = require('./Pricer_properties.js'),
       Pricer_set_price_oracle = require('./Pricer_set_price_oracle.js');
+      Pricer_unset_price_oracle = require('./Pricer_unset_price_oracle.js');
 
 contract('Pricer', function(accounts) {
 
   describe('Constructor', async () => Pricer_constructor.perform());
   describe('Properties', async () => Pricer_properties.perform(accounts));
   describe('SetPriceOracle', async () => Pricer_set_price_oracle.perform(accounts));
+  describe('UnsetPriceOracle', async () => Pricer_unset_price_oracle.perform(accounts));
   after(async () => {
     Pricer_utils.utils.printGasStatistics();
     Pricer_utils.utils.clearReceipts();
