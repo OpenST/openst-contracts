@@ -27,5 +27,18 @@ before_script:
   - nohup ./tools/runTestRpc.sh </dev/null >/dev/null 2>&1 &
 script:  
   - truffle test
+  - kill $(ps aux | grep 'testrpc' | awk '{print $2}')
+  - rm -r contracts/abi
+  - rm -r contracts/bin
+  - rm -r test/scripts/ost-price-oracle
+  - rm -r test/scripts/st-poa
+  - rm test/scripts/env_vars.sh
+  - rm test/scripts/poa-genesis.json
+  - rm test/scripts/pw
+  - sh contracts/compile.sh
+  - cd ./test/scripts/
+  - sh travis_test.sh
 after_script:
   - kill $(ps aux | grep 'testrpc' | awk '{print $2}')
+  - kill $(ps aux | grep 'geth' | awk '{print $2}')
+  

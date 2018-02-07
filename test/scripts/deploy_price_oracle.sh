@@ -1,13 +1,3 @@
-#git clone git@github.com:OpenSTFoundation/ost-price-oracle.git
-#cd ost-price-oracle
-#git checkout abhay/mocha_test
-#git pull --rebase
-#sh contracts/compile.sh 
-#node tools/deploy/price_oracle.js OST USD 0x12A05F200 travis po_ost_usd.txt
-#set /p PO_OST_USD_0.5=<po_ost_usd.txt
-#echo PO_OST_USD_0=$PO_OST_USD_0
-#export PO_OST_USD_0.5=$PO_OST_USD_0.5
-#node test/scripts/set_price.js OST USD 0.5 0x12A05F200
 
 echo "\n********* Preparing price oracle deployment *************"
 git clone git@github.com:OpenSTFoundation/ost-price-oracle.git
