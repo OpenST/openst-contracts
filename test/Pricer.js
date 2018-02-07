@@ -24,7 +24,8 @@ const Pricer_utils               = require('./Pricer_utils.js'),
       Pricer_properties          = require('./Pricer_properties.js'),
       Pricer_set_price_oracle    = require('./Pricer_set_price_oracle.js'),
       Pricer_unset_price_oracle  = require('./Pricer_unset_price_oracle.js'),
-      Pricer_set_accepted_margin = require('./Pricer_set_accepted_margin.js');
+      Pricer_set_accepted_margin = require('./Pricer_set_accepted_margin.js'),
+      Pricer_get_price_point     = require('./Pricer_get_price_point.js');
 
 contract('Pricer', function(accounts) {
 
@@ -33,6 +34,7 @@ contract('Pricer', function(accounts) {
   describe('SetPriceOracle', async () => Pricer_set_price_oracle.perform(accounts));
   describe('UnsetPriceOracle', async () => Pricer_unset_price_oracle.perform(accounts));
   describe('SetAcceptedMargin', async () => Pricer_set_accepted_margin.perform(accounts));
+  describe('GetPricePoint', async () => Pricer_get_price_point.perform(accounts));
   after(async () => {
     Pricer_utils.utils.printGasStatistics();
     Pricer_utils.utils.clearReceipts();
