@@ -17,13 +17,10 @@ const constants = {
   currencyBlank: "",
   pricerOstUsdAddress: process.env.TEST_PRICER_C5_ADDRESS,
   pricerOstEurAddress: process.env.TEST_PRICER_C2_ADDRESS,
-  priceOracles: JSON.parse(process.env.OST_PO_PRICE_ORACLES)
-  /*priceOracleOstUsdAddress: process.env., //conversionRate is 5
-  priceOracleOstEurAddress: process.env., //conversionRate is 2
-  priceOracleOstUsdZeroPricePointAddress: process.env.,
-  pricerOstAddress: process.env.,
-  pricerOstZeroPricePointAddress: process.env.,
-  pricerDummyAddress: process.env.,
-  */
+  pricerOstUsd10DecimalAddress: process.env.TEST_PRICER_C3_ADDRESS,
+  priceOracles: JSON.parse(process.env.OST_PO_PRICE_ORACLES),
+  TC5Address: process.env.TEST_COIN1_C5_ADDRESS,
+  TC2Address: process.env.TEST_COIN1_C2_ADDRESS,
+  TC3Address: process.env.TEST_COIN1_C3_ADDRESS
 };
 module.exports = constants;
