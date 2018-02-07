@@ -22,7 +22,8 @@
     "ganache-cli": "^6.0.3",
     "truffle": "^4.0.1",
     "mustache": "2.3.0",
-    "mocha": "^5.0.0"
+    "mocha": "^5.0.0",
+    "solc": "^0.4.19"
   },
   "author": "OpenST Foundation Ltd.",
   "license": "LGPL-3.0"
