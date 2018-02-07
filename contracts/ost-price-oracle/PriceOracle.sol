@@ -1,3 +1,4 @@
+/* solhint-disable-next-line compiler-fixed */
 pragma solidity ^0.4.17;
 
 // Copyright 2017 OST.com Ltd.
@@ -89,7 +90,7 @@ contract PriceOracle is OpsManaged, PriceOracleInterface {
         price = _price;
 
         // update the expiration height
-        oracleExpirationHeight = block.number + PRICE_VALIDITY_DURATION;
+        oracleExpirationHeight = block.number + priceValidityDuration();
 
         // Event Emitted
         PriceUpdated(_price, oracleExpirationHeight);

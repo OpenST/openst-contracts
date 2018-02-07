@@ -28,9 +28,9 @@ const pricer_utils = require('./pricer_utils.js');
 /// successfully returns price from priceOracle
 
 module.exports.perform = (accounts) => {
-  const opsAddress = accounts[1];
-  const usdPrice   = 20;
-  const eurPrice   = 10;
+  const opsAddress = accounts[1],
+        usdPrice   = new pricer_utils.bigNumber(20 * 10**18),
+        eurPrice   = new pricer_utils.bigNumber(10 * 10**18);
 
   var response = null;
 
