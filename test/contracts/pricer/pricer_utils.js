@@ -13,13 +13,13 @@
 // limitations under the License.
 //
 // ----------------------------------------------------------------------------
-// Test: Pricer_utils.js
+// Test: pricer_utils.js
 //
 // http://www.simpletoken.org/
 //
 // ----------------------------------------------------------------------------
 
-const Utils          = require('./lib/utils.js'),
+const Utils          = require('../../lib/utils.js'),
       BigNumber      = require('bignumber.js'),
       Pricer         = artifacts.require('./Pricer.sol'),
       EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol'),
@@ -30,7 +30,7 @@ const ost = 'OST',
       eur = 'EUR';
 
 /// @dev Export common requires
-module.exports.utils = Utils;
+module.exports.utils     = Utils;
 module.exports.bigNumber = BigNumber;
 
 /// @dev Export constants
@@ -42,7 +42,7 @@ module.exports.currencies = {
 
 /// @dev Deploy
 module.exports.deployPricer = async (artifacts, accounts) => {
-  const token          = await EIP20TokenMock.new(1, ost, 'name', 18),
+  const token          = await EIP20TokenMock.new(10, ost, 'name', 18),
         TOKEN_DECIMALS = 18,
         opsAddress     = accounts[1],
         pricer         = await Pricer.new(token.address, ost),

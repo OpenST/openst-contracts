@@ -13,13 +13,13 @@
 // limitations under the License.
 //
 // ----------------------------------------------------------------------------
-// Test: Pricer_set_price_oracle.js
+// Test: set_price_oracle.js
 //
 // http://www.simpletoken.org/
 //
 // ----------------------------------------------------------------------------
 
-const Pricer_utils = require('./Pricer_utils.js'),
+const pricer_utils = require('./pricer_utils.js'),
       PriceOracle = artifacts.require('./PriceOracle.sol');
 
 ///
@@ -38,46 +38,46 @@ module.exports.perform = (accounts) => {
   var response = null;
 
   before(async () => {
-    contracts      = await Pricer_utils.deployPricer(artifacts, accounts);
+    contracts      = await pricer_utils.deployPricer(artifacts, accounts);
     pricer         = contracts.pricer;
     usdPriceOracle = contracts.usdPriceOracle;
     eurPriceOracle = contracts.eurPriceOracle;     
   });
 
   it('fails to set priceOracle by non-ops', async () => {
-    await Pricer_utils.utils.expectThrow(pricer.setPriceOracle.call(Pricer_utils.currencies.usd, usdPriceOracle.address));
+    await pricer_utils.utils.expectThrow(pricer.setPriceOracle.call(pricer_utils.currencies.usd, usdPriceOracle.address));
   });
 
   it('fails to set priceOracle if oracleAddress is null', async () => {
-    await Pricer_utils.utils.expectThrow(pricer.setPriceOracle.call(Pricer_utils.currencies.usd, 0, { from: opsAddress }));
+    await pricer_utils.utils.expectThrow(pricer.setPriceOracle.call(pricer_utils.currencies.usd, 0, { from: opsAddress }));
   });
 
   it('fails to set priceOracle if currency is empty', async () => {
-    await Pricer_utils.utils.expectThrow(pricer.setPriceOracle.call('', usdPriceOracle.address, { from: opsAddress }));
+    await pricer_utils.utils.expectThrow(pricer.setPriceOracle.call('', usdPriceOracle.address, { from: opsAddress }));
   });
 
   it('fails to set priceOracle if oracle baseCurrency does not match pricer baseCurrency', async () => {
-    var inappositeOracle = await PriceOracle.new(Pricer_utils.currencies.usd, Pricer_utils.currencies.ost);
-    await Pricer_utils.utils.expectThrow(pricer.setPriceOracle.call(
-      Pricer_utils.currencies.usd, inappositeOracle.address, { from: opsAddress }));
+    var inappositeOracle = await PriceOracle.new(pricer_utils.currencies.usd, pricer_utils.currencies.ost);
+    await pricer_utils.utils.expectThrow(pricer.setPriceOracle.call(
+      pricer_utils.currencies.usd, inappositeOracle.address, { from: opsAddress }));
   });
 
   it('fails to set priceOracle if oracle quoteCurrency does not match currency', async () => {
-    await Pricer_utils.utils.expectThrow(pricer.setPriceOracle.call(Pricer_utils.currencies.eur, usdPriceOracle.address));
+    await pricer_utils.utils.expectThrow(pricer.setPriceOracle.call(pricer_utils.currencies.eur, usdPriceOracle.address));
   });
 
   it('successfully sets priceOracles', async () => {
-    assert.ok(await pricer.setPriceOracle.call(Pricer_utils.currencies.usd, usdPriceOracle.address, { from: opsAddress }));
-    response = await pricer.setPriceOracle(Pricer_utils.currencies.usd, usdPriceOracle.address, { from: opsAddress });
-    assert.equal(await pricer.priceOracles.call(Pricer_utils.currencies.usd), usdPriceOracle.address);
-    checkPriceOracleSetEvent(response.logs[0], Pricer_utils.currencies.usd, usdPriceOracle.address);
-    Pricer_utils.utils.logResponse(response, 'Pricer.setPriceOracle: ' + Pricer_utils.currencies.usd);
+    assert.ok(await pricer.setPriceOracle.call(pricer_utils.currencies.usd, usdPriceOracle.address, { from: opsAddress }));
+    response = await pricer.setPriceOracle(pricer_utils.currencies.usd, usdPriceOracle.address, { from: opsAddress });
+    assert.equal(await pricer.priceOracles.call(pricer_utils.currencies.usd), usdPriceOracle.address);
+    checkPriceOracleSetEvent(response.logs[0], pricer_utils.currencies.usd, usdPriceOracle.address);
+    pricer_utils.utils.logResponse(response, 'Pricer.setPriceOracle: ' + pricer_utils.currencies.usd);
 
-    assert.ok(await pricer.setPriceOracle.call(Pricer_utils.currencies.eur, eurPriceOracle.address, { from: opsAddress }));
-    response = await pricer.setPriceOracle(Pricer_utils.currencies.eur, eurPriceOracle.address, { from: opsAddress });
-    assert.equal(await pricer.priceOracles.call(Pricer_utils.currencies.eur), eurPriceOracle.address);
-    checkPriceOracleSetEvent(response.logs[0], Pricer_utils.currencies.eur, eurPriceOracle.address);
-    Pricer_utils.utils.logResponse(response, 'Pricer.setPriceOracle: ' + Pricer_utils.currencies.eur);
+    assert.ok(await pricer.setPriceOracle.call(pricer_utils.currencies.eur, eurPriceOracle.address, { from: opsAddress }));
+    response = await pricer.setPriceOracle(pricer_utils.currencies.eur, eurPriceOracle.address, { from: opsAddress });
+    assert.equal(await pricer.priceOracles.call(pricer_utils.currencies.eur), eurPriceOracle.address);
+    checkPriceOracleSetEvent(response.logs[0], pricer_utils.currencies.eur, eurPriceOracle.address);
+    pricer_utils.utils.logResponse(response, 'Pricer.setPriceOracle: ' + pricer_utils.currencies.eur);
   });
 }
 

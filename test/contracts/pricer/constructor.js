@@ -13,13 +13,13 @@
 // limitations under the License.
 //
 // ----------------------------------------------------------------------------
-// Test: Pricer_constructor.js
+// Test: constructor.js
 //
 // http://www.simpletoken.org/
 //
 // ----------------------------------------------------------------------------
 
-const Pricer_utils   = require('./Pricer_utils.js'),
+const pricer_utils   = require('./pricer_utils.js'),
       Pricer         = artifacts.require('./Pricer.sol'),
       EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol');
 
@@ -35,19 +35,19 @@ module.exports.perform = () => {
   var response = null;
 
   before(async () => {
-    token = await EIP20TokenMock.new(1, Pricer_utils.currencies.ost, 'name', 18);
+    token = await EIP20TokenMock.new(1, pricer_utils.currencies.ost, 'name', 18);
   });
 
   it('fails to deploy if brandedToken is null', async () => {
-    await Pricer_utils.utils.expectThrow(Pricer.new(0, Pricer_utils.currencies.ost));
+    await pricer_utils.utils.expectThrow(Pricer.new(0, pricer_utils.currencies.ost));
   });
 
   it('fails to deploy if baseCurrency is empty', async () => {
-    await Pricer_utils.utils.expectThrow(Pricer.new(token.address, ''));
+    await pricer_utils.utils.expectThrow(Pricer.new(token.address, ''));
   });
 
   it('successfully deploys', async () => {
-    response = await Pricer.new(token.address, Pricer_utils.currencies.ost);
-    Pricer_utils.utils.logTransaction(response.transactionHash, 'Pricer.constructor');
+    response = await Pricer.new(token.address, pricer_utils.currencies.ost);
+    pricer_utils.utils.logTransaction(response.transactionHash, 'Pricer.constructor');
   });
 }

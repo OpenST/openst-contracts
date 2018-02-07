@@ -13,13 +13,13 @@
 // limitations under the License.
 //
 // ----------------------------------------------------------------------------
-// Test: Pricer_properties.js
+// Test: properties.js
 //
 // http://www.simpletoken.org/
 //
 // ----------------------------------------------------------------------------
 
-const Pricer_utils = require('./Pricer_utils.js');
+const pricer_utils = require('./pricer_utils.js');
 
 ///
 /// Test stories
@@ -31,10 +31,10 @@ const Pricer_utils = require('./Pricer_utils.js');
 
 module.exports.perform = (accounts) => {
   const TOKEN_DECIMALS = 18,
-        conversionRate = 1;
+        conversionRate = 10;
 
   before(async () => {
-    contracts   = await Pricer_utils.deployPricer(artifacts, accounts);
+    contracts   = await pricer_utils.deployPricer(artifacts, accounts);
     token       = contracts.token;
     pricer      = contracts.pricer;
   });
@@ -44,7 +44,7 @@ module.exports.perform = (accounts) => {
   });
 
   it('has baseCurrency', async () => {
-    assert.equal(web3.toAscii(await pricer.baseCurrency.call()), Pricer_utils.currencies.ost);
+    assert.equal(web3.toAscii(await pricer.baseCurrency.call()), pricer_utils.currencies.ost);
   });
 
   it('has decimals', async () => {

@@ -13,13 +13,13 @@
 // limitations under the License.
 //
 // ----------------------------------------------------------------------------
-// Test: Pricer_get_price_point.js
+// Test: get_price_point.js
 //
 // http://www.simpletoken.org/
 //
 // ----------------------------------------------------------------------------
 
-const Pricer_utils = require('./Pricer_utils.js');
+const pricer_utils = require('./pricer_utils.js');
 
 ///
 /// Test stories
@@ -35,22 +35,22 @@ module.exports.perform = (accounts) => {
   var response = null;
 
   before(async () => {
-    contracts      = await Pricer_utils.deployPricer(artifacts, accounts);
+    contracts      = await pricer_utils.deployPricer(artifacts, accounts);
     pricer         = contracts.pricer;
     usdPriceOracle = contracts.usdPriceOracle;
     eurPriceOracle = contracts.eurPriceOracle;     
-    await pricer.setPriceOracle(Pricer_utils.currencies.usd, usdPriceOracle.address, { from: opsAddress });
-    await pricer.setPriceOracle(Pricer_utils.currencies.eur, eurPriceOracle.address, { from: opsAddress });
+    await pricer.setPriceOracle(pricer_utils.currencies.usd, usdPriceOracle.address, { from: opsAddress });
+    await pricer.setPriceOracle(pricer_utils.currencies.eur, eurPriceOracle.address, { from: opsAddress });
     await usdPriceOracle.setPrice(usdPrice, { from: opsAddress });
     await eurPriceOracle.setPrice(eurPrice, { from: opsAddress });
   });
 
   it('fails if priceOracle is not set', async () => {
-    await Pricer_utils.utils.expectThrow(pricer.getPricePoint.call(Pricer_utils.currencies.ost));
+    await pricer_utils.utils.expectThrow(pricer.getPricePoint.call(pricer_utils.currencies.ost));
   });
 
   it('successfully returns price from priceOracle', async () => {
-    assert.equal((await pricer.getPricePoint.call(Pricer_utils.currencies.usd)).toNumber(), usdPrice);
-    assert.equal((await pricer.getPricePoint.call(Pricer_utils.currencies.eur)).toNumber(), eurPrice);
+    assert.equal((await pricer.getPricePoint.call(pricer_utils.currencies.usd)).toNumber(), usdPrice);
+    assert.equal((await pricer.getPricePoint.call(pricer_utils.currencies.eur)).toNumber(), eurPrice);
   });
 }

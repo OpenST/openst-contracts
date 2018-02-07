@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 // ----------------------------------------------------------------------------
-// Test: Pricer_unset_price_oracle.js
+// Test: unset_price_oracle.js
 //
 // http://www.simpletoken.org/
 //
