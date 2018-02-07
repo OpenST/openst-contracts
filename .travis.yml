@@ -30,7 +30,7 @@ script:
   - kill $(ps aux | grep 'testrpc' | awk '{print $2}')
   - rm -r contracts/abi
   - rm -r contracts/bin
-  - rm -r test/scripts/ost-price-oracle
+  - rm -rf test/scripts/ost-price-oracle
   - rm -r test/scripts/st-poa
   - rm test/scripts/env_vars.sh
   - rm test/scripts/poa-genesis.json
