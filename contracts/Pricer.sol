@@ -40,7 +40,7 @@ contract Pricer is OpsManaged, PricerInterface {
     address private pricerBrandedToken;
 
     ///currency to accepted margin mapping, absolute +/- range in currency in which the price point will be accepted
-    mapping(bytes3 /* currency */ => uint64 /* margin */) private pricerAcceptedMargins;
+    mapping(bytes3 /* currency */ => uint256 /* margin */) private pricerAcceptedMargins;
     
     ///currency to price oracles address mapping
     mapping(bytes3 /* currency */ => PriceOracleInterface /* price oracle address */) private pricerPriceOracles;
@@ -90,11 +90,11 @@ contract Pricer is OpsManaged, PricerInterface {
     ///         returns acceptable margin for the given currency;
     ///         public method;
     /// @param _currency currency
-    /// @return uint64 margin
+    /// @return uint256 margin
     function acceptedMargins(
         bytes3 _currency) 
         public
-        returns (uint64)
+        returns (uint256)
     {       
         return pricerAcceptedMargins[_currency];
     }
@@ -200,7 +200,7 @@ contract Pricer is OpsManaged, PricerInterface {
     /// @return bool isSuccess
     function setAcceptedMargin(
         bytes3 _currency,
-        uint64 _acceptedMargin)             
+        uint256 _acceptedMargin)             
         public
         onlyOps
         returns (bool /* success */)
@@ -317,7 +317,7 @@ contract Pricer is OpsManaged, PricerInterface {
     function isPricePointInRange(
         uint256 _intendedPricePoint,
         uint256 _currentPricePoint,
-        uint64 _acceptedMargin)
+        uint256 _acceptedMargin)
         private
         pure
         returns (bool /*isValid*/)
@@ -339,7 +339,8 @@ contract Pricer is OpsManaged, PricerInterface {
     /// @param _transferAmount transferAmount
     /// @param _commissionAmount commissionAmount
     /// @return (amountBT,commissionAmountBT)
-    function getBTAmountFromCurrencyValue(uint256 _pricePoint,
+    function getBTAmountFromCurrencyValue(
+        uint256 _pricePoint,
         uint256 _transferAmount,
         uint256 _commissionAmount)
         private
