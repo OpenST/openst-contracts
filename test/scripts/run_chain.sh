@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 DATADIR=./st-poa
 LOCAL_NETWORK_ID="--networkid 20171010"

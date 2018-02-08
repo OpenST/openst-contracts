@@ -3,6 +3,7 @@ DATADIR=./st-poa
 ADDRESS_FILE=./new_addresses
 
 echo "Init/Re-Init chain..."
+#!/bin/bash
 sh ./init_chain.sh
 echo "" > $ADDRESS_FILE
 echo "...Done Init"
@@ -10,7 +11,7 @@ echo "...Done Init"
 
 echo "Generate new addresses..."
 
-source ./env_vars.sh
+. ./env_vars.sh
 
 
 # Utility Chain Deployer Address

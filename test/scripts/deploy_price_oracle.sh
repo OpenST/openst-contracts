@@ -1,3 +1,4 @@
+#!/bin/bash
 
 echo "\n********* Preparing price oracle deployment *************"
 git clone git@github.com:OpenSTFoundation/ost-price-oracle.git
