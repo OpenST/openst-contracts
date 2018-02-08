@@ -34,7 +34,7 @@ before_script:
   - bash contracts/compile.sh
 script:  
   - truffle test  
-  - cd test/scripts/  
+  - cd mocha_test/scripts/  
   - bash travis_test.sh  
 after_script:
   - kill $(ps aux | grep 'testrpc' | awk '{print $2}')
