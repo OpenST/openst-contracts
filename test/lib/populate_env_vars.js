@@ -11,7 +11,7 @@
 const mustache = require('mustache')
   , fs = require('fs')
   , Path = require('path')
- , envVarsSourceFile = '../../test/scripts/env_vars.sh';
+  , envVarsSourceFile = '../../test/scripts/env_vars.sh';
 
 
 const addressTemplate = "export OST_PRICER_DEPLOYER_ADDR='{{ost_pricer_deployer_address}}'\n" +
@@ -53,7 +53,7 @@ const populateEnvVars = {
       //console.log("ENV Constants to Write");
       //console.log(dataToWrite);
       fs.writeFileSync(Path.join(__dirname, '/' + envVarsSourceFile), dataToWrite);
-    } catch(e) {
+    } catch (e) {
       console.error("Error Reading and Populating Source File");
       console.error(e);
       process.exit(1);
