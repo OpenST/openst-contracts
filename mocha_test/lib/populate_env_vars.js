@@ -11,7 +11,7 @@
 const mustache = require('mustache')
   , fs = require('fs')
   , Path = require('path')
-  , envVarsSourceFile = '../../test/scripts/env_vars.sh';
+  , envVarsSourceFile = '../../mocha_test/scripts/env_vars.sh';
 
 
 const addressTemplate = "export OST_PRICER_DEPLOYER_ADDR='{{ost_pricer_deployer_address}}'\n" +

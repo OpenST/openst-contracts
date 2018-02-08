@@ -19,13 +19,13 @@ echo '\nexport TEST_COIN2_C2_ADDRESS='\'$TEST_COIN2_C2_ADDRESS\'>>scripts/env_va
 rm ../tools/deploy/tc2.txt
 echo "\n********* Done *************"
 
-# echo "\n********* Deploying test coin 3 *************"
-# . ./scripts/env_vars.sh
-# node ../tools/deploy/EIP20TokenMock.js 3 TC3 TestCoin3 10 0x12A05F200 travis tc3.txt
-# export TEST_COIN2_C3_ADDRESS=$(cat ../tools/deploy/tc3.txt)
-# echo '\nexport TEST_COIN2_C3_ADDRESS='\'$TEST_COIN2_C3_ADDRESS\'>>scripts/env_vars.sh
-# rm ../tools/deploy/tc3.txt
-# echo "\n********* Done *************"
+echo "\n********* Deploying test coin 3 *************"
+. ./scripts/env_vars.sh
+node ../tools/deploy/EIP20TokenMock.js 3 TC3 TestCoin3 10 0x12A05F200 travis tc3.txt
+export TEST_COIN2_C3_ADDRESS=$(cat ../tools/deploy/tc3.txt)
+echo '\nexport TEST_COIN2_C3_ADDRESS='\'$TEST_COIN2_C3_ADDRESS\'>>scripts/env_vars.sh
+rm ../tools/deploy/tc3.txt
+echo "\n********* Done *************"
 
 
 echo "\n********* Deploying Pricer 1 *************"
@@ -44,13 +44,13 @@ echo '\nexport TEST_PRICER_C2_ADDRESS='\'$TEST_PRICER_C2_ADDRESS\'>>scripts/env_
 rm ../tools/deploy/tp2.txt
 echo "\n********* Done *************"
 
-# echo "\n********* Deploying Pricer 3 *************"
-# . ./scripts/env_vars.sh
-# node ../tools/deploy/pricer.js $TEST_COIN2_C3_ADDRESS OST 0x12A05F200 travis tp3.txt
-# export TEST_PRICER_C3_ADDRESS=$(cat ../tools/deploy/tp3.txt)
-# echo '\nexport TEST_PRICER_C3_ADDRESS='\'$TEST_PRICER_C3_ADDRESS\'>>scripts/env_vars.sh
-# rm ../tools/deploy/tp3.txt
-#echo "\n********* Done *************"
+echo "\n********* Deploying Pricer 3 *************"
+. ./scripts/env_vars.sh
+node ../tools/deploy/pricer.js $TEST_COIN2_C3_ADDRESS OST 0x12A05F200 travis tp3.txt
+export TEST_PRICER_C3_ADDRESS=$(cat ../tools/deploy/tp3.txt)
+echo '\nexport TEST_PRICER_C3_ADDRESS='\'$TEST_PRICER_C3_ADDRESS\'>>scripts/env_vars.sh
+rm ../tools/deploy/tp3.txt
+echo "\n********* Done *************"
 
 
 echo "\n********* Setting env variables *************"

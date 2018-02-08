@@ -12,8 +12,8 @@ const _addresses = {
 
 const rootPrefix = "../.."
   , coreConstants = require( rootPrefix + '/config/core_constants' )
-  , populateEnvVars = require( rootPrefix + "/test/lib/populate_env_vars.js")
-  , poaGenesis = require( rootPrefix + "/test/scripts/poa-genesis.json")
+  , populateEnvVars = require( rootPrefix + "/mocha_test/lib/populate_env_vars.js")
+  , poaGenesis = require( rootPrefix + "/mocha_test/scripts/poa-genesis.json")
 ;
 
 function main( addressFile ) {

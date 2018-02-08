@@ -15,7 +15,7 @@ const rootPrefix = '../..'
   , coreAddresses = require(rootPrefix + '/config/core_addresses')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , web3EventsFormatter = require(rootPrefix + '/lib/web3/events/formatter')
-  , populateEnvVars = require(rootPrefix + "/test/lib/populate_env_vars.js")
+  , populateEnvVars = require(rootPrefix + "/mocha_test/lib/populate_env_vars.js")
   , fs = require('fs')
   , Path = require('path');
 
