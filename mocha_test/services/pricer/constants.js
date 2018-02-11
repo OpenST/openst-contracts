@@ -20,7 +20,7 @@ const constants = {
   pricerOstUsd10DecimalAddress: process.env.TEST_PRICER_C3_ADDRESS,
   priceOracles: JSON.parse(process.env.OST_PO_PRICE_ORACLES),
   TC5Address: process.env.TEST_COIN1_C5_ADDRESS,
-  TC2Address: process.env.TEST_COIN1_C2_ADDRESS,
-  TC3Address: process.env.TEST_COIN1_C3_ADDRESS
+  TC2Address: process.env.TEST_COIN2_C2_ADDRESS,
+  TC3Address: process.env.TEST_COIN3_C3_ADDRESS
 };
 module.exports = constants;

@@ -6,6 +6,7 @@ const chai = require('chai')
 
 const rootPrefix = "../../.."
   , constants = require(rootPrefix + '/mocha_test/services/pricer/constants')
+  , pricerUtils = require('./pricer_utils')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
   , pricerOstUsd = new pricer(constants.pricerOstUsdAddress)
   , pricerOstEur = new pricer(constants.pricerOstEurAddress)
@@ -24,52 +25,61 @@ describe('Set price oracle', function() {
     assert.notEqual(constants.deployer, constants.account1);
     assert.notEqual(constants.ops, constants.account1);
 
-    await pricerOstUsd.unsetPriceOracle(
+    const response = await pricerOstUsd.unsetPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyUSD,
       0xBA43B7400);
 
-    const poResult1 = await pricerOstUsd.priceOracles(constants.currencyUSD);
-    assert.equal(poResult1, 0x0);
+    assert.equal(response.isSuccess(), true);
+    assert.exists(response.data.transactionHash);
+    await pricerUtils.verifyReceipt(pricerOstUsd, response.data.transactionHash);
 
-    await pricerOstEur.unsetPriceOracle(
+    const poResult1 = await pricerOstUsd.priceOracles(constants.currencyUSD);
+    assert.equal(poResult1.isSuccess(), true);
+    assert.equal(0x0, poResult1.data.priceOracles);
+
+    const response2 = await pricerOstEur.unsetPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyEUR,
       0xBA43B7400);
 
+    assert.equal(response2.isSuccess(), true);
+    assert.exists(response2.data.transactionHash);
+    await pricerUtils.verifyReceipt(pricerOstEur, response2.data.transactionHash);
+
     const poResult2 = await pricerOstEur.priceOracles(constants.currencyEUR);
-    assert.equal(poResult2, 0x0);
+    assert.equal(poResult2.isSuccess(), true);
+    assert.equal(0x0, poResult2.data.priceOracles);
 
   });
+
 
   it('should fail when sender is not ops', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    await pricerOstUsd.unsetPriceOracle(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.currencyUSD,
-      0xBA43B7400);
-
-    const poResult1 = await pricerOstUsd.priceOracles(constants.currencyUSD);
-    assert.equal(poResult1, 0x0);
-
-    await pricerOstUsd.setPriceOracle(
+    const setResponse = await pricerOstUsd.setPriceOracle(
       constants.deployer,
       constants.deployerPassphrase,
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       0xBA43B7400);
 
+    assert.equal(setResponse.isSuccess(), true);
+    assert.exists(setResponse.data.transactionHash);
+    await pricerUtils.verifyReceipt(pricerOstUsd, setResponse.data.transactionHash);
+
     const poResult2 = await pricerOstUsd.priceOracles(constants.currencyUSD);
-    assert.equal(poResult2, 0x0);
+    assert.equal(poResult2.isSuccess(), true);
+    assert.equal(0x0, poResult2.data.priceOracles);
 
   });
 
+
   it('should fail when currency is blank', async function() {
+    var error = false;
     try {
       await pricerOstUsd.setPriceOracle(
         constants.ops,
@@ -79,8 +89,9 @@ describe('Set price oracle', function() {
         0xBA43B7400);
     }
     catch (err) {
-      assert.equal(err, 'Currency is mandatory');
+      error = true;
     }
+    assert.isTrue(error);
   });
 
 
@@ -100,6 +111,7 @@ describe('Set price oracle', function() {
     assert.isTrue(error);
   });
 
+
   it('should fail when gas amount is 0', async function() {
     var error = false;
     try {
@@ -115,6 +127,7 @@ describe('Set price oracle', function() {
     }
     assert.isTrue(error);
   });
+
 
   it('should fail when sender address is 0', async function() {
     var error = false;
@@ -132,18 +145,25 @@ describe('Set price oracle', function() {
     assert.isTrue(error);
   });
 
+
   it('should fail when price oracle has different quote currency', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    await pricerOstUsd.setPriceOracle(
+    const response = await pricerOstUsd.setPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.priceOracles.ETH.USD,
       0xBA43B7400);
+
+    assert.equal(response.isSuccess(), true);
+    assert.exists(response.data.transactionHash);
+    await pricerUtils.verifyReceipt(pricerOstUsd, response.data.transactionHash);
+
     const poResult = await pricerOstUsd.priceOracles(constants.currencyUSD);
-    assert.notEqual(poResult, constants.priceOracles.ETH.USD);
+    assert.equal(poResult.isSuccess(), true);
+    assert.notEqual(poResult.data.priceOracles, constants.priceOracles.ETH.USD);
 
   });
 
@@ -152,47 +172,66 @@ describe('Set price oracle', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    await pricerOstUsd10Decimal.setPriceOracle(
+    const response = await pricerOstUsd10Decimal.setPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       0xBA43B7400);
 
+    assert.equal(response.isSuccess(), true);
+    assert.exists(response.data.transactionHash);
+    await pricerUtils.verifyReceipt(pricerOstUsd10Decimal, response.data.transactionHash);
+
     const poResult = await pricerOstUsd.priceOracles(constants.currencyUSD);
-    assert.equal(poResult, 0);
+    assert.equal(poResult.isSuccess(), true);
+    assert.equal(poResult.data.priceOracles, 0x0);
 
   });
+
 
   it('should pass when OST/USD price oracle is set', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    await pricerOstUsd.setPriceOracle(
+    const response = await pricerOstUsd.setPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       0xBA43B7400);
 
+    assert.equal(response.isSuccess(), true);
+    assert.exists(response.data.transactionHash);
+    await pricerUtils.verifyReceipt(pricerOstUsd, response.data.transactionHash);
+
     const poResult = await pricerOstUsd.priceOracles(constants.currencyUSD);
-    assert.equal(constants.priceOracles.OST.USD, poResult);
+    assert.equal(poResult.isSuccess(), true);
+    assert.equal(poResult.data.priceOracles, constants.priceOracles.OST.USD);
 
   });
+
 
   it('should pass when OST/EUR price oracle is set', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    await pricerOstUsd.setPriceOracle(
+    const response = await pricerOstUsd.setPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyEUR,
       constants.priceOracles.OST.EUR,
       0xBA43B7400);
+
+    assert.equal(response.isSuccess(), true);
+    assert.exists(response.data.transactionHash);
+    await pricerUtils.verifyReceipt(pricerOstUsd, response.data.transactionHash);
+
     const poResult = await pricerOstUsd.priceOracles(constants.currencyEUR);
-    assert.equal(constants.priceOracles.OST.EUR, poResult);
+    assert.equal(poResult.isSuccess(), true);
+    assert.equal(poResult.data.priceOracles, constants.priceOracles.OST.EUR);
 
   });
+
 });
 
