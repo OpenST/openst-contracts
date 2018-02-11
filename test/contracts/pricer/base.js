@@ -44,4 +44,5 @@ contract('Pricer', function(accounts) {
     pricer_utils.utils.printGasStatistics();
     pricer_utils.utils.clearReceipts();
   });
+  
 });
