@@ -1,4 +1,4 @@
-// Copyright 2018 OpenST Ltd.
+// Copyright 2017 OST.com Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ module.exports.logResponse = (response, description) => {
     receipt     : response.receipt,
     description : description,
     response    : response
-  }); 
+  });
 }
 
 module.exports.logReceipt = (receipt, description) => {
@@ -77,7 +77,7 @@ module.exports.clearReceipts = () => {
  *  General event checks
  */
 module.exports.expectNoEvents = (result) => {
-   Assert.equal(result.receipt.logs.length, 0, "expected empty array of logs")
+  Assert.equal(result.receipt.logs.length, 0, "expected empty array of logs")
 }
 
 /*
@@ -86,29 +86,29 @@ module.exports.expectNoEvents = (result) => {
 
 /// @dev Compare to null address
 module.exports.isNullAddress = function (address) {
-    Assert.strictEqual(typeof address, 'string', `address must be of type 'string'`);
-    return (address == NullAddress);
+  Assert.strictEqual(typeof address, 'string', `address must be of type 'string'`);
+  return (address == NullAddress);
 }
 
 /// @dev Expect failure from invalid opcode or out of gas,
 ///      but returns error instead
 module.exports.expectThrow = async (promise) => {
-    try {
-        await promise;
-    } catch (error) {
-        const invalidOpcode = error.message.search('invalid opcode') > -1;
+  try {
+    await promise;
+  } catch (error) {
+    const invalidOpcode = error.message.search('invalid opcode') > -1;
 
-        const outOfGas = error.message.search('out of gas') > -1;
+    const outOfGas = error.message.search('out of gas') > -1;
 
-        // Latest TestRPC has trouble with require
-        const revertInstead = error.message.search('revert') > -1;
+    // Latest TestRPC has trouble with require
+    const revertInstead = error.message.search('revert') > -1;
 
-        assert(invalidOpcode || outOfGas || revertInstead, `Expected throw, but got ${error} instead`);
+    Assert(invalidOpcode || outOfGas || revertInstead, `Expected throw, but got ${error} instead`);
 
-        return;
-    }
+    return;
+  }
 
-    assert(false, "Did not throw as expected");
+  Assert(false, "Did not throw as expected");
 };
 
 /// @dev Get account balance
@@ -122,7 +122,7 @@ module.exports.getBalance = function (address) {
       }
     })
   })
-}
+};
 
 /// @dev Get gas price
 module.exports.getGasPrice = function () {
@@ -135,40 +135,4 @@ module.exports.getGasPrice = function () {
       }
     })
   })
-}
-
-/// @dev Decode logs with ABI
-module.exports.decodeLogs = (abi, logs) => {
-    return decodeLogs(abi, logs)
-}
-
-
-function decodeLogs(abi, logs) {
-   var decodedLogs = null
-   try {
-      decodedLogs = decodeLogsInternal(abi, logs)
-   } catch(error) {
-      throw new 'Could not decode receipt log for transaction ' + txID + ', message: ' + error
-   }
-
-   return decodedLogs
-}
-
-
-function hexToAscii(hexStr) {
-    var asciiStr = ''
-
-    var start = (hex.substring(0, 2) === '0x') ? 2 : 0
-
-    for (i = start; i < hexStr.length; i += 2) {
-        var charCode = parseInt(hex.substr(i, 2), 16)
-
-        if (code === 0) {
-           continue
-        }
-
-        asciiStr += String.fromCharCode(code);
-    }
-
-    return asciiStr;
-}
+};
