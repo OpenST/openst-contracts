@@ -251,7 +251,7 @@ contract Pricer is OpsManaged, PricerInterface {
     /// @param _commissionAmount commissionAmount
     /// @param _currency currency
     /// @param _intendedPricePoint _intendedPricePoint
-    /// @return bool isSuccess
+    /// @return uint256 total paid
     function pay(       
         address _beneficiary,
         uint256 _transferAmount,        
@@ -260,7 +260,7 @@ contract Pricer is OpsManaged, PricerInterface {
         bytes3 _currency,
         uint256 _intendedPricePoint)
         public
-        returns (bool /* success */)
+        returns (uint256 /* total paid */)
     {
         require(_beneficiary != address(0));
         require(_transferAmount != 0);
@@ -289,7 +289,7 @@ contract Pricer is OpsManaged, PricerInterface {
         //Trigger Event for PaymentComplete
         Payment(_beneficiary, _transferAmount, _commissionBeneficiary, 
             _commissionAmount, _currency, _intendedPricePoint, pricePoint);      
-        return true;
+        return (tokenAmount + commissionTokenAmount);
     }
 
     /// @dev    Takes _currency; 
