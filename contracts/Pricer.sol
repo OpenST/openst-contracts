@@ -153,8 +153,8 @@ contract Pricer is OpsManaged, PricerInterface {
     function setPriceOracle(
         bytes3 _currency,
         address _oracleAddress)
-        public
-        onlyOps        
+        public  
+        onlyOps     
         returns (bool /* success */)
     {
         require(_oracleAddress != address(0));

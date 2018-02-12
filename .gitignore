@@ -12,3 +12,11 @@ contracts/abi/
 
 # don't commit node_modules
 node_modules
+
+mocha_test/scripts/env_vars.sh
+mocha_test/scripts/ost-price-oracle/
+mocha_test/scripts/poa-genesis.json
+mocha_test/scripts/pw
+mocha_test/scripts/st-poa/
+
+package-lock.json

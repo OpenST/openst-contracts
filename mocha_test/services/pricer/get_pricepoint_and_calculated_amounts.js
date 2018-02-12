@@ -1,0 +1,153 @@
+
+/* global describe, it */
+
+const chai = require('chai')
+  , assert = chai.assert;
+
+const rootPrefix = "../../.."
+  , constants = require(rootPrefix + '/mocha_test/services/pricer/constants')
+  , pricerUtils = require('./pricer_utils')
+  , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
+  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress)
+  , pricerOstEur = new pricer(constants.pricerOstEurAddress)
+;
+
+
+describe('Get price point and calculated amounts', function() {
+
+  it('should pass the initial address checks', async function() {
+    // eslint-disable-next-line no-invalid-this
+    this.timeout(100000);
+
+    assert.isDefined(constants.deployer);
+    assert.isDefined(constants.ops);
+    assert.isDefined(constants.account1);
+    assert.notEqual(constants.deployer, constants.ops);
+    assert.notEqual(constants.deployer, constants.account1);
+    assert.notEqual(constants.ops, constants.account1);
+
+    const response1 = await pricerOstUsd.setPriceOracle(
+      constants.ops,
+      constants.opsPassphrase,
+      constants.currencyUSD,
+      constants.priceOracles.OST.USD,
+      0xBA43B7400);
+
+    assert.equal(response1.isSuccess(), true);
+    assert.exists(response1.data.transactionHash);
+    await pricerUtils.verifyReceipt(pricerOstUsd, response1.data.transactionHash);
+
+    const poResult1 = await pricerOstUsd.priceOracles(constants.currencyUSD);
+    assert.equal(poResult1.isSuccess(), true);
+    assert.equal(constants.priceOracles.OST.USD, poResult1.data.priceOracles);
+
+    const response2 = await pricerOstEur.setPriceOracle(
+      constants.ops,
+      constants.opsPassphrase,
+      constants.currencyEUR,
+      constants.priceOracles.OST.EUR,
+      0xBA43B7400);
+
+    assert.equal(response2.isSuccess(), true);
+    assert.exists(response2.data.transactionHash);
+    await pricerUtils.verifyReceipt(pricerOstEur, response2.data.transactionHash);
+
+    const poResult2 = await pricerOstEur.priceOracles(constants.currencyEUR);
+    assert.equal(poResult2.isSuccess(), true);
+    assert.equal(constants.priceOracles.OST.EUR, poResult2.data.priceOracles);
+
+  });
+
+
+  it('should fail when currency is 0', async function() {
+
+    const response = await pricerOstUsd.getPricePointAndCalculatedAmounts(
+      pricerOstUsd.toWei('1'),
+      pricerOstUsd.toWei('0.5'),
+      constants.currencyBlank);
+    assert.equal(response.isFailure(), true);
+
+  });
+
+  it('should fail when price point is 0', async function() {
+
+    var isError = false;
+    try {
+      await pricerOstUsd.getPricePointAndCalculatedAmounts(
+        pricerOstUsd.toWei('1'),
+        pricerOstUsd.toWei('0.5'),
+        constants.currencyINR);
+    }
+    catch (err) {
+      isError = true;
+      assert.instanceOf(err, Error);
+    }
+    assert.equal(isError, true);
+
+  });
+
+
+  it('should pass when all parameters are valid and conversion rate is 5', async function() {
+
+    const pricePointData = await pricerOstUsd.getPricePoint(constants.currencyUSD);
+    assert.equal(pricePointData.isSuccess(), true);
+    const pricePoint = pricePointData.data.pricePoint;
+
+    const decimalData = await pricerOstUsd.decimals();
+    assert.equal(decimalData.isSuccess(), true);
+    const decimal = decimalData.data.decimals;
+
+    const conversionRateData = await pricerOstUsd.conversionRate();
+    assert.equal(conversionRateData.isSuccess(), true);
+    const conversionRate = conversionRateData.data.conversionRate;
+
+    const amount = pricerOstUsd.toWei('1')
+      , commissionAmount = pricerOstUsd.toWei('0.5')
+      , calculatedAmount = (amount*conversionRate*(10**decimal))/pricePoint
+      , calculatedCommisionAmount = (commissionAmount*conversionRate*(10**decimal))/pricePoint;
+
+    const result = await pricerOstUsd.getPricePointAndCalculatedAmounts(
+      amount,
+      commissionAmount,
+      constants.currencyUSD);
+    assert.equal(result.isSuccess(), true);
+
+    assert.equal(result.data.pricePoint, pricePoint);
+    assert.equal(result.data.tokenAmount, calculatedAmount);
+    assert.equal(result.data.commissionTokenAmount, calculatedCommisionAmount);
+
+  });
+
+
+  it('should pass when all parameters are valid and conversion rate is 2', async function() {
+
+    const pricePointData = await pricerOstEur.getPricePoint(constants.currencyEUR);
+    assert.equal(pricePointData.isSuccess(), true);
+    const pricePoint = pricePointData.data.pricePoint;
+
+    const decimalData = await pricerOstEur.decimals();
+    assert.equal(decimalData.isSuccess(), true);
+    const decimal = decimalData.data.decimals;
+
+    const conversionRateData = await pricerOstEur.conversionRate();
+    assert.equal(conversionRateData.isSuccess(), true);
+    const conversionRate = conversionRateData.data.conversionRate;
+
+    const amount = pricerOstEur.toWei('1')
+      , commissionAmount = pricerOstEur.toWei('0.5')
+      , calculatedAmount = (amount*conversionRate*(10**decimal))/pricePoint
+      , calculatedCommisionAmount = (commissionAmount*conversionRate*(10**decimal))/pricePoint;
+
+    const result = await pricerOstEur.getPricePointAndCalculatedAmounts(
+      amount,
+      commissionAmount,
+      constants.currencyEUR);
+    assert.equal(result.isSuccess(), true);
+
+    assert.equal(result.data.pricePoint, pricePoint);
+    assert.equal(result.data.tokenAmount, calculatedAmount);
+    assert.equal(result.data.commissionTokenAmount, calculatedCommisionAmount);
+
+  });
+
+});
