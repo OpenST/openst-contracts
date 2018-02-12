@@ -1,4 +1,4 @@
-// Copyright 2017 OST.com Ltd.
+// Copyright 2018 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,16 +30,18 @@ const Workers       = artifacts.require('./Workers.sol');
 
 module.exports.perform = (accounts) => {
   const opsAddress          = accounts[1],
-        worker1Address       =  accounts[2],
-        worker2Address       =  accounts[3],
-        height1  = new workers_utils.bigNumber(100),
-        height2  = new workers_utils.bigNumber(140);
+        adminAddress        = accounts[5],
+        worker1Address      = accounts[2],
+        worker2Address      = accounts[3],
+        height1             = new workers_utils.bigNumber(100),
+        height2             = new workers_utils.bigNumber(140);
         
     before(async () => {
 
         workers = await Workers.new();
         assert.ok(await workers.setOpsAddress(opsAddress));    
-
+        assert.ok(await workers.setAdminAddress(adminAddress));
+        
         // set worker 1
         deactivationHeight = web3.eth.blockNumber + height1.toNumber();
         assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
@@ -56,7 +58,7 @@ module.exports.perform = (accounts) => {
 
     });
 
-    it('fails to remove when sender is not opsAddress', async () => {
+    it('fails to remove when sender is not opsAddress or adminAddress', async () => {
 
         await workers_utils.utils.expectThrow(workers.remove.call({ from: accounts[4] }));    
 
@@ -66,8 +68,56 @@ module.exports.perform = (accounts) => {
             
         assert.ok(await workers.remove.call({ from: opsAddress }));            
         response = await workers.remove({ from: opsAddress })     
-        workers_utils.utils.logResponse(response, 'Worker.remove');        
+        workers_utils.utils.logResponse(response, 'Worker.remove'); 
+
+        // check if the worker is deactivated if called       
         assert.equal(await workers.isWorker.call(worker2Address), false);
+
+        // Try to set a new worker.        
+        deactivationHeight = web3.eth.blockNumber + height1.toNumber();
+        assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
+        response = await workers.setWorker(worker1Address, deactivationHeight, { from: opsAddress });
+
+        // check if no event is raised.
+        assert.equal(response.logs[0], undefined);
+
+        // verify if the worker is invalid.
+        assert.equal(await workers.isWorker.call(worker1Address), false);
+        
+    });
+
+    it('pass to remove when sender is adminAddress', async () => {
+
+        // deploy a new contract
+        workers = await Workers.new();
+        assert.ok(await workers.setOpsAddress(opsAddress));    
+        assert.ok(await workers.setAdminAddress(adminAddress));    
+
+        //set a new worker to verify its working         
+        deactivationHeight = web3.eth.blockNumber + height1.toNumber();
+        assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
+        response = await workers.setWorker(worker1Address, deactivationHeight, { from: opsAddress });
+        assert.equal(await workers.isWorker.call(worker1Address), true);
+        workers_utils.checkWorkerSetEvent(response.logs[0], deactivationHeight, height1.toNumber()-1);
+
+        // call remove from admin address
+        assert.ok(await workers.remove.call({ from: adminAddress }));            
+        response = await workers.remove({ from: adminAddress })     
+        workers_utils.utils.logResponse(response, 'Worker.remove');        
+        
+        // check if worker is no more active if called
+        assert.equal(await workers.isWorker.call(worker1Address), false);
+
+        // Try to set a new worker.        
+        deactivationHeight = web3.eth.blockNumber + height1.toNumber();
+        assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
+        response = await workers.setWorker(worker1Address, deactivationHeight, { from: opsAddress });
+
+        // check if no event is raised.
+        assert.equal(response.logs[0], undefined);
+
+        // verify if the worker is invalid.
+        assert.equal(await workers.isWorker.call(worker1Address), false);
 
     });
 

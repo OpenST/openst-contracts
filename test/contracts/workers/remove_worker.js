@@ -1,4 +1,4 @@
-// Copyright 2017 OST.com Ltd.
+// Copyright 2018 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,11 +31,11 @@ const Workers       = artifacts.require('./Workers.sol');
 
 module.exports.perform = (accounts) => {
   const opsAddress          = accounts[1],
-        worker1Address       =  accounts[2],
-        worker2Address       =  accounts[3],
-        worker3Address       =  accounts[4],
-        height1  = new workers_utils.bigNumber(500),
-        height2  = new workers_utils.bigNumber(1000);
+        worker1Address      =  accounts[2],
+        worker2Address      =  accounts[3],
+        worker3Address      =  accounts[4],
+        height1             = new workers_utils.bigNumber(500),
+        height2             = new workers_utils.bigNumber(1000);
         
   before(async () => {
     workers = await Workers.new();
@@ -70,7 +70,7 @@ module.exports.perform = (accounts) => {
     assert.equal(await workers.removeWorker.call(worker3Address, { from: opsAddress }), false); 
     response = await workers.removeWorker(worker3Address, { from: opsAddress }); 
     assert.equal(await workers.isWorker.call(worker3Address), false);
-    workers_utils.checkWorkerUnsetEvent(response.logs[0], worker3Address, false);      
+    workers_utils.checkWorkerRemovedEvent(response.logs[0], worker3Address, false);      
     workers_utils.utils.logResponse(response, 'Worker.removeWorker not existed worker');
 
   });
@@ -81,18 +81,18 @@ module.exports.perform = (accounts) => {
     assert.equal(await workers.removeWorker.call(worker1Address, { from: opsAddress }), true); 
     response = await workers.removeWorker(worker1Address, { from: opsAddress }); 
     assert.equal(await workers.isWorker.call(worker1Address), false);
-    workers_utils.checkWorkerUnsetEvent(response.logs[0], worker1Address, true);          
+    workers_utils.checkWorkerRemovedEvent(response.logs[0], worker1Address, true);          
     workers_utils.utils.logResponse(response, 'Worker.removeWorker');
 
     assert.equal(await workers.removeWorker.call(worker2Address, { from: opsAddress }), true); 
     response = await workers.removeWorker(worker2Address, { from: opsAddress }); 
     assert.equal(await workers.isWorker.call(worker2Address), false);
-    workers_utils.checkWorkerUnsetEvent(response.logs[0], worker2Address, true);      
+    workers_utils.checkWorkerRemovedEvent(response.logs[0], worker2Address, true);      
     
     assert.equal(await workers.removeWorker.call(worker2Address, { from: opsAddress }), false); 
     response = await workers.removeWorker(worker2Address, { from: opsAddress }); 
     assert.equal(await workers.isWorker.call(worker2Address), false);
-    workers_utils.checkWorkerUnsetEvent(response.logs[0], worker2Address, false);          
+    workers_utils.checkWorkerRemovedEvent(response.logs[0], worker2Address, false);          
 
   });
 

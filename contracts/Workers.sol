@@ -39,25 +39,30 @@ contract Workers is OpsManaged {
      * Events
      */
     ///Event for worker set
-    event WrokerSet(
+    event WorkerSet(
         address _worker,
         uint256 _deactivationHeight,
         uint256 _remainingHeight);
 
-    ///Event for worker set
-    event WrokerUnset(
+    ///Event for worker removed
+    event WorkerRemoved(
         address _worker,
         bool _existed);
 
-    /*
-     *  Public functions
-     */
+    /// @dev    Constructor;
+    ///         public method;    
     function Workers()
         public
         OpsManaged()
     {
     }
 
+    /// @dev    Takes _worker, _deactivationHeight;
+    ///         Sets worker and its deactivation height; 
+    ///         external method;
+    /// @param _worker worker
+    /// @param _deactivationHeight deactivationHeight
+    /// @return (remainingHeight)    
     function setWorker(
         address _worker,
         uint256 _deactivationHeight)
@@ -71,11 +76,16 @@ contract Workers is OpsManaged {
         workers[_worker] = _deactivationHeight;
         uint256 remainingHeight = _deactivationHeight - block.number;
         //Event for worker set
-        WrokerSet(_worker, _deactivationHeight, remainingHeight);
+        WorkerSet(_worker, _deactivationHeight, remainingHeight);
 
         return (remainingHeight);
     }
 
+    /// @dev    Takes _worker;
+    ///         removes the worker; 
+    ///         external method;
+    /// @param _worker worker
+    /// @return (existed)    
     function removeWorker(
         address _worker)
         external
@@ -86,12 +96,14 @@ contract Workers is OpsManaged {
 
         delete workers[_worker];
         //Event for worker removed
-        WrokerUnset(_worker, existed);
+        WorkerRemoved(_worker, existed);
 
         return existed;
     }
-
-    // clean up or collectively revoke all workers
+    
+    /// @dev    Clean up or collectively revoke all workers;
+    ///         external method;
+    ///         only called by ops or admin;    
     function remove()
         external
         onlyAdminOrOps
@@ -99,9 +111,11 @@ contract Workers is OpsManaged {
         selfdestruct(msg.sender);
     }
 
-    /*
-     *  Public view functions
-     */
+    /// @dev    Takes _worker;
+    ///         checks if the worker is valid; 
+    ///         external method;
+    /// @param _worker worker
+    /// @return (isValid)    
     function isWorker(
         address _worker)
         external

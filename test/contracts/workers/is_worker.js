@@ -1,4 +1,4 @@
-// Copyright 2017 OST.com Ltd.
+// Copyright 2018 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,16 +26,16 @@ const Workers       = artifacts.require('./Workers.sol');
 /// Test stories
 ///
 /// returns false when worker was not set
-/// returns true when worker was is set and not reached deactivationHeight
+/// returns true when worker was set and deactivationHeight is not reached
 /// validate expiry
 
 module.exports.perform = (accounts) => {
   const opsAddress          = accounts[1],
-        worker1Address       =  accounts[2],
-        worker2Address       =  accounts[3],
-        worker3Address       =  accounts[4],
-        height1  = new workers_utils.bigNumber(50),
-        height2  = new workers_utils.bigNumber(40);
+        worker1Address      =  accounts[2],
+        worker2Address      =  accounts[3],
+        worker3Address      =  accounts[4],
+        height1             = new workers_utils.bigNumber(50),
+        height2             = new workers_utils.bigNumber(40);
         
   before(async () => {
     workers = await Workers.new();
@@ -63,7 +63,7 @@ module.exports.perform = (accounts) => {
 
   });
 
-  it('returns true when worker was is set and not reached deactivationHeight', async () => {
+  it('returns true when worker was set and deactivationHeight is not reached', async () => {
 
     assert.equal(await workers.isWorker.call(worker1Address), true);
     assert.equal(await workers.isWorker.call(worker2Address), true);

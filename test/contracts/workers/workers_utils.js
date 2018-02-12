@@ -1,4 +1,4 @@
-// Copyright 2017 OpenST Ltd.
+// Copyright 2018 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 
 const Utils          = require('../../lib/utils.js'),
       BigNumber      = require('bignumber.js'),
-      Workers         = artifacts.require('./Workers.sol');
+      Workers        = artifacts.require('./Workers.sol');
 
 
 /// @dev Export common requires
@@ -29,16 +29,16 @@ module.exports.utils     = Utils;
 module.exports.bigNumber = BigNumber;
 
 function checkWorkerSetEvent(event, deactivationHeight, remainingHeight) {
-  assert.equal(event.event, 'WrokerSet');
+  assert.equal(event.event, 'WorkerSet');
   assert.equal(event.args._deactivationHeight.toNumber(), deactivationHeight);
   assert.equal(event.args._remainingHeight.toNumber(), remainingHeight);
 }
 module.exports.checkWorkerSetEvent = checkWorkerSetEvent;
 
-function checkWorkerUnsetEvent(event, worker, existed) {
-  assert.equal(event.event, 'WrokerUnset');
+function checkWorkerRemovedEvent(event, worker, existed) {
+  assert.equal(event.event, 'WorkerRemoved');
   assert.equal(event.args._worker, worker);
   assert.equal(event.args._existed, existed);
 }
-module.exports.checkWorkerUnsetEvent = checkWorkerUnsetEvent;
+module.exports.checkWorkerRemovedEvent = checkWorkerRemovedEvent;
 

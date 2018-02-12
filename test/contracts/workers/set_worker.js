@@ -1,4 +1,4 @@
-// Copyright 2017 OST.com Ltd.
+// Copyright 2018 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,13 +31,15 @@ const Workers       = artifacts.require('./Workers.sol');
 /// fails to set worker if sender is not opsAddress
 /// pass to set worker if worker is not already set
 /// pass to set worker if worker was already set
+/// pass to set worker at higher deactivation height if worker was already set to a lower deactivation height
+/// pass to set worker at lower deactivation height if worker was already set to a higher deactivation height
 
 module.exports.perform = (accounts) => {
-  const opsAddress          = accounts[1],
-        worker1Address       =  accounts[2],
-        worker2Address       =  accounts[3],
-        height1  = new workers_utils.bigNumber(500),
-        height2  = new workers_utils.bigNumber(1000);
+  const opsAddress            = accounts[1],
+        worker1Address        =  accounts[2],
+        worker2Address        =  accounts[3],
+        height1               = new workers_utils.bigNumber(500),
+        height2               = new workers_utils.bigNumber(1000);
         
   before(async () => {
 
@@ -54,16 +56,16 @@ module.exports.perform = (accounts) => {
   });
 
 
-  it('fails to set worker if _deactivationHeight is equal to current block number', async () => {    
+  //it('pass to set worker if _deactivationHeight is equal to current block number', async () => {    
 
-    await workers_utils.utils.expectThrow(workers.setWorker.call(0, web3.eth.blockNumber, { from: opsAddress }));    
+  //  await workers_utils.utils.expectThrow(workers.setWorker.call(worker1Address, web3.eth.blockNumber, { from: opsAddress }));    
 
-  });
+  //});
 
 
   it('fails to set worker if _deactivationHeight is less than current block number', async () => {    
 
-    await workers_utils.utils.expectThrow(workers.setWorker.call(0, 0, { from: opsAddress }));    
+    await workers_utils.utils.expectThrow(workers.setWorker.call(worker1Address, web3.eth.blockNumber-1, { from: opsAddress }));    
 
   });
 
@@ -102,6 +104,55 @@ module.exports.perform = (accounts) => {
     assert.equal(await workers.isWorker.call(worker1Address), true);
     workers_utils.checkWorkerSetEvent(response.logs[0], deactivationHeight, height2.toNumber()-1);
     workers_utils.utils.logResponse(response, 'Worker.setWorker(update)');
+
+  });
+
+
+  it('pass to set worker at higher deactivation height if worker was already set to a lower deactivation height', async () => {
+    
+    // remove existing workers
+    assert.equal(await workers.removeWorker.call(worker1Address, { from: opsAddress }), true); 
+    response = await workers.removeWorker(worker1Address, { from: opsAddress }); 
+    assert.equal(await workers.isWorker.call(worker1Address), false);
+    workers_utils.checkWorkerRemovedEvent(response.logs[0], worker1Address, true);          
+
+    // add worker with lower deactivation height
+    deactivationHeight = web3.eth.blockNumber + height1.toNumber();
+    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
+    response = await workers.setWorker(worker1Address, deactivationHeight, { from: opsAddress });
+    assert.equal(await workers.isWorker.call(worker1Address), true);
+    workers_utils.checkWorkerSetEvent(response.logs[0], deactivationHeight, height1.toNumber()-1);
+    
+    // update worker with higher deactivation height
+    deactivationHeight = web3.eth.blockNumber + height2.toNumber();
+    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
+    response = await workers.setWorker(worker1Address, deactivationHeight, { from: opsAddress });
+    assert.equal(await workers.isWorker.call(worker1Address), true);
+    workers_utils.checkWorkerSetEvent(response.logs[0], deactivationHeight, height2.toNumber()-1);
+
+  });
+
+  it('pass to set worker at lower deactivation height if worker was already set to a higher deactivation height', async () => {
+       
+    // remove existing workers
+    assert.equal(await workers.removeWorker.call(worker1Address, { from: opsAddress }), true); 
+    response = await workers.removeWorker(worker1Address, { from: opsAddress }); 
+    assert.equal(await workers.isWorker.call(worker1Address), false);
+    workers_utils.checkWorkerRemovedEvent(response.logs[0], worker1Address, true);          
+
+    // set worker with higher deactivation height
+    deactivationHeight = web3.eth.blockNumber + height2.toNumber();
+    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
+    response = await workers.setWorker(worker1Address, deactivationHeight, { from: opsAddress });
+    assert.equal(await workers.isWorker.call(worker1Address), true);
+    workers_utils.checkWorkerSetEvent(response.logs[0], deactivationHeight, height2.toNumber()-1);
+
+    // update worker with lower deactivation height
+    deactivationHeight = web3.eth.blockNumber + height1.toNumber();
+    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
+    response = await workers.setWorker(worker1Address, deactivationHeight, { from: opsAddress });
+    assert.equal(await workers.isWorker.call(worker1Address), true);
+    workers_utils.checkWorkerSetEvent(response.logs[0], deactivationHeight, height1.toNumber()-1);
 
   });
 
