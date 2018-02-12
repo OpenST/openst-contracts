@@ -15,13 +15,12 @@ const rootPrefix = "../../.."
 
 describe('Get price oracles', function() {
 
-  it('should return 0x0 when currency is blank', async function() {
+  it('should fail when currency is blank', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
     const poResult = await pricerOstUsd.priceOracles(constants.currencyBlank);
-    assert.equal(poResult.isSuccess(), true);
-    assert.equal(poResult.data.priceOracles, 0x0);
+    assert.equal(poResult.isFailure(), true);
 
   });
 

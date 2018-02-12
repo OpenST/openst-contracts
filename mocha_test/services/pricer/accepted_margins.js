@@ -34,13 +34,12 @@ describe('Get accepted margins', function() {
 
   });
 
-  it('should return 0 when margin when currency is blank', async function() {
+  it('should return error when margin when currency is blank', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
     const amResult = await pricerOstUsd.acceptedMargins(constants.currencyBlank);
-    assert.equal(amResult.isSuccess(), true);
-    assert.equal(0, amResult.data.acceptedMargins);
+    assert.equal(amResult.isFailure(), true);
 
   });
 

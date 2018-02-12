@@ -61,17 +61,11 @@ describe('Get price point and calculated amounts', function() {
 
   it('should fail when currency is 0', async function() {
 
-    var isError = false;
-    try {
-      await pricerOstUsd.getPricePointAndCalculatedAmounts(
-        pricerOstUsd.toWei('1'),
-        pricerOstUsd.toWei('0.5'),
-        constants.currencyBlank);
-    }
-    catch (err) {
-      isError = true;
-    }
-    assert.equal(isError, true);
+    const response = await pricerOstUsd.getPricePointAndCalculatedAmounts(
+      pricerOstUsd.toWei('1'),
+      pricerOstUsd.toWei('0.5'),
+      constants.currencyBlank);
+    assert.equal(response.isFailure(), true);
 
   });
 

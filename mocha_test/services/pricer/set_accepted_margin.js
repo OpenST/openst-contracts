@@ -41,68 +41,52 @@ describe('Set accepted margins', function() {
   });
 
   it('should fail when currency is blank', async function() {
-    var error = false;
-    try {
-      await pricerOstUsd.setAcceptedMargin(
-        constants.ops,
-        constants.opsPassphrase,
-        constants.currencyBlank,
-        3,
-        0xBA43B7400);
-    }
-    catch (err) {
-      error = true;
-    }
-    assert.isTrue(error);
+
+    const response = await pricerOstUsd.setAcceptedMargin(
+      constants.ops,
+      constants.opsPassphrase,
+      constants.currencyBlank,
+      3,
+      0xBA43B7400);
+    assert.equal(response.isFailure(), true);
+
   });
 
   it('should fail when gas amount is 0', async function() {
-    var error = false;
-    try {
-      await pricerOstUsd.setAcceptedMargin(
-        constants.ops,
-        constants.opsPassphrase,
-        constants.currencyUSD,
-        3,
-        0);
-    }
-    catch (err) {
-      error = true;
-    }
-    assert.isTrue(error);
+
+    const response = await pricerOstUsd.setAcceptedMargin(
+      constants.ops,
+      constants.opsPassphrase,
+      constants.currencyUSD,
+      3,
+      0);
+    assert.equal(response.isFailure(), true);
+
   });
 
   it('should fail when sender address is 0', async function() {
-    var error = false;
-    try {
-      await pricerOstUsd.setAcceptedMargin(
-        0,
-        constants.opsPassphrase,
-        constants.currencyUSD,
-        3,
-        0xBA43B7400);
-    }
-    catch (err) {
-      error = true;
-    }
-    assert.isTrue(error);
+
+    const response = await pricerOstUsd.setAcceptedMargin(
+      0,
+      constants.opsPassphrase,
+      constants.currencyUSD,
+      3,
+      0xBA43B7400);
+    assert.equal(response.isFailure(), true);
+
   });
 
 
   it('should fail when accepted margin is negetive', async function() {
-    var error = false;
-    try {
-      await pricerOstUsd.setAcceptedMargin(
-        0,
-        constants.opsPassphrase,
-        constants.currencyUSD,
-        -30,
-        0xBA43B7400);
-    }
-    catch (err) {
-      error = true;
-    }
-    assert.isTrue(error);
+
+    const response = await pricerOstUsd.setAcceptedMargin(
+      0,
+      constants.opsPassphrase,
+      constants.currencyUSD,
+      -30,
+      0xBA43B7400);
+    assert.equal(response.isFailure(), true);
+
   });
 
   it('should fail when sender is not ops', async function() {

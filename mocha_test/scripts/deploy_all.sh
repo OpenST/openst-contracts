@@ -63,6 +63,8 @@ export OST_PO_DEPLOYER_PASSPHRASE=$OST_PRICER_DEPLOYER_PASSPHRASE
 export OST_PO_OPS_ADDR=$OST_PRICER_OPS_ADDR
 export OST_PO_OPS_PASSPHRASE=$OST_PRICER_OPS_PASSPHRASE
 export OST_PO_PRICE_ORACLES='{}'
+export OST_PO_CHAIN_ID=$OST_PRICER_CHAIN_ID
+export OST_CACHING_ENGINE='none'
 
 echo '\nexport OST_PO_GETH_RPC_PROVIDER='\'$OST_PO_GETH_RPC_PROVIDER\'>>env_vars.sh
 echo '\nexport OST_PO_DEPLOYER_ADDR='\'$OST_PO_DEPLOYER_ADDR\'>>env_vars.sh
@@ -70,6 +72,8 @@ echo '\nexport OST_PO_DEPLOYER_PASSPHRASE='\'$OST_PO_DEPLOYER_PASSPHRASE\'>>env_
 echo '\nexport OST_PO_OPS_ADDR='\'$OST_PO_OPS_ADDR\'>>env_vars.sh
 echo '\nexport OST_PO_OPS_PASSPHRASE='\'$OST_PO_OPS_PASSPHRASE\'>>env_vars.sh
 echo '\nexport OST_PO_PRICE_ORACLES='\'$OST_PO_PRICE_ORACLES\'>>env_vars.sh
+echo '\nexport OST_PO_CHAIN_ID='\'$OST_PO_CHAIN_ID\'>>env_vars.sh
+echo '\nexport OST_CACHING_ENGINE='\'$OST_CACHING_ENGINE\'>>env_vars.sh
 
 
 echo "\n********* Done *************"

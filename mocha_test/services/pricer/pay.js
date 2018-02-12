@@ -349,24 +349,17 @@ describe('Pay', function() {
       total,
       0xBA43B7400);
 
-    var isError = false;
-    try {
-      await pricerOstUsd.pay(
-        constants.account1,
-        constants.accountPassphrase1,
-        beneficiary,
-        transferAmount,
-        commissionBeneficiary,
-        commissionAmount,
-        currency,
-        intendedPricePoint,
-        0xBA43B7400);
-    }
-    catch (err) {
-      isError = true;
-      assert.instanceOf(err, Error);
-    }
-    assert.equal(isError, true);
+    const payResponse = await pricerOstUsd.pay(
+      constants.account1,
+      constants.accountPassphrase1,
+      beneficiary,
+      transferAmount,
+      commissionBeneficiary,
+      commissionAmount,
+      currency,
+      intendedPricePoint,
+      0xBA43B7400);
+    assert.equal(payResponse.isFailure(), true);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -485,24 +478,17 @@ describe('Pay', function() {
       total,
       0xBA43B7400);
 
-    var isError = false;
-    try {
-      await pricerOstUsd.pay(
-        constants.account1,
-        constants.accountPassphrase1,
-        beneficiary,
-        transferAmount,
-        commissionBeneficiary,
-        commissionAmount,
-        currency,
-        intendedPricePoint,
-        0xBA43B7400);
-    }
-    catch (err) {
-      isError = true;
-      assert.instanceOf(err, Error);
-    }
-    assert.equal(isError, true);
+    const payResponse = await pricerOstUsd.pay(
+      constants.account1,
+      constants.accountPassphrase1,
+      beneficiary,
+      transferAmount,
+      commissionBeneficiary,
+      commissionAmount,
+      currency,
+      intendedPricePoint,
+      0xBA43B7400);
+    assert.equal(payResponse.isFailure(), true);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))

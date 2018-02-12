@@ -79,70 +79,54 @@ describe('Set price oracle', function() {
 
 
   it('should fail when currency is blank', async function() {
-    var error = false;
-    try {
-      await pricerOstUsd.setPriceOracle(
-        constants.ops,
-        constants.opsPassphrase,
-        constants.currencyBlank,
-        constants.priceOracles.OST.USD,
-        0xBA43B7400);
-    }
-    catch (err) {
-      error = true;
-    }
-    assert.isTrue(error);
+
+    const response = await pricerOstUsd.setPriceOracle(
+      constants.ops,
+      constants.opsPassphrase,
+      constants.currencyBlank,
+      constants.priceOracles.OST.USD,
+      0xBA43B7400);
+    assert.equal(response.isFailure(), true);
+
   });
 
 
   it('should fail when oracleAddress is 0', async function() {
-    var error = false;
-    try {
-      await pricerOstUsd.setPriceOracle(
-        constants.ops,
-        constants.opsPassphrase,
-        constants.currencyUSD,
-        0,
-        0xBA43B7400);
-    }
-    catch (err) {
-      error = true;
-    }
-    assert.isTrue(error);
+
+    const response = await pricerOstUsd.setPriceOracle(
+      constants.ops,
+      constants.opsPassphrase,
+      constants.currencyUSD,
+      0,
+      0xBA43B7400);
+    assert.equal(response.isFailure(), true);
+
   });
 
 
   it('should fail when gas amount is 0', async function() {
-    var error = false;
-    try {
-      await pricerOstUsd.setPriceOracle(
-        constants.ops,
-        constants.opsPassphrase,
-        constants.currencyUSD,
-        constants.priceOracles.OST.USD,
-        0);
-    }
-    catch (err) {
-      error = true;
-    }
-    assert.isTrue(error);
+
+    const response = await pricerOstUsd.setPriceOracle(
+      constants.ops,
+      constants.opsPassphrase,
+      constants.currencyUSD,
+      constants.priceOracles.OST.USD,
+      0);
+    assert.equal(response.isFailure(), true);
+
   });
 
 
   it('should fail when sender address is 0', async function() {
-    var error = false;
-    try {
-      await pricerOstUsd.setPriceOracle(
-        0,
-        constants.opsPassphrase,
-        constants.currencyUSD,
-        constants.priceOracles.OST.USD,
-        0xBA43B7400);
-    }
-    catch (err) {
-      error = true;
-    }
-    assert.isTrue(error);
+
+    const response = await pricerOstUsd.setPriceOracle(
+      0,
+      constants.opsPassphrase,
+      constants.currencyUSD,
+      constants.priceOracles.OST.USD,
+      0xBA43B7400);
+    assert.equal(response.isFailure(), true);
+
   });
 
 
