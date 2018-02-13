@@ -22,6 +22,9 @@ const constants = {
   TC5Address: process.env.TEST_COIN1_C5_ADDRESS,
   TC2Address: process.env.TEST_COIN2_C2_ADDRESS,
   TC3Address: process.env.TEST_COIN3_C3_ADDRESS,
-  chainId: process.env.OST_PRICER_CHAIN_ID
+  chainId: process.env.OST_PRICER_CHAIN_ID,
+  returnTypeUUID: "uuid",
+  returnTypeHash: "txHash",
+  returnTypeReceipt: "txReceipt"
 };
 module.exports = constants;
