@@ -65,25 +65,21 @@ module.exports.perform = (accounts) => {
     });
 
     it('pass to remove when sender is opsAddress', async () => {
-            
+        
+        // check if contract code exists at the given address
+        assert.notEqual(web3.eth.getCode(workers.address),0x0);
+
+        // call remove 
         assert.ok(await workers.remove.call({ from: opsAddress }));            
         response = await workers.remove({ from: opsAddress })     
         workers_utils.utils.logResponse(response, 'Worker.remove'); 
 
-        // check if the worker is deactivated if called       
+        // check if contract is removed
+        assert.equal(web3.eth.getCode(workers.address),0x0);
+
+        // check if the active workers are no more valid if called after remove.
         assert.equal(await workers.isWorker.call(worker2Address), false);
-
-        // Try to set a new worker.        
-        deactivationHeight = web3.eth.blockNumber + height1.toNumber();
-        assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
-        response = await workers.setWorker(worker1Address, deactivationHeight, { from: opsAddress });
-
-        // check if no event is raised.
-        assert.equal(response.logs[0], undefined);
-
-        // verify if the worker is invalid.
-        assert.equal(await workers.isWorker.call(worker1Address), false);
-        
+       
     });
 
     it('pass to remove when sender is adminAddress', async () => {
@@ -93,7 +89,10 @@ module.exports.perform = (accounts) => {
         assert.ok(await workers.setOpsAddress(opsAddress));    
         assert.ok(await workers.setAdminAddress(adminAddress));    
 
-        //set a new worker to verify its working         
+        // check if contract code exists at the given address
+        assert.notEqual(web3.eth.getCode(workers.address),0x0);
+
+        //set a new worker 
         deactivationHeight = web3.eth.blockNumber + height1.toNumber();
         assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
         response = await workers.setWorker(worker1Address, deactivationHeight, { from: opsAddress });
@@ -105,18 +104,10 @@ module.exports.perform = (accounts) => {
         response = await workers.remove({ from: adminAddress })     
         workers_utils.utils.logResponse(response, 'Worker.remove');        
         
-        // check if worker is no more active if called
-        assert.equal(await workers.isWorker.call(worker1Address), false);
+        // check if contract is removed
+        assert.equal(web3.eth.getCode(workers.address),0x0);
 
-        // Try to set a new worker.        
-        deactivationHeight = web3.eth.blockNumber + height1.toNumber();
-        assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
-        response = await workers.setWorker(worker1Address, deactivationHeight, { from: opsAddress });
-
-        // check if no event is raised.
-        assert.equal(response.logs[0], undefined);
-
-        // verify if the worker is invalid.
+        // check if the active workers are no more valid if called after remove.    
         assert.equal(await workers.isWorker.call(worker1Address), false);
 
     });
