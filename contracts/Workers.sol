@@ -24,70 +24,105 @@ pragma solidity ^0.4.17;
 import "./OpsManaged.sol";
 import "./SafeMath.sol";
 
+
 /// A set of authorised workers
 contract Workers is OpsManaged {
-	using SafeMath for uint256;
+    using SafeMath for uint256;
 
-	/*
-	 *  Storage
-	 */
-	/// workers are active up unto the deactivation height
-	mapping(address => uint256 /* deactivation height */) public workers;
+    /*
+     *  Storage
+     */
+    /// workers are active up unto the deactivation height
+    mapping(address => uint256 /* deactivation height */) public workers;
 
-	/*
-	 *  Public functions
-	 */
-	function Workers()
-		public
-		OpsManaged()
-	{
-	}
+    /*
+     * Events
+     */
+    ///Event for worker set
+    event WorkerSet(
+        address _worker,
+        uint256 _deactivationHeight,
+        uint256 _remainingHeight);
 
-	function setWorker(
-		address _worker,
-		uint256 _deactivationHeight)
-		external
-		onlyOps
-		returns (uint256 /* remaining activation length */)
-	{
-		require(_deactivationHeight >= block.number);
+    ///Event for worker removed
+    event WorkerRemoved(
+        address _worker,
+        bool _existed);
 
-		workers[_worker] = _deactivationHeight;
+    /// @dev    Constructor;
+    ///         public method;    
+    function Workers()
+        public
+        OpsManaged()
+    {
+    }
 
-		return (_deactivationHeight - block.number);
-	}
+    /// @dev    Takes _worker, _deactivationHeight;
+    ///         Sets worker and its deactivation height; 
+    ///         external method;
+    /// @param _worker worker
+    /// @param _deactivationHeight deactivationHeight
+    /// @return (remainingHeight)    
+    function setWorker(
+        address _worker,
+        uint256 _deactivationHeight)
+        external
+        onlyOps
+        returns (uint256 /* remaining activation length */)
+    {
+        require(_worker != address(0));
+        require(_deactivationHeight >= block.number);
 
-	function removeWorker(
-		address _worker)
-		external
-		onlyOps
-		returns (bool existed)
-	{
-		existed = (workers[_worker] > 0);
+        workers[_worker] = _deactivationHeight;
+        uint256 remainingHeight = _deactivationHeight - block.number;
+        //Event for worker set
+        WorkerSet(_worker, _deactivationHeight, remainingHeight);
 
-		delete workers[_worker];
+        return (remainingHeight);
+    }
 
-		return existed;
-	}
+    /// @dev    Takes _worker;
+    ///         removes the worker; 
+    ///         external method;
+    /// @param _worker worker
+    /// @return (existed)    
+    function removeWorker(
+        address _worker)
+        external
+        onlyOps
+        returns (bool existed)
+    {
+        existed = (workers[_worker] > 0);
 
-	// clean up or collectively revoke all workers
-	function remove()
-		external
-		onlyAdminOrOps
-	{
-		selfdestruct(msg.sender);
-	}
+        delete workers[_worker];
+        //Event for worker removed
+        WorkerRemoved(_worker, existed);
 
-	/*
-	 *  Public view functions
-	 */
-	function isWorker(
-		address _worker)
-		external
-		view
-		returns (bool /* is active worker */)
-	{
-		return (workers[_worker] >= block.number);
-	}
+        return existed;
+    }
+    
+    /// @dev    Clean up or collectively revoke all workers;
+    ///         external method;
+    ///         only called by ops or admin;    
+    function remove()
+        external
+        onlyAdminOrOps
+    {
+        selfdestruct(msg.sender);
+    }
+
+    /// @dev    Takes _worker;
+    ///         checks if the worker is valid; 
+    ///         external method;
+    /// @param _worker worker
+    /// @return (isValid)    
+    function isWorker(
+        address _worker)
+        external
+        view
+        returns (bool /* is active worker */)
+    {
+        return (workers[_worker] >= block.number);
+    }
 
 }
