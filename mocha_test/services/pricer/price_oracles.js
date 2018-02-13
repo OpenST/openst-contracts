@@ -38,33 +38,44 @@ describe('Get price oracles', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
+    // set price oracle
     const setResponse = await pricerOstUsd.setPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(setResponse.isSuccess(), true);
-    assert.exists(setResponse.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, setResponse.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(setResponse);
 
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, setResponse.data.transaction_hash);
 
+    // set price oracle
     const setResponse1 = await pricerOstUsd.setPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyEUR,
       constants.priceOracles.OST.EUR,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(setResponse1.isSuccess(), true);
-    assert.exists(setResponse1.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, setResponse1.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(setResponse);
 
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, setResponse.data.transaction_hash);
+
+    // verify result
     const poResult1 = await pricerOstUsd.priceOracles(constants.currencyUSD);
     assert.equal(poResult1.isSuccess(), true);
     assert.equal(poResult1.data.priceOracles, constants.priceOracles.OST.USD);
 
+    // verify result
     const poResult2 = await pricerOstUsd.priceOracles(constants.currencyEUR);
     assert.equal(poResult2.isSuccess(), true);
     assert.equal(poResult2.data.priceOracles, constants.priceOracles.OST.EUR);
@@ -75,31 +86,42 @@ describe('Get price oracles', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
+    // unset price oracle
     const unsetResponse = await pricerOstUsd.unsetPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyUSD,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(unsetResponse.isSuccess(), true);
-    assert.exists(unsetResponse.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, unsetResponse.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(unsetResponse);
 
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, unsetResponse.data.transaction_hash);
 
+    // unset price oracle
     const unsetResponse1 = await pricerOstUsd.unsetPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyEUR,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(unsetResponse1.isSuccess(), true);
-    assert.exists(unsetResponse1.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, unsetResponse1.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(unsetResponse1);
 
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, unsetResponse1.data.transaction_hash);
+
+    // verify result
     const poResult1 = await pricerOstUsd.priceOracles(constants.currencyUSD);
     assert.equal(poResult1.isSuccess(), true);
     assert.equal(poResult1.data.priceOracles, 0x0);
 
+    // verify result
     const poResult2 = await pricerOstUsd.priceOracles(constants.currencyEUR);
     assert.equal(poResult2.isSuccess(), true);
     assert.equal(poResult2.data.priceOracles, 0x0);
