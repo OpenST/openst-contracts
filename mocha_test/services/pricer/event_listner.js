@@ -5,7 +5,7 @@ var allEvents = {};
 
 
 module.exports.verifyIfEventFired = function(uuid, kind) {
-  const key = `${uuid}_${kind}`;  
+  const key = `${uuid}_${kind}`;
   return allEvents[key] !== undefined && allEvents[key] !== "undefined" && allEvents[key] !== null;
 };
 
@@ -15,13 +15,13 @@ module.exports.startObserving = function() {
       [
         "payment.pricer.setAcceptedMargin",
         "payment.pricer.setPriceOracle",
-        "payment.pricer.unsetPriceOracle"
+        "payment.pricer.unsetPriceOracle",
+        "payment.pricer.pay"
       ],
-      function(msgContent) {        
+      function(msgContent) {
         const messageData = JSON.parse(msgContent);
         const key = `${messageData.message.payload.uuid}_${messageData.message.kind}`;
         allEvents[key] = messageData.message;
-        console.log("Event received: "+ key);
       });
     notificationRef = openSTNotification;
   }

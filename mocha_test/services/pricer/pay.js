@@ -27,32 +27,44 @@ describe('Pay', function() {
     assert.notEqual(constants.deployer, constants.account1);
     assert.notEqual(constants.ops, constants.account1);
 
+    // set accepted margin
     const amResponse = await pricerOstUsd.setAcceptedMargin(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyUSD,
       50,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(amResponse.isSuccess(), true);
-    assert.exists(amResponse.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, amResponse.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(amResponse);
 
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, amResponse.data.transaction_hash);
+
+    // verify if its set
     const amResult = await pricerOstUsd.acceptedMargins(constants.currencyUSD);
     assert.equal(amResult.isSuccess(), true);
     assert.equal(50, amResult.data.acceptedMargins);
 
+    // set price oracle
     const spoResponse = await pricerOstUsd.setPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(spoResponse.isSuccess(), true);
-    assert.exists(spoResponse.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, spoResponse.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(spoResponse);
 
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, spoResponse.data.transaction_hash);
+
+    // verify if its set
     const poResult = await pricerOstUsd.priceOracles(constants.currencyUSD);
     assert.equal(poResult.isSuccess(), true);
     assert.equal(constants.priceOracles.OST.USD, poResult.data.priceOracles);
@@ -148,12 +160,15 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(payResponse.isSuccess(), true);
-    assert.exists(payResponse.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, payResponse.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(payResponse);
 
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -225,11 +240,15 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(payResponse.isSuccess(), true);
-    assert.exists(payResponse.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, payResponse.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(payResponse);
+
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -292,11 +311,15 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(payResponse.isSuccess(), true);
-    assert.exists(payResponse.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, payResponse.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(payResponse);
+
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -358,7 +381,10 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
+
     assert.equal(payResponse.isFailure(), true);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
@@ -421,11 +447,15 @@ describe('Pay', function() {
       commissionAmount,
       constants.currencyINR,
       intendedPricePoint,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(payResponse.isSuccess(), true);
-    assert.exists(payResponse.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, payResponse.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(payResponse);
+
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -487,7 +517,10 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
+
     assert.equal(payResponse.isFailure(), true);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
@@ -551,11 +584,15 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       changedPricePoint,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(payResponse.isSuccess(), true);
-    assert.exists(payResponse.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, payResponse.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(payResponse);
+
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -621,11 +658,15 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       changedPricePoint,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(payResponse.isSuccess(), true);
-    assert.exists(payResponse.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, payResponse.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(payResponse);
+
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -687,11 +728,15 @@ describe('Pay', function() {
       commissionAmount,
       constants.currencyINR,
       intendedPricePoint,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(payResponse.isSuccess(), true);
-    assert.exists(payResponse.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, payResponse.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(payResponse);
+
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -751,11 +796,15 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(payResponse.isSuccess(), true);
-    assert.exists(payResponse.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, payResponse.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(payResponse);
+
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -803,11 +852,15 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(payResponse.isSuccess(), true);
-    assert.exists(payResponse.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, payResponse.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(payResponse);
+
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -865,11 +918,15 @@ describe('Pay', function() {
       commissionAmount,
       constants.currencyUSD,
       0,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(payResponse.isSuccess(), true);
-    assert.exists(payResponse.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, payResponse.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(payResponse);
+
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -878,6 +935,163 @@ describe('Pay', function() {
     assert.equal(initialAccount1Balance.toNumber(), account1Balance.toNumber());
     assert.equal(initialAccount3Balance.toNumber(), account3Balance.toNumber());
     assert.equal(initialAccount4Balance.toNumber(), account4Balance.toNumber());
+
+  });
+
+
+  it('should pass for interaction layer test when return type is uuid', async function() {
+
+    // eslint-disable-next-line no-invalid-this
+    this.timeout(100000);
+
+    const beneficiary = constants.account3
+      , commissionAmount = new BigNumber(pricerOstUsd.toWei('10'))
+      , commissionBeneficiary = constants.account4
+      , currency = constants.currencyUSD
+      , transferAmount = new BigNumber(pricerOstUsd.toWei('5'))
+      ;
+
+    const acceptedMarginData = await pricerOstUsd.acceptedMargins(currency);
+    assert.equal(acceptedMarginData.isSuccess(), true);
+
+    const estimatedValues = await pricerOstUsd.getPricePointAndCalculatedAmounts(
+      transferAmount,
+      commissionAmount,
+      currency);
+    assert.equal(estimatedValues.isSuccess(), true);
+
+    const estimatedTokenAmount = new BigNumber(estimatedValues.data.tokenAmount);
+    const estimatedCommissionTokenAmount = new BigNumber(estimatedValues.data.commissionTokenAmount);
+    const estimatedMargin = new BigNumber(acceptedMarginData.data.acceptedMargins);
+
+    const total = estimatedTokenAmount.plus(estimatedCommissionTokenAmount).plus(estimatedMargin);
+
+    await TC5.approve(
+      constants.account1,
+      constants.accountPassphrase1,
+      constants.pricerOstUsdAddress,
+      total,
+      0xBA43B7400);
+
+    const payResponse = await pricerOstUsd.pay(
+      constants.account1,
+      constants.accountPassphrase1,
+      beneficiary,
+      transferAmount,
+      commissionBeneficiary,
+      commissionAmount,
+      constants.currencyUSD,
+      0,
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeUUID});
+
+    // verify if the transaction receipt is valid
+    // we will not verify if it got mined as its just interaction layer testing
+    pricerUtils.verifyTransactionUUID(payResponse);
+
+  });
+
+  it('should pass for interaction layer test when return type is txHash', async function() {
+
+    // eslint-disable-next-line no-invalid-this
+    this.timeout(100000);
+
+    const beneficiary = constants.account3
+      , commissionAmount = new BigNumber(pricerOstUsd.toWei('10'))
+      , commissionBeneficiary = constants.account4
+      , currency = constants.currencyUSD
+      , transferAmount = new BigNumber(pricerOstUsd.toWei('5'))
+      ;
+
+    const acceptedMarginData = await pricerOstUsd.acceptedMargins(currency);
+    assert.equal(acceptedMarginData.isSuccess(), true);
+
+    const estimatedValues = await pricerOstUsd.getPricePointAndCalculatedAmounts(
+      transferAmount,
+      commissionAmount,
+      currency);
+    assert.equal(estimatedValues.isSuccess(), true);
+
+    const estimatedTokenAmount = new BigNumber(estimatedValues.data.tokenAmount);
+    const estimatedCommissionTokenAmount = new BigNumber(estimatedValues.data.commissionTokenAmount);
+    const estimatedMargin = new BigNumber(acceptedMarginData.data.acceptedMargins);
+
+    const total = estimatedTokenAmount.plus(estimatedCommissionTokenAmount).plus(estimatedMargin);
+
+    await TC5.approve(
+      constants.account1,
+      constants.accountPassphrase1,
+      constants.pricerOstUsdAddress,
+      total,
+      0xBA43B7400);
+
+    const payResponse = await pricerOstUsd.pay(
+      constants.account1,
+      constants.accountPassphrase1,
+      beneficiary,
+      transferAmount,
+      commissionBeneficiary,
+      commissionAmount,
+      constants.currencyUSD,
+      0,
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeHash});
+
+    // verify if the transaction hash is valid
+    // we will not verify if it got mined as its just interaction layer testing
+    pricerUtils.verifyTransactionHash(payResponse);
+
+  });
+
+  it('should pass for interaction layer test when return type is txReceipt', async function() {
+
+    const beneficiary = constants.account3
+      , commissionAmount = new BigNumber(pricerOstUsd.toWei('10'))
+      , commissionBeneficiary = constants.account4
+      , currency = constants.currencyUSD
+      , transferAmount = new BigNumber(pricerOstUsd.toWei('5'))
+      ;
+
+    const acceptedMarginData = await pricerOstUsd.acceptedMargins(currency);
+    assert.equal(acceptedMarginData.isSuccess(), true);
+
+    const estimatedValues = await pricerOstUsd.getPricePointAndCalculatedAmounts(
+      transferAmount,
+      commissionAmount,
+      currency);
+    assert.equal(estimatedValues.isSuccess(), true);
+
+    const estimatedTokenAmount = new BigNumber(estimatedValues.data.tokenAmount);
+    const estimatedCommissionTokenAmount = new BigNumber(estimatedValues.data.commissionTokenAmount);
+    const estimatedMargin = new BigNumber(acceptedMarginData.data.acceptedMargins);
+
+    const total = estimatedTokenAmount.plus(estimatedCommissionTokenAmount).plus(estimatedMargin);
+
+    await TC5.approve(
+      constants.account1,
+      constants.accountPassphrase1,
+      constants.pricerOstUsdAddress,
+      total,
+      0xBA43B7400);
+
+    const payResponse = await pricerOstUsd.pay(
+      constants.account1,
+      constants.accountPassphrase1,
+      beneficiary,
+      transferAmount,
+      commissionBeneficiary,
+      commissionAmount,
+      constants.currencyUSD,
+      0,
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
+
+    // verify if the transaction receipt is valid.
+    // We will not check here if the value is really set as its just interaction layer testing.
+    pricerUtils.verifyTransactionReceipt(payResponse);
 
   });
 
