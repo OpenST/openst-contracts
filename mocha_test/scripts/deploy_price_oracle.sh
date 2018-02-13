@@ -1,18 +1,8 @@
 #!/bin/bash
 
 echo "\n********* Preparing price oracle deployment *************"
-npm install @ostdotcom/ost-price-oracle
+npm install @ostdotcom/ost-price-oracle@1.0.0-beta.3
 cd ../../node_modules/@ostdotcom/ost-price-oracle/
-
-# git clone git@github.com:OpenSTFoundation/ost-price-oracle.git
-# cd ost-price-oracle
-# git stash
-# git checkout develop
-# git pull --rebase   
-# cd ..     
-# npm install ./ost-price-oracle
-# cd ost-price-oracle
-
 echo "\n********* Done *************"
 
 echo "\n********* Deploying PO 1 *************"
