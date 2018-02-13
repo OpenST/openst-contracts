@@ -1047,6 +1047,9 @@ describe('Pay', function() {
 
   it('should pass for interaction layer test when return type is txReceipt', async function() {
 
+    // eslint-disable-next-line no-invalid-this
+    this.timeout(100000);
+
     const beneficiary = constants.account3
       , commissionAmount = new BigNumber(pricerOstUsd.toWei('10'))
       , commissionBeneficiary = constants.account4

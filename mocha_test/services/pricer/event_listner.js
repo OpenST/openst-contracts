@@ -6,7 +6,7 @@ var allEvents = {};
 
 module.exports.verifyIfEventFired = function(uuid, kind) {
   const key = `${uuid}_${kind}`;
-  return allEvents[key] !== undefined && allEvents[key] !== "undefined" && allEvents[key] !== null;
+  return allEvents[key] !== undefined && allEvents[key] !== "undefined" && allEvents[key] !== null && allEvents[key] !== '';
 };
 
 module.exports.startObserving = function() {
