@@ -26,32 +26,44 @@ describe('Get price point and calculated amounts', function() {
     assert.notEqual(constants.deployer, constants.account1);
     assert.notEqual(constants.ops, constants.account1);
 
+    // set price oracle
     const response1 = await pricerOstUsd.setPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(response1.isSuccess(), true);
-    assert.exists(response1.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, response1.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(response1);
 
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, response1.data.transaction_hash);
+
+    // verify if its set
     const poResult1 = await pricerOstUsd.priceOracles(constants.currencyUSD);
     assert.equal(poResult1.isSuccess(), true);
     assert.equal(constants.priceOracles.OST.USD, poResult1.data.priceOracles);
 
+    // set price oracle
     const response2 = await pricerOstEur.setPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyEUR,
       constants.priceOracles.OST.EUR,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(response2.isSuccess(), true);
-    assert.exists(response2.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstEur, response2.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(response2);
 
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstEur, response1.data.transaction_hash);
+
+    // verify if its set
     const poResult2 = await pricerOstEur.priceOracles(constants.currencyEUR);
     assert.equal(poResult2.isSuccess(), true);
     assert.equal(constants.priceOracles.OST.EUR, poResult2.data.priceOracles);
