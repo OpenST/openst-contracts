@@ -1,5 +1,5 @@
 /**
- * This is script for deploying Pricer contract on any chain.<br><br>
+ * This is script for deploying Workers contract on any chain.<br><br>
  *
  *   Prerequisite:
  *    <ol>
@@ -8,11 +8,11 @@
  *
  *   These are the following steps:<br>
  *     <ol>
- *       <li>Deploy Pricer contract</li>
+ *       <li>Deploy Workers contract</li>
  *     </ol>
  *
  *
- * @module tools/deploy/pricer
+ * @module tools/deploy/workers
  */
 
 const readline = require('readline');
@@ -32,8 +32,6 @@ const deployerAddress = coreAddresses.getAddressForUser(deployerName);
 const opsName = "ops";
 const opsAddress = coreAddresses.getAddressForUser(opsName);
 
-
-//node ../tools/deploy/workers.js 0x12A05F200 travis tc3.txt
 /**
  * It is the main performer method of this deployment script
  *
@@ -122,9 +120,6 @@ async function performer(argv) {
   var contractOpsAddress = await opsManaged.getOpsAddress();
   logger.info("Ops Address Set to: " + contractOpsAddress);
 
-  // if (isTravisCIEnabled) {
-  //   await deployHelper.updateEnvContractAddress('contractPricer', {'ost_pricer_contract_address': contractDeployTxReceipt.contractAddress});
-  // }
   if (fileForContractAddress !== '') {
     deployHelper.writeContractAddressToFile(fileForContractAddress, contractAddress);
   }
