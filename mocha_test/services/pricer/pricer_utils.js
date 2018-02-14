@@ -2,7 +2,7 @@
 const chai = require('chai')
   , assert = chai.assert
   ,rootPrefix = '../../..'
-  , eventListner = require('./event_listner')
+  , eventListner = require('./event_listener')
   , helper = require(rootPrefix + '/lib/contract_interact/helper')
   ;
 /*eslint-enable */
