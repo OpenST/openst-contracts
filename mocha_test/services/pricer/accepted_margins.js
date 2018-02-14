@@ -47,49 +47,65 @@ describe('Get accepted margins', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
+    // set the accepted margin to 50
     const response1 = await pricerOstUsd.setAcceptedMargin(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyUSD,
       50,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(response1.isSuccess(), true);
-    assert.exists(response1.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, response1.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(response1);
 
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, response1.data.transaction_hash);
+
+    // verify if the accepted margin is set to 50
     const amResult1 = await pricerOstUsd.acceptedMargins(constants.currencyUSD);
     assert.equal(amResult1.isSuccess(), true);
     assert.equal(50, amResult1.data.acceptedMargins);
 
-
+    // set the accepted margin to 300
     const response2 = await pricerOstUsd.setAcceptedMargin(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyUSD,
       300,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(response2.isSuccess(), true);
-    assert.exists(response2.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, response2.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(response2);
 
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, response2.data.transaction_hash);
+
+    // verify if the accepted margin is set to 300
     const amResult2 = await pricerOstUsd.acceptedMargins(constants.currencyUSD);
     assert.equal(amResult2.isSuccess(), true);
     assert.equal(300, amResult2.data.acceptedMargins);
 
-
+    // set the accepted margin to 100
     const response3 = await pricerOstUsd.setAcceptedMargin(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyEUR,
       100,
-      0xBA43B7400);
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
 
-    assert.equal(response3.isSuccess(), true);
-    assert.exists(response3.data.transactionHash);
-    await pricerUtils.verifyReceipt(pricerOstUsd, response3.data.transactionHash);
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(response3);
 
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, response3.data.transaction_hash);
+
+    // verify if the accepted margin is set to 100
     const amResult3 = await pricerOstUsd.acceptedMargins(constants.currencyEUR);
     assert.equal(amResult3.isSuccess(), true);
     assert.equal(100, amResult3.data.acceptedMargins);
