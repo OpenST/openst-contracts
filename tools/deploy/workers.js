@@ -1,5 +1,5 @@
 /**
- * This is script for deploying Pricer contract on any chain.<br><br>
+ * This is script for deploying Workers contract on any chain.<br><br>
  *
  *   Prerequisite:
  *    <ol>
@@ -8,11 +8,11 @@
  *
  *   These are the following steps:<br>
  *     <ol>
- *       <li>Deploy Pricer contract</li>
+ *       <li>Deploy Workers contract</li>
  *     </ol>
  *
  *
- * @module tools/deploy/pricer
+ * @module tools/deploy/workers
  */
 
 const readline = require('readline');
@@ -32,30 +32,6 @@ const deployerAddress = coreAddresses.getAddressForUser(deployerName);
 const opsName = "ops";
 const opsAddress = coreAddresses.getAddressForUser(opsName);
 
-
-/**
- * Validation Method
- *
- * @param {Array} arguments
- *
- * @return {}
- */
-function validate(argv) {
-  if (argv[2] === undefined || argv[2] === '') {
-    logger.error("Mandatory Param is missing! ( brandedTokenAddress)");
-    process.exit(0);
-  }
-
-  if (argv[3] === undefined || argv[3] === '') {
-    logger.error("Base currency is mandatory!");
-    process.exit(0);
-  }
-  if (argv[4] === undefined || argv[4] === '') {
-    logger.error("Gas Price is mandatory!");
-    process.exit(0);
-  }
-}
-
 /**
  * It is the main performer method of this deployment script
  *
@@ -70,19 +46,19 @@ async function performer(argv) {
   logger.info("argv[2]: " + argv[2]);
   logger.info("argv[3]: " + argv[3]);
   logger.info("argv[4]: " + argv[4]);
-  logger.info("argv[5]: " + argv[5]);
-  logger.info("argv[6]: " + argv[6]);
 
-  validate(argv);
-  const brandedTokenAddress = argv[2].trim();
-  const baseCurrency = argv[3].trim();
-  const gasPrice = argv[4].trim();
-  var isTravisCIEnabled = false;
-  if (argv[5] !== undefined) {
-    isTravisCIEnabled = argv[5].trim() === 'travis';
+  if (argv[2] === undefined || argv[2] === '') {
+    logger.error("Gas Price is mandatory!");
+    process.exit(0);
   }
 
-  const fileForContractAddress = (argv[6] !== undefined) ? argv[6].trim() : '';
+  const gasPrice = argv[2].trim();
+  var isTravisCIEnabled = false;
+  if (argv[3] !== undefined) {
+    isTravisCIEnabled = argv[3].trim() === 'travis';
+  }
+
+  const fileForContractAddress = (argv[4] !== undefined) ? argv[4].trim() : '';
   const deploymentOptions = {
     gasPrice: gasPrice,
     gas: coreConstants.OST_GAS_LIMIT
@@ -90,8 +66,6 @@ async function performer(argv) {
 
   logger.info("Deployer Address: " + deployerAddress);
   logger.info("Ops Address: " + opsAddress);
-  logger.info("Branded Token Address: " + brandedTokenAddress);
-  logger.info("Base currency: " + brandedTokenAddress);
   logger.info("Gas price: " + gasPrice);
   logger.info("Travis CI enabled Status: " + isTravisCIEnabled);
   logger.info("File to write For ContractAddress: "+fileForContractAddress);
@@ -114,15 +88,12 @@ async function performer(argv) {
     prompts.close();
   }
 
-  const contractName = 'pricer';
+  const contractName = 'workers';
   const contractAbi = coreAddresses.getAbiForContract(contractName);
   const contractBin = coreAddresses.getBinForContract(contractName);
 
 
-  var constructorArgs = [
-    brandedTokenAddress,
-    web3Provider.utils.asciiToHex(baseCurrency)
-  ];
+  var constructorArgs = [];
 
   logger.info("Deploying contract: "+contractName);
 
@@ -140,7 +111,7 @@ async function performer(argv) {
   logger.info(contractName+ " Deployed ");
 
   const contractAddress = contractDeployTxReceipt.receipt.contractAddress;
-  logger.info(contractName+ " Contract Address: "+contractAddress);
+  logger.win(contractName+ " Contract Address: "+contractAddress);
 
   logger.info("Setting Ops Address to: " + opsAddress);
   var opsManaged = new OpsManagedContract(contractAddress, gasPrice);
@@ -149,13 +120,9 @@ async function performer(argv) {
   var contractOpsAddress = await opsManaged.getOpsAddress();
   logger.info("Ops Address Set to: " + contractOpsAddress);
 
-  // if (isTravisCIEnabled) {
-  //   await deployHelper.updateEnvContractAddress('contractPricer', {'ost_pricer_contract_address': contractDeployTxReceipt.contractAddress});
-  // }
   if (fileForContractAddress !== '') {
     deployHelper.writeContractAddressToFile(fileForContractAddress, contractAddress);
   }
-
 }
 
 performer(process.argv);

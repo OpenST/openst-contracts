@@ -38,6 +38,10 @@ const allAddresses = {
     opsManaged: {
       abi: coreAbis.opsManaged,
       bin: coreBins.opsManaged
+    },
+    workers: {
+      abi: coreAbis.workers,
+      bin: coreBins.workers
     }
   }
 };
