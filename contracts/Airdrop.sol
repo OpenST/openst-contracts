@@ -1,3 +1,4 @@
+/* solhint-disable-next-line compiler-fixed */
 pragma solidity ^0.4.17;
 
 // Copyright 2018 OpenST Ltd.
@@ -21,102 +22,156 @@ pragma solidity ^0.4.17;
 //
 // ----------------------------------------------------------------------------
 
-
-// look to replace with interface
 import "./Workers.sol";
+import "./Pricer.sol";
 
 
-contract Airdrop is Pricer {
-	// SafeMath for uint256 is declared in Pricer.sol
+contract Airdrop is Pricer, Workers {
 
-	/*
-	 *  Storage
-	 */
-	Workers public workers;
-	address public airdropBudget;
-
-	 /*
-	  *  Public functions
-	  */
-	function Airdrop(
-		address _brandedToken,
-		Workers _workers,
-		address _airdropBudget)
-		public
-		Pricer(_brandedToken)
-		OpsManaged()
-	{
-		require(_workers != address(0));
-		require(_airdropBudget != address(0));
-
-		workers = _workers;
-		airdropBudget = _airdropBudget;
-	}
-
-	/// airPay matches the behaviour of pricer:pay
-	/// but allows spending from 
-	function airPay(
-		/// input parameters for pricer:pay
+    /*
+     *  Events
+    */
+    /// Event for AirdropPayment complete
+    event AirdropPayment(
         address _beneficiary,
-        uint256 _transferAmount,        
+        uint256 tokenAmount,
         address _commissionBeneficiary,
-        uint256 _commissionAmount,      
+        uint256 commissionTokenAmount,
+        uint256 _actualPricePoint,
+        address _spender,
+        uint256 _airdropAmount
+        );
+
+    /*
+     *  Storage
+     */
+    Workers public workers;
+    address public airdropBudgetHolder;
+
+    /*
+      *  Constructor
+     */
+    /// @dev    Takes _brandedToken, _baseCurrency, _workers, _airdropBudgetHolder;
+    ///         constructor;
+    ///         public method;
+    /// @param _brandedToken Branded Token
+    /// @param _baseCurrency Base Currency
+    /// @param _workers  Workers contract address
+    /// @param _airdropBudgetHolder Airdrop Budget Holder Address
+    function Airdrop(
+        address _brandedToken,
+        bytes3 _baseCurrency,
+        Workers _workers,
+        address _airdropBudgetHolder)
+        public
+        Pricer(_brandedToken, _baseCurrency)
+        OpsManaged()
+    {
+        require(_workers != address(0));
+        require(airdropBudgetHolder != address(0));
+
+        workers = _workers;
+        airdropBudgetHolder = _airdropBudgetHolder;
+    }
+
+    /*
+      *  External functions
+     */
+    /// clean up or revoke airdrop contract
+    function remove()
+        external
+        onlyAdminOrOps
+    {
+        selfdestruct(msg.sender);
+    }
+
+    /*
+     *  External functions
+     */
+    /// performPay matches the behaviour of Pricer:pay with extra functionality of airdrop evaluation
+    /// @param _beneficiary beneficiary
+    /// @param _transferAmount transferAmount
+    /// @param _commissionBeneficiary commissionBeneficiary
+    /// @param _commissionAmount commissionAmount
+    /// @param _currency currency
+    /// @param _intendedPricePoint intendedPricePoint
+    /// @param _spender spender
+    /// @param _airdropAmount airdropAmount
+    /// @return uint256 totalPaid
+    function performPay(
+        address _beneficiary,
+        uint256 _transferAmount,
+        address _commissionBeneficiary,
+        uint256 _commissionAmount,
         bytes3 _currency,
         uint256 _intendedPricePoint,
-        /// additional input parameters for airdrop
-        address _user,
+        address _spender,
         uint256 _airdropAmount)
         public
-        returns (uint256 totalPaid, uint256 airdropUsed)
-	{
-		require(workers.isWorker(msg.sender));
+        returns (
+            uint256 /* totalPaid */)
+    {
+        require(workers.isWorker(msg.sender));
+        require(_spender != address(0));
 
-		/*
-		 *  lift from pricer:pay
-		 *  further clean up 
-		 */
-		require(_beneficiary != address(0));
-		require(_transferAmount != 0);
+        require(isValidBeneficiaryData(_beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount));
 
-		if (_commissionAmount > 0) {
-			require(_commissionBeneficiary != address(0));
-		}
+        uint256 tokenAmount = _transferAmount;
+        uint256 commissionTokenAmount = _commissionAmount;
+        uint256 pricePoint = _intendedPricePoint;
 
-		uint256 tokenAmount = _transferAmount;
-		uint256 commissionTokenAmount = _commissionAmount;
-		uint256 pricePoint = _intendedPricePoint;
-		if (_currency != 0) {
-            uint8 tokenDecimals = 0;
-            (pricePoint, tokenDecimals) = getPricePoint(_currency);
-            require(pricePoint > 0);            
-            require(isPricePointInRange(_intendedPricePoint, pricePoint, pricerAcceptedMargins[_currency]));            
-            (tokenAmount, commissionTokenAmount) = getBTAmountFromCurrencyValue(pricePoint, 
-                tokenDecimals, _transferAmount, _commissionAmount);
+        // check Margin And Calculate BTAmount
+        if (_currency != "") {
+            (pricePoint, tokenAmount, commissionTokenAmount) = validateMarginAndCalculateBTAmount(_currency,
+                _intendedPricePoint, _transferAmount, _commissionAmount);
         }
-		/*
-		 *  end of pricer:pay
-		 */
 
-        totalPaid = tokenAmount + commissionTokenAmount;
-        airdropUsed = _airdropAmount;
-        if (totalPaid < _airdropAmount) {
-        	airdropUsed = _airdropAmount - totalPaid;
+        require(performAirdropTransferToSpender(_spender, _airdropAmount,
+            tokenAmount, commissionTokenAmount));
+        require(performTransfer(_spender, _beneficiary, tokenAmount,
+            _commissionBeneficiary, commissionTokenAmount));
+
+        /// Emit AirdropPayment Event
+        AirdropPayment(_beneficiary, tokenAmount, _commissionBeneficiary,
+            commissionTokenAmount, pricePoint, _spender, _airdropAmount);
+
+        return ((tokenAmount + commissionTokenAmount));
+    }
+
+    /*
+     *  Private functions
+     */
+    /// @dev    Takes _spender, _airdropAmount, _tokenAmount, _commissionTokenAmount;
+    ///         Calculate airdropUsed to transfer
+    ///         Perform perform Airdrop Transfer To Spender
+    ///         internal method;
+    /// @param _spender spenderUser
+    /// @param _airdropAmount airdropAmount
+    /// @param _tokenAmount tokenAmount
+    /// @param _commissionTokenAmount commissionTokenAmount
+    /// @return uint256 airdropUsed
+    function performAirdropTransferToSpender(
+        address _spender,
+        uint256 _airdropAmount,
+        uint256 _tokenAmount,
+        uint256 _commissionTokenAmount)
+        private
+        returns (
+            bool /* boolean value */)
+    {
+        // @Ben Do we need this? Can't we transfer all _airdropAmount to _spender?
+        uint256 airdropUsed = _airdropAmount;
+        uint256 totalPaid = (_tokenAmount + _commissionTokenAmount);
+        if (_airdropAmount > totalPaid) {
+            airdropUsed = _airdropAmount - totalPaid;
         }
-        // prefund the user from the airdrop budget
-        require (EIP20Interface(pricerBrandedToken).transferFrom(airdropBudget, _user, airdropUsed))
 
-		/*
-		 *  lift from pricer:pay
-		 */
-		require(EIP20Interface(pricerBrandedToken).transferFrom(_user, _beneficiary, tokenAmount));
-		if (_commissionBeneficiary != address(0)) {
-			require(EIP20Interface(pricerBrandedToken).transferFrom(_user, 
-				_commissionBeneficiary, commissionTokenAmount));
-		}
+        // Prefund the user from the airdrop budget holder
+        if (airdropUsed > 0) {
+            require(EIP20Interface(brandedToken()).transferFrom(airdropBudgetHolder, _spender, airdropUsed));
+        }
 
-		//Trigger Event for PaymentComplete
-		Payment(_beneficiary, _transferAmount, _commissionBeneficiary, 
-			_commissionAmount, _currency, _intendedPricePoint, pricePoint);      
-		return (totalPaid, airdropUsed);
-	}
+        return true;
+    }
+
 }
