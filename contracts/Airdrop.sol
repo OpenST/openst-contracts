@@ -31,12 +31,12 @@ contract Airdrop is Pricer {
     /*
      *  Events
     */
-    /// Event for AirdropPayment complete
+    /// Emit AirdropPayment Event
     event AirdropPayment(
         address indexed _beneficiary,
-        uint256 tokenAmount,
+        uint256 _transferAmount,
         address indexed _commissionBeneficiary,
-        uint256 commissionTokenAmount,
+        uint256 _commissionAmount,
         uint256 _actualPricePoint,
         address indexed _spender,
         uint256 _airdropAmount
@@ -97,14 +97,14 @@ contract Airdrop is Pricer {
         address _spender,
         uint256 _airdropAmount)
         public
-        isValidBeneficiaryDataModifier(_beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount)
         returns (
             uint256 /* totalPaid */)
     {
         require(workers.isWorker(msg.sender));
         require(_spender != address(0));
 
-        ///require(isValidBeneficiaryData(_beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount));
+        require(isValidBeneficiaryData(_beneficiary, _transferAmount,
+            _commissionBeneficiary, _commissionAmount));
 
         uint256 tokenAmount = _transferAmount;
         uint256 commissionTokenAmount = _commissionAmount;
@@ -122,8 +122,8 @@ contract Airdrop is Pricer {
             _commissionBeneficiary, commissionTokenAmount));
 
         /// Emit AirdropPayment Event
-        AirdropPayment(_beneficiary, tokenAmount, _commissionBeneficiary,
-            commissionTokenAmount, pricePoint, _spender, _airdropAmount);
+        AirdropPayment(_beneficiary, _transferAmount, _commissionBeneficiary,
+            _commissionAmount, pricePoint, _spender, _airdropAmount);
 
         return ((tokenAmount + commissionTokenAmount));
     }
@@ -149,10 +149,11 @@ contract Airdrop is Pricer {
         returns (
             bool /* boolean value */)
     {
-        uint256 airdropUsed = _airdropAmount;
         uint256 totalPaid = (_tokenAmount + _commissionTokenAmount);
-        if (_airdropAmount > totalPaid) {
-            airdropUsed = _airdropAmount - totalPaid;
+        // Find out minimum of totalPaid and _airdropAmount
+        uint256 airdropUsed = _airdropAmount;
+        if (totalPaid < airdropUsed) {
+            airdropUsed = totalPaid;
         }
 
         // Prefund the user from the airdrop budget holder
