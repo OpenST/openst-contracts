@@ -97,14 +97,14 @@ contract Airdrop is Pricer {
         address _spender,
         uint256 _airdropAmount)
         public
-        ///isValidBeneficiaryDataModifier(_beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount)
+        isValidBeneficiaryDataModifier(_beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount)
         returns (
             uint256 /* totalPaid */)
     {
         require(workers.isWorker(msg.sender));
         require(_spender != address(0));
 
-        require(isValidBeneficiaryData(_beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount));
+        ///require(isValidBeneficiaryData(_beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount));
 
         uint256 tokenAmount = _transferAmount;
         uint256 commissionTokenAmount = _commissionAmount;
@@ -149,7 +149,6 @@ contract Airdrop is Pricer {
         returns (
             bool /* boolean value */)
     {
-        // @Ben Do we need this? Can't we transfer all _airdropAmount to _spender?
         uint256 airdropUsed = _airdropAmount;
         uint256 totalPaid = (_tokenAmount + _commissionTokenAmount);
         if (_airdropAmount > totalPaid) {
