@@ -274,11 +274,11 @@ contract Pricer is OpsManaged, PricerInterface {
         bytes3 _currency,
         uint256 _intendedPricePoint)
         public
-        ///isValidBeneficiaryDataModifier(_beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount)
+        isValidBeneficiaryDataModifier(_beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount)
         returns (uint256 /* total paid */)
     {
-        require(isValidBeneficiaryData(_beneficiary, _transferAmount,
-            _commissionBeneficiary, _commissionAmount));
+        // require(isValidBeneficiaryData(_beneficiary, _transferAmount,
+        //     _commissionBeneficiary, _commissionAmount));
 
         uint256 tokenAmount = _transferAmount;
         uint256 commissionTokenAmount = _commissionAmount;
