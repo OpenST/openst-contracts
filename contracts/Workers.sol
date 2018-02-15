@@ -40,13 +40,13 @@ contract Workers is OpsManaged {
      */
     ///Event for worker set
     event WorkerSet(
-        address _worker,
-        uint256 _deactivationHeight,
+        address indexed _worker,
+        uint256 indexed _deactivationHeight,
         uint256 _remainingHeight);
 
     ///Event for worker removed
     event WorkerRemoved(
-        address _worker,
+        address indexed _worker,
         bool _existed);
 
     /// @dev    Constructor;

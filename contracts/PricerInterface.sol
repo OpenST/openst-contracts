@@ -32,24 +32,28 @@ contract PricerInterface {
         address _beneficiary,
         uint256 _transferAmount,
         address _commissionBeneficiary,
-        uint256 _commissionAmount,      
+        uint256 _commissionAmount,
         bytes3 _currency,
         uint256 _intendedPricePoint,
         uint256 _actualPricePoint);
     
     ///Event for price oracles updates for currency
     event PriceOracleSet(       
-        bytes3 _currency,
-        address _address);
+        bytes3 indexed _currency,
+        address indexed _address);
     
     ///Event for price oracles delete
     event PriceOracleUnset(     
-        bytes3 _currency);
+        bytes3 indexed _currency);
 
     ///Event for accepted margin update for currency
     event AcceptedMarginSet(
-        bytes3 _currency,       
+        bytes3 indexed _currency,
         uint256 _acceptedMargin);
+
+    ///Event for Removing Contract
+    event Removed(
+        address indexed _sender);
 
     /// @dev    Returns address of the branded token;
     ///         public method;
@@ -150,6 +154,7 @@ contract PricerInterface {
         uint256 _commissionAmount,      
         bytes3 _currency)
         public
+        view
         returns (uint256, uint256, uint256);  
 
     /// @dev    Takes _beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount, 
@@ -186,7 +191,8 @@ contract PricerInterface {
     /// @return (pricePoint)
     function getPricePoint(
         bytes3 _currency) 
-        public 
+        public
+        view
         returns (uint256);
 
     /// @dev    Takes _intendedPricePoint, _currentPricePoint, _acceptedMargin;
@@ -215,7 +221,7 @@ contract PricerInterface {
     /// @param _commissionBeneficiary commissionBeneficiary
     /// @param _commissionTokenAmount commissionTokenAmount
     /// @return (bool)
-    function performTransfer(
+    function performTransfers(
         address _spender,
         address _beneficiary,
         uint256 _tokenAmount,

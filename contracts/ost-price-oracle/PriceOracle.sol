@@ -103,20 +103,12 @@ contract PriceOracle is OpsManaged, PriceOracleInterface {
     /// @return price (Return 0 in case price expired so that call of this method can handle the error case)
     function getPrice()
         public
+        view
         returns (
         uint256 /* price */  )
     {
         // Current Block Number should be less than expiration height
-        // Emit an event if Price has expired
-        if (block.number > oracleExpirationHeight) {
-            // Emit invalid price event
-            PriceExpired(oracleExpirationHeight);
-
-            return (0);
-        }
-
-        // Return current price
-        return (price);
+        return (block.number > oracleExpirationHeight) ? 0 : price;
     }
 
     /// @dev use this function to get token decimals value

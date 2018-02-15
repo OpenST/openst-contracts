@@ -77,6 +77,18 @@ contract Pricer is OpsManaged, PricerInterface {
         pricerConversionRate = UtilityTokenInterface(_brandedToken).conversionRate();
     }
 
+    /*
+     *  External functions
+     */
+    /// clean up or revoke airdrop contract
+    function remove()
+        external
+        onlyAdminOrOps
+    {
+        selfdestruct(msg.sender);
+        Removed(msg.sender);
+    }
+
     /// @dev    Returns address of the branded token;
     ///         public method;
     /// @return address    
@@ -213,7 +225,7 @@ contract Pricer is OpsManaged, PricerInterface {
     }
 
     /// @dev    Takes _transferAmount, _commissionAmount, _currency;
-    ///         public method
+    ///         public view method
     /// @param _transferAmount transferAmount
     /// @param _commissionAmount commissionAmount    
     /// @param _currency currency
@@ -223,6 +235,7 @@ contract Pricer is OpsManaged, PricerInterface {
         uint256 _commissionAmount,      
         bytes3 _currency)
         public
+        view
         returns (
             uint256 pricePoint,
             uint256 tokenAmount, 
@@ -261,6 +274,7 @@ contract Pricer is OpsManaged, PricerInterface {
         bytes3 _currency,
         uint256 _intendedPricePoint)
         public
+        ///isValidBeneficiaryDataModifier(_beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount)
         returns (uint256 /* total paid */)
     {
         require(isValidBeneficiaryData(_beneficiary, _transferAmount,
@@ -276,11 +290,11 @@ contract Pricer is OpsManaged, PricerInterface {
                 _intendedPricePoint, _transferAmount, _commissionAmount);
         }
 
-        require(performTransfer(msg.sender, _beneficiary, tokenAmount,
+        require(performTransfers(msg.sender, _beneficiary, tokenAmount,
             _commissionBeneficiary, commissionTokenAmount));
 
         //Trigger Event for PaymentComplete
-        Payment(_beneficiary, _transferAmount, _commissionBeneficiary, 
+        Payment(_beneficiary, _transferAmount, _commissionBeneficiary,
             _commissionAmount, _currency, _intendedPricePoint, pricePoint);
         return (tokenAmount + commissionTokenAmount);
     }
@@ -292,14 +306,18 @@ contract Pricer is OpsManaged, PricerInterface {
     /// @return (pricePoint)
     function getPricePoint(
         bytes3 _currency)
-        public              
+        public
+        view
         returns (uint256) /* pricePoint */
     {
         PriceOracleInterface currentPriceOracle = pricerPriceOracles[_currency];
         require(currentPriceOracle != address(0));
         return (currentPriceOracle.getPrice()); 
     }
-    
+
+    /*
+     *  Internal functions
+     */
     /// @dev    Takes _intendedPricePoint, _currentPricePoint, _acceptedMargin;
     ///         checks if the current price point is in the acceptable range of intendedPricePoint; 
     ///         internal method;
@@ -381,7 +399,7 @@ contract Pricer is OpsManaged, PricerInterface {
     /// @param _commissionBeneficiary commissionBeneficiary
     /// @param _commissionTokenAmount commissionTokenAmount
     /// @return (bool)
-    function performTransfer(
+    function performTransfers(
         address _spender,
         address _beneficiary,
         uint256 _tokenAmount,
@@ -427,6 +445,30 @@ contract Pricer is OpsManaged, PricerInterface {
             _commissionAmount);
 
         return (pricePoint, tokenAmount, commissionTokenAmount);
+    }
+
+    /*
+     *  Modifiers
+     */
+    /// @dev    Takes _beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount;
+    ///         checks if the current price point is in the acceptable range of intendedPricePoint;
+    ///         modifier method;
+    /// @param _beneficiary beneficiary
+    /// @param _transferAmount transferAmount
+    /// @param _commissionBeneficiary commissionBeneficiary
+    /// @param _commissionAmount commissionAmount
+    modifier isValidBeneficiaryDataModifier(
+        address _beneficiary,
+        uint256 _transferAmount,
+        address _commissionBeneficiary,
+        uint256 _commissionAmount) {
+        require(_beneficiary != address(0));
+        require(_transferAmount != 0);
+
+        if (_commissionAmount > 0) {
+            require(_commissionBeneficiary != address(0));
+        }
+        _;
     }
 
 }

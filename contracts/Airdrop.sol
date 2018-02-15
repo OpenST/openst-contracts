@@ -26,19 +26,19 @@ import "./Workers.sol";
 import "./Pricer.sol";
 
 
-contract Airdrop is Pricer, Workers {
+contract Airdrop is Pricer {
 
     /*
      *  Events
     */
     /// Event for AirdropPayment complete
     event AirdropPayment(
-        address _beneficiary,
+        address indexed _beneficiary,
         uint256 tokenAmount,
-        address _commissionBeneficiary,
+        address indexed _commissionBeneficiary,
         uint256 commissionTokenAmount,
         uint256 _actualPricePoint,
-        address _spender,
+        address indexed _spender,
         uint256 _airdropAmount
         );
 
@@ -75,20 +75,9 @@ contract Airdrop is Pricer, Workers {
     }
 
     /*
-      *  External functions
-     */
-    /// clean up or revoke airdrop contract
-    function remove()
-        external
-        onlyAdminOrOps
-    {
-        selfdestruct(msg.sender);
-    }
-
-    /*
      *  External functions
      */
-    /// performPay matches the behaviour of Pricer:pay with extra functionality of airdrop evaluation
+    /// payAirdrop matches the behaviour of Pricer:pay with extra functionality of airdrop evaluation
     /// @param _beneficiary beneficiary
     /// @param _transferAmount transferAmount
     /// @param _commissionBeneficiary commissionBeneficiary
@@ -98,7 +87,7 @@ contract Airdrop is Pricer, Workers {
     /// @param _spender spender
     /// @param _airdropAmount airdropAmount
     /// @return uint256 totalPaid
-    function performPay(
+    function payAirdrop(
         address _beneficiary,
         uint256 _transferAmount,
         address _commissionBeneficiary,
@@ -108,6 +97,7 @@ contract Airdrop is Pricer, Workers {
         address _spender,
         uint256 _airdropAmount)
         public
+        ///isValidBeneficiaryDataModifier(_beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount)
         returns (
             uint256 /* totalPaid */)
     {
@@ -128,7 +118,7 @@ contract Airdrop is Pricer, Workers {
 
         require(performAirdropTransferToSpender(_spender, _airdropAmount,
             tokenAmount, commissionTokenAmount));
-        require(performTransfer(_spender, _beneficiary, tokenAmount,
+        require(performTransfers(_spender, _beneficiary, tokenAmount,
             _commissionBeneficiary, commissionTokenAmount));
 
         /// Emit AirdropPayment Event
