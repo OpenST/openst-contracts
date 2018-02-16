@@ -20,7 +20,7 @@
 // ----------------------------------------------------------------------------
 
 const pricer_utils = require('./pricer_utils.js'),
-      PriceOracle = artifacts.require('./PriceOracle.sol');
+      PriceOracle = artifacts.require('./PriceOracleMock.sol');
 
 ///
 /// Test stories

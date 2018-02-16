@@ -41,8 +41,8 @@ module.exports.perform = (accounts) => {
     eurPriceOracle = contracts.eurPriceOracle;     
     await pricer.setPriceOracle(pricer_utils.currencies.usd, usdPriceOracle.address, { from: opsAddress });
     await pricer.setPriceOracle(pricer_utils.currencies.eur, eurPriceOracle.address, { from: opsAddress });
-    await usdPriceOracle.setPrice(usdPrice, { from: opsAddress });
-    await eurPriceOracle.setPrice(eurPrice, { from: opsAddress });
+    await usdPriceOracle.setPrice(usdPrice);
+    await eurPriceOracle.setPrice(eurPrice);
   });
 
   it('fails if priceOracle is not set', async () => {

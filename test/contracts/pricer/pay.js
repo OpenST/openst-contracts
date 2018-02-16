@@ -50,7 +50,7 @@ module.exports.perform = (accounts) => {
     pricer         = contracts.pricer;
     usdPriceOracle = contracts.usdPriceOracle;
     await pricer.setPriceOracle(pricer_utils.currencies.usd, usdPriceOracle.address, { from: opsAddress });
-    await usdPriceOracle.setPrice(usdPrice, { from: opsAddress });
+    await usdPriceOracle.setPrice(usdPrice);
     intendedPricePoint = await pricer.getPricePoint.call(pricer_utils.currencies.usd);
     await token.setBalance(accounts[0], new pricer_utils.bigNumber(100 * 10**18));
   });

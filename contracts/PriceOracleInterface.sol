@@ -1,7 +1,7 @@
 /* solhint-disable-next-line compiler-fixed */
 pragma solidity ^0.4.17;
 
-// Copyright 2017 OST.com Ltd.
+// Copyright 2018 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

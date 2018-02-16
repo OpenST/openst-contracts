@@ -44,7 +44,7 @@ module.exports.perform = (accounts) => {
     eurPriceOracle = contracts.eurPriceOracle;     
     await pricer.setPriceOracle(pricer_utils.currencies.usd, usdPriceOracle.address, { from: opsAddress });
     await pricer.setPriceOracle(pricer_utils.currencies.eur, eurPriceOracle.address, { from: opsAddress });
-    await eurPriceOracle.setPrice(eurPrice, { from: opsAddress });
+    await eurPriceOracle.setPrice(eurPrice);
   });
 
   it('fails to get pricePoint and calculated amounts if currency is empty', async () => {
@@ -65,7 +65,7 @@ module.exports.perform = (accounts) => {
 
   it('successfully gets pricePoints and calculated amounts', async () => {
     // set usdPriceOracle price
-    await usdPriceOracle.setPrice(usdPrice, { from: opsAddress });
+    await usdPriceOracle.setPrice(usdPrice);
 
     var returns = await pricer.getPricePointAndCalculatedAmounts.call(
       transferAmount, commissionAmount, pricer_utils.currencies.usd);

@@ -23,7 +23,7 @@ const Utils          = require('../../lib/utils.js'),
       BigNumber      = require('bignumber.js'),
       Pricer         = artifacts.require('./Pricer.sol'),
       EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol'),
-    	PriceOracle    = artifacts.require('./ost-price-oracle/PriceOracle.sol');
+    	PriceOracle    = artifacts.require('./PriceOracleMock.sol');
 
 const ost = 'OST',
       usd = 'USD',
@@ -50,8 +50,6 @@ module.exports.deployPricer = async (artifacts, accounts) => {
         eurPriceOracle = await PriceOracle.new(ost, eur);
 
   assert.ok(await pricer.setOpsAddress(opsAddress));
-  assert.ok(await usdPriceOracle.setOpsAddress(opsAddress));
-  assert.ok(await eurPriceOracle.setOpsAddress(opsAddress));
 
 	return {
     token          : token,
