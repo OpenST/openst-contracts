@@ -8,9 +8,9 @@ const rootPrefix = "../../.."
   , constants = require(rootPrefix + '/mocha_test/services/pricer/constants')
   , pricerUtils = require('./pricer_utils')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
-  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress)
-  , pricerOstEur = new pricer(constants.pricerOstEurAddress)
-  , pricerOstUsd10Decimal = new pricer(constants.pricerOstUsd10DecimalAddress)
+  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
+  , pricerOstEur = new pricer(constants.pricerOstEurAddress, constants.chainId)
+  , pricerOstUsd10Decimal = new pricer(constants.pricerOstUsd10DecimalAddress, constants.chainId)
 ;
 
 describe('Get branded token', function() {

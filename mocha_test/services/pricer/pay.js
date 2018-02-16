@@ -34,7 +34,6 @@ describe('Pay', function() {
       constants.currencyUSD,
       50,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -55,7 +54,6 @@ describe('Pay', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -161,7 +159,6 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -241,7 +238,6 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -312,7 +308,6 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -382,7 +377,6 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     assert.equal(payResponse.isFailure(), true);
@@ -448,7 +442,6 @@ describe('Pay', function() {
       constants.currencyINR,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -518,7 +511,6 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     assert.equal(payResponse.isFailure(), true);
@@ -585,7 +577,6 @@ describe('Pay', function() {
       currency,
       changedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -607,7 +598,7 @@ describe('Pay', function() {
 
   it('should fail when intendedPricePoint is less than the acceptable margin of current price point', async function() {
     // eslint-disable-next-line no-invalid-this
-    this.timeout(100000);
+    this.timeout(200000);
 
     const initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , initialAccount3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -659,7 +650,6 @@ describe('Pay', function() {
       currency,
       changedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -729,7 +719,6 @@ describe('Pay', function() {
       constants.currencyINR,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -797,7 +786,6 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -853,7 +841,6 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -919,7 +906,6 @@ describe('Pay', function() {
       constants.currencyUSD,
       0,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -983,7 +969,6 @@ describe('Pay', function() {
       constants.currencyUSD,
       0,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeUUID});
 
     // verify if the transaction receipt is valid
@@ -1036,7 +1021,6 @@ describe('Pay', function() {
       constants.currencyUSD,
       0,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeHash});
 
     // verify if the transaction hash is valid
@@ -1089,7 +1073,6 @@ describe('Pay', function() {
       constants.currencyUSD,
       0,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid.
@@ -1135,7 +1118,6 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
