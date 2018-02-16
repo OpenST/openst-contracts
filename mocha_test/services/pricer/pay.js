@@ -15,7 +15,7 @@ const rootPrefix = "../../.."
 ;
 
 describe('Pay', function() {
-/*
+
   it('should pass the initial checks', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(300000);
@@ -1097,7 +1097,7 @@ describe('Pay', function() {
     pricerUtils.verifyTransactionReceipt(payResponse);
 
   });
-*/
+
 
   it('should fail when sender has insufficient balance (BT Transfer)', async function() {
     // eslint-disable-next-line no-invalid-this
