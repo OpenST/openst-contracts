@@ -37,6 +37,7 @@ contract Airdrop is Pricer {
         uint256 _transferAmount,
         address indexed _commissionBeneficiary,
         uint256 _commissionAmount,
+        bytes3 _currency,
         uint256 _actualPricePoint,
         address indexed _spender,
         uint256 _airdropAmount
@@ -123,7 +124,7 @@ contract Airdrop is Pricer {
 
         /// Emit AirdropPayment Event
         AirdropPayment(_beneficiary, _transferAmount, _commissionBeneficiary,
-            _commissionAmount, pricePoint, _spender, _airdropAmount);
+            _commissionAmount, _currency, pricePoint, _spender, _airdropAmount);
 
         return ((tokenAmount + commissionTokenAmount));
     }
