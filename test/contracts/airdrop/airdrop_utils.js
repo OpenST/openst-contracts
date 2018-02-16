@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 // ----------------------------------------------------------------------------
-// Test: pricer_utils.js
+// Test: airdrop_utils.js
 //
 // http://www.simpletoken.org/
 //
@@ -21,7 +21,8 @@
 
 const Utils          = require('../../lib/utils.js'),
       BigNumber      = require('bignumber.js'),
-      Airdrop         = artifacts.require('./Airdrop.sol'),
+      Workers        = artifacts.require('./Workers.sol'),
+      Airdrop        = artifacts.require('./Airdrop.sol'),
       EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol'),
       PriceOracle    = artifacts.require('./ost-price-oracle/PriceOracle.sol');
 
@@ -39,18 +40,25 @@ module.exports.currencies = {
 }
 
 /// @dev Deploy
-module.exports.deployPricer = async (artifacts, accounts) => {
+module.exports.deployAirdrop = async (artifacts, accounts) => {
 
   const token               = await EIP20TokenMock.new(10, ost, 'name', 18),
         TOKEN_DECIMALS      = 18,
         opsAddress          = accounts[1],
-        workers             = accounts[2],
+        worker              = accounts[2],
         airdropBudgetHolder = accounts[3],
-        airdrop             = await Airdrop.new(token.address, ost),
-        usdPriceOracle      = await PriceOracle.new(ost, usd);
+        workers             = await Workers.new(),
+        airdrop             = await Airdrop.new(token.address, ost, workers.address, airdropBudgetHolder),
+        usdPriceOracle      = await PriceOracle.new(ost, usd),
+        usdPrice            = new BigNumber(20 * 10**18);
 
+  assert.ok(await workers.setOpsAddress(opsAddress));
   assert.ok(await airdrop.setOpsAddress(opsAddress));
   assert.ok(await usdPriceOracle.setOpsAddress(opsAddress));
+
+  assert.ok(await workers.setWorker(worker, web3.eth.blockNumber + 1000, { from: opsAddress }));
+  assert.ok(await airdrop.setPriceOracle(usd, usdPriceOracle.address, { from: opsAddress }));
+  assert.ok(await usdPriceOracle.setPrice(usdPrice, { from: opsAddress }));
 
 	return {
     token          : token,
