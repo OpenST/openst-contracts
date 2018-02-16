@@ -42,6 +42,10 @@ const allAddresses = {
     workers: {
       abi: coreAbis.workers,
       bin: coreBins.workers
+    },
+    brandedtoken: {
+      abi: coreAbis.brandedtoken,
+      bin: coreBins.brandedtoken
     }
   }
 };

@@ -8,14 +8,14 @@ const rootPrefix = "../../.."
   , BigNumber = require('bignumber.js')
   , pricerUtils = require('./pricer_utils')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
-  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress)
-  , pricerOstEur = new pricer(constants.pricerOstEurAddress)
+  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
+  , pricerOstEur = new pricer(constants.pricerOstEurAddress, constants.chainId)
   , mockToken = require(rootPrefix + '/lib/contract_interact/EIP20TokenMock')
   , TC5 = new mockToken(constants.TC5Address)
 ;
 
 describe('Pay', function() {
-
+/*
   it('should pass the initial checks', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(300000);
@@ -1097,7 +1097,61 @@ describe('Pay', function() {
     pricerUtils.verifyTransactionReceipt(payResponse);
 
   });
+*/
 
+  it('should fail when sender has insufficient balance (BT Transfer)', async function() {
+    // eslint-disable-next-line no-invalid-this
+    this.timeout(100000);
+
+    const initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
+      , initialAccount3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
+      , initialAccount4Balance = new BigNumber(await TC5.balanceOf(constants.account4));
+
+    const beneficiary = constants.account3
+      , commissionAmount = new BigNumber(pricerOstUsd.toWei('0.1'))
+      , commissionBeneficiary = constants.account4
+      , currency = constants.currencyBlank
+      , transferAmount = new BigNumber(pricerOstUsd.toWei('0.5'))
+      ;
+
+    const intendedPricePoint = 0;
+
+    const total = transferAmount.plus(commissionAmount);
+
+    await TC5.approve(
+      constants.account1,
+      constants.accountPassphrase1,
+      constants.pricerOstUsdAddress,
+      total,
+      0xBA43B7400);
+
+    const payResponse = await pricerOstUsd.pay(
+      constants.account1,
+      constants.accountPassphrase1,
+      beneficiary,
+      transferAmount,
+      commissionBeneficiary,
+      commissionAmount,
+      currency,
+      intendedPricePoint,
+      0xBA43B7400,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt});
+
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(payResponse);
+
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+
+    const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
+      , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
+      , account4Balance = new BigNumber(await TC5.balanceOf(constants.account4));
+
+    assert.equal(initialAccount1Balance.minus(total).toNumber(), account1Balance.toNumber());
+    assert.equal(initialAccount3Balance.plus(transferAmount).toNumber(), account3Balance.toNumber());
+    assert.equal(initialAccount4Balance.plus(commissionAmount).toNumber(), account4Balance.toNumber());
+  });
 });
 
 
