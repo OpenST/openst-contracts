@@ -30,9 +30,9 @@ contract PricerInterface {
     ///Event for payment complete    
     event Payment(
         address _beneficiary,
-        uint256 _transferAmount,
+        uint256 _tokenAmount,
         address _commissionBeneficiary,
-        uint256 _commissionAmount,
+        uint256 _commissionTokenAmount,
         bytes3 _currency,
         uint256 _intendedPricePoint,
         uint256 _actualPricePoint);

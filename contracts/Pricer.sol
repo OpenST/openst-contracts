@@ -85,8 +85,8 @@ contract Pricer is OpsManaged, PricerInterface {
         external
         onlyAdminOrOps
     {
-        selfdestruct(msg.sender);
         Removed(msg.sender);
+        selfdestruct(msg.sender);
     }
 
     /// @dev    Returns address of the branded token;
@@ -293,8 +293,8 @@ contract Pricer is OpsManaged, PricerInterface {
             _commissionBeneficiary, commissionTokenAmount));
 
         //Trigger Event for PaymentComplete
-        Payment(_beneficiary, _transferAmount, _commissionBeneficiary,
-            _commissionAmount, _currency, _intendedPricePoint, pricePoint);
+        Payment(_beneficiary, tokenAmount, _commissionBeneficiary,
+            commissionTokenAmount, _currency, _intendedPricePoint, pricePoint);
         return (tokenAmount + commissionTokenAmount);
     }
 
