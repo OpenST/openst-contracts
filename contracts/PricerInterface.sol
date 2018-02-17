@@ -1,3 +1,4 @@
+/* solhint-disable-next-line compiler-fixed */
 pragma solidity ^0.4.17;
 
 // Copyright 2018 OpenST Ltd.
@@ -29,26 +30,30 @@ contract PricerInterface {
     ///Event for payment complete    
     event Payment(
         address _beneficiary,
-        uint256 _transferAmount,
+        uint256 _tokenAmount,
         address _commissionBeneficiary,
-        uint256 _commissionAmount,      
+        uint256 _commissionTokenAmount,
         bytes3 _currency,
         uint256 _intendedPricePoint,
         uint256 _actualPricePoint);
     
     ///Event for price oracles updates for currency
     event PriceOracleSet(       
-        bytes3 _currency,
-        address _address);
+        bytes3 indexed _currency,
+        address indexed _address);
     
     ///Event for price oracles delete
     event PriceOracleUnset(     
-        bytes3 _currency);
+        bytes3 indexed _currency);
 
     ///Event for accepted margin update for currency
     event AcceptedMarginSet(
-        bytes3 _currency,       
+        bytes3 indexed _currency,
         uint256 _acceptedMargin);
+
+    ///Event for Removing Contract
+    event Removed(
+        address indexed _sender);
 
     /// @dev    Returns address of the branded token;
     ///         public method;
@@ -149,6 +154,7 @@ contract PricerInterface {
         uint256 _commissionAmount,      
         bytes3 _currency)
         public
+        view
         returns (uint256, uint256, uint256);  
 
     /// @dev    Takes _beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount, 
@@ -167,7 +173,7 @@ contract PricerInterface {
     /// @param _commissionAmount commissionAmount
     /// @param _currency currency
     /// @param _intendedPricePoint _intendedPricePoint
-    /// @return bool isSuccess
+    /// @return uint256 totalPaid
     function pay(
         address _beneficiary, 
         uint256 _transferAmount, 
@@ -176,7 +182,7 @@ contract PricerInterface {
         bytes3 _currency, 
         uint256 _intendedPricePoint) 
         public 
-        returns (bool);
+        returns (uint256);
 
     /// @dev    Takes _currency; 
     ///         gets current price point for the price oracle for the given currency;
@@ -185,8 +191,60 @@ contract PricerInterface {
     /// @return (pricePoint)
     function getPricePoint(
         bytes3 _currency) 
-        public 
+        public
+        view
         returns (uint256);
-    
+
+    /// @dev    Takes _intendedPricePoint, _currentPricePoint, _acceptedMargin;
+    ///         checks if the current price point is in the acceptable range of intendedPricePoint;
+    ///         internal method;
+    /// @param _beneficiary beneficiary
+    /// @param _transferAmount transferAmount
+    /// @param _commissionBeneficiary commissionBeneficiary
+    /// @param _commissionAmount commissionAmount
+    /// @return bool isValid
+    function isValidBeneficiaryData(
+        address _beneficiary,
+        uint256 _transferAmount,
+        address _commissionBeneficiary,
+        uint256 _commissionAmount)
+        internal
+        returns (bool);
+
+    /// @dev    Takes _spender, _beneficiary, _tokenAmount, _commissionBeneficiary, _commissionTokenAmount;
+    ///         Perform tokenAmount transfer
+    ///         Perform commissionTokenAmount transfer
+    ///         internal method;
+    /// @param _spender spender
+    /// @param _beneficiary beneficiary
+    /// @param _tokenAmount tokenAmount
+    /// @param _commissionBeneficiary commissionBeneficiary
+    /// @param _commissionTokenAmount commissionTokenAmount
+    /// @return (bool)
+    function performTransfers(
+        address _spender,
+        address _beneficiary,
+        uint256 _tokenAmount,
+        address _commissionBeneficiary,
+        uint256 _commissionTokenAmount)
+        internal
+        returns (bool);
+
+    /// @dev    Takes _currency, _intendedPricePoint, _transferAmount, _commissionAmount;
+    ///         Validate accepted margin
+    ///         Calculates tokenAmount and commissionTokenAmount
+    ///         internal method
+    /// @param _currency currency
+    /// @param _intendedPricePoint intendedPricePoint
+    /// @param _transferAmount transferAmount
+    /// @param _commissionAmount commissionAmount
+    /// @return (pricePoint, tokenAmount, commissionTokenAmount)
+    function validateMarginAndCalculateBTAmount(
+        bytes3 _currency,
+        uint256 _intendedPricePoint,
+        uint256 _transferAmount,
+        uint256 _commissionAmount)
+        internal
+        returns (uint256, uint256, uint256);
     
 }
