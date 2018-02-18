@@ -7,7 +7,7 @@ const rootPrefix = "../../.."
   , constants = require(rootPrefix + '/mocha_test/services/pricer/constants')
   , pricerUtils = require('./pricer_utils')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
-  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress)
+  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
 ;
 
 
@@ -33,7 +33,6 @@ describe('Unset price oracle', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -53,7 +52,6 @@ describe('Unset price oracle', function() {
       constants.deployerPassphrase,
       constants.currencyUSD,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -78,7 +76,6 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyBlank,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if it failed
@@ -95,7 +92,6 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       0,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if it failed
@@ -111,7 +107,6 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if it failed
@@ -133,7 +128,7 @@ describe('Unset price oracle', function() {
 
   it('should pass when price oracle was set prior', async function() {
     // eslint-disable-next-line no-invalid-this
-    this.timeout(100000);
+    this.timeout(200000);
 
     // set the price oracle
     const setResponse = await pricerOstUsd.setPriceOracle(
@@ -142,7 +137,6 @@ describe('Unset price oracle', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -162,7 +156,6 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -190,7 +183,6 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeUUID});
 
     // verify if the transaction receipt is valid
@@ -210,7 +202,6 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeHash});
 
     // verify if the transaction hash is valid
@@ -230,7 +221,6 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid.

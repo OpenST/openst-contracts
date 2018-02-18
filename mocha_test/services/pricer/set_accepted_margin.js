@@ -8,7 +8,7 @@ const rootPrefix = "../../.."
   , constants = require(rootPrefix + '/mocha_test/services/pricer/constants')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
   , pricerUtils = require('./pricer_utils')
-  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress)
+  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
 ;
 /*eslint-enable */
 
@@ -33,7 +33,6 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       30,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -61,7 +60,6 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       50,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeUUID});
 
     // verify if the transaction receipt is valid
@@ -82,7 +80,6 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       150,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeHash});
 
     // verify if the transaction hash is valid
@@ -103,7 +100,6 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       70,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid.
@@ -122,7 +118,6 @@ describe('Set accepted margins', function() {
       constants.currencyBlank,
       3,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the response is failure
@@ -140,7 +135,6 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       3,
       0,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the response is failure
@@ -157,7 +151,6 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       3,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the response is failure
@@ -175,7 +168,6 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       -30,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the response is failure
@@ -186,7 +178,7 @@ describe('Set accepted margins', function() {
 
   it('should fail when sender is not ops', async function() {
     // eslint-disable-next-line no-invalid-this
-    this.timeout(100000);
+    this.timeout(200000);
 
     // set the accepted margin to 3
     const response1 = await pricerOstUsd.setAcceptedMargin(
@@ -195,7 +187,6 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       3,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -216,7 +207,6 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       8,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -245,7 +235,6 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       0,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -274,7 +263,6 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       50,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid

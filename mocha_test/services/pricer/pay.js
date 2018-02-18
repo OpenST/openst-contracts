@@ -8,11 +8,18 @@ const rootPrefix = "../../.."
   , BigNumber = require('bignumber.js')
   , pricerUtils = require('./pricer_utils')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
-  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress)
-  , pricerOstEur = new pricer(constants.pricerOstEurAddress)
+  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
+  , pricerOstEur = new pricer(constants.pricerOstEurAddress, constants.chainId)
   , mockToken = require(rootPrefix + '/lib/contract_interact/EIP20TokenMock')
   , TC5 = new mockToken(constants.TC5Address)
+  , btHelper = require(rootPrefix + '/lib/contract_interact/branded_token')
+  , cacheHelper = new btHelper(constants.TC5Address, constants.chainId);
 ;
+
+async function getAmountFromCache(address) {
+  const resp = await  cacheHelper.getBalanceFromCache(address);
+  return new BigNumber(resp.data.response);
+}
 
 describe('Pay', function() {
 
@@ -34,7 +41,6 @@ describe('Pay', function() {
       constants.currencyUSD,
       50,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -55,7 +61,6 @@ describe('Pay', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -109,22 +114,46 @@ describe('Pay', function() {
     const account4Balance = await TC5.balanceOf(constants.account4);
     assert.equal(account4Balance, pricerOstUsd.toWei('0'));
 
+    // populate cache
+    cacheHelper.getBalanceOf(constants.account1);
+    cacheHelper.getBalanceOf(constants.account2);
+    cacheHelper.getBalanceOf(constants.account3);
+    cacheHelper.getBalanceOf(constants.account4);
+
   });
 
 
   it('should pass when all parameters are valid', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
+    // populate cache
+    cacheHelper.getBalanceOf(constants.account1);
+    cacheHelper.getBalanceOf(constants.account2);
+    cacheHelper.getBalanceOf(constants.account3);
+    cacheHelper.getBalanceOf(constants.account4);
+
 
     const initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , initialAccount3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
       , initialAccount4Balance = new BigNumber(await TC5.balanceOf(constants.account4));
 
+    const initialAccount1BalanceCache = await getAmountFromCache(constants.account1)
+      , initialAccount3BalanceCache = await getAmountFromCache(constants.account3)
+      , initialAccount4BalanceCache = await getAmountFromCache(constants.account4);
+
+    console.log(initialAccount1Balance.toString(), initialAccount1BalanceCache.toString());
+    console.log(initialAccount3Balance.toString(), initialAccount3BalanceCache.toString());
+    console.log(initialAccount4Balance.toString(), initialAccount4BalanceCache.toString());
+
+    assert.equal(initialAccount1Balance.toNumber(), initialAccount1BalanceCache.toNumber(), "account1: Actual and cache value mismatch");
+    assert.equal(initialAccount3Balance.toNumber(), initialAccount3BalanceCache.toNumber(), "account3: Actual and cache value mismatch");
+    assert.equal(initialAccount4Balance.toNumber(), initialAccount4BalanceCache.toNumber(), "account4: Actual and cache value mismatch");
+
     const beneficiary = constants.account3
-      , commissionAmount = new BigNumber(pricerOstUsd.toWei('5'))
+      , commissionAmount = new BigNumber(pricerOstUsd.toWei('2'))
       , commissionBeneficiary = constants.account4
-      , currency = constants.currencyUSD      
-      , transferAmount = new BigNumber(pricerOstUsd.toWei('10'))
+      , currency = constants.currencyUSD
+      , transferAmount = new BigNumber(pricerOstUsd.toWei('3'))
       ;
 
     const acceptedMarginData = await pricerOstUsd.acceptedMargins(currency);
@@ -142,8 +171,10 @@ describe('Pay', function() {
     const intendedPricePoint = estimatedValues.data.pricePoint;
     const estimatedMargin = new BigNumber(acceptedMarginData.data.acceptedMargins);
 
-    const estimatedTotalAmount = estimatedTokenAmount.plus(estimatedCommissionTokenAmount).plus(estimatedMargin);
+    const estimatedTotalAmount = new BigNumber(0).plus(estimatedTokenAmount).plus(estimatedCommissionTokenAmount);
 
+    console.log("estimatedTotalAmount");
+    console.log(estimatedTotalAmount.toString());
     await TC5.approve(
       constants.account1,
       constants.accountPassphrase1,
@@ -161,7 +192,6 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -175,24 +205,36 @@ describe('Pay', function() {
       , account4Balance = new BigNumber(await TC5.balanceOf(constants.account4));
 
     assert.equal(
-      initialAccount1Balance
+      new BigNumber(0).plus(initialAccount1Balance)
         .minus(estimatedTokenAmount)
         .minus(estimatedCommissionTokenAmount)
         .toNumber(), account1Balance.toNumber());
 
     assert.equal(
-      initialAccount3Balance
+      new BigNumber(0).plus(initialAccount3Balance)
         .plus(estimatedTokenAmount)
         .toNumber(), account3Balance.toNumber());
 
     assert.equal(
-      initialAccount4Balance
+      new BigNumber(0).plus(initialAccount4Balance)
         .plus(estimatedCommissionTokenAmount)
         .toNumber(), account4Balance.toNumber());
 
+    const finalAccount1BalanceCache = await getAmountFromCache(constants.account1)
+      , finalAccount3BalanceCache = await getAmountFromCache(constants.account3)
+      , finalAccount4BalanceCache = await getAmountFromCache(constants.account4);
+
+    console.log(account1Balance.toString(), finalAccount1BalanceCache.toString());
+    console.log(account3Balance.toString(), finalAccount3BalanceCache.toString());
+    console.log(account4Balance.toString(), finalAccount4BalanceCache.toString());
+
+    assert.equal(account1Balance.toNumber(), finalAccount1BalanceCache.toNumber(), "account1: Actuall and cache value mismatch after test");
+    assert.equal(account3Balance.toNumber(), finalAccount3BalanceCache.toNumber(), "account3: Actuall and cache value mismatch after test");
+    assert.equal(account4Balance.toNumber(), finalAccount4BalanceCache.toNumber(), "account4: Actuall and cache value mismatch after test");
+
   });
 
-
+/*
   it('should fail when sender balance is less than the amount being transfered', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -241,7 +283,6 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -312,7 +353,6 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -382,7 +422,6 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     assert.equal(payResponse.isFailure(), true);
@@ -448,7 +487,6 @@ describe('Pay', function() {
       constants.currencyINR,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -518,7 +556,6 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     assert.equal(payResponse.isFailure(), true);
@@ -585,7 +622,6 @@ describe('Pay', function() {
       currency,
       changedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -607,7 +643,7 @@ describe('Pay', function() {
 
   it('should fail when intendedPricePoint is less than the acceptable margin of current price point', async function() {
     // eslint-disable-next-line no-invalid-this
-    this.timeout(100000);
+    this.timeout(200000);
 
     const initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , initialAccount3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -659,7 +695,6 @@ describe('Pay', function() {
       currency,
       changedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -729,7 +764,6 @@ describe('Pay', function() {
       constants.currencyINR,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -797,7 +831,6 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -853,7 +886,6 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -919,7 +951,6 @@ describe('Pay', function() {
       constants.currencyUSD,
       0,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -983,7 +1014,6 @@ describe('Pay', function() {
       constants.currencyUSD,
       0,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeUUID});
 
     // verify if the transaction receipt is valid
@@ -1036,7 +1066,6 @@ describe('Pay', function() {
       constants.currencyUSD,
       0,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeHash});
 
     // verify if the transaction hash is valid
@@ -1089,7 +1118,6 @@ describe('Pay', function() {
       constants.currencyUSD,
       0,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid.
@@ -1098,6 +1126,61 @@ describe('Pay', function() {
 
   });
 
+
+  it('should fail when sender has insufficient balance (BT Transfer)', async function() {
+    // eslint-disable-next-line no-invalid-this
+    this.timeout(100000);
+
+    const initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
+      , initialAccount3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
+      , initialAccount4Balance = new BigNumber(await TC5.balanceOf(constants.account4));
+
+    const beneficiary = constants.account3
+      , commissionAmount = new BigNumber(pricerOstUsd.toWei('0.1'))
+      , commissionBeneficiary = constants.account4
+      , currency = constants.currencyBlank
+      , transferAmount = new BigNumber(pricerOstUsd.toWei('0.5'))
+      ;
+
+    const intendedPricePoint = 0;
+
+    const total = transferAmount.plus(commissionAmount);
+
+    await TC5.approve(
+      constants.account1,
+      constants.accountPassphrase1,
+      constants.pricerOstUsdAddress,
+      total,
+      0xBA43B7400);
+
+    const payResponse = await pricerOstUsd.pay(
+      constants.account1,
+      constants.accountPassphrase1,
+      beneficiary,
+      transferAmount,
+      commissionBeneficiary,
+      commissionAmount,
+      currency,
+      intendedPricePoint,
+      0xBA43B7400,
+      {returnType: constants.returnTypeReceipt});
+
+    // verify if the transaction receipt is valid
+    pricerUtils.verifyTransactionReceipt(payResponse);
+
+    // verify if the transaction has was actually mined
+    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+
+    const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
+      , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
+      , account4Balance = new BigNumber(await TC5.balanceOf(constants.account4));
+
+    assert.equal(initialAccount1Balance.minus(total).toNumber(), account1Balance.toNumber());
+    assert.equal(initialAccount3Balance.plus(transferAmount).toNumber(), account3Balance.toNumber());
+    assert.equal(initialAccount4Balance.plus(commissionAmount).toNumber(), account4Balance.toNumber());
+  });
+
+  */
 });
 
 

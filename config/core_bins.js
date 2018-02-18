@@ -19,7 +19,8 @@ const coreBins = {
   pricer: readFile(rootPrefix + '/contracts/bin/Pricer.bin', 'utf8'),
   eip20tokenmock: readFile(rootPrefix + '/contracts/bin/EIP20TokenMock.bin', 'utf8'),
   opsManaged: readFile(rootPrefix + '/contracts/bin/OpsManaged.bin', "utf8"),
-  workers: readFile(rootPrefix + '/contracts/bin/Workers.bin', "utf8")
+  workers: readFile(rootPrefix + '/contracts/bin/Workers.bin', "utf8"),
+  brandedtoken: readFile(rootPrefix + '/contracts/bin/EIP20Token.bin', "utf8")
 };
 
 module.exports = coreBins;
