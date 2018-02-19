@@ -11,7 +11,8 @@
 
 const rootPrefix = ".."
   , coreAbis = require(rootPrefix + '/config/core_abis')
-  , coreBins = require(rootPrefix + '/config/core_bins');
+  , coreBins = require(rootPrefix + '/config/core_bins')
+;
 
 const allAddresses = {
   users: {
@@ -42,6 +43,10 @@ const allAddresses = {
     workers: {
       abi: coreAbis.workers,
       bin: coreBins.workers
+    },
+    airdrop: {
+      abi: coreAbis.airdrop,
+      bin: coreBins.airdrop
     }
   }
 };

@@ -23,7 +23,9 @@ const addressTemplate = "export OST_PRICER_DEPLOYER_ADDR='{{ost_pricer_deployer_
   "export OST_PRICER_PO_TEST_ACCOUNT3='{{ost_pricer_test_account_3}}'\n" +
   "export OST_PRICER_PO_TEST_ACCOUNT3_PASSPHRASE='testtest'\n" +
   "export OST_PRICER_PO_TEST_ACCOUNT4='{{ost_pricer_test_account_4}}'\n" +
-  "export OST_PRICER_PO_TEST_ACCOUNT4_PASSPHRASE='testtest'\n";
+  "export OST_PRICER_PO_TEST_ACCOUNT4_PASSPHRASE='testtest'\n" +
+  "export OST_AIRDROP_BUDGET_HOLDER='{{ost_airdrop_budget_holder}}'\n" +
+  "export OST_AIRDROP_BUDGET_HOLDER_PASSPHRASE='testtest'\n";
 
 const contractPricer = "export OST_PRICER_CONTRACT_ADDR='{{ost_pricer_contract_address}}'\n";
 const contractBT = "export OST_PRICER_BT_CONTRACT_ADDR='{{ost_pricer_bt_contract_address}}'\n";

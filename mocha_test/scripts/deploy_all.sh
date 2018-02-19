@@ -52,6 +52,14 @@ echo '\nexport TEST_PRICER_C3_ADDRESS='\'$TEST_PRICER_C3_ADDRESS\'>>scripts/env_
 rm ../tools/deploy/tp3.txt
 echo "\n********* Done *************"
 
+echo "\n********* Deploying Worker Contract Address *************"
+. ./scripts/env_vars.sh
+node ../tools/deploy/workers.js 0x12A05F200 travis w.txt
+export TEST_WORKER_CONTRACT_ADDRESS=$(cat ../tools/deploy/w.txt)
+echo '\nexport TEST_WORKER_CONTRACT_ADDRESS='\'$TEST_WORKER_CONTRACT_ADDRESS\'>>scripts/env_vars.sh
+rm ../tools/deploy/w.txt
+echo "\n********* Done *************"
+
 
 echo "\n********* Setting env variables *************"
 . ./scripts/env_vars.sh
