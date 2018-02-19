@@ -8,8 +8,8 @@ const rootPrefix = "../../.."
   , constants = require(rootPrefix + '/mocha_test/services/pricer/constants')
   , pricerUtils = require('./pricer_utils')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
-  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress)
-  , pricerOstEur = new pricer(constants.pricerOstEurAddress)
+  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
+  , pricerOstEur = new pricer(constants.pricerOstEurAddress, constants.chainId)
 ;
 
 
@@ -33,7 +33,6 @@ describe('Get price point and calculated amounts', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -54,7 +53,6 @@ describe('Get price point and calculated amounts', function() {
       constants.currencyEUR,
       constants.priceOracles.OST.EUR,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid

@@ -43,14 +43,14 @@ module.exports = {
                 "before": false
             }
         ],
-        "comma-style": "error",
+        "comma-style": "warn",
         "complexity": "error",
         "computed-property-spacing": [
             "error",
             "never"
         ],
         "consistent-return": "error",
-        "consistent-this": "error",
+        "consistent-this": "warn",
         "curly": "error",
         "default-case": "error",
         "dot-location": "off",
@@ -97,7 +97,7 @@ module.exports = {
         "lines-around-directive": "error",
         "max-depth": "error",
         "max-len": "off",
-        "max-lines": "error",
+        "max-lines": "warn",
         "max-nested-callbacks": "error",
         "max-params": "off",
         "max-statements": "off",

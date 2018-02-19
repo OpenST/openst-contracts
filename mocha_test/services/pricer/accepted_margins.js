@@ -7,7 +7,7 @@ const rootPrefix = "../../.."
   , constants = require(rootPrefix + '/mocha_test/services/pricer/constants')
   , pricerUtils = require('./pricer_utils')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
-  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress)
+  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
 ;
 
 
@@ -54,7 +54,6 @@ describe('Get accepted margins', function() {
       constants.currencyUSD,
       50,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -75,7 +74,6 @@ describe('Get accepted margins', function() {
       constants.currencyUSD,
       300,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -96,7 +94,6 @@ describe('Get accepted margins', function() {
       constants.currencyEUR,
       100,
       0xBA43B7400,
-      constants.chainId,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
