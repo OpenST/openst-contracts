@@ -25,6 +25,14 @@ const constants = {
   chainId: process.env.OST_PRICER_CHAIN_ID,
   returnTypeUUID: "uuid",
   returnTypeHash: "txHash",
-  returnTypeReceipt: "txReceipt"
+  returnTypeReceipt: "txReceipt",
+  // Worker specific constants
+  workerAccount1: process.env.OST_WORKER_TEST_ACCOUNT1,
+  workerAccountPassphrase1: process.env.OST_WORKER_TEST_ACCOUNT1_PASSPHRASE,
+  // Airdrop specific constants
+  airdropBudgetHolder: process.env.OST_AIRDROP_BUDGET_HOLDER,
+  airdropBudgetHolderPassphrase: process.env.OST_AIRDROP_BUDGET_HOLDER_PASSPHRASE,
+  workerContractAddress: process.env.TEST_WORKER_CONTRACT_ADDRESS,
+  airdropOstUsdAddress: process.env.TEST_AIRDROP1_CONTRACT_ADDRESS
 };
 module.exports = constants;

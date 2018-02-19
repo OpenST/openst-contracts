@@ -4,8 +4,8 @@ const chai = require('chai')
   , assert = chai.assert;
 
 const rootPrefix = "../../.."
-  , constants = require(rootPrefix + '/mocha_test/services/pricer/constants')
-  , pricerUtils = require('./pricer_utils')
+  , constants = require(rootPrefix + '/mocha_test/lib/constants')
+  , utils = require(rootPrefix+'/mocha_test/lib/utils')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
   , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
 ;
@@ -57,10 +57,10 @@ describe('Get accepted margins', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(response1);
+    utils.verifyTransactionReceipt(response1);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, response1.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, response1.data.transaction_hash);
 
     // verify if the accepted margin is set to 50
     const amResult1 = await pricerOstUsd.acceptedMargins(constants.currencyUSD);
@@ -77,10 +77,10 @@ describe('Get accepted margins', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(response2);
+    utils.verifyTransactionReceipt(response2);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, response2.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, response2.data.transaction_hash);
 
     // verify if the accepted margin is set to 300
     const amResult2 = await pricerOstUsd.acceptedMargins(constants.currencyUSD);
@@ -97,10 +97,10 @@ describe('Get accepted margins', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(response3);
+    utils.verifyTransactionReceipt(response3);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, response3.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, response3.data.transaction_hash);
 
     // verify if the accepted margin is set to 100
     const amResult3 = await pricerOstUsd.acceptedMargins(constants.currencyEUR);

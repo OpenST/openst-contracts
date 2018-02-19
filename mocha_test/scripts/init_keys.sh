@@ -42,6 +42,10 @@ geth --datadir "$DATADIR" account new --password ./pw >> $ADDRESS_FILE
 echo $OST_AIRDROP_BUDGET_HOLDER_PASSPHRASE > ./pw
 geth --datadir "$DATADIR" account new --password ./pw >> $ADDRESS_FILE
 
+#Worker Test account 1
+echo "testtest" > ./pw
+geth --datadir "$DATADIR" account new --password ./pw >> $ADDRESS_FILE
+
 echo "...New addresses generated"
 cat $ADDRESS_FILE
 #Invoke JS script to init addresses in various JSON files.

@@ -5,8 +5,8 @@ const chai = require('chai')
   , assert = chai.assert;
 
 const rootPrefix = "../../.."
-  , constants = require(rootPrefix + '/mocha_test/services/pricer/constants')
-  , pricerUtils = require('./pricer_utils')
+  , constants = require(rootPrefix + '/mocha_test/lib/constants')
+  , utils = require(rootPrefix+'/mocha_test/lib/utils')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
   , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
 ;
@@ -56,10 +56,10 @@ describe('Get price point', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(response);
+    utils.verifyTransactionReceipt(response);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, response.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, response.data.transaction_hash);
 
     // verify if its set
     const poResult = await pricerOstUsd.priceOracles(constants.currencyEUR);
@@ -77,10 +77,10 @@ describe('Get price point', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(response2);
+    utils.verifyTransactionReceipt(response2);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, response2.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, response2.data.transaction_hash);
 
     const poResult2 = await pricerOstUsd.priceOracles(constants.currencyUSD);
     assert.equal(poResult2.isSuccess(), true);
@@ -110,10 +110,10 @@ describe('Get price point', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(response);
+    utils.verifyTransactionReceipt(response);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, response.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, response.data.transaction_hash);
 
     const poResult = await pricerOstUsd.priceOracles(constants.currencyUSD);
     assert.equal(poResult.isSuccess(), true);

@@ -5,8 +5,8 @@ const chai = require('chai')
   , assert = chai.assert;
 
 const rootPrefix = "../../.."
-  , constants = require(rootPrefix + '/mocha_test/services/pricer/constants')
-  , pricerUtils = require('./pricer_utils')
+  , constants = require(rootPrefix + '/mocha_test/lib/constants')
+  , utils = require(rootPrefix+'/mocha_test/lib/utils')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
   , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
   , pricerOstEur = new pricer(constants.pricerOstEurAddress, constants.chainId)
@@ -48,10 +48,10 @@ describe('Get price oracles', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(setResponse);
+    utils.verifyTransactionReceipt(setResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, setResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, setResponse.data.transaction_hash);
 
     // set price oracle
     const setResponse1 = await pricerOstUsd.setPriceOracle(
@@ -63,10 +63,10 @@ describe('Get price oracles', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(setResponse);
+    utils.verifyTransactionReceipt(setResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, setResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, setResponse.data.transaction_hash);
 
     // verify result
     const poResult1 = await pricerOstUsd.priceOracles(constants.currencyUSD);
@@ -93,10 +93,10 @@ describe('Get price oracles', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(unsetResponse);
+    utils.verifyTransactionReceipt(unsetResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, unsetResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, unsetResponse.data.transaction_hash);
 
     // unset price oracle
     const unsetResponse1 = await pricerOstUsd.unsetPriceOracle(
@@ -107,10 +107,10 @@ describe('Get price oracles', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(unsetResponse1);
+    utils.verifyTransactionReceipt(unsetResponse1);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, unsetResponse1.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, unsetResponse1.data.transaction_hash);
 
     // verify result
     const poResult1 = await pricerOstUsd.priceOracles(constants.currencyUSD);

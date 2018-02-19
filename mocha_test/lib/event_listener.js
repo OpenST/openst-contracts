@@ -16,7 +16,8 @@ module.exports.startObserving = function() {
         "payment.pricer.setAcceptedMargin",
         "payment.pricer.setPriceOracle",
         "payment.pricer.unsetPriceOracle",
-        "payment.pricer.pay"
+        "payment.pricer.pay",
+        "payment.airdrop.pay"
       ],
       function(msgContent) {
         const messageData = JSON.parse(msgContent);

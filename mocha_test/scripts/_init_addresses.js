@@ -49,7 +49,10 @@ function main( addressFile ) {
     } else if ( !_addresses.airdropBudgetHolder ) {
       _addresses.airdropBudgetHolder = thisAddress;
       fundAddress(thisAddress);
-  }
+    } else if ( !_addresses.workerAccount1 ) {
+      _addresses.workerAccount1 = thisAddress;
+      fundAddress(thisAddress);
+    }
   });
 
   populateEnvVars.renderAndPopulate('address', {
@@ -59,7 +62,8 @@ function main( addressFile ) {
     ost_pricer_test_account_2: _addresses.account2,
     ost_pricer_test_account_3: _addresses.account3,
     ost_pricer_test_account_4: _addresses.account4,
-    ost_airdrop_budget_holder: _addresses.airdropBudgetHolder
+    ost_airdrop_budget_holder: _addresses.airdropBudgetHolder,
+    ost_worker_test_account_1: _addresses.workerAccount1
    }
   );
 }

@@ -53,16 +53,18 @@ rm ../tools/deploy/tp3.txt
 echo "\n********* Done *************"
 
 echo "\n********* Deploying Worker Contract Address *************"
-. ./scripts/env_vars.sh
 node ../tools/deploy/workers.js 0x12A05F200 travis w1.txt
-export TEST_WORKER1_CONTRACT_ADDRESS=$(cat ../tools/deploy/w1.txt)
-echo '\nexport TEST_WORKER1_CONTRACT_ADDRESS='\'$TEST_WORKER1_CONTRACT_ADDRESS\'>>scripts/env_vars.sh
+export TEST_WORKER_CONTRACT_ADDRESS=$(cat ../tools/deploy/w1.txt)
+echo '\nexport TEST_WORKER_CONTRACT_ADDRESS='\'$TEST_WORKER_CONTRACT_ADDRESS\'>>scripts/env_vars.sh
 rm ../tools/deploy/w1.txt
 echo "\n********* Done *************"
 
+echo "\n Sourcing env_vars again"
+. ./scripts/env_vars.sh
+
 echo "\n********* Deploying Airdrop Contract Address *************"
 . ./scripts/env_vars.sh
-node ../tools/deploy/airdrop.js $TEST_COIN1_C5_ADDRESS OST $TEST_WORKER1_CONTRACT_ADDRESS $OST_AIRDROP_BUDGET_HOLDER 0x12A05F200 travis a1.txt
+node ../tools/deploy/airdrop.js $TEST_COIN1_C5_ADDRESS OST $TEST_WORKER_CONTRACT_ADDRESS $OST_AIRDROP_BUDGET_HOLDER 0x12A05F200 travis a1.txt
 export TEST_AIRDROP1_CONTRACT_ADDRESS=$(cat ../tools/deploy/a1.txt)
 echo '\nexport TEST_AIRDROP1_CONTRACT_ADDRESS='\'$TEST_AIRDROP1_CONTRACT_ADDRESS\'>>scripts/env_vars.sh
 rm ../tools/deploy/a1.txt

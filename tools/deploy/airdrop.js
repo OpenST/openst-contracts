@@ -77,7 +77,7 @@ async function performer(argv) {
   logger.info("argv[2]: " + argv[2]); // branded Toke Contract Address
   logger.info("argv[3]: " + argv[3]); // base Currency
   logger.info("argv[4]: " + argv[4]); // worker contract address
-  logger.info("argv[5]: " + argv[5]); // airdropbudgetholder address
+  logger.info("argv[5]: " + argv[5]); // airdropBudgetHolder address
   logger.info("argv[6]: " + argv[6]); // gas price
   logger.info("argv[7]: " + argv[7]); // isTravisCIEnabled
   logger.info("argv[8]: " + argv[8]); // file to write airdrop contract address

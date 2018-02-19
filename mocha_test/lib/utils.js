@@ -1,13 +1,13 @@
 /*eslint-disable */
 const chai = require('chai')
   , assert = chai.assert
-  ,rootPrefix = '../../..'
-  , eventListner = require('./event_listener')
+  , rootPrefix = '../..'
+  , eventListener = require(rootPrefix+'/mocha_test/lib/event_listener')
   , helper = require(rootPrefix + '/lib/contract_interact/helper')
   ;
 /*eslint-enable */
 
-eventListner.startObserving();
+eventListener.startObserving();
 
 
 module.exports.verifyIfMined = async (pricer, transactionHash) => {
@@ -42,7 +42,7 @@ module.exports.verifyTransactionHash = function (response) {
   assert.isEmpty(response.data.transaction_receipt, "check if transaction receipt does not exists");
 
   // verify if the events were fired
-  assert.equal(eventListner.verifyIfEventFired(response.data.transaction_uuid, "transaction_initiated"), true, "Event verification for transaction_initiated");
+  assert.equal(eventListener.verifyIfEventFired(response.data.transaction_uuid, "transaction_initiated"), true, "Event verification for transaction_initiated");
 
 };
 
@@ -57,8 +57,8 @@ module.exports.verifyTransactionReceipt = function (response) {
   assert.exists(response.data.transaction_receipt, "check if transaction receipt exists");
 
   // verify if the events were fired
-  assert.equal(eventListner.verifyIfEventFired(response.data.transaction_uuid, "transaction_initiated"), true, "Event verification for transaction_initiated");
-  assert.equal(eventListner.verifyIfEventFired(response.data.transaction_uuid, "transaction_mined"), true, "Event verification for transaction_mined");
+  assert.equal(eventListener.verifyIfEventFired(response.data.transaction_uuid, "transaction_initiated"), true, "Event verification for transaction_initiated");
+  assert.equal(eventListener.verifyIfEventFired(response.data.transaction_uuid, "transaction_mined"), true, "Event verification for transaction_mined");
 
 };
 

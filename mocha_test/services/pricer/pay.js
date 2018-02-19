@@ -4,9 +4,9 @@ const chai = require('chai')
   , assert = chai.assert;
 
 const rootPrefix = "../../.."
-  , constants = require(rootPrefix + '/mocha_test/services/pricer/constants')
+  , constants = require(rootPrefix + '/mocha_test/lib/constants')
   , BigNumber = require('bignumber.js')
-  , pricerUtils = require('./pricer_utils')
+  , utils = require(rootPrefix+'/mocha_test/lib/utils')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
   , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
   , pricerOstEur = new pricer(constants.pricerOstEurAddress, constants.chainId)
@@ -44,10 +44,10 @@ describe('Pay', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(amResponse);
+    utils.verifyTransactionReceipt(amResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, amResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, amResponse.data.transaction_hash);
 
     // verify if its set
     const amResult = await pricerOstUsd.acceptedMargins(constants.currencyUSD);
@@ -64,10 +64,10 @@ describe('Pay', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(spoResponse);
+    utils.verifyTransactionReceipt(spoResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, spoResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, spoResponse.data.transaction_hash);
 
     // verify if its set
     const poResult = await pricerOstUsd.priceOracles(constants.currencyUSD);
@@ -183,10 +183,10 @@ describe('Pay', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -363,10 +363,10 @@ describe('Pay', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -533,10 +533,10 @@ describe('Pay', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -704,10 +704,10 @@ describe('Pay', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -795,10 +795,10 @@ describe('Pay', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -882,10 +882,10 @@ describe('Pay', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -967,10 +967,10 @@ describe('Pay', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -1040,10 +1040,10 @@ describe('Pay', function() {
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -1124,10 +1124,10 @@ describe('Pay', function() {
 
     assert.equal(payResponse.isFailure(), true, "intendedPricePoint 0 cheek");
     // verify if the transaction receipt is valid
-    //pricerUtils.verifyTransactionReceipt(payResponse);
+    //utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    //await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    //await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -1199,7 +1199,7 @@ describe('Pay', function() {
 
     // verify if the transaction receipt is valid
     // we will not verify if it got mined as its just interaction layer testing
-    pricerUtils.verifyTransactionUUID(payResponse);
+    utils.verifyTransactionUUID(payResponse);
 
   });
 
@@ -1253,7 +1253,7 @@ describe('Pay', function() {
 
     // verify if the transaction hash is valid
     // we will not verify if it got mined as its just interaction layer testing
-    pricerUtils.verifyTransactionHash(payResponse);
+    utils.verifyTransactionHash(payResponse);
 
   });
 
@@ -1307,7 +1307,7 @@ describe('Pay', function() {
 
     // verify if the transaction receipt is valid.
     // We will not check here if the value is really set as its just interaction layer testing.
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
   });
 
