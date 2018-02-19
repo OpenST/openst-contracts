@@ -75,8 +75,6 @@ module.exports.perform = (accounts) => {
 
   it('succesfully pays', async () => {
     // without commission
-
-    // reset token balances to 0
     await token.setBalance(beneficiary, 0);
     assert.equal(await token.balanceOf.call(beneficiary), 0);
 
@@ -84,11 +82,11 @@ module.exports.perform = (accounts) => {
     assert.ok(await pricer.pay.call(beneficiary, transferAmount, 0, 0, '', 0));
     response = await pricer.pay(beneficiary, transferAmount, 0, 0, '', 0);
     assert.equal((await token.balanceOf(beneficiary)).toNumber(), transferAmount);
+    // When currency is blank, transferAmount is equal to tokenAmount
     checkPaymentEvent(response.logs[0], beneficiary, transferAmount, 0, 0, '', 0);
     pricer_utils.utils.logResponse(response, 'Pricer.pay: ' + transferAmount);
 
     // with commission
-
     // reset token balances to 0
     await token.setBalance(beneficiary, 0);
     await token.setBalance(commissionBeneficiary, 0);
@@ -100,6 +98,7 @@ module.exports.perform = (accounts) => {
     response = await pricer.pay(beneficiary, transferAmount, commissionBeneficiary, commissionAmount, '', 0);
     assert.equal((await token.balanceOf(beneficiary)).toNumber(), transferAmount);
     assert.equal((await token.balanceOf(commissionBeneficiary)).toNumber(), commissionAmount);
+    // When currency is blank, transferAmount is equal to tokenAmount
     checkPaymentEvent(response.logs[0], beneficiary, transferAmount, commissionBeneficiary, commissionAmount, '', 0);
     pricer_utils.utils.logResponse(response, 'Pricer.pay: ' + transferAmount.plus(commissionAmount));
   });
@@ -115,22 +114,24 @@ module.exports.perform = (accounts) => {
         beneficiary, transferAmount, 0, 0, pricer_utils.currencies.usd, intendedPricePoint.plus(1)));
     });
 
-    it('succesfully pays', async () => {
+    it('successfully pays', async () => {
       // reset token balances to 0
       await token.setBalance(beneficiary, 0);
       assert.equal(await token.balanceOf.call(beneficiary), 0);
 
       // get amount of tokens from currency value
-      var convertedTransferAmount = (await pricer.getPricePointAndCalculatedAmounts.call(
-      transferAmount, commissionAmount, pricer_utils.currencies.usd))[1];
+      var calculatedResponse = (await pricer.getPricePointAndCalculatedAmounts.call(
+      transferAmount, commissionAmount, pricer_utils.currencies.usd));
 
-      await token.approve(pricer.address, convertedTransferAmount);
+      var convertedTokenTransferAmount = calculatedResponse[1];
+
+      await token.approve(pricer.address, convertedTokenTransferAmount);
       assert.ok(await pricer.pay.call(beneficiary, transferAmount, 0, 0, pricer_utils.currencies.usd, intendedPricePoint));
       response = await pricer.pay(beneficiary, transferAmount, 0, 0, pricer_utils.currencies.usd, intendedPricePoint);
-      assert.equal((await token.balanceOf(beneficiary)).toNumber(), convertedTransferAmount);
+      assert.equal((await token.balanceOf(beneficiary)).toNumber(), convertedTokenTransferAmount);
 
       // Note: Payment event publishes unconverted values--this is OK because the Transfer event will show convertedTransferAmount
-      checkPaymentEvent(response.logs[0], beneficiary, transferAmount, 0, 0, pricer_utils.currencies.usd, intendedPricePoint);
+      checkPaymentEvent(response.logs[0], beneficiary, convertedTokenTransferAmount, 0, 0, pricer_utils.currencies.usd, intendedPricePoint);
       pricer_utils.utils.logResponse(response, 'Pricer.pay (currency): ' + transferAmount);
     });
 
@@ -138,12 +139,12 @@ module.exports.perform = (accounts) => {
 
 }
 
-function checkPaymentEvent(event, _beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount, _currency, _intendedPricePoint) {
+function checkPaymentEvent(event, _beneficiary, _tokenAmount, _commissionBeneficiary, _commissionTokenAmount, _currency, _intendedPricePoint) {
   assert.equal(event.event, 'Payment');
   assert.equal(event.args._beneficiary, _beneficiary);
-  assert.equal(event.args._transferAmount.toNumber(), _transferAmount);
+  assert.equal(event.args._tokenAmount.toNumber(), _tokenAmount);
   assert.equal(event.args._commissionBeneficiary, _commissionBeneficiary);
-  assert.equal(event.args._commissionAmount.toNumber(), _commissionAmount);
+  assert.equal(event.args._commissionTokenAmount.toNumber(), _commissionTokenAmount);
   if (_currency) {
     assert.equal(web3.toAscii(event.args._currency), _currency);
   }
