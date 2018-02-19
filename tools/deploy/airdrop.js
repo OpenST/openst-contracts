@@ -171,5 +171,5 @@ async function performer(argv) {
 
 }
 
-// node tools/deploy/airdrop.js brandedTokenContractAddress quoteCurrency workerContractAddress airdropBudgetHolder gasPrice <travis> <fileToWrite>
+// node tools/deploy/airdrop.js brandedTokenContractAddress baseCurrency workerContractAddress airdropBudgetHolder gasPrice <travis> <fileToWrite>
 performer(process.argv);
