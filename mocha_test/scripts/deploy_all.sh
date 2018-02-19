@@ -64,10 +64,10 @@ echo "\n Sourcing env_vars again"
 
 echo "\n********* Deploying Airdrop Contract Address *************"
 . ./scripts/env_vars.sh
-node ../tools/deploy/airdrop.js $TEST_COIN1_C5_ADDRESS OST $TEST_WORKER_CONTRACT_ADDRESS $OST_AIRDROP_BUDGET_HOLDER 0x12A05F200 travis a1.txt
-export TEST_AIRDROP1_CONTRACT_ADDRESS=$(cat ../tools/deploy/a1.txt)
+node ../tools/deploy/airdrop.js $TEST_COIN1_C5_ADDRESS OST $TEST_WORKER_CONTRACT_ADDRESS $OST_AIRDROP_BUDGET_HOLDER 0x12A05F200 travis ad1.txt
+export TEST_AIRDROP1_CONTRACT_ADDRESS=$(cat ../tools/deploy/ad1.txt)
 echo '\nexport TEST_AIRDROP1_CONTRACT_ADDRESS='\'$TEST_AIRDROP1_CONTRACT_ADDRESS\'>>scripts/env_vars.sh
-rm ../tools/deploy/a1.txt
+rm ../tools/deploy/ad1.txt
 echo "\n********* Done *************"
 
 

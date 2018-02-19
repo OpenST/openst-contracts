@@ -1,4 +1,5 @@
 const constants = {
+  gasUsed: 0xBA43B7400,
   deployer: process.env.OST_PRICER_DEPLOYER_ADDR,
   deployerPassphrase: process.env.OST_PRICER_DEPLOYER_PASSPHRASE,
   ops: process.env.OST_PRICER_OPS_ADDR,
