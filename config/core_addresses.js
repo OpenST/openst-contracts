@@ -44,6 +44,10 @@ const allAddresses = {
       abi: coreAbis.workers,
       bin: coreBins.workers
     },
+    brandedtoken: {
+      abi: coreAbis.brandedtoken,
+      bin: coreBins.brandedtoken
+    },
     airdrop: {
       abi: coreAbis.airdrop,
       bin: coreBins.airdrop
