@@ -230,8 +230,9 @@ describe('Pay', function() {
 
     const initialAccount1BalanceCache = await getAmountFromCache(constants.account1)
       , initialAccount3BalanceCache = await getAmountFromCache(constants.account3)
-      , initialAccount4BalanceCache = await getAmountFromCache(constants.account4);
-    
+      , initialAccount4BalanceCache = await getAmountFromCache(constants.account4)
+    ;
+
     assert.equal(initialAccount1Balance.toNumber(), initialAccount1BalanceCache.toNumber(), "account1: Actual and cacheValue mismatch");
     assert.equal(initialAccount3Balance.toNumber(), initialAccount3BalanceCache.toNumber(), "account3: Actual and cacheValue mismatch");
     assert.equal(initialAccount4Balance.toNumber(), initialAccount4BalanceCache.toNumber(), "account4: Actual and cacheValue mismatch");
@@ -462,7 +463,8 @@ describe('Pay', function() {
     // Cache check
     const finalAccount1BalanceCache = await getAmountFromCache(constants.account1)
       , finalAccount3BalanceCache = await getAmountFromCache(constants.account3)
-      , finalAccount4BalanceCache = await getAmountFromCache(constants.account4);
+      , finalAccount4BalanceCache = await getAmountFromCache(constants.account4)
+    ;
 
     assert.equal(account1Balance.toNumber(), finalAccount1BalanceCache.toNumber(), "account1: Actual and cacheValue mismatch after test");
     assert.equal(account3Balance.toNumber(), finalAccount3BalanceCache.toNumber(), "account3: Actual and cacheValue mismatch after test");
@@ -482,7 +484,8 @@ describe('Pay', function() {
     // Cache check
     const initialAccount1BalanceCache = await getAmountFromCache(constants.account1)
       , initialAccount3BalanceCache = await getAmountFromCache(constants.account3)
-      , initialAccount4BalanceCache = await getAmountFromCache(constants.account4);
+      , initialAccount4BalanceCache = await getAmountFromCache(constants.account4)
+    ;
 
     assert.equal(initialAccount1Balance.toNumber(), initialAccount1BalanceCache.toNumber(), "account1: Actual and cacheValue mismatch");
     assert.equal(initialAccount3Balance.toNumber(), initialAccount3BalanceCache.toNumber(), "account3: Actual and cacheValue mismatch");
@@ -651,7 +654,8 @@ describe('Pay', function() {
     // Cache check
     const initialAccount1BalanceCache = await getAmountFromCache(constants.account1)
       , initialAccount3BalanceCache = await getAmountFromCache(constants.account3)
-      , initialAccount4BalanceCache = await getAmountFromCache(constants.account4);
+      , initialAccount4BalanceCache = await getAmountFromCache(constants.account4)
+    ;
 
     assert.equal(initialAccount1Balance.toNumber(), initialAccount1BalanceCache.toNumber(), "account1: Actual and cacheValue mismatch");
     assert.equal(initialAccount3Balance.toNumber(), initialAccount3BalanceCache.toNumber(), "account3: Actual and cacheValue mismatch");
@@ -662,7 +666,7 @@ describe('Pay', function() {
       , commissionBeneficiary = constants.account4
       , currency = constants.currencyUSD
       , transferAmount = new BigNumber(pricerOstUsd.toWei('5'))
-      ;
+    ;
 
     const acceptedMarginData = await pricerOstUsd.acceptedMargins(currency);
     assert.equal(acceptedMarginData.isSuccess(), true);
@@ -720,7 +724,8 @@ describe('Pay', function() {
     // Cache check
     const finalAccount1BalanceCache = await getAmountFromCache(constants.account1)
       , finalAccount3BalanceCache = await getAmountFromCache(constants.account3)
-      , finalAccount4BalanceCache = await getAmountFromCache(constants.account4);
+      , finalAccount4BalanceCache = await getAmountFromCache(constants.account4)
+    ;
 
     assert.equal(account1Balance.toNumber(), finalAccount1BalanceCache.toNumber(), "account1: Actual and cacheValue mismatch after test");
     assert.equal(account3Balance.toNumber(), finalAccount3BalanceCache.toNumber(), "account3: Actual and cacheValue mismatch after test");
