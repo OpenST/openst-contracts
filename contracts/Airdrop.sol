@@ -69,7 +69,7 @@ contract Airdrop is Pricer {
         OpsManaged()
     {
         require(_workers != address(0));
-        require(airdropBudgetHolder != address(0));
+        require(_airdropBudgetHolder != address(0));
 
         workers = _workers;
         airdropBudgetHolder = _airdropBudgetHolder;
