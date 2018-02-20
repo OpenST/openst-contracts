@@ -14,27 +14,21 @@ const mustache = require('mustache')
   , envVarsSourceFile = '../../mocha_test/scripts/env_vars.sh';
 
 
-const addressTemplate = "export OST_PRICER_DEPLOYER_ADDR='{{ost_pricer_deployer_address}}'\n" +
-  "export OST_PRICER_OPS_ADDR='{{ost_pricer_ops_address}}'\n" +
-  "export OST_PRICER_PO_TEST_ACCOUNT1='{{ost_pricer_test_account_1}}'\n" +
-  "export OST_PRICER_PO_TEST_ACCOUNT1_PASSPHRASE='testtest'\n" +
-  "export OST_PRICER_PO_TEST_ACCOUNT2='{{ost_pricer_test_account_2}}'\n" +
-  "export OST_PRICER_PO_TEST_ACCOUNT2_PASSPHRASE='testtest'\n" +
-  "export OST_PRICER_PO_TEST_ACCOUNT3='{{ost_pricer_test_account_3}}'\n" +
-  "export OST_PRICER_PO_TEST_ACCOUNT3_PASSPHRASE='testtest'\n" +
-  "export OST_PRICER_PO_TEST_ACCOUNT4='{{ost_pricer_test_account_4}}'\n" +
-  "export OST_PRICER_PO_TEST_ACCOUNT4_PASSPHRASE='testtest'\n" +
+const addressTemplate = "export OST_UTILITY_DEPLOYER_ADDR='{{ost_utility_deployer_address}}'\n" +
+  "export OST_UTILITY_OPS_ADDR='{{ost_utility_ops_address}}'\n" +
+  "export OST_UTILITY_TEST_ACCOUNT1='{{ost_utility_test_account_1}}'\n" +
+  "export OST_UTILITY_TEST_ACCOUNT1_PASSPHRASE='testtest'\n" +
+  "export OST_UTILITY_TEST_ACCOUNT2='{{ost_utility_test_account_2}}'\n" +
+  "export OST_UTILITY_TEST_ACCOUNT2_PASSPHRASE='testtest'\n" +
+  "export OST_UTILITY_TEST_ACCOUNT3='{{ost_utility_test_account_3}}'\n" +
+  "export OST_UTILITY_TEST_ACCOUNT3_PASSPHRASE='testtest'\n" +
+  "export OST_UTILITY_TEST_ACCOUNT4='{{ost_utility_test_account_4}}'\n" +
+  "export OST_UTILITY_TEST_ACCOUNT4_PASSPHRASE='testtest'\n" +
   "export OST_AIRDROP_BUDGET_HOLDER='{{ost_airdrop_budget_holder}}'\n" +
   "export OST_AIRDROP_BUDGET_HOLDER_PASSPHRASE='testtest'\n" +
   "export OST_WORKER_TEST_ACCOUNT1='{{ost_worker_test_account_1}}'\n" +
   "export OST_WORKER_TEST_ACCOUNT1_PASSPHRASE='testtest'\n"
 ;
-
-
-const contractPricer = "export OST_PRICER_CONTRACT_ADDR='{{ost_pricer_contract_address}}'\n";
-const contractBT = "export OST_PRICER_BT_CONTRACT_ADDR='{{ost_pricer_bt_contract_address}}'\n";
-const contractPO = "export OST_PRICER_PO_CONTRACT_ADDR='{{ost_pricer_po_contract_address}}'\n";
-
 
 const populateEnvVars = {
 
@@ -44,13 +38,7 @@ const populateEnvVars = {
       if (type === 'address') {
         renderData = mustache.to_html(addressTemplate, vars);
       }
-      else if (type === 'contractPricer') {
-        renderData = mustache.to_html(contractPricer, vars);
-      } else if (type === 'contractBT') {
-        renderData = mustache.to_html(contractBT, vars);
-      } else if (type === 'contractPO') {
-        renderData = mustache.to_html(contractPO, vars);
-      } else {
+      else {
         console.error(" Invalid Template Type To render");
         process.exit(1);
       }

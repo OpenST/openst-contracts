@@ -56,12 +56,12 @@ function main( addressFile ) {
   });
 
   populateEnvVars.renderAndPopulate('address', {
-    ost_pricer_deployer_address: _addresses.deployerAdd,
-    ost_pricer_ops_address: _addresses.opsAdd,
-    ost_pricer_test_account_1: _addresses.account1,
-    ost_pricer_test_account_2: _addresses.account2,
-    ost_pricer_test_account_3: _addresses.account3,
-    ost_pricer_test_account_4: _addresses.account4,
+    ost_utility_deployer_address: _addresses.deployerAdd,
+    ost_utility_ops_address: _addresses.opsAdd,
+    ost_utility_test_account_1: _addresses.account1,
+    ost_utility_test_account_2: _addresses.account2,
+    ost_utility_test_account_3: _addresses.account3,
+    ost_utility_test_account_4: _addresses.account4,
     ost_airdrop_budget_holder: _addresses.airdropBudgetHolder,
     ost_worker_test_account_1: _addresses.workerAccount1
    }

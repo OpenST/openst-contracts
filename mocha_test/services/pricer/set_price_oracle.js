@@ -30,7 +30,7 @@ describe('Set price oracle', function() {
       constants.ops,
       constants.opsPassphrase,
       constants.currencyUSD,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -49,7 +49,7 @@ describe('Set price oracle', function() {
       constants.ops,
       constants.opsPassphrase,
       constants.currencyEUR,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -76,7 +76,7 @@ describe('Set price oracle', function() {
       constants.deployerPassphrase,
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -101,7 +101,7 @@ describe('Set price oracle', function() {
       constants.opsPassphrase,
       constants.currencyBlank,
       constants.priceOracles.OST.USD,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // check if the response is failure
@@ -118,7 +118,7 @@ describe('Set price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       0,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // check if the response is failure
@@ -152,7 +152,7 @@ describe('Set price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // check if the response is failure
@@ -171,7 +171,7 @@ describe('Set price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.priceOracles.ETH.USD,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -198,7 +198,7 @@ describe('Set price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -225,7 +225,7 @@ describe('Set price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -252,7 +252,7 @@ describe('Set price oracle', function() {
       constants.opsPassphrase,
       constants.currencyEUR,
       constants.priceOracles.OST.EUR,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -280,7 +280,7 @@ describe('Set price oracle', function() {
       constants.opsPassphrase,
       constants.currencyEUR,
       constants.priceOracles.OST.EUR,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeUUID});
 
     // verify if the transaction receipt is valid
@@ -300,7 +300,7 @@ describe('Set price oracle', function() {
       constants.opsPassphrase,
       constants.currencyEUR,
       constants.priceOracles.OST.EUR,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeHash});
 
     // verify if the transaction hash is valid
@@ -320,7 +320,7 @@ describe('Set price oracle', function() {
       constants.opsPassphrase,
       constants.currencyEUR,
       constants.priceOracles.OST.EUR,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid.

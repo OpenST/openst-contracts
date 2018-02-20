@@ -16,14 +16,8 @@ function define(name, value) {
   });
 }
 
-// ST' UUID
-define('OST_PRICER_ST_PRIME_UUID', process.env.OST_PRICER_ST_PRIME_UUID);
-
 // Geth
-define('OST_PRICER_GETH_RPC_PROVIDER', process.env.OST_PRICER_GETH_RPC_PROVIDER);
-
-// Chain ID
-define('OST_PRICER_CHAIN_ID', process.env.OST_PRICER_CHAIN_ID);
+define('OST_UTILITY_GETH_RPC_PROVIDER', process.env.OST_UTILITY_GETH_RPC_PROVIDER);
 
 // Gas limit
 define('OST_GAS_LIMIT', 9100000);

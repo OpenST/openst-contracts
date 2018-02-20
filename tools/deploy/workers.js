@@ -125,4 +125,5 @@ async function performer(argv) {
   }
 }
 
+// node tools/deploy/worker.js gasPrice <travis> <fileToWrite>
 performer(process.argv);

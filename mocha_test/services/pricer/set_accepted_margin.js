@@ -32,7 +32,7 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       30,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -59,7 +59,7 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       50,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeUUID});
 
     // verify if the transaction receipt is valid
@@ -79,7 +79,7 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       150,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeHash});
 
     // verify if the transaction hash is valid
@@ -99,7 +99,7 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       70,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid.
@@ -117,7 +117,7 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyBlank,
       3,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the response is failure
@@ -150,7 +150,7 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       3,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the response is failure
@@ -167,7 +167,7 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       -30,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the response is failure
@@ -186,7 +186,7 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       3,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -206,7 +206,7 @@ describe('Set accepted margins', function() {
       constants.deployerPassphrase,
       constants.currencyUSD,
       8,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -234,7 +234,7 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       0,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -262,7 +262,7 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       50,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid

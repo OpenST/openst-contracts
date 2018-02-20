@@ -22,15 +22,12 @@ sh start_test_chain.sh
 ### Setup Initial Setup Variables:
 
 ```bash
-export OST_PRICER_GETH_RPC_PROVIDER='http://127.0.0.1:9546'
-export OST_PRICER_DEPLOYER_ADDR=''
-export OST_PRICER_DEPLOYER_PASSPHRASE='testtest'
-export OST_PRICER_OPS_ADDR=''
-export OST_PRICER_OPS_PASSPHRASE='testtest'
+export OST_UTILITY_GETH_RPC_PROVIDER='http://127.0.0.1:9546'
+export OST_UTILITY_DEPLOYER_ADDR=''
+export OST_UTILITY_DEPLOYER_PASSPHRASE='testtest'
+export OST_UTILITY_OPS_ADDR=''
+export OST_UTILITY_OPS_PASSPHRASE='testtest'
 ```
-
-### Start Chain:
-
 
 ### Run Deployment Script for Branded Token:
 
@@ -41,13 +38,13 @@ node tools/deploy/EIP20TokenMock.js conversionRate symbol name decimals gasPrice
 ### Run Deployment Script for Workers:
 
 ```bash
-node tools/deploy/workers.js
+node tools/deploy/workers.js gasPrice
 ```
 
 ### Run Deployment Script for Airdrop:
 
 ```bash
-node tools/deploy/airdrop.js brandedTokenContractAddress quoteCurrency workerContractAddress airdropBudgetHolder gasPrice
+node tools/deploy/airdrop.js brandedTokenContractAddress baseCurrency workerContractAddress airdropBudgetHolder gasPrice
 ```
 
 ### Set Caching Engine:
@@ -60,8 +57,29 @@ For using redis/memcache as cache engine refer - [OpenSTFoundation/ost-price-ora
 # Example:
 ```js
 const OpenSTPayment = require('@openstfoundation/openst-payments')
-  , workers = OpenSTPayment.worker
-  , airdrop = OpenSTPayment.airdrop
-;
-
+  , workers = new OpenSTPayment.worker(workerContractAddress, chainId)
+  , airdrop = new OpenSTPayment.airdrop(airdropContractAddress, chainId)
+  , currency = 'USD'
+;  
+  // Set Worker
+  workers.setWorker(senderAddress, senderPassphrase, workerAddress, deactivationHeight, gasPrice);
+  // Set Price Oracle
+  airdrop.setPriceOracle(senderAddress, senderPassphrase, currency, address, gasPrice);
+  // Set Accepted Margin
+  airdrop.setAcceptedMargin(senderAddress, senderPassphrase, currency, acceptedMargin, gasPrice);
+  // Transfer Amount to airdrop budget holder
+  // Approve airdrop budget holder
+  // Approve spender
+  // Call Pay method
+  airdrop.pay(workerAddress,
+              WorkerPassphrase,
+              beneficiaryAddress,
+              transferAmount,
+              commissionBeneficiaryAddress,
+              commissionAmount,
+              currency,
+              intendedPricePoint,
+              spender,
+              airdropAmount,
+              gasPrice);
 ```

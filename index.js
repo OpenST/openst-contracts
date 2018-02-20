@@ -7,8 +7,7 @@
 const rootPrefix = "."
   , version = require(rootPrefix + '/package.json').version
   , workers = require(rootPrefix + '/lib/contract_interact/workers')
-  , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
-  , aidrop = require(rootPrefix + '/lib/contract_interact/aidrop')
+  , airdrop = require(rootPrefix + '/lib/contract_interact/airdrop')
 ;
 
 const OSTPayment = function () {
@@ -16,7 +15,6 @@ const OSTPayment = function () {
 
   oThis.version = version;
   oThis.workers = workers;
-  oThis.pricer = pricer;
   oThis.airdrop = airdrop;
 };
 

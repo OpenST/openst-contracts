@@ -128,10 +128,6 @@ async function performer(argv) {
   logger.info(contractDeployTxReceipt);
   logger.win(contractName+ " Deployed ");
   const contractAddress = contractDeployTxReceipt.receipt.contractAddress;
-  // if (isTravisCIEnabled) {
-  //   await deployHelper.updateEnvContractAddress(
-  //     'contractBT', {'ost_pricer_bt_contract_address': contractDeployTxReceipt.contractAddress});
-  // }
   deployHelper.writeContractAddressToFile(fileForContractAddress, contractAddress);
 }
 

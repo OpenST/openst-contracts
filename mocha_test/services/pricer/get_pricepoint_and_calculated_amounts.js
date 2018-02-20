@@ -32,7 +32,7 @@ describe('Get price point and calculated amounts', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -52,7 +52,7 @@ describe('Get price point and calculated amounts', function() {
       constants.opsPassphrase,
       constants.currencyEUR,
       constants.priceOracles.OST.EUR,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid

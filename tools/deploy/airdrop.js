@@ -152,10 +152,10 @@ async function performer(argv) {
   );
 
   logger.info(contractDeployTxReceipt);
-  logger.win(contractName+ " Deployed ");
+  logger.win(contractName+ " Contract Deployed ");
 
   const contractAddress = contractDeployTxReceipt.receipt.contractAddress;
-  logger.info(contractName+ " Contract Address: "+contractAddress);
+  logger.win(contractName+ " Contract Address: "+contractAddress);
 
   logger.info("Setting Ops Address to: " + opsAddress);
   var opsManaged = new OpsManagedContract(contractAddress, gasPrice);

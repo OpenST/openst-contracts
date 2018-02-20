@@ -9,8 +9,6 @@ const rootPrefix = "../../.."
   , utils = require(rootPrefix+'/mocha_test/lib/utils')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
   , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
-  , pricerOstEur = new pricer(constants.pricerOstEurAddress, constants.chainId)
-  , pricerOstUsd10Decimal = new pricer(constants.pricerOstUsd10DecimalAddress, constants.chainId)
 ;
 
 describe('Get price oracles', function() {
@@ -44,7 +42,7 @@ describe('Get price oracles', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -59,7 +57,7 @@ describe('Get price oracles', function() {
       constants.opsPassphrase,
       constants.currencyEUR,
       constants.priceOracles.OST.EUR,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -89,7 +87,7 @@ describe('Get price oracles', function() {
       constants.ops,
       constants.opsPassphrase,
       constants.currencyUSD,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -103,7 +101,7 @@ describe('Get price oracles', function() {
       constants.ops,
       constants.opsPassphrase,
       constants.currencyEUR,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid

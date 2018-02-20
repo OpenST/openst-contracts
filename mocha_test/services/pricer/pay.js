@@ -40,7 +40,7 @@ describe('Pay', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       50,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -60,7 +60,7 @@ describe('Pay', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -79,7 +79,7 @@ describe('Pay', function() {
       constants.opsPassphrase,
       constants.account1,
       pricerOstUsd.toWei('1000'),
-      0xBA43B7400);
+      constants.gasUsed);
 
     const account1Balance = await TC5.balanceOf(constants.account1);
     assert.equal(account1Balance, pricerOstUsd.toWei('1000'));
@@ -89,7 +89,7 @@ describe('Pay', function() {
       constants.opsPassphrase,
       constants.account2,
       pricerOstUsd.toWei('0'),
-      0xBA43B7400);
+      constants.gasUsed);
 
     const account2Balance = await TC5.balanceOf(constants.account2);
     assert.equal(account2Balance, pricerOstUsd.toWei('0'));
@@ -99,7 +99,7 @@ describe('Pay', function() {
       constants.opsPassphrase,
       constants.account3,
       pricerOstUsd.toWei('0'),
-      0xBA43B7400);
+      constants.gasUsed);
 
     const account3Balance = await TC5.balanceOf(constants.account3);
     assert.equal(account3Balance, pricerOstUsd.toWei('0'));
@@ -109,7 +109,7 @@ describe('Pay', function() {
       constants.opsPassphrase,
       constants.account4,
       pricerOstUsd.toWei('0'),
-      0xBA43B7400);
+      constants.gasUsed);
 
     const account4Balance = await TC5.balanceOf(constants.account4);
     assert.equal(account4Balance, pricerOstUsd.toWei('0'));
@@ -168,7 +168,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       estimatedTotalAmount,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -179,7 +179,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -264,7 +264,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -275,7 +275,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     assert.equal(payResponse.isFailure(), true, "Low balance check");
@@ -348,7 +348,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -359,7 +359,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -435,7 +435,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -446,7 +446,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     assert.equal(payResponse.isFailure(), true);
@@ -518,7 +518,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -529,7 +529,7 @@ describe('Pay', function() {
       commissionAmount,
       constants.currencyINR,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -605,7 +605,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -616,7 +616,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     assert.equal(payResponse.isFailure(), true);
@@ -685,7 +685,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const changedPricePoint = new BigNumber(intendedPricePoint)
       .plus(estimatedMargin)
@@ -700,7 +700,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       changedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -776,7 +776,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const changedPricePoint = new BigNumber(intendedPricePoint)
       .minus(estimatedMargin)
@@ -791,7 +791,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       changedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -867,7 +867,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -878,7 +878,7 @@ describe('Pay', function() {
       commissionAmount,
       constants.currencyINR,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -952,7 +952,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -963,7 +963,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -1025,7 +1025,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -1036,7 +1036,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
@@ -1108,7 +1108,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -1119,7 +1119,7 @@ describe('Pay', function() {
       commissionAmount,
       constants.currencyUSD,
       0,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     assert.equal(payResponse.isFailure(), true, "intendedPricePoint 0 cheek");
@@ -1183,7 +1183,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       estimatedTotalAmount,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -1194,7 +1194,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeUUID});
 
     // verify if the transaction receipt is valid
@@ -1237,7 +1237,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       estimatedTotalAmount,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -1248,7 +1248,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeHash});
 
     // verify if the transaction hash is valid
@@ -1291,7 +1291,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       estimatedTotalAmount,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -1302,7 +1302,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid.
@@ -1345,7 +1345,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -1356,7 +1356,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     assert.equal(payResponse.isFailure(), true, "insufficient balance cheek");

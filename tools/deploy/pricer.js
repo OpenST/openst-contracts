@@ -149,9 +149,6 @@ async function performer(argv) {
   var contractOpsAddress = await opsManaged.getOpsAddress();
   logger.info("Ops Address Set to: " + contractOpsAddress);
 
-  // if (isTravisCIEnabled) {
-  //   await deployHelper.updateEnvContractAddress('contractPricer', {'ost_pricer_contract_address': contractDeployTxReceipt.contractAddress});
-  // }
   if (fileForContractAddress !== '') {
     deployHelper.writeContractAddressToFile(fileForContractAddress, contractAddress);
   }
