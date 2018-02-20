@@ -21,7 +21,8 @@
 
 const Utils          = require('../../lib/utils.js'),
       BigNumber      = require('bignumber.js'),
-      Workers        = artifacts.require('./Workers.sol');
+      Workers        = artifacts.require('./Workers.sol')
+      ;
 
 
 /// @dev Export common requires
