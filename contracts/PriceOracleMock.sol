@@ -50,7 +50,8 @@ contract PriceOracleMock is PriceOracleInterface {
     /// @param _quoteCurrency quoteCurrency
     function PriceOracleMock(
         bytes3 _baseCurrency,
-        bytes3 _quoteCurrency
+        bytes3 _quoteCurrency,
+        uint256 _price
         )
         public
     {
@@ -58,21 +59,7 @@ contract PriceOracleMock is PriceOracleInterface {
         oracleQuoteCurrency = _quoteCurrency;
         // Initialize base currency
         oracleBaseCurrency = _baseCurrency;
-    }
-
-    /// @dev use this method to set price
-    /// @param _price price
-    /// @return uint256
-    function setPrice(
-        uint256 _price)
-        external
-        returns(
-        uint256)
-    {
-        // Assign the new value
         price = _price;
-
-        return 0;
     }
 
     /// @dev gets price

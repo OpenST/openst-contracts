@@ -19,7 +19,7 @@
 //
 // ----------------------------------------------------------------------------
 
-const pricer_utils = require('./pricer_utils.js');
+const pricerUtils = require('./pricer_utils.js');
 
 ///
 /// Test stories
@@ -31,10 +31,11 @@ const pricer_utils = require('./pricer_utils.js');
 
 module.exports.perform = (accounts) => {
   const TOKEN_DECIMALS = 18,
-        conversionRate = 10;
+        conversionRate = 10
+        ;
 
   before(async () => {
-    contracts   = await pricer_utils.deployPricer(artifacts, accounts);
+    contracts   = await pricerUtils.deployPricer(artifacts, accounts);
     token       = contracts.token;
     pricer      = contracts.pricer;
   });
@@ -44,7 +45,7 @@ module.exports.perform = (accounts) => {
   });
 
   it('has baseCurrency', async () => {
-    assert.equal(web3.toAscii(await pricer.baseCurrency.call()), pricer_utils.currencies.ost);
+    assert.equal(web3.toAscii(await pricer.baseCurrency.call()), pricerUtils.currencies.ost);
   });
 
   it('has decimals', async () => {

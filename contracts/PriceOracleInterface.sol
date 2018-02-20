@@ -37,15 +37,6 @@ contract PriceOracleInterface {
     /*
      * Functions
      */
-    /// @dev use this function to update oracle price
-    /// @param _price price
-    /// @return expirationHeight
-    function setPrice(
-        uint256 _price)
-        external
-        returns(
-        uint256);
-
     /// @dev Price is stored as fixed point integer value similar as wei unit.
     /// Use this variable in case decimal value need to be evaluated
     /// @return token decimals

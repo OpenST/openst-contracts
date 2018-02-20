@@ -19,9 +19,10 @@
 //
 // ----------------------------------------------------------------------------
 
-const pricer_utils   = require('./pricer_utils.js'),
+const pricerUtils   = require('./pricer_utils.js'),
       Pricer         = artifacts.require('./Pricer.sol'),
-      EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol');
+      EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol')
+      ;
 
 ///
 /// Test stories
@@ -31,23 +32,24 @@ const pricer_utils   = require('./pricer_utils.js'),
 /// successfully deploys
 
 module.exports.perform = () => {
-  var token    = null;
-  var response = null;
+  var token    = null,
+      response = null
+      ;
 
   before(async () => {
-    token = await EIP20TokenMock.new(1, pricer_utils.currencies.ost, 'name', 18);
+    token = await EIP20TokenMock.new(1, pricerUtils.currencies.ost, 'name', 18);
   });
 
   it('fails to deploy if brandedToken is null', async () => {
-    await pricer_utils.utils.expectThrow(Pricer.new(0, pricer_utils.currencies.ost));
+    await pricerUtils.utils.expectThrow(Pricer.new(0, pricerUtils.currencies.ost));
   });
 
   it('fails to deploy if baseCurrency is empty', async () => {
-    await pricer_utils.utils.expectThrow(Pricer.new(token.address, ''));
+    await pricerUtils.utils.expectThrow(Pricer.new(token.address, ''));
   });
 
   it('successfully deploys', async () => {
-    response = await Pricer.new(token.address, pricer_utils.currencies.ost);
-    pricer_utils.utils.logTransaction(response.transactionHash, 'Pricer.constructor');
+    response = await Pricer.new(token.address, pricerUtils.currencies.ost);
+    pricerUtils.utils.logTransaction(response.transactionHash, 'Pricer.constructor');
   });
 }

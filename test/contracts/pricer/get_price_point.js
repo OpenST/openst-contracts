@@ -19,7 +19,7 @@
 //
 // ----------------------------------------------------------------------------
 
-const pricer_utils = require('./pricer_utils.js');
+const pricerUtils = require('./pricer_utils.js');
 
 ///
 /// Test stories
@@ -29,28 +29,27 @@ const pricer_utils = require('./pricer_utils.js');
 
 module.exports.perform = (accounts) => {
   const opsAddress = accounts[1],
-        usdPrice   = new pricer_utils.bigNumber(20 * 10**18),
-        eurPrice   = new pricer_utils.bigNumber(10 * 10**18);
+        abcPrice   = new pricerUtils.bigNumber(20 * 10**18),
+        xyzPrice   = new pricerUtils.bigNumber(10 * 10**18)
+        ;
 
   var response = null;
 
   before(async () => {
-    contracts      = await pricer_utils.deployPricer(artifacts, accounts);
+    contracts      = await pricerUtils.deployPricer(artifacts, accounts);
     pricer         = contracts.pricer;
-    usdPriceOracle = contracts.usdPriceOracle;
-    eurPriceOracle = contracts.eurPriceOracle;     
-    await pricer.setPriceOracle(pricer_utils.currencies.usd, usdPriceOracle.address, { from: opsAddress });
-    await pricer.setPriceOracle(pricer_utils.currencies.eur, eurPriceOracle.address, { from: opsAddress });
-    await usdPriceOracle.setPrice(usdPrice);
-    await eurPriceOracle.setPrice(eurPrice);
+    abcPriceOracle = contracts.abcPriceOracle;
+    xyzPriceOracle = contracts.xyzPriceOracle;
+    await pricer.setPriceOracle(pricerUtils.currencies.abc, abcPriceOracle.address, { from: opsAddress });
+    await pricer.setPriceOracle(pricerUtils.currencies.xyz, xyzPriceOracle.address, { from: opsAddress });
   });
 
   it('fails if priceOracle is not set', async () => {
-    await pricer_utils.utils.expectThrow(pricer.getPricePoint.call(pricer_utils.currencies.ost));
+    await pricerUtils.utils.expectThrow(pricer.getPricePoint.call(pricerUtils.currencies.ost));
   });
 
   it('successfully returns price from priceOracle', async () => {
-    assert.equal((await pricer.getPricePoint.call(pricer_utils.currencies.usd)).toNumber(), usdPrice);
-    assert.equal((await pricer.getPricePoint.call(pricer_utils.currencies.eur)).toNumber(), eurPrice);
+    assert.equal((await pricer.getPricePoint.call(pricerUtils.currencies.abc)).toNumber(), abcPrice);
+    assert.equal((await pricer.getPricePoint.call(pricerUtils.currencies.xyz)).toNumber(), xyzPrice);
   });
 }
