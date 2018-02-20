@@ -24,10 +24,12 @@ const Utils          = require('../../lib/utils.js'),
       Workers        = artifacts.require('./Workers.sol'),
       Airdrop        = artifacts.require('./Airdrop.sol'),
       EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol'),
-      PriceOracle    = artifacts.require('./ost-price-oracle/PriceOracle.sol');
+      PriceOracle    = artifacts.require('./ost-price-oracle/PriceOracle.sol')
+      ;
 
 const ost = 'OST',
-      usd = 'USD';
+      abc = 'ABC'
+      ;
 
 /// @dev Export common requires
 module.exports.utils     = Utils;
@@ -36,7 +38,7 @@ module.exports.bigNumber = BigNumber;
 /// @dev Export constants
 module.exports.currencies = {
   ost : ost,
-  usd : usd
+  abc : abc
 }
 
 /// @dev Deploy
@@ -49,20 +51,21 @@ module.exports.deployAirdrop = async (artifacts, accounts) => {
         airdropBudgetHolder = accounts[3],
         workers             = await Workers.new(),
         airdrop             = await Airdrop.new(token.address, ost, workers.address, airdropBudgetHolder),
-        usdPriceOracle      = await PriceOracle.new(ost, usd),
-        usdPrice            = new BigNumber(20 * 10**18);
+        abcPriceOracle      = await PriceOracle.new(ost, abc),
+        abcPrice            = new BigNumber(20 * 10**18)
+        ;
 
   assert.ok(await workers.setOpsAddress(opsAddress));
   assert.ok(await airdrop.setOpsAddress(opsAddress));
-  assert.ok(await usdPriceOracle.setOpsAddress(opsAddress));
+  assert.ok(await abcPriceOracle.setOpsAddress(opsAddress));
 
   assert.ok(await workers.setWorker(worker, web3.eth.blockNumber + 1000, { from: opsAddress }));
-  assert.ok(await airdrop.setPriceOracle(usd, usdPriceOracle.address, { from: opsAddress }));
-  assert.ok(await usdPriceOracle.setPrice(usdPrice, { from: opsAddress }));
+  assert.ok(await airdrop.setPriceOracle(abc, abcPriceOracle.address, { from: opsAddress }));
+  assert.ok(await abcPriceOracle.setPrice(abcPrice, { from: opsAddress }));
 
-	return {
+  return {
     token          : token,
     airdrop        : airdrop,
-    usdPriceOracle : usdPriceOracle
-	};
+    abcPriceOracle : abcPriceOracle
+  };
 };

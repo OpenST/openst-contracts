@@ -19,9 +19,10 @@
 //
 // ----------------------------------------------------------------------------
 
-const airdrop_utils  = require('./airdrop_utils.js'),
+const airdropUtils  = require('./airdrop_utils.js'),
       Airdrop        = artifacts.require('./Airdrop.sol'),
-      EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol');
+      EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol')
+      ;
 
 ///
 /// Test stories
@@ -31,27 +32,28 @@ const airdrop_utils  = require('./airdrop_utils.js'),
 /// successfully deploys
 
 module.exports.perform = (accounts) => {
-        workers             = accounts[2],
-        airdropBudgetHolder = accounts[3];
+  const workers             = accounts[2],
+        airdropBudgetHolder = accounts[3]
+        ;
 
   var token = null;
 
   before(async () => {
-    token = await EIP20TokenMock.new(1, airdrop_utils.currencies.ost, 'name', 18);
+    token = await EIP20TokenMock.new(1, airdropUtils.currencies.ost, 'name', 18);
   });
 
   it('fails to deploy if workers is null', async () => {
-    await airdrop_utils.utils.expectThrow(Airdrop.new(token.address, airdrop_utils.currencies.ost, 0, airdropBudgetHolder));
+    await airdropUtils.utils.expectThrow(Airdrop.new(token.address, airdropUtils.currencies.ost, 0, airdropBudgetHolder));
   });
 
   it('fails to deploy if airdropBudgetHolder is null', async () => {
-    await airdrop_utils.utils.expectThrow(Airdrop.new(token.address, airdrop_utils.currencies.ost, workers, 0));
+    await airdropUtils.utils.expectThrow(Airdrop.new(token.address, airdropUtils.currencies.ost, workers, 0));
   });
 
   it('successfully deploys', async () => {
-    var airdrop = await Airdrop.new(token.address, airdrop_utils.currencies.ost, workers, airdropBudgetHolder);
+    var airdrop = await Airdrop.new(token.address, airdropUtils.currencies.ost, workers, airdropBudgetHolder);
     assert.equal(await airdrop.workers.call(), workers);
     assert.equal(await airdrop.airdropBudgetHolder.call(), airdropBudgetHolder);
-    airdrop_utils.utils.logTransaction(airdrop.transactionHash, 'Airdrop.constructor');
+    airdropUtils.utils.logTransaction(airdrop.transactionHash, 'Airdrop.constructor');
   });
 }

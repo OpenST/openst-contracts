@@ -19,7 +19,7 @@
 //
 // ----------------------------------------------------------------------------
 
-const airdrop_utils  = require('./airdrop_utils.js');
+const airdropUtils  = require('./airdrop_utils.js');
 
 ///
 /// Test stories
@@ -39,17 +39,19 @@ module.exports.perform = (accounts) => {
         worker                = accounts[2],
         airdropBudgetHolder   = accounts[3],
         beneficiary           = accounts[4],
-        transferAmount        = new airdrop_utils.bigNumber(5 * 10**18),
+        transferAmount        = new airdropUtils.bigNumber(5 * 10**18),
         commissionBeneficiary = accounts[5],
-        commissionAmount      = new airdrop_utils.bigNumber(1.25 * 10**18),
+        commissionAmount      = new airdropUtils.bigNumber(1.25 * 10**18),
         spender               = accounts[6],
-        airdropAmount         = new airdrop_utils.bigNumber(10 * 10**18);
+        airdropAmount         = new airdropUtils.bigNumber(10 * 10**18)
+        ;
 
   var airdrop               = null,
-      response              = null;
+      response              = null
+      ;
 
   before(async () => {
-    contracts = await airdrop_utils.deployAirdrop(artifacts, accounts);
+    contracts = await airdropUtils.deployAirdrop(artifacts, accounts);
     token     = contracts.token;
     airdrop   = contracts.airdrop;
 
@@ -57,29 +59,29 @@ module.exports.perform = (accounts) => {
   });
 
 	it('fails to airdrop and pay if msg.sender is not an active worker', async () => {
-    await airdrop_utils.utils.expectThrow(airdrop.payAirdrop.call(beneficiary, transferAmount, commissionBeneficiary, commissionAmount,
+    await airdropUtils.utils.expectThrow(airdrop.payAirdrop.call(beneficiary, transferAmount, commissionBeneficiary, commissionAmount,
       '', 0, spender, airdropAmount, { from: opsAddress }));
   });
 
 	it('fails to airdrop and pay if spender is null', async () => {
-    await airdrop_utils.utils.expectThrow(airdrop.payAirdrop.call(beneficiary, transferAmount, commissionBeneficiary, commissionAmount,
+    await airdropUtils.utils.expectThrow(airdrop.payAirdrop.call(beneficiary, transferAmount, commissionBeneficiary, commissionAmount,
       '', 0, 0, airdropAmount, { from: worker }));
   });
 
 	it('fails to airdrop and pay if isValidBeneficiaryData returns false', async () => {
     // transferAmount == 0
-    await airdrop_utils.utils.expectThrow(airdrop.payAirdrop.call(beneficiary, 0, commissionBeneficiary, commissionAmount,
+    await airdropUtils.utils.expectThrow(airdrop.payAirdrop.call(beneficiary, 0, commissionBeneficiary, commissionAmount,
       '', 0, spender, airdropAmount, { from: worker }));
   });
 
   it('fails to airdrop and pay if unable to perfrom airdrop transfer to spender', async () => {
-    await airdrop_utils.utils.expectThrow(airdrop.payAirdrop.call(beneficiary, transferAmount, commissionBeneficiary, commissionAmount,
+    await airdropUtils.utils.expectThrow(airdrop.payAirdrop.call(beneficiary, transferAmount, commissionBeneficiary, commissionAmount,
       '', 0, spender, airdropAmount, { from: worker }));
   });
 
   it('fails to airdrop and pay if unable to perform transfers', async () => {
     await token.approve(airdrop.address, airdropAmount, { from: airdropBudgetHolder });
-    await airdrop_utils.utils.expectThrow(airdrop.payAirdrop.call(beneficiary, transferAmount, commissionBeneficiary, commissionAmount,
+    await airdropUtils.utils.expectThrow(airdrop.payAirdrop.call(beneficiary, transferAmount, commissionBeneficiary, commissionAmount,
       '', 0, spender, airdropAmount, { from: worker }));
   });
 
@@ -96,8 +98,10 @@ module.exports.perform = (accounts) => {
     assert.equal((await token.allowance.call(airdropBudgetHolder, airdrop.address)).toNumber(), airdropAmount.minus(totalPaid).toNumber());
     assert.equal((await token.balanceOf.call(beneficiary)).toNumber(), transferAmount.toNumber());
     assert.equal((await token.balanceOf.call(commissionBeneficiary)).toNumber(), commissionAmount.toNumber());
+    // transferAmount == tokenAmount when currency is null
+    // commissionAmount == commissionTokenAmount when currency is null
     checkAirdropPaymentEvent(response.logs[0], beneficiary, transferAmount, commissionBeneficiary, commissionAmount, '', 0, spender, airdropAmount);
-    airdrop_utils.utils.logResponse(response, 'Airdrop.payAirdrop: ' + totalPaid);
+    airdropUtils.utils.logResponse(response, 'Airdrop.payAirdrop: ' + totalPaid);
   });
 
   context('when currency is not empty', async () => {
@@ -112,31 +116,31 @@ module.exports.perform = (accounts) => {
 
     it('fails to airdrop and pay if unable to validate margin and calculate BT amount', async () => {
       // intendedPricePoint == 0
-      await airdrop_utils.utils.expectThrow(airdrop.payAirdrop.call(beneficiary, transferAmount, commissionBeneficiary, commissionAmount,
-        airdrop_utils.currencies.usd, 0, spender, airdropAmount, { from: worker }));
+      await airdropUtils.utils.expectThrow(airdrop.payAirdrop.call(beneficiary, transferAmount, commissionBeneficiary, commissionAmount,
+        airdropUtils.currencies.abc, 0, spender, airdropAmount, { from: worker }));
     });
 
     it('successfully airdrops and pays', async () => {
-      response = await airdrop.getPricePointAndCalculatedAmounts.call(transferAmount, commissionAmount, airdrop_utils.currencies.usd);
+      response = await airdrop.getPricePointAndCalculatedAmounts.call(transferAmount, commissionAmount, airdropUtils.currencies.abc);
       var intendedPricePoint = response[0];
       var tokenAmount = response[1];
       var commissionTokenAmount = response[2];
       await token.approve(airdrop.address, tokenAmount.plus(commissionTokenAmount), { from: spender });
 
       var totalPaid = await airdrop.payAirdrop.call(beneficiary, transferAmount, commissionBeneficiary, commissionAmount,
-        airdrop_utils.currencies.usd, intendedPricePoint, spender, airdropAmount, { from: worker });
+        airdropUtils.currencies.abc, intendedPricePoint, spender, airdropAmount, { from: worker });
       assert.equal((totalPaid).toNumber(), tokenAmount.plus(commissionTokenAmount).toNumber());
 
       response = await airdrop.payAirdrop(beneficiary, transferAmount, commissionBeneficiary, commissionAmount,
-        airdrop_utils.currencies.usd, intendedPricePoint, spender, airdropAmount, { from: worker });
+        airdropUtils.currencies.abc, intendedPricePoint, spender, airdropAmount, { from: worker });
       assert.equal(await token.balanceOf.call(spender), 0);
       // Airdrop only uses as much of the airdrop amount as required to cover total paid
       assert.equal((await token.allowance.call(airdropBudgetHolder, airdrop.address)).toNumber(), airdropAmount.minus(totalPaid).toNumber());
       assert.equal((await token.balanceOf.call(beneficiary)).toNumber(), tokenAmount.toNumber());
       assert.equal((await token.balanceOf.call(commissionBeneficiary)).toNumber(), commissionTokenAmount.toNumber());
       checkAirdropPaymentEvent(response.logs[0], beneficiary, tokenAmount, commissionBeneficiary, commissionTokenAmount,
-        airdrop_utils.currencies.usd, intendedPricePoint, spender, airdropAmount);
-      airdrop_utils.utils.logResponse(response, 'Airdrop.payAirdrop (currency): ' + totalPaid);
+        airdropUtils.currencies.abc, intendedPricePoint, spender, airdropAmount);
+      airdropUtils.utils.logResponse(response, 'Airdrop.payAirdrop (currency): ' + totalPaid);
     });
   });
 }
