@@ -58,7 +58,7 @@ module.exports.perform = (accounts) => {
   });
 
   it('fails to set priceOracle if oracle baseCurrency does not match pricer baseCurrency', async () => {
-    var inappositeOracle = await PriceOracle.new(pricerUtils.currencies.abc, pricerUtils.currencies.ost);
+    var inappositeOracle = await PriceOracle.new(pricerUtils.currencies.abc, pricerUtils.currencies.ost, 1);
     await pricerUtils.utils.expectThrow(pricer.setPriceOracle.call(
       pricerUtils.currencies.abc, inappositeOracle.address, { from: opsAddress }));
   });
