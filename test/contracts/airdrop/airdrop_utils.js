@@ -24,7 +24,7 @@ const Utils          = require('../../lib/utils.js'),
       Workers        = artifacts.require('./Workers.sol'),
       Airdrop        = artifacts.require('./Airdrop.sol'),
       EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol'),
-      PriceOracle    = artifacts.require('./ost-price-oracle/PriceOracle.sol')
+      PriceOracle    = artifacts.require('./PriceOracleMock.sol')
       ;
 
 const ost = 'OST',
@@ -51,21 +51,18 @@ module.exports.deployAirdrop = async (artifacts, accounts) => {
         airdropBudgetHolder = accounts[3],
         workers             = await Workers.new(),
         airdrop             = await Airdrop.new(token.address, ost, workers.address, airdropBudgetHolder),
-        abcPriceOracle      = await PriceOracle.new(ost, abc),
-        abcPrice            = new BigNumber(20 * 10**18)
+        abcPrice            = new BigNumber(20 * 10**18),
+        abcPriceOracle      = await PriceOracle.new(ost, abc, abcPrice)
         ;
 
   assert.ok(await workers.setOpsAddress(opsAddress));
   assert.ok(await airdrop.setOpsAddress(opsAddress));
-  assert.ok(await abcPriceOracle.setOpsAddress(opsAddress));
 
   assert.ok(await workers.setWorker(worker, web3.eth.blockNumber + 1000, { from: opsAddress }));
   assert.ok(await airdrop.setPriceOracle(abc, abcPriceOracle.address, { from: opsAddress }));
-  assert.ok(await abcPriceOracle.setPrice(abcPrice, { from: opsAddress }));
 
   return {
     token          : token,
-    airdrop        : airdrop,
-    abcPriceOracle : abcPriceOracle
+    airdrop        : airdrop
   };
 };

@@ -19,7 +19,7 @@
 //
 // ----------------------------------------------------------------------------
 
-const pricer_utils = require('./pricer_utils.js');
+const pricerUtils = require('./pricer_utils.js');
 
 ///
 /// Test stories
@@ -31,43 +31,43 @@ module.exports.perform = (accounts) => {
   const opsAddress = accounts[1];
 
   var response       = null,
-      acceptedMargin = null;
+      acceptedMargin = null
+      ;
 
   before(async () => {
-    contracts      = await pricer_utils.deployPricer(artifacts, accounts);
+    contracts      = await pricerUtils.deployPricer(artifacts, accounts);
     pricer         = contracts.pricer;
-    usdPriceOracle = contracts.usdPriceOracle;
-    eurPriceOracle = contracts.eurPriceOracle;     
-    await pricer.setPriceOracle(pricer_utils.currencies.usd, usdPriceOracle.address, { from: opsAddress });
+    abcPriceOracle = contracts.abcPriceOracle;
+    await pricer.setPriceOracle(pricerUtils.currencies.abc, abcPriceOracle.address, { from: opsAddress });
   });
 
   it('fails to set acceptedMargin by non-ops', async () => {
     acceptedMargin = 1;
-    await pricer_utils.utils.expectThrow(pricer.setAcceptedMargin.call(pricer_utils.currencies.usd, acceptedMargin));
+    await pricerUtils.utils.expectThrow(pricer.setAcceptedMargin.call(pricerUtils.currencies.abc, acceptedMargin));
   });
 
   it('successfully sets acceptedMargin', async () => {
     // Sets accepted margin multiple times to show range of gas usages
-    acceptedMargin = new pricer_utils.bigNumber(0);
-    assert.ok(await pricer.setAcceptedMargin.call(pricer_utils.currencies.usd, acceptedMargin, { from: opsAddress }));
-    response = await pricer.setAcceptedMargin(pricer_utils.currencies.usd, acceptedMargin, { from: opsAddress });
-    assert.equal((await pricer.acceptedMargins.call(pricer_utils.currencies.usd)).toNumber(), acceptedMargin.toNumber());
-    checkAcceptedMarginSetEvent(response.logs[0], pricer_utils.currencies.usd, acceptedMargin);
-    pricer_utils.utils.logResponse(response, 'Pricer.setAcceptedMargin: ' + acceptedMargin);
+    acceptedMargin = new pricerUtils.bigNumber(0);
+    assert.ok(await pricer.setAcceptedMargin.call(pricerUtils.currencies.abc, acceptedMargin, { from: opsAddress }));
+    response = await pricer.setAcceptedMargin(pricerUtils.currencies.abc, acceptedMargin, { from: opsAddress });
+    assert.equal((await pricer.acceptedMargins.call(pricerUtils.currencies.abc)).toNumber(), acceptedMargin.toNumber());
+    checkAcceptedMarginSetEvent(response.logs[0], pricerUtils.currencies.abc, acceptedMargin);
+    pricerUtils.utils.logResponse(response, 'Pricer.setAcceptedMargin: ' + acceptedMargin);
 
-    acceptedMargin = new pricer_utils.bigNumber(1);
-    assert.ok(await pricer.setAcceptedMargin.call(pricer_utils.currencies.usd, acceptedMargin, { from: opsAddress }));
-    response = await pricer.setAcceptedMargin(pricer_utils.currencies.usd, acceptedMargin, { from: opsAddress });
-    assert.equal((await pricer.acceptedMargins.call(pricer_utils.currencies.usd)).toNumber(), acceptedMargin.toNumber());
-    checkAcceptedMarginSetEvent(response.logs[0], pricer_utils.currencies.usd, acceptedMargin);
-    pricer_utils.utils.logResponse(response, 'Pricer.setAcceptedMargin: ' + acceptedMargin);
+    acceptedMargin = new pricerUtils.bigNumber(1);
+    assert.ok(await pricer.setAcceptedMargin.call(pricerUtils.currencies.abc, acceptedMargin, { from: opsAddress }));
+    response = await pricer.setAcceptedMargin(pricerUtils.currencies.abc, acceptedMargin, { from: opsAddress });
+    assert.equal((await pricer.acceptedMargins.call(pricerUtils.currencies.abc)).toNumber(), acceptedMargin.toNumber());
+    checkAcceptedMarginSetEvent(response.logs[0], pricerUtils.currencies.abc, acceptedMargin);
+    pricerUtils.utils.logResponse(response, 'Pricer.setAcceptedMargin: ' + acceptedMargin);
 
-    acceptedMargin = new pricer_utils.bigNumber(7.778 * 10**17); // 10**17 to ease readability in gas usage output
-    assert.ok(await pricer.setAcceptedMargin.call(pricer_utils.currencies.usd, acceptedMargin, { from: opsAddress }));
-    response = await pricer.setAcceptedMargin(pricer_utils.currencies.usd, acceptedMargin, { from: opsAddress });
-    assert.equal((await pricer.acceptedMargins.call(pricer_utils.currencies.usd)).toNumber(), acceptedMargin.toNumber());
-    checkAcceptedMarginSetEvent(response.logs[0], pricer_utils.currencies.usd, acceptedMargin);
-    pricer_utils.utils.logResponse(response, 'Pricer.setAcceptedMargin: ' + acceptedMargin);
+    acceptedMargin = new pricerUtils.bigNumber(7.778 * 10**17); // 10**17 to ease readability in gas usage output
+    assert.ok(await pricer.setAcceptedMargin.call(pricerUtils.currencies.abc, acceptedMargin, { from: opsAddress }));
+    response = await pricer.setAcceptedMargin(pricerUtils.currencies.abc, acceptedMargin, { from: opsAddress });
+    assert.equal((await pricer.acceptedMargins.call(pricerUtils.currencies.abc)).toNumber(), acceptedMargin.toNumber());
+    checkAcceptedMarginSetEvent(response.logs[0], pricerUtils.currencies.abc, acceptedMargin);
+    pricerUtils.utils.logResponse(response, 'Pricer.setAcceptedMargin: ' + acceptedMargin);
   });
 }
 

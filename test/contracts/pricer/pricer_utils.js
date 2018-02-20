@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 // ----------------------------------------------------------------------------
-// Test: pricer_utils.js
+// Test: pricerUtils.js
 //
 // http://www.simpletoken.org/
 //
@@ -23,11 +23,13 @@ const Utils          = require('../../lib/utils.js'),
       BigNumber      = require('bignumber.js'),
       Pricer         = artifacts.require('./Pricer.sol'),
       EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol'),
-    	PriceOracle    = artifacts.require('./ost-price-oracle/PriceOracle.sol');
+    	PriceOracle    = artifacts.require('./PriceOracleMock.sol')
+      ;
 
 const ost = 'OST',
-      usd = 'USD',
-      eur = 'EUR';
+      abc = 'ABC',
+      xyz = 'XYZ'
+      ;
 
 /// @dev Export common requires
 module.exports.utils     = Utils;
@@ -36,8 +38,8 @@ module.exports.bigNumber = BigNumber;
 /// @dev Export constants
 module.exports.currencies = {
   ost : ost,
-  usd : usd,
-  eur : eur
+  abc : abc,
+  xyz : xyz
 }
 
 /// @dev Deploy
@@ -46,17 +48,18 @@ module.exports.deployPricer = async (artifacts, accounts) => {
         TOKEN_DECIMALS = 18,
         opsAddress     = accounts[1],
         pricer         = await Pricer.new(token.address, ost),
-        usdPriceOracle = await PriceOracle.new(ost, usd),
-        eurPriceOracle = await PriceOracle.new(ost, eur);
+        abcPrice       = new BigNumber(20 * 10**18),
+        xyzPrice       = new BigNumber(10 * 10**18),
+        abcPriceOracle = await PriceOracle.new(ost, abc, abcPrice),
+        xyzPriceOracle = await PriceOracle.new(ost, xyz, xyzPrice)
+        ;
 
   assert.ok(await pricer.setOpsAddress(opsAddress));
-  assert.ok(await usdPriceOracle.setOpsAddress(opsAddress));
-  assert.ok(await eurPriceOracle.setOpsAddress(opsAddress));
 
 	return {
     token          : token,
     pricer         : pricer,
-    usdPriceOracle : usdPriceOracle,
-    eurPriceOracle : eurPriceOracle
+    abcPriceOracle : abcPriceOracle,
+    xyzPriceOracle : xyzPriceOracle
 	};
 };

@@ -19,7 +19,7 @@
 //
 // ----------------------------------------------------------------------------
 
-const pricer_utils                               = require('./pricer_utils.js'),
+const pricerUtils                               = require('./pricer_utils.js'),
       constructor                                = require('./constructor.js'),
       properties                                 = require('./properties.js'),
       set_price_oracle                           = require('./set_price_oracle.js'),
@@ -27,7 +27,8 @@ const pricer_utils                               = require('./pricer_utils.js'),
       set_accepted_margin                        = require('./set_accepted_margin.js'),
       get_price_point                            = require('./get_price_point.js'),
       get_price_point_and_calculated_amounts     = require('./get_price_point_and_calculated_amounts.js'),
-      pay                                        = require('./pay.js');
+      pay                                        = require('./pay.js')
+      ;
 
 contract('Pricer', function(accounts) {
   // TODO: include PricerMock that wraps getBTAmountFromCurrencyValue and isPricePointInRange
@@ -41,8 +42,8 @@ contract('Pricer', function(accounts) {
   describe('GetPricePointAndCalculatedAmounts', async () => get_price_point_and_calculated_amounts.perform(accounts));
   describe('Pay', async () => pay.perform(accounts));
   after(async () => {
-    pricer_utils.utils.printGasStatistics();
-    pricer_utils.utils.clearReceipts();
+    pricerUtils.utils.printGasStatistics();
+    pricerUtils.utils.clearReceipts();
   });
   
 });

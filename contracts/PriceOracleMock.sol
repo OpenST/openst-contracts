@@ -1,7 +1,7 @@
 /* solhint-disable-next-line compiler-fixed */
 pragma solidity ^0.4.17;
 
-// Copyright 2017 OST.com Ltd.
+// Copyright 2018 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,40 +16,30 @@ pragma solidity ^0.4.17;
 // limitations under the License.
 //
 // ----------------------------------------------------------------------------
-// Utility Chain: PriceOracle
+// Utility Chain: PriceOracleMock
 //
 // http://www.simpletoken.org/
 //
 // --------------------------
 
-import "../OpsManaged.sol";
 import "./PriceOracleInterface.sol";
 
 
-/// @title PriceOracle - Accepts and exposes a price for a certain base currency in a certain quote currency.
-contract PriceOracle is OpsManaged, PriceOracleInterface {
+/// @title PriceOracleMock - Basic implementation of the PriceOracleInterface to aid testing Pricer
+contract PriceOracleMock is PriceOracleInterface {
 
     /*
      *  Constants
      */
-    /// Block expiry duration private constant variable
-    // The constant value is set in block numbers which is equivalent number of blocks estimated in hours.
-    uint256 private constant PRICE_VALIDITY_DURATION = 18000; // 25 hours at 5 seconds per block
-
     /// Use this variable in case decimal value need to be evaluated
     uint8 private constant TOKEN_DECIMALS = 18;
-
 
     /*
      *  Storage
      */
     /// Private variable price
     uint256 private price;
-    /// blockheight at which the price expires
-    uint256 private oracleExpirationHeight;
-    /// specifies the base currency value e.g. "OST"
     bytes3 private oracleBaseCurrency;
-    /// specifies the quote Currency value "USD", "EUR", "ETH", "BTC"
     bytes3 private oracleQuoteCurrency;
 
     /*
@@ -58,57 +48,29 @@ contract PriceOracle is OpsManaged, PriceOracleInterface {
     /// @dev constructor function
     /// @param _baseCurrency baseCurrency
     /// @param _quoteCurrency quoteCurrency
-    function PriceOracle(
+    function PriceOracleMock(
         bytes3 _baseCurrency,
-        bytes3 _quoteCurrency
+        bytes3 _quoteCurrency,
+        uint256 _price
         )
         public
-        OpsManaged()
     {
-        // base Currency and quote Currency should not be same
-        require(_baseCurrency != _quoteCurrency);
         // Initialize quote currency
         oracleQuoteCurrency = _quoteCurrency;
         // Initialize base currency
         oracleBaseCurrency = _baseCurrency;
-    }
-
-    /// @dev use this method to set price
-    /// @param _price price
-    /// @return expirationHeight
-    function setPrice(
-        uint256 _price)
-        external
-        onlyOps
-        returns(
-        uint256 /* expirationHeight */)
-    {
-        // Validate if _price is greater than 0
-        require(_price > 0);
-
-        // Assign the new value
         price = _price;
-
-        // update the expiration height
-        oracleExpirationHeight = block.number + priceValidityDuration();
-
-        // Event Emitted
-        PriceUpdated(_price, oracleExpirationHeight);
-
-        // Return
-        return (oracleExpirationHeight);
     }
 
-    /// @dev use this function to get quoteCurrency/baseCurrency value
-    /// @return price (Return 0 in case price expired so that call of this method can handle the error case)
+    /// @dev gets price
+    /// @return price
     function getPrice()
         public
         view
         returns (
         uint256 /* price */  )
     {
-        // Current Block Number should be less than expiration height
-        return (block.number > oracleExpirationHeight) ? 0 : price;
+        return price;
     }
 
     /// @dev use this function to get token decimals value
@@ -122,26 +84,24 @@ contract PriceOracle is OpsManaged, PriceOracleInterface {
         return TOKEN_DECIMALS;
     }
 
-    /// @dev use this function to get price validity duration
-    /// @return price validity duration
+    /// @dev returns 0
     function priceValidityDuration()
         public
         view
         returns(
-        uint256 /* price validity duration */)
+        uint256)
     {
-        return PRICE_VALIDITY_DURATION;
+        return 0;
     }
 
-    /// @dev block height at which the price expires
-    /// @return oracleExpirationHeight
+    /// @dev returns 0
     function expirationHeight()
         public
         view
         returns(
-        uint256 /* oracleExpirationHeight */)
+        uint256)
     {
-        return oracleExpirationHeight;
+        return 0;
     }
 
     /// @dev get baseCurrency bytes3 code

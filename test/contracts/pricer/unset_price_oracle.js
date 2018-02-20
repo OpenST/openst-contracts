@@ -19,7 +19,7 @@
 //
 // ----------------------------------------------------------------------------
 
-const pricer_utils = require('./pricer_utils.js');
+const pricerUtils = require('./pricer_utils.js');
 
 ///
 /// Test stories
@@ -34,31 +34,31 @@ module.exports.perform = (accounts) => {
   var response = null;
 
   before(async () => {
-    contracts      = await pricer_utils.deployPricer(artifacts, accounts);
+    contracts      = await pricerUtils.deployPricer(artifacts, accounts);
     pricer         = contracts.pricer;
-    usdPriceOracle = contracts.usdPriceOracle;
-    eurPriceOracle = contracts.eurPriceOracle;     
-    await pricer.setPriceOracle(pricer_utils.currencies.usd, usdPriceOracle.address, { from: opsAddress });
-    await pricer.setPriceOracle(pricer_utils.currencies.eur, eurPriceOracle.address, { from: opsAddress });
+    abcPriceOracle = contracts.abcPriceOracle;
+    xyzPriceOracle = contracts.xyzPriceOracle;     
+    await pricer.setPriceOracle(pricerUtils.currencies.abc, abcPriceOracle.address, { from: opsAddress });
+    await pricer.setPriceOracle(pricerUtils.currencies.xyz, xyzPriceOracle.address, { from: opsAddress });
   });
 
   it('fails to set priceOracle by non-ops', async () => {
-    await pricer_utils.utils.expectThrow(pricer.unsetPriceOracle.call(pricer_utils.currencies.usd));
+    await pricerUtils.utils.expectThrow(pricer.unsetPriceOracle.call(pricerUtils.currencies.abc));
   });
 
   it('successfully unsets priceOracle', async () => {
-    assert.ok(await pricer.unsetPriceOracle.call(pricer_utils.currencies.usd, { from: opsAddress }));
-    response = await pricer.unsetPriceOracle(pricer_utils.currencies.usd, { from: opsAddress });
-    assert.equal(await pricer.priceOracles.call(pricer_utils.currencies.usd), 0);
-    checkPriceOracleUnsetEvent(response.logs[0], pricer_utils.currencies.usd);
-    pricer_utils.utils.logResponse(response, 'Pricer.unsetPriceOracle: ' + pricer_utils.currencies.usd);
+    assert.ok(await pricer.unsetPriceOracle.call(pricerUtils.currencies.abc, { from: opsAddress }));
+    response = await pricer.unsetPriceOracle(pricerUtils.currencies.abc, { from: opsAddress });
+    assert.equal(await pricer.priceOracles.call(pricerUtils.currencies.abc), 0);
+    checkPriceOracleUnsetEvent(response.logs[0], pricerUtils.currencies.abc);
+    pricerUtils.utils.logResponse(response, 'Pricer.unsetPriceOracle: ' + pricerUtils.currencies.abc);
 
     // confirm EUR priceOracle unaffected
-    assert.equal(await pricer.priceOracles.call(pricer_utils.currencies.eur), eurPriceOracle.address);
+    assert.equal(await pricer.priceOracles.call(pricerUtils.currencies.xyz), xyzPriceOracle.address);
   });
 
   it('fails to unset priceOracle if not already set', async () => {
-    await pricer_utils.utils.expectThrow(pricer.unsetPriceOracle.call(pricer_utils.currencies.usd, { from: opsAddress }));
+    await pricerUtils.utils.expectThrow(pricer.unsetPriceOracle.call(pricerUtils.currencies.abc, { from: opsAddress }));
   });
 }
 

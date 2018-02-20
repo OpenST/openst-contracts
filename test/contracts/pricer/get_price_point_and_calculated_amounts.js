@@ -19,65 +19,72 @@
 //
 // ----------------------------------------------------------------------------
 
-const pricer_utils = require('./pricer_utils.js');
+const pricerUtils = require('./pricer_utils.js'),
+      PriceOracle = artifacts.require('./PriceOracleMock.sol')
+      ;
 
 ///
 /// Test stories
 ///
 /// fails to get pricePoint and calculated amounts if currency is empty
 /// fails to get pricePoint and calculated amounts if priceOracle is not set
-/// fails to get pricePoint and calculated amounts if pricePoint is 0
 /// successfully gets pricePoints and calculated amounts
+/// when oracle returns 0 for price
+///   fails to get pricePoint and calculated amounts
 
 module.exports.perform = (accounts) => {
   const opsAddress       = accounts[1],
-        usdPrice         = new pricer_utils.bigNumber(20 * 10**18),
-        eurPrice         = new pricer_utils.bigNumber(10 * 10**18),
+        abcPrice         = new pricerUtils.bigNumber(20 * 10**18),
+        xyzPrice         = new pricerUtils.bigNumber(10 * 10**18),
         conversionRate   = 10,
-        transferAmount   = new pricer_utils.bigNumber(5 * 10**18),
-        commissionAmount = new pricer_utils.bigNumber(1.25 * 10**18);
+        transferAmount   = new pricerUtils.bigNumber(5 * 10**18),
+        commissionAmount = new pricerUtils.bigNumber(1.25 * 10**18)
+        ;
 
   before(async () => {
-    contracts      = await pricer_utils.deployPricer(artifacts, accounts);
-    pricer         = contracts.pricer;
-    usdPriceOracle = contracts.usdPriceOracle;
-    eurPriceOracle = contracts.eurPriceOracle;     
-    await pricer.setPriceOracle(pricer_utils.currencies.usd, usdPriceOracle.address, { from: opsAddress });
-    await pricer.setPriceOracle(pricer_utils.currencies.eur, eurPriceOracle.address, { from: opsAddress });
-    await eurPriceOracle.setPrice(eurPrice, { from: opsAddress });
+    contracts       = await pricerUtils.deployPricer(artifacts, accounts);
+    pricer          = contracts.pricer;
+    zeroPriceOracle = contracts.abcPriceOracle;
+    xyzPriceOracle  = contracts.xyzPriceOracle;
+    await pricer.setPriceOracle(pricerUtils.currencies.abc, abcPriceOracle.address, { from: opsAddress });
+    await pricer.setPriceOracle(pricerUtils.currencies.xyz, xyzPriceOracle.address, { from: opsAddress });
   });
 
   it('fails to get pricePoint and calculated amounts if currency is empty', async () => {
-    await pricer_utils.utils.expectThrow(pricer.getPricePointAndCalculatedAmounts.call(
+    await pricerUtils.utils.expectThrow(pricer.getPricePointAndCalculatedAmounts.call(
       transferAmount, commissionAmount, ''));
   });
 
   it('fails to get pricePoint and calculated amounts if priceOracle is not set', async () => {
-    await pricer_utils.utils.expectThrow(pricer.getPricePointAndCalculatedAmounts.call(
-      transferAmount, commissionAmount, pricer_utils.currencies.ost));
-  });
-
-  it('fails to get pricePoint and calculated amounts if pricePoint is 0', async () => {
-    // usdPriceOracle price is not yet set, so will return 0 for pricePoint
-    await pricer_utils.utils.expectThrow(pricer.getPricePointAndCalculatedAmounts.call(
-      transferAmount, commissionAmount, pricer_utils.currencies.usd));
+    await pricerUtils.utils.expectThrow(pricer.getPricePointAndCalculatedAmounts.call(
+      transferAmount, commissionAmount, pricerUtils.currencies.ost));
   });
 
   it('successfully gets pricePoints and calculated amounts', async () => {
-    // set usdPriceOracle price
-    await usdPriceOracle.setPrice(usdPrice, { from: opsAddress });
+    var returns = await pricer.getPricePointAndCalculatedAmounts.call(
+      transferAmount, commissionAmount, pricerUtils.currencies.abc);
+    assert.equal(returns[0].toNumber(), abcPrice.toNumber());
+    assert.equal(returns[1].toNumber(), new pricerUtils.bigNumber(2.5 * 10**18));
+    assert.equal(returns[2].toNumber(), new pricerUtils.bigNumber(0.625 * 10**18));
 
     var returns = await pricer.getPricePointAndCalculatedAmounts.call(
-      transferAmount, commissionAmount, pricer_utils.currencies.usd);
-    assert.equal(returns[0].toNumber(), usdPrice.toNumber());
-    assert.equal(returns[1].toNumber(), new pricer_utils.bigNumber(2.5 * 10**18));
-    assert.equal(returns[2].toNumber(), new pricer_utils.bigNumber(0.625 * 10**18));
-
-    var returns = await pricer.getPricePointAndCalculatedAmounts.call(
-      transferAmount, commissionAmount, pricer_utils.currencies.eur);
-    assert.equal(returns[0].toNumber(), eurPrice.toNumber());
-    assert.equal(returns[1].toNumber(), new pricer_utils.bigNumber(5 * 10**18));
-    assert.equal(returns[2].toNumber(), new pricer_utils.bigNumber(1.25 * 10**18));
+      transferAmount, commissionAmount, pricerUtils.currencies.xyz);
+    assert.equal(returns[0].toNumber(), xyzPrice.toNumber());
+    assert.equal(returns[1].toNumber(), new pricerUtils.bigNumber(5 * 10**18));
+    assert.equal(returns[2].toNumber(), new pricerUtils.bigNumber(1.25 * 10**18));
   });
 
+  context('when oracle returns 0 for price', async () => {
+    var zeroPriceOracle = null;
+
+    before(async () => {
+      zeroPriceOracle = await PriceOracle.new(pricerUtils.currencies.ost, 'OOO', 0);
+      await pricer.setPriceOracle('OOO', zeroPriceOracle.address, { from: opsAddress });
+    });
+
+    it('fails to get pricePoint and calculated amounts if pricePoint is 0', async () => {
+      await pricerUtils.utils.expectThrow(pricer.getPricePointAndCalculatedAmounts.call(
+        transferAmount, commissionAmount, 'OOO'));
+    });
+  });
 }

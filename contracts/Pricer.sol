@@ -25,7 +25,7 @@ pragma solidity ^0.4.17;
 
 import "./openst-protocol/EIP20Interface.sol";
 import "./openst-protocol/UtilityTokenInterface.sol";
-import "./ost-price-oracle/PriceOracleInterface.sol";
+import "./PriceOracleInterface.sol";
 import "./OpsManaged.sol";
 import "./SafeMath.sol";
 import "./PricerInterface.sol";
