@@ -91,7 +91,7 @@ async function performer(argv) {
   logger.info("Deployer Address: " + deployerAddress);
   logger.info("Ops Address: " + opsAddress);
   logger.info("Branded Token Address: " + brandedTokenAddress);
-  logger.info("Base currency: " + brandedTokenAddress);
+  logger.info("Base currency: " + baseCurrency);
   logger.info("Gas price: " + gasPrice);
   logger.info("Travis CI enabled Status: " + isTravisCIEnabled);
   logger.info("File to write For ContractAddress: "+fileForContractAddress);
