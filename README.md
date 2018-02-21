@@ -54,6 +54,16 @@ export OST_CACHING_ENGINE='none'
 For using redis/memcache as cache engine refer - [OpenSTFoundation/ost-price-oracle](https://github.com/OpenSTFoundation/ost-price-oracle)
 ```
 
+### Set DB Details For Payments/Airdrop:
+
+```bash
+export OP_MYSQL_HOST='127.0.0.1'
+export OP_MYSQL_USER='root'
+export OP_MYSQL_PASSWORD='root'
+export OP_MYSQL_CONNECTION_POOL_SIZE='5'
+export OP_MYSQL_TIMEZONE='+05:30'
+```
+
 # Example:
 ```js
 const OpenSTPayment = require('@openstfoundation/openst-payments')
@@ -61,7 +71,6 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
   , opsManaged = new OpenSTPayment.opsManaged()
   , workers = new OpenSTPayment.worker(workerContractAddress, chainId)
   , airdrop = new OpenSTPayment.airdrop(airdropContractAddress, chainId)
-  , currency = 'USD'
 ;  
   // Deploy Contract
   deployer.deploy( contractName, constructorArgs, gasPrice, options);
