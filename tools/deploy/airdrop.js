@@ -18,7 +18,7 @@
 const readline = require('readline');
 const rootPrefix = '../..';
 const web3Provider = require(rootPrefix + '/lib/web3/providers/rpc');
-const deployHelper = require(rootPrefix + '/tools/deploy/helper');
+const Deployer = require(rootPrefix + '/lib/deployer');
 const coreConstants = require(rootPrefix + '/config/core_constants');
 const coreAddresses = require(rootPrefix + '/config/core_addresses');
 const prompts = readline.createInterface(process.stdin, process.stdout);
@@ -93,10 +93,6 @@ async function performer(argv) {
     isTravisCIEnabled = argv[7].trim() === 'travis';
   }
   const fileForContractAddress = (argv[8] !== undefined) ? argv[8].trim() : '';
-  const deploymentOptions = {
-    gasPrice: gasPrice,
-    gas: coreConstants.OST_GAS_LIMIT
-  };
 
   logger.info("Deployer Address: " + deployerAddress);
   logger.info("Ops Address: " + opsAddress);
@@ -127,10 +123,9 @@ async function performer(argv) {
     prompts.close();
   }
 
-  const contractName = 'airdrop';
-  const contractAbi = coreAddresses.getAbiForContract(contractName);
-  const contractBin = coreAddresses.getBinForContract(contractName);
+  const deployerInstance = new Deployer();
 
+  const contractName = 'airdrop';
 
   var constructorArgs = [
     brandedTokenAddress,
@@ -138,35 +133,31 @@ async function performer(argv) {
     workerContractAddress,
     airdropBudgetHolder
   ];
+  const options = {returnType: "txReceipt"};
 
-  logger.info("Deploying contract: " + contractName);
-
-  var contractDeployTxReceipt = await deployHelper.perform(
+  const deployResult =  await deployerInstance.deploy(
     contractName,
-    web3Provider,
-    contractAbi,
-    contractBin,
-    deployerName,
-    deploymentOptions,
-    constructorArgs
-  );
+    constructorArgs,
+    gasPrice,
+    options);
 
-  logger.info(contractDeployTxReceipt);
-  logger.win(contractName+ " Contract Deployed ");
+  if (deployResult.isSuccess()) {
+    const contractAddress = deployResult.data.transaction_receipt.contractAddress;
+    logger.win("contractAddress: " + contractAddress);
+    if (fileForContractAddress !== '') {
+      deployerInstance.writeContractAddressToFile(fileForContractAddress, contractAddress);
+    }
 
-  const contractAddress = contractDeployTxReceipt.receipt.contractAddress;
-  logger.win(contractName+ " Contract Address: "+contractAddress);
+    logger.info("Setting Ops Address to: " + opsAddress);
+    var opsManaged = new OpsManagedContract(contractAddress, gasPrice);
+    var result = await opsManaged.setOpsAddress(deployerName, opsAddress, {
+      gasPrice: gasPrice,
+      gas: coreConstants.OST_GAS_LIMIT
+    });
+    logger.info(result);
+    var contractOpsAddress = await opsManaged.getOpsAddress();
+    logger.info("Ops Address Set to: " + contractOpsAddress);
 
-  logger.info("Setting Ops Address to: " + opsAddress);
-  var opsManaged = new OpsManagedContract(contractAddress, gasPrice);
-  var result = await opsManaged.setOpsAddress(deployerName, opsAddress, deploymentOptions);
-  logger.info(result);
-  var contractOpsAddress = await opsManaged.getOpsAddress();
-  logger.info("Ops Address Set to: " + contractOpsAddress);
-
-  // Write to file based on filename passed
-  if (fileForContractAddress != '') {
-    deployHelper.writeContractAddressToFile(fileForContractAddress, contractAddress);
   }
 
 }
