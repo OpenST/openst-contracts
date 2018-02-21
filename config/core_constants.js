@@ -20,4 +20,4 @@ function define(name, value) {
 define('OST_UTILITY_GETH_RPC_PROVIDER', process.env.OST_UTILITY_GETH_RPC_PROVIDER);
 
 // Gas limit
-define('OST_GAS_LIMIT', 9100000);
+define('OST_GAS_LIMIT', 9000000);
