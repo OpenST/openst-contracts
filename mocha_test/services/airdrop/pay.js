@@ -48,9 +48,23 @@ describe('Airdrop Pay', function() {
       constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
-    console.log(setWorkerResponse);
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(setWorkerResponse);
+
+    // Set Price Oracle
+    const spoResponse = await airdropOstUsd.setPriceOracle(
+      constants.ops,
+      constants.opsPassphrase,
+      constants.currencyUSD,
+      constants.priceOracles.OST.USD,
+      constants.gasUsed,
+      {returnType: constants.returnTypeReceipt});
+
+    // verify if the transaction receipt is valid
+    utils.verifyTransactionReceipt(spoResponse);
+
+    // verify if the transaction has was actually mined
+    await utils.verifyIfMined(airdropOstUsd, spoResponse.data.transaction_hash);
 
     // set accepted margin
     const amResponse = await airdropOstUsd.setAcceptedMargin(
@@ -71,21 +85,6 @@ describe('Airdrop Pay', function() {
     const amResult = await airdropOstUsd.acceptedMargins(constants.currencyUSD);
     assert.equal(amResult.isSuccess(), true);
     assert.equal(50, amResult.data.acceptedMargins);
-
-    // set price oracle
-    const spoResponse = await airdropOstUsd.setPriceOracle(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.currencyUSD,
-      constants.priceOracles.OST.USD,
-      constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
-
-    // verify if the transaction receipt is valid
-    utils.verifyTransactionReceipt(spoResponse);
-
-    // verify if the transaction has was actually mined
-    await utils.verifyIfMined(airdropOstUsd, spoResponse.data.transaction_hash);
 
     // verify if its set
     const poResult = await airdropOstUsd.priceOracles(constants.currencyUSD);
@@ -132,7 +131,7 @@ describe('Airdrop Pay', function() {
     const account4Balance = await TC5.balanceOf(constants.account4);
     assert.equal(account4Balance, airdropOstUsd.toWei('0'));
 
-    // populate cache
+    // Populate Cache
     cacheHelper.getBalanceOf(constants.account1);
     cacheHelper.getBalanceOf(constants.account2);
     cacheHelper.getBalanceOf(constants.account3);
@@ -209,7 +208,6 @@ describe('Airdrop Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      constants.workerContractAddress,
       constants.account1,
       0,
       constants.gasUsed,

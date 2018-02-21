@@ -159,7 +159,7 @@ describe('Set accepted margins', function() {
   });
 
 
-  it('should fail when accepted margin is negetive', async function() {
+  it('should fail when accepted margin is negative', async function() {
 
     // set the accepted margin to -30
     const response = await pricerOstUsd.setAcceptedMargin(

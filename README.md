@@ -57,10 +57,16 @@ For using redis/memcache as cache engine refer - [OpenSTFoundation/ost-price-ora
 # Example:
 ```js
 const OpenSTPayment = require('@openstfoundation/openst-payments')
+  , deployer = new OpenSTPayment.deployer()
+  , opsManaged = new OpenSTPayment.opsManaged()
   , workers = new OpenSTPayment.worker(workerContractAddress, chainId)
   , airdrop = new OpenSTPayment.airdrop(airdropContractAddress, chainId)
   , currency = 'USD'
 ;  
+  // Deploy Contract
+  deployer.deploy( contractName, constructorArgs, gasPrice, options);
+  // Set Ops Address
+  opsManaged.setOpsAddress(deployerName, opsAddress, options);
   // Set Worker
   workers.setWorker(senderAddress, senderPassphrase, workerAddress, deactivationHeight, gasPrice);
   // Set Price Oracle
