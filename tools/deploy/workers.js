@@ -17,7 +17,6 @@
 
 const readline = require('readline');
 const rootPrefix = '../..';
-const web3Provider = require(rootPrefix + '/lib/web3/providers/rpc');
 const coreConstants = require(rootPrefix + '/config/core_constants');
 const coreAddresses = require(rootPrefix + '/config/core_addresses');
 const prompts = readline.createInterface(process.stdin, process.stdout);
@@ -25,8 +24,6 @@ const logger = require(rootPrefix + '/helpers/custom_console_logger');
 const OpsManagedContract = require(rootPrefix + "/lib/contract_interact/ops_managed_contract");
 const Deployer = require(rootPrefix + '/lib/deployer');
 
-// Different addresses used for deployment
-const deployerName = "deployer";
 
 /**
  * It is the main performer method of this deployment script
@@ -56,7 +53,6 @@ async function performer(argv) {
 
   const fileForContractAddress = (argv[4] !== undefined) ? argv[4].trim() : '';
 
-  logger.info("Deployer name: " + deployerName);
   logger.info("Gas price: " + gasPrice);
   logger.info("Travis CI enabled Status: " + isTravisCIEnabled);
   logger.info("File to write For ContractAddress: "+fileForContractAddress);
@@ -88,7 +84,6 @@ async function performer(argv) {
   const options = {returnType: "txReceipt"};
 
   const deployResult =  await deployerInstance.deploy(
-    deployerName,
     contractName,
     constructorArgs,
     gasPrice,
@@ -107,6 +102,7 @@ async function performer(argv) {
 
     logger.info("Setting Ops Address to: " + opsAddress);
     var opsManaged = new OpsManagedContract(contractAddress, gasPrice);
+    const deployerName = "deployer";
     var result = await opsManaged.setOpsAddress(deployerName, opsAddress, {
       gasPrice: gasPrice,
       gas: coreConstants.OST_GAS_LIMIT

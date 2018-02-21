@@ -25,9 +25,6 @@ const Deployer = require(rootPrefix + '/lib/deployer');
 const coreAddresses = require(rootPrefix + '/config/core_addresses');
 const coreConstants = require(rootPrefix + '/config/core_constants');
 
-// Different addresses used for deployment
-const deployerName = "deployer";
-
 
 /**
  * Validation Method
@@ -80,7 +77,6 @@ async function performer(argv) {
 
   const fileForContractAddress = (argv[6] !== undefined) ? argv[6].trim() : '';
 
-  logger.info("Deployer name: " + deployerName);
   logger.info("Branded Token Address: " + brandedTokenAddress);
   logger.info("Base currency: " + baseCurrency);
   logger.info("Gas price: " + gasPrice);
@@ -117,7 +113,6 @@ async function performer(argv) {
   const options = {returnType: "txReceipt"};
 
   const deployResult =  await deployerInstance.deploy(
-    deployerName,
     contractName,
     constructorArgs,
     gasPrice,
@@ -135,6 +130,7 @@ async function performer(argv) {
     const opsAddress = coreAddresses.getAddressForUser(opsName);
 
     logger.info("Setting Ops Address to: " + opsAddress);
+    const deployerName = "deployer";
     var opsManaged = new OpsManagedContract(contractAddress, gasPrice);
     var result = await opsManaged.setOpsAddress(deployerName, opsAddress, {
       gasPrice: gasPrice,

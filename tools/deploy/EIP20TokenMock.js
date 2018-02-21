@@ -6,13 +6,8 @@
  *       <li>Deployer Address</li>
  *     </ol>
  *
- *   These are the following steps:<br>
- *     <ol>
- *       <li>Deploy Pricer contract</li>
- *     </ol>
  *
- *
- * @module tools/deploy/pricer
+ * @module tools/deploy/EIP20TokenMock
  */
 
 const readline = require('readline');
@@ -21,10 +16,6 @@ const prompts = readline.createInterface(process.stdin, process.stdout);
 const logger = require(rootPrefix + '/helpers/custom_console_logger');
 const Deployer = require(rootPrefix + '/lib/deployer');
 const coreConstants = require(rootPrefix + '/config/core_constants');
-
-
-// Different addresses used for deployment
-const deployerName = "deployer";
 
 /**
  * It is the main performer method of this deployment script
@@ -68,12 +59,7 @@ async function performer(argv) {
     isTravisCIEnabled = argv[7].trim() === 'travis';
   }
   const fileForContractAddress = (argv[8] !== undefined) ? argv[8].trim() : '';
-  const deploymentOptions = {
-    gasPrice: gasPrice,
-    gas: coreConstants.OST_GAS_LIMIT
-  };
 
-  logger.info("Deployer name: " + deployerName);
   logger.info("conversionRate: " + conversionRate);
   logger.info("symbol: " + symbol);
   logger.info("name: " + name);
@@ -114,7 +100,6 @@ async function performer(argv) {
   const deployerInstance = new Deployer();
 
   const deployResult =  await deployerInstance.deploy(
-    deployerName,
     contractName,
     constructorArgs,
     gasPrice,
