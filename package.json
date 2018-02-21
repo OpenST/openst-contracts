@@ -1,5 +1,5 @@
 {
-  "name": "openst-payments",
+  "name": "@openstfoundation/openst-payments",
   "version": "1.0.0-beta.1",
   "description": "",
   "dependencies": {
