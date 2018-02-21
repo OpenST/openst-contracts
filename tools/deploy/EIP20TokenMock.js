@@ -6,28 +6,16 @@
  *       <li>Deployer Address</li>
  *     </ol>
  *
- *   These are the following steps:<br>
- *     <ol>
- *       <li>Deploy Pricer contract</li>
- *     </ol>
  *
- *
- * @module tools/deploy/pricer
+ * @module tools/deploy/EIP20TokenMock
  */
 
 const readline = require('readline');
 const rootPrefix = '../..';
-const web3Provider = require(rootPrefix + '/lib/web3/providers/rpc');
-const deployHelper = require(rootPrefix + '/tools/deploy/helper');
-const coreConstants = require(rootPrefix + '/config/core_constants');
-const coreAddresses = require(rootPrefix + '/config/core_addresses');
 const prompts = readline.createInterface(process.stdin, process.stdout);
 const logger = require(rootPrefix + '/helpers/custom_console_logger');
-
-
-// Different addresses used for deployment
-const deployerName = "deployer";
-const deployerAddress = coreAddresses.getAddressForUser(deployerName);
+const Deployer = require(rootPrefix + '/lib/deployer');
+const coreConstants = require(rootPrefix + '/config/core_constants');
 
 /**
  * It is the main performer method of this deployment script
@@ -71,12 +59,7 @@ async function performer(argv) {
     isTravisCIEnabled = argv[7].trim() === 'travis';
   }
   const fileForContractAddress = (argv[8] !== undefined) ? argv[8].trim() : '';
-  const deploymentOptions = {
-    gasPrice: gasPrice,
-    gas: coreConstants.OST_GAS_LIMIT
-  };
 
-  logger.info("Deployer Address: " + deployerAddress);
   logger.info("conversionRate: " + conversionRate);
   logger.info("symbol: " + symbol);
   logger.info("name: " + name);
@@ -104,9 +87,6 @@ async function performer(argv) {
   }
 
   const contractName = 'eip20tokenmock';
-  const contractAbi = coreAddresses.getAbiForContract(contractName);
-  const contractBin = coreAddresses.getBinForContract(contractName);
-
 
   var constructorArgs = [
     conversionRate,
@@ -115,20 +95,23 @@ async function performer(argv) {
     decimals
   ];
 
-  var contractDeployTxReceipt = await deployHelper.perform(
-    contractName,
-    web3Provider,
-    contractAbi,
-    contractBin,
-    deployerName,
-    deploymentOptions,
-    constructorArgs
-  );
+  const options = {returnType: "txReceipt"};
 
-  logger.info(contractDeployTxReceipt);
-  logger.win(contractName+ " Deployed ");
-  const contractAddress = contractDeployTxReceipt.receipt.contractAddress;
-  deployHelper.writeContractAddressToFile(fileForContractAddress, contractAddress);
+  const deployerInstance = new Deployer();
+
+  const deployResult =  await deployerInstance.deploy(
+    contractName,
+    constructorArgs,
+    gasPrice,
+    options);
+
+  if (deployResult.isSuccess()) {
+    const contractAddress = deployResult.data.transaction_receipt.contractAddress;
+    logger.win("contractAddress: " + contractAddress);
+    if (fileForContractAddress !== '') {
+      deployerInstance.writeContractAddressToFile(fileForContractAddress, contractAddress);
+    }
+  }
 }
 
 // example: node ../tools/deploy/EIP20TokenMock.js 5 DKN deepeshCoin 18 0x12A05F200 travis bt.txt
