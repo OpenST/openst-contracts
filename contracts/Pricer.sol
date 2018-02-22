@@ -348,10 +348,10 @@ contract Pricer is OpsManaged, PricerInterface {
     {
         bool isValid = true;
         if (_intendedPricePoint >= _acceptedMargin) {
-            isValid = SafeMath.sub(_intendedPricePoint, _acceptedMargin) <= _currentPricePoint;
+            isValid = _intendedPricePoint.sub(_acceptedMargin) <= _currentPricePoint;
         }
         if (isValid) {
-            isValid = _currentPricePoint <= SafeMath.add(_intendedPricePoint, _acceptedMargin);
+            isValid = _currentPricePoint <= _intendedPricePoint.add(_acceptedMargin);
         }
         return isValid;     
     }
@@ -371,9 +371,9 @@ contract Pricer is OpsManaged, PricerInterface {
         view
         returns (uint256, uint256) /* number of BT ,number of commission BT */
     {
-        uint256 adjConversionRate = SafeMath.div(SafeMath.mul(pricerConversionRate, 10**uint256(pricerDecimals)), 10**uint256(pricerConversionRateDecimals));
-        uint256 amountBT = SafeMath.div(SafeMath.mul(_transferAmount, adjConversionRate), _pricePoint);
-        uint256 commissionAmountBT = SafeMath.div(SafeMath.mul(_commissionAmount, adjConversionRate), _pricePoint);
+        uint256 adjConversionRate = pricerConversionRate.mul(10**uint256(pricerDecimals)).div(10**uint256(pricerConversionRateDecimals));
+        uint256 amountBT = _transferAmount.mul(adjConversionRate).div(_pricePoint);
+        uint256 commissionAmountBT = _commissionAmount.mul(adjConversionRate).div(_pricePoint);
         return (amountBT, commissionAmountBT);
     }
 
