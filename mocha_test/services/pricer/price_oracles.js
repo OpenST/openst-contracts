@@ -45,7 +45,7 @@ describe('Get price oracles', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(setResponse);
@@ -60,7 +60,7 @@ describe('Get price oracles', function() {
       constants.currencyEUR,
       constants.priceOracles.OST.EUR,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(setResponse);
@@ -90,7 +90,7 @@ describe('Get price oracles', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(unsetResponse);
@@ -104,7 +104,7 @@ describe('Get price oracles', function() {
       constants.opsPassphrase,
       constants.currencyEUR,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(unsetResponse1);

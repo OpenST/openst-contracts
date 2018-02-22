@@ -13,10 +13,10 @@ module.exports.startObserving = function() {
   if (notificationRef === null) {
     openSTNotification.subscribeEvent.local(
       [
-        "payment.pricer.setAcceptedMargin",
-        "payment.pricer.setPriceOracle",
-        "payment.pricer.unsetPriceOracle",
-        "payment.pricer.pay"
+        "payments.pricer.setAcceptedMargin",
+        "payments.pricer.setPriceOracle",
+        "payments.pricer.unsetPriceOracle",
+        "payments.pricer.pay"
       ],
       function(msgContent) {
         const messageData = JSON.parse(msgContent);

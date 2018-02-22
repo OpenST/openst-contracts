@@ -1,3 +1,8 @@
+
+const returnTypeUUID = "uuid";
+const returnTypeHash = "txHash";
+const returnTypeReceipt = "txReceipt";
+
 const constants = {
   deployer: process.env.OST_PRICER_DEPLOYER_ADDR,
   deployerPassphrase: process.env.OST_PRICER_DEPLOYER_PASSPHRASE,
@@ -23,8 +28,11 @@ const constants = {
   TC2Address: process.env.TEST_COIN2_C2_ADDRESS,
   TC3Address: process.env.TEST_COIN3_C3_ADDRESS,
   chainId: process.env.OST_PRICER_CHAIN_ID,
-  returnTypeUUID: "uuid",
-  returnTypeHash: "txHash",
-  returnTypeReceipt: "txReceipt"
+  returnTypeUUID: returnTypeUUID,
+  returnTypeHash: returnTypeHash,
+  returnTypeReceipt: returnTypeReceipt,
+  optionsUUID: {returnType: returnTypeUUID, tag: "test"},
+  optionsHash: {returnType: returnTypeHash, tag: "test"},
+  optionsReceipt: {returnType: returnTypeReceipt, tag: "test"}
 };
 module.exports = constants;

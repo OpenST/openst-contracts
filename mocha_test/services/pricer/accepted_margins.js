@@ -54,7 +54,7 @@ describe('Get accepted margins', function() {
       constants.currencyUSD,
       50,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(response1);
@@ -74,7 +74,7 @@ describe('Get accepted margins', function() {
       constants.currencyUSD,
       300,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(response2);
@@ -94,7 +94,7 @@ describe('Get accepted margins', function() {
       constants.currencyEUR,
       100,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(response3);

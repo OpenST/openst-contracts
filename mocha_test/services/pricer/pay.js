@@ -41,7 +41,7 @@ describe('Pay', function() {
       constants.currencyUSD,
       50,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(amResponse);
@@ -61,7 +61,7 @@ describe('Pay', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(spoResponse);
@@ -180,7 +180,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(payResponse);
@@ -276,7 +276,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     assert.equal(payResponse.isFailure(), true, "Low balance check");
 
@@ -360,7 +360,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(payResponse);
@@ -447,7 +447,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     assert.equal(payResponse.isFailure(), true);
 
@@ -530,7 +530,7 @@ describe('Pay', function() {
       constants.currencyINR,
       intendedPricePoint,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(payResponse);
@@ -617,7 +617,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     assert.equal(payResponse.isFailure(), true);
 
@@ -701,7 +701,7 @@ describe('Pay', function() {
       currency,
       changedPricePoint,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(payResponse);
@@ -792,7 +792,7 @@ describe('Pay', function() {
       currency,
       changedPricePoint,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(payResponse);
@@ -879,7 +879,7 @@ describe('Pay', function() {
       constants.currencyINR,
       intendedPricePoint,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(payResponse);
@@ -964,7 +964,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(payResponse);
@@ -1037,7 +1037,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     pricerUtils.verifyTransactionReceipt(payResponse);
@@ -1120,7 +1120,7 @@ describe('Pay', function() {
       constants.currencyUSD,
       0,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     assert.equal(payResponse.isFailure(), true, "intendedPricePoint 0 cheek");
     // verify if the transaction receipt is valid
@@ -1195,7 +1195,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      {returnType: constants.returnTypeUUID});
+      constants.optionsUUID);
 
     // verify if the transaction receipt is valid
     // we will not verify if it got mined as its just interaction layer testing
@@ -1249,7 +1249,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      {returnType: constants.returnTypeHash});
+      constants.optionsHash);
 
     // verify if the transaction hash is valid
     // we will not verify if it got mined as its just interaction layer testing
@@ -1303,7 +1303,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid.
     // We will not check here if the value is really set as its just interaction layer testing.
@@ -1357,7 +1357,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       0xBA43B7400,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     assert.equal(payResponse.isFailure(), true, "insufficient balance cheek");
 
