@@ -32,5 +32,5 @@ const mysqlConfig = {
 
   }
 };
-mysqlConfig["databases"]["payments_"+coreConstants.SUB_ENVIRONMENT+"_"+coreConstants.ENVIRONMENT] = ["cluster1"];
+mysqlConfig["databases"][coreConstants.MYSQL_DATABASE] = ["cluster1"];
 module.exports = mysqlConfig;

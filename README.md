@@ -58,10 +58,17 @@ For using redis/memcache as cache engine refer - [OpenSTFoundation/ost-price-ora
 
 ```bash
 export OP_MYSQL_HOST='127.0.0.1'
-export OP_MYSQL_USER='root'
-export OP_MYSQL_PASSWORD='root'
+export OP_MYSQL_USER=''
+export OP_MYSQL_PASSWORD=''
+export OP_MYSQL_DATABASE='payment_development'
 export OP_MYSQL_CONNECTION_POOL_SIZE='5'
 export OP_MYSQL_TIMEZONE='+05:30'
+```
+
+### Create Airdrop Tables:
+
+```bash
+node migrations/create_tables.js 
 ```
 
 # Example:
@@ -77,11 +84,11 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
   // Set Ops Address
   opsManaged.setOpsAddress(deployerName, opsAddress, options);
   // Set Worker
-  workers.setWorker(senderAddress, senderPassphrase, workerAddress, deactivationHeight, gasPrice);
+  workers.setWorker(senderAddress, senderPassphrase, workerAddress, deactivationHeight, gasPrice, options);
   // Set Price Oracle
-  airdrop.setPriceOracle(senderAddress, senderPassphrase, currency, address, gasPrice);
+  airdrop.setPriceOracle(senderAddress, senderPassphrase, currency, address, gasPrice, options);
   // Set Accepted Margin
-  airdrop.setAcceptedMargin(senderAddress, senderPassphrase, currency, acceptedMargin, gasPrice);
+  airdrop.setAcceptedMargin(senderAddress, senderPassphrase, currency, acceptedMargin, gasPrice, options);
   // Transfer Amount to airdrop budget holder
   // Approve airdrop budget holder
   // Approve spender

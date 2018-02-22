@@ -3,7 +3,7 @@
 var rootPrefix = '../..'
   , mysqlWrapper = require(rootPrefix + "/lib/mysql_wrapper")
   , util = require(rootPrefix + '/lib/util')
-  , logger = require(rootPrefix + '/lib/logger/custom_console_logger')
+  , logger = require(rootPrefix + '/helpers/custom_console_logger')
 ;
 
 const QueryDB = function(dbName){

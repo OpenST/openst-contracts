@@ -184,20 +184,25 @@ describe('Airdrop Pay', function() {
     const airdropBudgetAmount = new BigNumber(airdropOstUsd.toWei('1000000')); // 1 million
 
     // Approve airdropBudgetHolder for transfer
-    await TC5.approve(
+    const airdropBudgetHolderApproveResponse = await TC5.approve(
       constants.airdropBudgetHolder,
       constants.airdropBudgetHolderPassphrase,
       constants.airdropOstUsdAddress,
       airdropBudgetAmount,
       constants.gasUsed);
+    console.log("airdropBudgetHolder approve");
+    console.log(airdropBudgetHolderApproveResponse);
 
     // Approve account1 for transfer
-    await TC5.approve(
+    const account1ApproveResponse = await TC5.approve(
       constants.account1,
       constants.accountPassphrase1,
       constants.airdropOstUsdAddress,
       estimatedTotalAmount,
       constants.gasUsed);
+
+    console.log("user approve");
+    console.log(account1ApproveResponse);
 
     const payResponse = await airdropOstUsd.pay(
       constants.workerAccount1,
@@ -213,10 +218,14 @@ describe('Airdrop Pay', function() {
       constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
+    console.log("payResponse");
+    console.log(payResponse);
+
+
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(payResponse);
 
-    // verify if the transaction has was actually mined
+    // verify if the transaction is actually mined
     await utils.verifyIfMined(airdropOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
