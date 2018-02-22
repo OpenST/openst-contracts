@@ -44,15 +44,17 @@ module.exports.currencies = {
 /// @dev Deploy
 module.exports.deployAirdrop = async (artifacts, accounts) => {
 
-  const token               = await EIP20TokenMock.new(10, ost, 'name', 18),
-        TOKEN_DECIMALS      = 18,
-        opsAddress          = accounts[1],
-        worker              = accounts[2],
-        airdropBudgetHolder = accounts[3],
-        workers             = await Workers.new(),
-        airdrop             = await Airdrop.new(token.address, ost, workers.address, airdropBudgetHolder),
-        abcPrice            = new BigNumber(20 * 10**18),
-        abcPriceOracle      = await PriceOracle.new(ost, abc, abcPrice)
+  const conversionRate         = 101,
+        conversionRateDecimals = 1,
+        token                  = await EIP20TokenMock.new(conversionRate, conversionRateDecimals, ost, 'name', 18),
+        TOKEN_DECIMALS         = 18,
+        opsAddress             = accounts[1],
+        worker                 = accounts[2],
+        airdropBudgetHolder    = accounts[3],
+        workers                = await Workers.new(),
+        airdrop                = await Airdrop.new(token.address, ost, workers.address, airdropBudgetHolder),
+        abcPrice               = new BigNumber(20 * 10**18),
+        abcPriceOracle         = await PriceOracle.new(ost, abc, abcPrice)
         ;
 
   assert.ok(await workers.setOpsAddress(opsAddress));

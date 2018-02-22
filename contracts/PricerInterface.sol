@@ -89,19 +89,26 @@ contract PricerInterface {
         public
         returns (bytes3);
 
-    /// @dev    Returns pricer decimal;
+    /// @dev    Returns pricer decimal for branded token;
     ///         public method;
-    /// @return bytes3    
+    /// @return uint8
     function decimals() 
         public
         returns (uint8);
 
-    /// @dev    Returns conversion rate;
+    /// @dev    Returns conversion rate for branded token;
     ///         public method;
-    /// @return bytes3    
-    function conversionRate() 
+    /// @return uint256
+    function conversionRate()
         public
         returns (uint256);
+
+    /// @dev    Returns conversion rate decimals for branded token;
+    ///         public method;
+    /// @return uint8
+    function conversionRateDecimals()
+        public
+        returns (uint8);
 
     /// @dev    Takes _currency, _oracleAddress; 
     ///         updates the price oracle address for a given currency;

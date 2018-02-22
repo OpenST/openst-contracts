@@ -44,14 +44,16 @@ module.exports.currencies = {
 
 /// @dev Deploy
 module.exports.deployPricer = async (artifacts, accounts) => {
-  const token          = await EIP20TokenMock.new(10, ost, 'name', 18),
-        TOKEN_DECIMALS = 18,
-        opsAddress     = accounts[1],
-        pricer         = await Pricer.new(token.address, ost),
-        abcPrice       = new BigNumber(20 * 10**18),
-        xyzPrice       = new BigNumber(10 * 10**18),
-        abcPriceOracle = await PriceOracle.new(ost, abc, abcPrice),
-        xyzPriceOracle = await PriceOracle.new(ost, xyz, xyzPrice)
+  const conversionRate         = 101,
+        conversionRateDecimals = 1,
+        token                  = await EIP20TokenMock.new(conversionRate, conversionRateDecimals, ost, 'name', 18),
+        TOKEN_DECIMALS         = 18,
+        opsAddress             = accounts[1],
+        pricer                 = await Pricer.new(token.address, ost),
+        abcPrice               = new BigNumber(20 * 10**18),
+        xyzPrice               = new BigNumber(10 * 10**18),
+        abcPriceOracle         = await PriceOracle.new(ost, abc, abcPrice),
+        xyzPriceOracle         = await PriceOracle.new(ost, xyz, xyzPrice)
         ;
 
   assert.ok(await pricer.setOpsAddress(opsAddress));
