@@ -184,25 +184,20 @@ describe('Airdrop Pay', function() {
     const airdropBudgetAmount = new BigNumber(airdropOstUsd.toWei('1000000')); // 1 million
 
     // Approve airdropBudgetHolder for transfer
-    const airdropBudgetHolderApproveResponse = await TC5.approve(
+    await TC5.approve(
       constants.airdropBudgetHolder,
       constants.airdropBudgetHolderPassphrase,
       constants.airdropOstUsdAddress,
       airdropBudgetAmount,
       constants.gasUsed);
-    console.log("airdropBudgetHolder approve");
-    console.log(airdropBudgetHolderApproveResponse);
 
     // Approve account1 for transfer
-    const account1ApproveResponse = await TC5.approve(
+    await TC5.approve(
       constants.account1,
       constants.accountPassphrase1,
       constants.airdropOstUsdAddress,
       estimatedTotalAmount,
       constants.gasUsed);
-
-    console.log("user approve");
-    console.log(account1ApproveResponse);
 
     const payResponse = await airdropOstUsd.pay(
       constants.workerAccount1,
@@ -217,10 +212,6 @@ describe('Airdrop Pay', function() {
       0,
       constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
-
-    console.log("payResponse");
-    console.log(payResponse);
-
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(payResponse);
