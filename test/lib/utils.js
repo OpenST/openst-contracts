@@ -31,17 +31,17 @@ const receipts = [];
 
 module.exports.logResponse = (response, description) => {
   receipts.push({
-    receipt     : response.receipt,
-    description : description,
-    response    : response
+    receipt: response.receipt,
+    description: description,
+    response: response
   });
 }
 
 module.exports.logReceipt = (receipt, description) => {
   receipts.push({
-    receipt     : receipt,
-    description : description,
-    response    : null
+    receipt: receipt,
+    description: description,
+    response: null
   })
 }
 
@@ -69,7 +69,7 @@ module.exports.printGasStatistics = () => {
 }
 
 module.exports.clearReceipts = () => {
-  receipts.splice( 0, receipts.length );
+  receipts.splice(0, receipts.length);
 }
 
 
@@ -113,7 +113,7 @@ module.exports.expectThrow = async (promise) => {
 
 /// @dev Get account balance
 module.exports.getBalance = function (address) {
-  return new Promise (function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     web3.eth.getBalance(address, function (error, result) {
       if (error) {
         reject(error);
@@ -126,7 +126,7 @@ module.exports.getBalance = function (address) {
 
 /// @dev Get gas price
 module.exports.getGasPrice = function () {
-  return new Promise (function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     web3.eth.getGasPrice(function (error, result) {
       if (error) {
         reject(error);

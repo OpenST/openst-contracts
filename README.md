@@ -24,9 +24,9 @@ sh start_test_chain.sh
 ```bash
 export OST_UTILITY_GETH_RPC_PROVIDER='http://127.0.0.1:9546'
 export OST_UTILITY_DEPLOYER_ADDR=''
-export OST_UTILITY_DEPLOYER_PASSPHRASE='testtest'
+export OST_UTILITY_DEPLOYER_PASSPHRASE=''
 export OST_UTILITY_OPS_ADDR=''
-export OST_UTILITY_OPS_PASSPHRASE='testtest'
+export OST_UTILITY_OPS_PASSPHRASE=''
 ```
 
 ### Run Deployment Script for Branded Token:

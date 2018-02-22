@@ -1,32 +1,56 @@
 "use strict";
 
-var rootPrefix = '../..'
+const rootPrefix = '../..'
   , coreConstants = require(rootPrefix + '/config/core_constants')
   , QueryDBKlass = require(rootPrefix + '/app/models/queryDb')
+  , ModelBaseKlass = require(rootPrefix + '/app/models/base')
 ;
 
-/*
- * Table configuration methods
- */
-
-const dbName = "payment_"+coreConstants.ENVIRONMENT
-  , QueryDB = new QueryDBKlass(dbName)
-  , tableName = 'airdrops'
+const dbName = coreConstants.MYSQL_DATABASE
+  , QueryDBObj = new QueryDBKlass(dbName)
 ;
 
-/*
- * Public methods
- */
-const airdrop = {
+const AirdropKlass = function () {};
 
-  get: function (id) {
-    return QueryDB.read(
-      tableName,
-      [],
-      'id=?',
-      [id]);
+AirdropKlass.prototype = Object.create(ModelBaseKlass.prototype);
+
+const AirdropKlassPrototype = {
+
+  QueryDB: QueryDBObj,
+
+  tableName: 'airdrops',
+
+  getAll: async function (params) {
+
+    var oThis = this
+      , return_result = []
+    ;
+
+    var results = await oThis.QueryDB.read(
+      oThis.tableName,
+      []
+    );
+
+    for(var i=0; i<results.length; i++){
+      return_result.push(oThis.convertEnumForResult(results[i]));
+    }
+
+    return Promise.resolve(return_result);
+
+  },
+
+  getById: function (params) {
+    var oThis = this;
+    return oThis.QueryDB.read(oThis.tableName, [], 'id=?', [params['id']]);
+  },
+
+  getByContractAddress: function (params) {
+    var oThis = this;
+    return oThis.QueryDB.read(oThis.tableName, [], 'contract_address?', [params['contract_address']]);
   }
 
 };
 
-module.exports = airdrop;
+Object.assign(AirdropKlass.prototype, AirdropKlassPrototype);
+
+module.exports = AirdropKlass;
