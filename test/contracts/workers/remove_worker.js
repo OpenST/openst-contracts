@@ -19,8 +19,9 @@
 //
 // ----------------------------------------------------------------------------
 
-const workers_utils = require('./workers_utils.js');
-const Workers       = artifacts.require('./Workers.sol');
+const workersUtils   = require('./workers_utils.js'),
+      Workers        = artifacts.require('./Workers.sol')
+      ;
 
 ///
 /// Test stories
@@ -34,65 +35,62 @@ module.exports.perform = (accounts) => {
         worker1Address      =  accounts[2],
         worker2Address      =  accounts[3],
         worker3Address      =  accounts[4],
-        height1             = new workers_utils.bigNumber(500),
-        height2             = new workers_utils.bigNumber(1000);
+        height1             = new workersUtils.bigNumber(500),
+        height2             = new workersUtils.bigNumber(1000)
+        ;
         
   before(async () => {
     workers = await Workers.new();
-    assert.ok(await workers.setOpsAddress(opsAddress));    
+    assert.ok(await workers.setOpsAddress(opsAddress));
 
     // set worker 1
     deactivationHeight = web3.eth.blockNumber + height1.toNumber();
-    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
-    response = await workers.setWorker(worker1Address, deactivationHeight, { from: opsAddress });
-    assert.equal(await workers.isWorker.call(worker1Address), true);
-    workers_utils.checkWorkerSetEvent(response.logs[0], deactivationHeight, height1.toNumber()-1);
-    
+    await workers.setWorker(worker1Address, deactivationHeight, { from: opsAddress });
+
     // set worker 2
     deactivationHeight = web3.eth.blockNumber + height2.toNumber();
-    assert.ok(await workers.setWorker.call(worker2Address, deactivationHeight, { from: opsAddress }));
-    response = await workers.setWorker(worker2Address, deactivationHeight, { from: opsAddress });
-    assert.equal(await workers.isWorker.call(worker2Address), true);
-    workers_utils.checkWorkerSetEvent(response.logs[0], deactivationHeight, height2.toNumber()-1);    
+    await workers.setWorker(worker2Address, deactivationHeight, { from: opsAddress });
 
   });
 
-  
+
   it('fails to remove worker if sender is not opsAddress', async () => {
 
-    await workers_utils.utils.expectThrow(workers.removeWorker.call(worker1Address, { from: accounts[5] }));    
+    await workersUtils.utils.expectThrow(workers.removeWorker.call(worker1Address, { from: accounts[5] }));
 
   });
 
 
   it('fails to remove worker if worker was not set', async () => {
 
-    assert.equal(await workers.removeWorker.call(worker3Address, { from: opsAddress }), false); 
-    response = await workers.removeWorker(worker3Address, { from: opsAddress }); 
+    assert.equal(await workers.removeWorker.call(worker3Address, { from: opsAddress }), false);
+    response = await workers.removeWorker(worker3Address, { from: opsAddress });
     assert.equal(await workers.isWorker.call(worker3Address), false);
-    workers_utils.checkWorkerRemovedEvent(response.logs[0], worker3Address, false);      
-    workers_utils.utils.logResponse(response, 'Worker.removeWorker not existed worker');
+    workersUtils.checkWorkerRemovedEvent(response.logs[0], worker3Address, false);
+    workersUtils.utils.logResponse(response, 'Workers.removeWorker (never set)');
 
   });
 
 
   it('pass to remove worker', async () => {
-    
-    assert.equal(await workers.removeWorker.call(worker1Address, { from: opsAddress }), true); 
-    response = await workers.removeWorker(worker1Address, { from: opsAddress }); 
-    assert.equal(await workers.isWorker.call(worker1Address), false);
-    workers_utils.checkWorkerRemovedEvent(response.logs[0], worker1Address, true);          
-    workers_utils.utils.logResponse(response, 'Worker.removeWorker');
 
-    assert.equal(await workers.removeWorker.call(worker2Address, { from: opsAddress }), true); 
-    response = await workers.removeWorker(worker2Address, { from: opsAddress }); 
+    assert.equal(await workers.removeWorker.call(worker1Address, { from: opsAddress }), true);
+    response = await workers.removeWorker(worker1Address, { from: opsAddress });
+    assert.equal(await workers.isWorker.call(worker1Address), false);
+    workersUtils.checkWorkerRemovedEvent(response.logs[0], worker1Address, true);
+    workersUtils.utils.logResponse(response, 'Workers.removeWorker (w1)');
+
+    assert.equal(await workers.removeWorker.call(worker2Address, { from: opsAddress }), true);
+    response = await workers.removeWorker(worker2Address, { from: opsAddress });
     assert.equal(await workers.isWorker.call(worker2Address), false);
-    workers_utils.checkWorkerRemovedEvent(response.logs[0], worker2Address, true);      
-    
-    assert.equal(await workers.removeWorker.call(worker2Address, { from: opsAddress }), false); 
-    response = await workers.removeWorker(worker2Address, { from: opsAddress }); 
+    workersUtils.checkWorkerRemovedEvent(response.logs[0], worker2Address, true);
+    workersUtils.utils.logResponse(response, 'Workers.removeWorker (w2)');
+
+    assert.equal(await workers.removeWorker.call(worker2Address, { from: opsAddress }), false);
+    response = await workers.removeWorker(worker2Address, { from: opsAddress });
     assert.equal(await workers.isWorker.call(worker2Address), false);
-    workers_utils.checkWorkerRemovedEvent(response.logs[0], worker2Address, false);          
+    workersUtils.checkWorkerRemovedEvent(response.logs[0], worker2Address, false);
+    workersUtils.utils.logResponse(response, 'Workers.removeWorker (w1 again)');
 
   });
 

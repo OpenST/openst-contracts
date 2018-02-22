@@ -19,22 +19,19 @@
 //
 // ----------------------------------------------------------------------------
 
-const workers_utils = require('./workers_utils.js'),
-      constructor   = require('./constructor.js');
-      setWorker     = require('./set_worker.js');
+const workersUtils = require('./workers_utils.js'),
+      setIsWorker     = require('./set_is_worker.js');
       removeWorker  = require('./remove_worker.js');
-      isWorker      = require('./is_worker.js');
-      remove        = require('./remove.js');
+      remove        = require('./remove.js')
+      ;
       
 contract('Workers', function(accounts) {
-  describe('Constructor', async () => constructor.perform());
-  describe('setWorker', async () => setWorker.perform(accounts));
-  describe('removeWorker', async () => removeWorker.perform(accounts));
-  describe('isWorker', async () => isWorker.perform(accounts));
-  describe('remove', async () => remove.perform(accounts));
+  describe('Set/IsWorker', async () => setIsWorker.perform(accounts));
+  describe('RemoveWorker', async () => removeWorker.perform(accounts));
+  describe('Remove', async () => remove.perform(accounts));
   
   after(async () => {
-    workers_utils.utils.printGasStatistics();
-    workers_utils.utils.clearReceipts();
+    workersUtils.utils.printGasStatistics();
+    workersUtils.utils.clearReceipts();
   });
 });
