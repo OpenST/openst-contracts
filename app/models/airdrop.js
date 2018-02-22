@@ -23,7 +23,6 @@ const AirdropKlassPrototype = {
   getAll: async function (params) {
 
     var oThis = this
-      , return_result = []
     ;
 
     var results = await oThis.QueryDB.read(
@@ -31,11 +30,7 @@ const AirdropKlassPrototype = {
       []
     );
 
-    for(var i=0; i<results.length; i++){
-      return_result.push(oThis.convertEnumForResult(results[i]));
-    }
-
-    return Promise.resolve(return_result);
+    return Promise.resolve(results);
 
   },
 
@@ -46,7 +41,7 @@ const AirdropKlassPrototype = {
 
   getByContractAddress: function (params) {
     var oThis = this;
-    return oThis.QueryDB.read(oThis.tableName, [], 'contract_address?', [params['contract_address']]);
+    return oThis.QueryDB.read(oThis.tableName, [], 'contract_address=?', [params['contract_address']]);
   }
 
 };
