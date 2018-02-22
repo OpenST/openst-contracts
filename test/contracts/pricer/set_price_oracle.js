@@ -36,7 +36,12 @@ const pricerUtils = require('./pricer_utils.js'),
 module.exports.perform = (accounts) => {
   const opsAddress = accounts[1];
 
-  var response = null;
+  var contracts      = null,
+      pricer         = null,
+      abcPriceOracle = null,
+      xyzPriceOracle = null,
+      response       = null
+      ;
 
   before(async () => {
     contracts      = await pricerUtils.deployPricer(artifacts, accounts);

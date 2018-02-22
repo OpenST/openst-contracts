@@ -35,6 +35,11 @@ module.exports.perform = (accounts) => {
         conversionRateDecimals = 1
         ;
 
+  var contracts      = null,
+      token          = null,
+      pricer         = null
+      ;
+
   before(async () => {
     contracts   = await pricerUtils.deployPricer(artifacts, accounts);
     token       = contracts.token;

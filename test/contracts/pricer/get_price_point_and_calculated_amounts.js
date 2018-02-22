@@ -36,15 +36,20 @@ module.exports.perform = (accounts) => {
   const opsAddress             = accounts[1],
         abcPrice               = new pricerUtils.bigNumber(20 * 10**18),
         xyzPrice               = new pricerUtils.bigNumber(10 * 10**18),
-        conversionRate         = 101,
         transferAmount         = new pricerUtils.bigNumber(5 * 10**18),
         commissionAmount       = new pricerUtils.bigNumber(1.25 * 10**18)
         ;
 
+  var contracts      = null,
+      pricer         = null,
+      abcPriceOracle = null,
+      xyzPriceOracle = null
+      ;
+
   before(async () => {
     contracts       = await pricerUtils.deployPricer(artifacts, accounts);
     pricer          = contracts.pricer;
-    zeroPriceOracle = contracts.abcPriceOracle;
+    abcPriceOracle = contracts.abcPriceOracle;
     xyzPriceOracle  = contracts.xyzPriceOracle;
     await pricer.setPriceOracle(pricerUtils.currencies.abc, abcPriceOracle.address, { from: opsAddress });
     await pricer.setPriceOracle(pricerUtils.currencies.xyz, xyzPriceOracle.address, { from: opsAddress });
