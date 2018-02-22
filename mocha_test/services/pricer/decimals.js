@@ -5,8 +5,7 @@ const chai = require('chai')
   , assert = chai.assert;
 
 const rootPrefix = "../../.."
-  , constants = require(rootPrefix + '/mocha_test/services/pricer/constants')
-  , pricerUtils = require('./pricer_utils')
+  , constants = require(rootPrefix + '/mocha_test/lib/constants')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
   , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
   , pricerOstEur = new pricer(constants.pricerOstEurAddress, constants.chainId)

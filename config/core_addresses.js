@@ -11,23 +11,23 @@
 
 const rootPrefix = ".."
   , coreAbis = require(rootPrefix + '/config/core_abis')
-  , coreBins = require(rootPrefix + '/config/core_bins');
+  , coreBins = require(rootPrefix + '/config/core_bins')
+;
 
 const allAddresses = {
   users: {
     deployer: {
-      address: process.env.OST_PRICER_DEPLOYER_ADDR,
-      passphrase: process.env.OST_PRICER_DEPLOYER_PASSPHRASE
+      address: process.env.OST_UTILITY_DEPLOYER_ADDR,
+      passphrase: process.env.OST_UTILITY_DEPLOYER_PASSPHRASE
     },
     ops: {
-      address: process.env.OST_PRICER_OPS_ADDR,
-      passphrase: process.env.OST_PRICER_OPS_PASSPHRASE
+      address: process.env.OST_UTILITY_OPS_ADDR,
+      passphrase: process.env.OST_UTILITY_OPS_PASSPHRASE
     }
   },
 
   contracts: {
     pricer: {
-      address: process.env.OST_PRICER_CONTRACT_ADDR,
       abi: coreAbis.pricer,
       bin: coreBins.pricer
     },
@@ -46,6 +46,10 @@ const allAddresses = {
     brandedtoken: {
       abi: coreAbis.brandedtoken,
       bin: coreBins.brandedtoken
+    },
+    airdrop: {
+      abi: coreAbis.airdrop,
+      bin: coreBins.airdrop
     }
   }
 };

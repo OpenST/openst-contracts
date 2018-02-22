@@ -5,9 +5,9 @@ const chai = require('chai')
   , assert = chai.assert;
 
 const rootPrefix = "../../.."
-  , constants = require(rootPrefix + '/mocha_test/services/pricer/constants')
+  , constants = require(rootPrefix + '/mocha_test/lib/constants')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
-  , pricerUtils = require('./pricer_utils')
+  , utils = require(rootPrefix+'/mocha_test/lib/utils')
   , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
 ;
 /*eslint-enable */
@@ -32,14 +32,14 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       30,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(response);
+    utils.verifyTransactionReceipt(response);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, response.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, response.data.transaction_hash);
 
     // verify if value is changed
     const amResult = await pricerOstUsd.acceptedMargins(constants.currencyUSD);
@@ -59,12 +59,12 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       50,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeUUID});
 
     // verify if the transaction receipt is valid
     // we will not verify if it got mined as its just interaction layer testing
-    pricerUtils.verifyTransactionUUID(response);
+    utils.verifyTransactionUUID(response);
 
   });
 
@@ -79,12 +79,12 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       150,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeHash});
 
     // verify if the transaction hash is valid
     // we will not verify if it got mined as its just interaction layer testing
-    pricerUtils.verifyTransactionHash(response);
+    utils.verifyTransactionHash(response);
 
   });
 
@@ -99,12 +99,12 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       70,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid.
     // We will not check here if the value is really set as its just interaction layer testing.
-    pricerUtils.verifyTransactionReceipt(response);
+    utils.verifyTransactionReceipt(response);
 
   });
 
@@ -117,7 +117,7 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyBlank,
       3,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the response is failure
@@ -150,7 +150,7 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       3,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the response is failure
@@ -159,7 +159,7 @@ describe('Set accepted margins', function() {
   });
 
 
-  it('should fail when accepted margin is negetive', async function() {
+  it('should fail when accepted margin is negative', async function() {
 
     // set the accepted margin to -30
     const response = await pricerOstUsd.setAcceptedMargin(
@@ -167,7 +167,7 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       -30,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the response is failure
@@ -186,14 +186,14 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       3,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(response1);
+    utils.verifyTransactionReceipt(response1);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, response1.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, response1.data.transaction_hash);
 
     // verify if the accepted margin is set to 3
     const amResult1 = await pricerOstUsd.acceptedMargins(constants.currencyUSD);
@@ -206,14 +206,14 @@ describe('Set accepted margins', function() {
       constants.deployerPassphrase,
       constants.currencyUSD,
       8,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(response2);
+    utils.verifyTransactionReceipt(response2);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, response2.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, response2.data.transaction_hash);
 
     // verify if the accepted margin is still set to 3
     const amResult2 = await pricerOstUsd.acceptedMargins(constants.currencyUSD);
@@ -234,14 +234,14 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       0,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(response);
+    utils.verifyTransactionReceipt(response);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, response.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, response.data.transaction_hash);
 
     // verify if the accepted margin is set to 0
     const amResult = await pricerOstUsd.acceptedMargins(constants.currencyUSD);
@@ -262,14 +262,14 @@ describe('Set accepted margins', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       50,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(response);
+    utils.verifyTransactionReceipt(response);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, response.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, response.data.transaction_hash);
 
     // verify if the accepted margin is set to 50
     const amResult = await pricerOstUsd.acceptedMargins(constants.currencyUSD);

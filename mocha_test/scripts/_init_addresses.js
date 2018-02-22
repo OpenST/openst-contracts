@@ -7,7 +7,8 @@ const _addresses = {
   "account1": null,
   "account2": null,
   "account3": null,
-  "account4": null
+  "account4": null,
+  "airdropBudgetHolder": null
 };
 
 const rootPrefix = "../.."
@@ -45,17 +46,25 @@ function main( addressFile ) {
     } else if ( !_addresses.account4 ) {
       _addresses.account4 = thisAddress;
       fundAddress(thisAddress);
+    } else if ( !_addresses.airdropBudgetHolder ) {
+      _addresses.airdropBudgetHolder = thisAddress;
+      fundAddress(thisAddress);
+    } else if ( !_addresses.workerAccount1 ) {
+      _addresses.workerAccount1 = thisAddress;
+      fundAddress(thisAddress);
     }
   });
 
   populateEnvVars.renderAndPopulate('address', {
-    ost_pricer_deployer_address: _addresses.deployerAdd,
-    ost_pricer_ops_address: _addresses.opsAdd,
-    ost_pricer_test_account_1: _addresses.account1,
-    ost_pricer_test_account_2: _addresses.account2,
-    ost_pricer_test_account_3: _addresses.account3,
-    ost_pricer_test_account_4: _addresses.account4
-  }
+    ost_utility_deployer_address: _addresses.deployerAdd,
+    ost_utility_ops_address: _addresses.opsAdd,
+    ost_utility_test_account_1: _addresses.account1,
+    ost_utility_test_account_2: _addresses.account2,
+    ost_utility_test_account_3: _addresses.account3,
+    ost_utility_test_account_4: _addresses.account4,
+    ost_airdrop_budget_holder: _addresses.airdropBudgetHolder,
+    ost_worker_test_account_1: _addresses.workerAccount1
+   }
   );
 }
 

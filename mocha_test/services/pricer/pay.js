@@ -4,9 +4,9 @@ const chai = require('chai')
   , assert = chai.assert;
 
 const rootPrefix = "../../.."
-  , constants = require(rootPrefix + '/mocha_test/services/pricer/constants')
+  , constants = require(rootPrefix + '/mocha_test/lib/constants')
   , BigNumber = require('bignumber.js')
-  , pricerUtils = require('./pricer_utils')
+  , utils = require(rootPrefix+'/mocha_test/lib/utils')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
   , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
   , pricerOstEur = new pricer(constants.pricerOstEurAddress, constants.chainId)
@@ -40,14 +40,14 @@ describe('Pay', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       50,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(amResponse);
+    utils.verifyTransactionReceipt(amResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, amResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, amResponse.data.transaction_hash);
 
     // verify if its set
     const amResult = await pricerOstUsd.acceptedMargins(constants.currencyUSD);
@@ -60,14 +60,14 @@ describe('Pay', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(spoResponse);
+    utils.verifyTransactionReceipt(spoResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, spoResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, spoResponse.data.transaction_hash);
 
     // verify if its set
     const poResult = await pricerOstUsd.priceOracles(constants.currencyUSD);
@@ -79,7 +79,7 @@ describe('Pay', function() {
       constants.opsPassphrase,
       constants.account1,
       pricerOstUsd.toWei('1000'),
-      0xBA43B7400);
+      constants.gasUsed);
 
     const account1Balance = await TC5.balanceOf(constants.account1);
     assert.equal(account1Balance, pricerOstUsd.toWei('1000'));
@@ -89,7 +89,7 @@ describe('Pay', function() {
       constants.opsPassphrase,
       constants.account2,
       pricerOstUsd.toWei('0'),
-      0xBA43B7400);
+      constants.gasUsed);
 
     const account2Balance = await TC5.balanceOf(constants.account2);
     assert.equal(account2Balance, pricerOstUsd.toWei('0'));
@@ -99,7 +99,7 @@ describe('Pay', function() {
       constants.opsPassphrase,
       constants.account3,
       pricerOstUsd.toWei('0'),
-      0xBA43B7400);
+      constants.gasUsed);
 
     const account3Balance = await TC5.balanceOf(constants.account3);
     assert.equal(account3Balance, pricerOstUsd.toWei('0'));
@@ -109,7 +109,7 @@ describe('Pay', function() {
       constants.opsPassphrase,
       constants.account4,
       pricerOstUsd.toWei('0'),
-      0xBA43B7400);
+      constants.gasUsed);
 
     const account4Balance = await TC5.balanceOf(constants.account4);
     assert.equal(account4Balance, pricerOstUsd.toWei('0'));
@@ -168,7 +168,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       estimatedTotalAmount,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -179,14 +179,14 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -230,8 +230,9 @@ describe('Pay', function() {
 
     const initialAccount1BalanceCache = await getAmountFromCache(constants.account1)
       , initialAccount3BalanceCache = await getAmountFromCache(constants.account3)
-      , initialAccount4BalanceCache = await getAmountFromCache(constants.account4);
-    
+      , initialAccount4BalanceCache = await getAmountFromCache(constants.account4)
+    ;
+
     assert.equal(initialAccount1Balance.toNumber(), initialAccount1BalanceCache.toNumber(), "account1: Actual and cacheValue mismatch");
     assert.equal(initialAccount3Balance.toNumber(), initialAccount3BalanceCache.toNumber(), "account3: Actual and cacheValue mismatch");
     assert.equal(initialAccount4Balance.toNumber(), initialAccount4BalanceCache.toNumber(), "account4: Actual and cacheValue mismatch");
@@ -264,7 +265,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -275,7 +276,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     assert.equal(payResponse.isFailure(), true, "Low balance check");
@@ -348,7 +349,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -359,14 +360,14 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -435,7 +436,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -446,7 +447,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     assert.equal(payResponse.isFailure(), true);
@@ -462,7 +463,8 @@ describe('Pay', function() {
     // Cache check
     const finalAccount1BalanceCache = await getAmountFromCache(constants.account1)
       , finalAccount3BalanceCache = await getAmountFromCache(constants.account3)
-      , finalAccount4BalanceCache = await getAmountFromCache(constants.account4);
+      , finalAccount4BalanceCache = await getAmountFromCache(constants.account4)
+    ;
 
     assert.equal(account1Balance.toNumber(), finalAccount1BalanceCache.toNumber(), "account1: Actual and cacheValue mismatch after test");
     assert.equal(account3Balance.toNumber(), finalAccount3BalanceCache.toNumber(), "account3: Actual and cacheValue mismatch after test");
@@ -482,7 +484,8 @@ describe('Pay', function() {
     // Cache check
     const initialAccount1BalanceCache = await getAmountFromCache(constants.account1)
       , initialAccount3BalanceCache = await getAmountFromCache(constants.account3)
-      , initialAccount4BalanceCache = await getAmountFromCache(constants.account4);
+      , initialAccount4BalanceCache = await getAmountFromCache(constants.account4)
+    ;
 
     assert.equal(initialAccount1Balance.toNumber(), initialAccount1BalanceCache.toNumber(), "account1: Actual and cacheValue mismatch");
     assert.equal(initialAccount3Balance.toNumber(), initialAccount3BalanceCache.toNumber(), "account3: Actual and cacheValue mismatch");
@@ -518,7 +521,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -529,14 +532,14 @@ describe('Pay', function() {
       commissionAmount,
       constants.currencyINR,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -605,7 +608,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -616,7 +619,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     assert.equal(payResponse.isFailure(), true);
@@ -651,7 +654,8 @@ describe('Pay', function() {
     // Cache check
     const initialAccount1BalanceCache = await getAmountFromCache(constants.account1)
       , initialAccount3BalanceCache = await getAmountFromCache(constants.account3)
-      , initialAccount4BalanceCache = await getAmountFromCache(constants.account4);
+      , initialAccount4BalanceCache = await getAmountFromCache(constants.account4)
+    ;
 
     assert.equal(initialAccount1Balance.toNumber(), initialAccount1BalanceCache.toNumber(), "account1: Actual and cacheValue mismatch");
     assert.equal(initialAccount3Balance.toNumber(), initialAccount3BalanceCache.toNumber(), "account3: Actual and cacheValue mismatch");
@@ -662,7 +666,7 @@ describe('Pay', function() {
       , commissionBeneficiary = constants.account4
       , currency = constants.currencyUSD
       , transferAmount = new BigNumber(pricerOstUsd.toWei('5'))
-      ;
+    ;
 
     const acceptedMarginData = await pricerOstUsd.acceptedMargins(currency);
     assert.equal(acceptedMarginData.isSuccess(), true);
@@ -685,7 +689,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const changedPricePoint = new BigNumber(intendedPricePoint)
       .plus(estimatedMargin)
@@ -700,14 +704,14 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       changedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -720,7 +724,8 @@ describe('Pay', function() {
     // Cache check
     const finalAccount1BalanceCache = await getAmountFromCache(constants.account1)
       , finalAccount3BalanceCache = await getAmountFromCache(constants.account3)
-      , finalAccount4BalanceCache = await getAmountFromCache(constants.account4);
+      , finalAccount4BalanceCache = await getAmountFromCache(constants.account4)
+    ;
 
     assert.equal(account1Balance.toNumber(), finalAccount1BalanceCache.toNumber(), "account1: Actual and cacheValue mismatch after test");
     assert.equal(account3Balance.toNumber(), finalAccount3BalanceCache.toNumber(), "account3: Actual and cacheValue mismatch after test");
@@ -776,7 +781,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const changedPricePoint = new BigNumber(intendedPricePoint)
       .minus(estimatedMargin)
@@ -791,14 +796,14 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       changedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -867,7 +872,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -878,14 +883,14 @@ describe('Pay', function() {
       commissionAmount,
       constants.currencyINR,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -952,7 +957,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -963,14 +968,14 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -1025,7 +1030,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -1036,14 +1041,14 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -1108,7 +1113,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -1119,15 +1124,15 @@ describe('Pay', function() {
       commissionAmount,
       constants.currencyUSD,
       0,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     assert.equal(payResponse.isFailure(), true, "intendedPricePoint 0 cheek");
     // verify if the transaction receipt is valid
-    //pricerUtils.verifyTransactionReceipt(payResponse);
+    //utils.verifyTransactionReceipt(payResponse);
 
     // verify if the transaction has was actually mined
-    //await pricerUtils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    //await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -1183,7 +1188,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       estimatedTotalAmount,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -1194,12 +1199,12 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeUUID});
 
     // verify if the transaction receipt is valid
     // we will not verify if it got mined as its just interaction layer testing
-    pricerUtils.verifyTransactionUUID(payResponse);
+    utils.verifyTransactionUUID(payResponse);
 
   });
 
@@ -1237,7 +1242,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       estimatedTotalAmount,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -1248,12 +1253,12 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeHash});
 
     // verify if the transaction hash is valid
     // we will not verify if it got mined as its just interaction layer testing
-    pricerUtils.verifyTransactionHash(payResponse);
+    utils.verifyTransactionHash(payResponse);
 
   });
 
@@ -1291,7 +1296,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       estimatedTotalAmount,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -1302,12 +1307,12 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid.
     // We will not check here if the value is really set as its just interaction layer testing.
-    pricerUtils.verifyTransactionReceipt(payResponse);
+    utils.verifyTransactionReceipt(payResponse);
 
   });
 
@@ -1345,7 +1350,7 @@ describe('Pay', function() {
       constants.accountPassphrase1,
       constants.pricerOstUsdAddress,
       total,
-      0xBA43B7400);
+      constants.gasUsed);
 
     const payResponse = await pricerOstUsd.pay(
       constants.account1,
@@ -1356,7 +1361,7 @@ describe('Pay', function() {
       commissionAmount,
       currency,
       intendedPricePoint,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     assert.equal(payResponse.isFailure(), true, "insufficient balance cheek");

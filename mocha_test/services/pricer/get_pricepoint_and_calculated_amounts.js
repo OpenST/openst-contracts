@@ -5,8 +5,8 @@ const chai = require('chai')
   , assert = chai.assert;
 
 const rootPrefix = "../../.."
-  , constants = require(rootPrefix + '/mocha_test/services/pricer/constants')
-  , pricerUtils = require('./pricer_utils')
+  , constants = require(rootPrefix + '/mocha_test/lib/constants')
+  , utils = require(rootPrefix+'/mocha_test/lib/utils')
   , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
   , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
   , pricerOstEur = new pricer(constants.pricerOstEurAddress, constants.chainId)
@@ -32,14 +32,14 @@ describe('Get price point and calculated amounts', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(response1);
+    utils.verifyTransactionReceipt(response1);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstUsd, response1.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstUsd, response1.data.transaction_hash);
 
     // verify if its set
     const poResult1 = await pricerOstUsd.priceOracles(constants.currencyUSD);
@@ -52,14 +52,14 @@ describe('Get price point and calculated amounts', function() {
       constants.opsPassphrase,
       constants.currencyEUR,
       constants.priceOracles.OST.EUR,
-      0xBA43B7400,
+      constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
     // verify if the transaction receipt is valid
-    pricerUtils.verifyTransactionReceipt(response2);
+    utils.verifyTransactionReceipt(response2);
 
     // verify if the transaction has was actually mined
-    await pricerUtils.verifyIfMined(pricerOstEur, response1.data.transaction_hash);
+    await utils.verifyIfMined(pricerOstEur, response1.data.transaction_hash);
 
     // verify if its set
     const poResult2 = await pricerOstEur.priceOracles(constants.currencyEUR);

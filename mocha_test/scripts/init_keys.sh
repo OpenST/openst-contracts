@@ -15,11 +15,11 @@ echo "Generate new addresses..."
 
 
 # Utility Chain Deployer Address
-echo $OST_PRICER_DEPLOYER_PASSPHRASE > ./pw
+echo $OST_UTILITY_DEPLOYER_PASSPHRASE > ./pw
 geth --datadir "$DATADIR" account new --password ./pw >> $ADDRESS_FILE
 
 #Ops Address
-echo $OST_PRICER_OPS_PASSPHRASE > ./pw
+echo $OST_UTILITY_OPS_PASSPHRASE > ./pw
 geth --datadir "$DATADIR" account new --password ./pw >> $ADDRESS_FILE
 
 #Test account 1
@@ -35,6 +35,14 @@ echo "testtest" > ./pw
 geth --datadir "$DATADIR" account new --password ./pw >> $ADDRESS_FILE
 
 #Test account 4
+echo "testtest" > ./pw
+geth --datadir "$DATADIR" account new --password ./pw >> $ADDRESS_FILE
+
+#Airdrop Budget Holder Address
+echo $OST_AIRDROP_BUDGET_HOLDER_PASSPHRASE > ./pw
+geth --datadir "$DATADIR" account new --password ./pw >> $ADDRESS_FILE
+
+#Worker Test account 1
 echo "testtest" > ./pw
 geth --datadir "$DATADIR" account new --password ./pw >> $ADDRESS_FILE
 
