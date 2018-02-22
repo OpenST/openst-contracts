@@ -34,14 +34,14 @@ const AirdropKlassPrototype = {
 
   },
 
-  getById: function (params) {
+  getById: function (id) {
     var oThis = this;
-    return oThis.QueryDB.read(oThis.tableName, [], 'id=?', [params['id']]);
+    return oThis.QueryDB.read(oThis.tableName, [], 'id=?', [id]);
   },
 
-  getByContractAddress: function (params) {
+  getByContractAddress: function (contract_address) {
     var oThis = this;
-    return oThis.QueryDB.read(oThis.tableName, [], 'contract_address=?', [params['contract_address']]);
+    return oThis.QueryDB.read(oThis.tableName, [], 'contract_address=?', [contract_address]);
   }
 
 };

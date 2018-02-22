@@ -2,7 +2,7 @@
 
 var rootPrefix = '../..'
   , mysqlWrapper = require(rootPrefix + "/lib/mysql_wrapper")
-  , util = require(rootPrefix + '/lib/util')
+  , util = require(rootPrefix + '/lib/utils')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
 ;
 
