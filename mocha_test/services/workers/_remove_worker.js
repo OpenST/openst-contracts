@@ -12,7 +12,7 @@ const rootPrefix      = "../../.."
 
 describe('Remove worker', function() {
 
-  it('should pass the initial address checks', () => {
+  it('should pass the initial address checks', function() {
 
     assert.isDefined(constants.deployer);
     assert.isDefined(constants.ops);
@@ -20,62 +20,7 @@ describe('Remove worker', function() {
 
   });
 
-	it('should pass for interaction layer test when return type is uuid', async () => {
-
-    // eslint-disable-next-line no-invalid-this
-    this.timeout(100000);
-
-    // set worker
-    const response = await workers.removeWorker(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.workerAccount1,
-      constants.gasUsed,
-      {returnType: constants.returnTypeUUID});
-
-    // verify transaction UUID
-    // we will not verify if it got mined as its just interaction layer testing
-    utils.verifyTransactionUUID(response);
-
-  });
-
-  it('should pass for interaction layer test when return type is txHash', async () => {
-
-    // eslint-disable-next-line no-invalid-this
-    this.timeout(100000);
-
-    // set worker
-    const response = await workers.removeWorker(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.workerAccount1,
-      constants.gasUsed,
-      {returnType: constants.returnTypeHash});
-
-    // verify transaction hash
-    utils.verifyTransactionHash(response);
-
-  });
-
-  it('should pass for interaction layer test when return type is txReceipt', async () => {
-
-    // eslint-disable-next-line no-invalid-this
-    this.timeout(100000);
-
-    // set worker
-    const response = await workers.removeWorker(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.workerAccount1,
-      constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
-
-    // verify transaction receipt
-    utils.verifyTransactionReceipt(response);
-
-	});
-
-  it('should fail when gasPrice is null', async () => {
+  it('should fail when gasPrice is null', async function() {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -94,7 +39,7 @@ describe('Remove worker', function() {
 
   });
 
-  it('should fail when senderAddress is not valid', async () => {
+  it('should fail when senderAddress is not valid', async function() {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -113,7 +58,7 @@ describe('Remove worker', function() {
 
   });
 
-  it('should fail when workerAddress is not valid', async () => {
+  it('should fail when workerAddress is not valid', async function() {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -132,7 +77,7 @@ describe('Remove worker', function() {
 
   });
 
-  it('should succeed', async () => {
+  it('should succeed', async function() {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -157,5 +102,60 @@ describe('Remove worker', function() {
     assert.equal(isWorkerAfter.data.isValid, false);
 
   });
+
+	it('should pass for interaction layer test when return type is uuid', async function() {
+
+    // eslint-disable-next-line no-invalid-this
+    this.timeout(100000);
+
+    // set worker
+    const response = await workers.removeWorker(
+      constants.ops,
+      constants.opsPassphrase,
+      constants.workerAccount1,
+      constants.gasUsed,
+      {returnType: constants.returnTypeUUID});
+
+    // verify transaction UUID
+    // we will not verify if it got mined as its just interaction layer testing
+    utils.verifyTransactionUUID(response);
+
+  });
+
+  it('should pass for interaction layer test when return type is txHash', async function() {
+
+    // eslint-disable-next-line no-invalid-this
+    this.timeout(100000);
+
+    // set worker
+    const response = await workers.removeWorker(
+      constants.ops,
+      constants.opsPassphrase,
+      constants.workerAccount1,
+      constants.gasUsed,
+      {returnType: constants.returnTypeHash});
+
+    // verify transaction hash
+    utils.verifyTransactionHash(response);
+
+  });
+
+  it('should pass for interaction layer test when return type is txReceipt', async function() {
+
+    // eslint-disable-next-line no-invalid-this
+    this.timeout(100000);
+
+    // set worker
+    const response = await workers.removeWorker(
+      constants.ops,
+      constants.opsPassphrase,
+      constants.workerAccount1,
+      constants.gasUsed,
+      {returnType: constants.returnTypeReceipt});
+
+    // verify transaction receipt
+    utils.verifyTransactionReceipt(response);
+
+	});
 
 });

@@ -12,7 +12,7 @@ const rootPrefix      = "../../.."
 describe('Is worker', function() {
 	// Success mode is tested in `set_worker.js`
 
-  it('should fail when worker address is not valid', async () => {
+  it('should fail when worker address is not valid', async function() {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);

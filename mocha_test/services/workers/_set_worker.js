@@ -14,7 +14,7 @@ const rootPrefix      = "../../.."
 
 describe('Set worker', function() {
 
-  it('should pass the initial address checks', () => {
+  it('should pass the initial address checks', function() {
 
     assert.isDefined(constants.deployer);
     assert.isDefined(constants.ops);
@@ -22,7 +22,7 @@ describe('Set worker', function() {
 
   });
 
-  it('should fail when gasPrice is null', async () => {
+  it('should fail when gasPrice is null', async function() {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -46,7 +46,7 @@ describe('Set worker', function() {
 
   });
 
-  it('should fail when senderAddress is not valid', async () => {
+  it('should fail when senderAddress is not valid', async function() {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -70,7 +70,7 @@ describe('Set worker', function() {
 
   });
 
-  it('should fail when workerAddress is not valid', async () => {
+  it('should fail when workerAddress is not valid', async function() {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -94,7 +94,7 @@ describe('Set worker', function() {
 
   });
 
-  it('should fail when deactivationHeight is not present', async () => {
+  it('should fail when deactivationHeight is not present', async function() {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -118,7 +118,7 @@ describe('Set worker', function() {
 
   });
 
-  it('should fail when deactivationHeight is not a number', async () => {
+  it('should fail when deactivationHeight is not a number', async function() {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -142,7 +142,7 @@ describe('Set worker', function() {
 
   });
 
-  it('should fail when deactivationHeight is less than 0', async () => {
+  it('should fail when deactivationHeight is less than 0', async function() {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -166,7 +166,7 @@ describe('Set worker', function() {
 
   });
 
-  it('should fail when deactivationHeight is not an integer', async () => {
+  it('should fail when deactivationHeight is not an integer', async function() {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -190,7 +190,7 @@ describe('Set worker', function() {
 
   });
 
-  it('should succeed', async () => {
+  it('should succeed', async function() {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -226,8 +226,7 @@ describe('Set worker', function() {
 
   });
 
-  // interaction layer tests, which otherwise pass, must come after "should succeed" test
-	it('should pass interaction layer test when return type is uuid', async () => {
+	it('should pass interaction layer test when return type is uuid', async function() {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -251,7 +250,7 @@ describe('Set worker', function() {
 
   });
 
-  it('should pass interaction layer test when return type is txHash', async () => {
+  it('should pass interaction layer test when return type is txHash', async function() {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -274,7 +273,7 @@ describe('Set worker', function() {
 
   });
 
-  it('should pass interaction layer test when return type is txReceipt', async () => {
+  it('should pass interaction layer test when return type is txReceipt', async function() {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
