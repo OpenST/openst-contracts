@@ -9,7 +9,7 @@ const rootPrefix = "../../.."
   , utils = require(rootPrefix+'/mocha_test/lib/utils')
   , airdrop = require(rootPrefix + '/lib/contract_interact/airdrop')
   , workers = require(rootPrefix + '/lib/contract_interact/workers')
-  , workersContract = new workers(constants.workerContractAddress, constants.chainId)
+  , workersContract = new workers(constants.workersContractAddress, constants.chainId)
   , airdropOstUsd = new airdrop(constants.airdropOstUsdAddress, constants.chainId)
   , mockToken = require(rootPrefix + '/lib/contract_interact/EIP20TokenMock')
   , TC5 = new mockToken(constants.TC5Address)
@@ -46,7 +46,7 @@ describe('Airdrop Pay', function() {
       constants.workerAccount1,
       deactivationHeight.toNumber(),
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(setWorkerResponse);
@@ -58,7 +58,7 @@ describe('Airdrop Pay', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(spoResponse);
@@ -73,7 +73,7 @@ describe('Airdrop Pay', function() {
       constants.currencyUSD,
       50,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(amResponse);
@@ -211,7 +211,7 @@ describe('Airdrop Pay', function() {
       constants.account1,
       0,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(payResponse);

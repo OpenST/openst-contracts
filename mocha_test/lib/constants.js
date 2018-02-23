@@ -41,7 +41,7 @@ const constants = {
   // Airdrop specific constants
   airdropBudgetHolder: process.env.OST_AIRDROP_BUDGET_HOLDER,
   airdropBudgetHolderPassphrase: process.env.OST_AIRDROP_BUDGET_HOLDER_PASSPHRASE,
-  workerContractAddress: process.env.OST_UTILITY_WORKER_CONTRACT_ADDRESS,
+  workersContractAddress: process.env.OST_UTILITY_WORKER_CONTRACT_ADDRESS,
   airdropOstUsdAddress: process.env.OST_UTILITY_TEST_AIRDROP1_CONTRACT_ADDRESS
 };
 module.exports = constants;

@@ -16,7 +16,7 @@ describe('Get Workers', function() {
     const airdropWorkersResult = await airdropContract.getWorkers();
     assert.equal(airdropWorkersResult.isSuccess(), true);
     assert.equal(airdropWorkersResult.data.workerContractAddress,
-      web3RpcProvider.utils.toChecksumAddress(constants.workerContractAddress));
+      web3RpcProvider.utils.toChecksumAddress(constants.workersContractAddress));
 
   });
 

@@ -7,7 +7,7 @@ const rootPrefix      = "../../.."
     , constants       = require(rootPrefix + '/mocha_test/lib/constants')
     , utils           = require(rootPrefix+'/mocha_test/lib/utils')
     , workersModule   = require(rootPrefix + '/lib/contract_interact/workers')
-    , workers         = new workersModule(constants.workerContractAddress, constants.chainId) // should be workersContractAddress
+    , workers         = new workersModule(constants.workersContractAddress, constants.chainId) // should be workersContractAddress
 ;
 
 describe('Remove worker', function() {
@@ -31,7 +31,7 @@ describe('Remove worker', function() {
       constants.opsPassphrase,
       constants.workerAccount1,
       0,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
@@ -50,7 +50,7 @@ describe('Remove worker', function() {
       constants.opsPassphrase,
       constants.workerAccount1,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
@@ -69,7 +69,7 @@ describe('Remove worker', function() {
       constants.opsPassphrase,
       0,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
@@ -88,7 +88,7 @@ describe('Remove worker', function() {
       constants.opsPassphrase,
       constants.workerAccount1,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response);
@@ -114,7 +114,7 @@ describe('Remove worker', function() {
       constants.opsPassphrase,
       constants.workerAccount1,
       constants.gasUsed,
-      {returnType: constants.returnTypeUUID});
+      constants.optionsUUID);
 
     // verify transaction UUID
     // we will not verify if it got mined as its just interaction layer testing
@@ -133,7 +133,7 @@ describe('Remove worker', function() {
       constants.opsPassphrase,
       constants.workerAccount1,
       constants.gasUsed,
-      {returnType: constants.returnTypeHash});
+      constants.optionsHash);
 
     // verify transaction hash
     utils.verifyTransactionHash(response);
@@ -151,7 +151,7 @@ describe('Remove worker', function() {
       constants.opsPassphrase,
       constants.workerAccount1,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify transaction receipt
     utils.verifyTransactionReceipt(response);
