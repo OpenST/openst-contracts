@@ -33,7 +33,7 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       30,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response);
@@ -60,7 +60,7 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       50,
       constants.gasUsed,
-      {returnType: constants.returnTypeUUID});
+      constants.optionsUUID);
 
     // verify if the transaction receipt is valid
     // we will not verify if it got mined as its just interaction layer testing
@@ -80,7 +80,7 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       150,
       constants.gasUsed,
-      {returnType: constants.returnTypeHash});
+      constants.optionsHash);
 
     // verify if the transaction hash is valid
     // we will not verify if it got mined as its just interaction layer testing
@@ -100,7 +100,7 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       70,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid.
     // We will not check here if the value is really set as its just interaction layer testing.
@@ -118,7 +118,7 @@ describe('Set accepted margins', function() {
       constants.currencyBlank,
       3,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the response is failure
     assert.equal(response.isFailure(), true);
@@ -135,7 +135,7 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       3,
       0,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the response is failure
     assert.equal(response.isFailure(), true);
@@ -151,7 +151,7 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       3,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the response is failure
     assert.equal(response.isFailure(), true);
@@ -168,7 +168,7 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       -30,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the response is failure
     assert.equal(response.isFailure(), true);
@@ -187,7 +187,7 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       3,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response1);
@@ -207,7 +207,7 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       8,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response2);
@@ -235,7 +235,7 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       0,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response);
@@ -263,7 +263,7 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       50,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response);
