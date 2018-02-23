@@ -45,7 +45,9 @@ module.exports.perform = (accounts) => {
         height2               = new workersUtils.bigNumber(1000)
         ;
 
-  var deactivationHeight = null;
+  var workers            = null,
+      deactivationHeight = null
+      ;
 
   before(async () => {
 

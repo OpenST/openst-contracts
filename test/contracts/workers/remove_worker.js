@@ -39,6 +39,10 @@ module.exports.perform = (accounts) => {
         height2             = new workersUtils.bigNumber(1000)
         ;
         
+  var workers            = null,
+      deactivationHeight = null
+      ;
+
   before(async () => {
     workers = await Workers.new();
     assert.ok(await workers.setOpsAddress(opsAddress));

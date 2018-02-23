@@ -37,7 +37,7 @@ module.exports.perform = () => {
       ;
 
   before(async () => {
-    token = await EIP20TokenMock.new(1, pricerUtils.currencies.ost, 'name', 18);
+    token = await EIP20TokenMock.new(1, 0, pricerUtils.currencies.ost, 'name', 18);
   });
 
   it('fails to deploy if brandedToken is null', async () => {
