@@ -209,6 +209,18 @@ BasicHelperKlass.prototype = {
    */
   convertToBigNumber: function (number) {
     return (number instanceof BigNumber) ? number : new BigNumber(number);
+  },
+
+  /**
+   * Check if chainId is valid
+   *
+   * @param {Number} chainId - chainId
+   *
+   * @return {Bool}
+   */
+  isValidChainId: function (chainId) {
+   const chainIdBigNumberObject = new BigNumber(chainId);
+   return chainIdBigNumberObject.isNaN() || !chainIdBigNumberObject.isInteger() ? false : true
   }
 
 };

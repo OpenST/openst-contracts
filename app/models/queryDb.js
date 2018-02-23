@@ -88,7 +88,10 @@ QueryDB.prototype = {
       , queryArgs = queryArgs.concat([currentDateTime, currentDateTime])
       , q = 'INSERT INTO '+tableName+' ('+fields+') VALUES (?)'
     ;
-
+    logger.info("=======Insert queryArgs=======");
+    logger.info(queryArgs);
+    logger.info("=======Insert Query=======");
+    logger.info(q);
     return new Promise(
       function (onResolve, onReject) {
         // get a timestamp before running the query

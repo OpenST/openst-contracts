@@ -78,6 +78,7 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
   , opsManaged = new OpenSTPayment.opsManaged(contractAddress, gasPrice, chainId)
   , workers = new OpenSTPayment.worker(workerContractAddress, chainId)
   , airdrop = new OpenSTPayment.airdrop(airdropContractAddress, chainId)
+  , airdropManager = OpenSTPayment.airdropManager
 ;  
   // Deploy Contract
   deployer.deploy( contractName, constructorArgs, gasPrice, options);
@@ -89,9 +90,16 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
   airdrop.setPriceOracle(senderAddress, senderPassphrase, currency, address, gasPrice, options);
   // Set Accepted Margin
   airdrop.setAcceptedMargin(senderAddress, senderPassphrase, currency, acceptedMargin, gasPrice, options);
+  // Setup Airdrop
+  airdropManager.transfer(airdropContractAddress, chainId);
   // Transfer Amount to airdrop budget holder
+  airdropManager.transfer(senderAddress, senderPassphrase, airdropContractAddress, amount, gasPrice, chainId, options);
   // Approve airdrop budget holder
-  // Approve spender
+  airdropManager.approve(airdropContractAddress, airdropBudgetHolderPassphrase, gasPrice, chainId, options);
+  // Allocate airdrop amount to users in batch
+  airdropManager.batchAllocate(airdropContractAddress, transactionHash, airdropUsers);
+  // Get Users Airdrop Balance
+  airdropManager.getUserAirdropBalance(userAddresses);
   // Call Pay method
   airdrop.pay(workerAddress,
               WorkerPassphrase,
