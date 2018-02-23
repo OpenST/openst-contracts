@@ -39,7 +39,7 @@ module.exports.perform = (accounts) => {
   var token = null;
 
   before(async () => {
-    token = await EIP20TokenMock.new(1, airdropUtils.currencies.ost, 'name', 18);
+    token = await EIP20TokenMock.new(1, 0, airdropUtils.currencies.ost, 'name', 18);
   });
 
   it('fails to deploy if workers is null', async () => {

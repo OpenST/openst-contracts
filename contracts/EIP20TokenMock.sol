@@ -29,6 +29,7 @@ import "./openst-protocol/EIP20Token.sol";
 /// @title EIP20TokenMock - Provides EIP20Token with mock functionality to facilitate testing payments 
 contract EIP20TokenMock is EIP20Token {
     uint256 public conversionRate;
+    uint8 public conversionRateDecimals;
 
     /// @dev    Takes _conversionRate, _symbol, _name, _decimals
     /// @param _conversionRate conversionRate
@@ -37,6 +38,7 @@ contract EIP20TokenMock is EIP20Token {
     /// @param _decimals decimals
     function EIP20TokenMock(
         uint256 _conversionRate,
+        uint8 _conversionRateDecimals,
         string _symbol,
         string _name,
         uint8 _decimals)
@@ -45,6 +47,7 @@ contract EIP20TokenMock is EIP20Token {
         public
     {
         conversionRate = _conversionRate;
+        conversionRateDecimals = _conversionRateDecimals;
     }
 
     /// @dev    Returns 0 as mock total supply

@@ -30,8 +30,11 @@ const pricerUtils = require('./pricer_utils.js');
 module.exports.perform = (accounts) => {
   const opsAddress = accounts[1];
 
-  var response       = null,
-      acceptedMargin = null
+  var contracts      = null,
+      pricer         = null,
+      abcPriceOracle = null,
+      acceptedMargin = null,
+      response       = null
       ;
 
   before(async () => {

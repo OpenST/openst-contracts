@@ -35,7 +35,7 @@ module.exports.perform = (accounts) => {
         adminAddress        = accounts[2]
         ;
 
-  var workers = null,
+  var workers  = null,
       response = null
       ;
 

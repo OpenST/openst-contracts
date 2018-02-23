@@ -33,7 +33,12 @@ module.exports.perform = (accounts) => {
         xyzPrice   = new pricerUtils.bigNumber(10 * 10**18)
         ;
 
-  var response = null;
+  var contracts      = null,
+      pricer         = null,
+      abcPriceOracle = null,
+      xyzPriceOracle = null,
+      response       = null
+      ;
 
   before(async () => {
     contracts      = await pricerUtils.deployPricer(artifacts, accounts);

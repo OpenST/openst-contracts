@@ -36,14 +36,17 @@ const pricerUtils = require('./pricer_utils.js');
 module.exports.perform = (accounts) => {
   const opsAddress            = accounts[1],
         abcPrice              = new pricerUtils.bigNumber(20 * 10**18),
-        conversionRate        = 10,
         transferAmount        = new pricerUtils.bigNumber(5 * 10**18),
         commissionAmount      = new pricerUtils.bigNumber(1.25 * 10**18),
         beneficiary           = accounts[2],
         commissionBeneficiary = accounts[3]
         ;
 
-  var response           = null,
+  var contracts          = null,
+      token              = null,
+      pricer             = null,
+      abcPriceOracle     = null,
+      response           = null,
       intendedPricePoint = null
       ;
 

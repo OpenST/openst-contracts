@@ -46,7 +46,9 @@ module.exports.perform = (accounts) => {
         airdropAmount         = new airdropUtils.bigNumber(10 * 10**18)
         ;
 
-  var airdrop               = null,
+  var contracts             = null,
+      token                 = null,
+      airdrop               = null,
       response              = null
       ;
 
