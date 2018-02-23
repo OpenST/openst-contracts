@@ -16,6 +16,7 @@ const rootPrefix = "../../.."
   , btHelper = require(rootPrefix + '/lib/contract_interact/branded_token')
   , cacheHelper = new btHelper(constants.TC5Address, constants.chainId)
   , web3RpcProvider = require(rootPrefix + '/lib/web3/providers/rpc')
+  , airdropManager = require(rootPrefix + '/lib/airdrop_management/base')
 ;
 
 async function getAmountFromCache(address) {
@@ -90,6 +91,13 @@ describe('Airdrop Pay', function() {
     const poResult = await airdropOstUsd.priceOracles(constants.currencyUSD);
     assert.equal(poResult.isSuccess(), true);
     assert.equal(constants.priceOracles.OST.USD, poResult.data.priceOracles);
+
+    // Do Airdrop Setup
+    const setupAirdropResponse = await airdropManager.setupAirdrop(
+      constants.airdropOstUsdAddress,
+      constants.chainId
+    );
+    assert.equal(setupAirdropResponse.isSuccess(), true);
 
     await TC5.setBalance(
       constants.ops,
