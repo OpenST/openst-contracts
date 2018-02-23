@@ -139,126 +139,126 @@ describe('Airdrop Pay', function() {
 
   });
 
-  it('should pass when all parameters are valid', async function() {
-    // eslint-disable-next-line no-invalid-this
-    this.timeout(100000);
-
-    const initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
-      , initialAccount3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
-      , initialAccount4Balance = new BigNumber(await TC5.balanceOf(constants.account4))
-    ;
-
-    // Cache check
-    const initialAccount1BalanceCache = await getAmountFromCache(constants.account1)
-      , initialAccount3BalanceCache = await getAmountFromCache(constants.account3)
-      , initialAccount4BalanceCache = await getAmountFromCache(constants.account4)
-    ;
-
-    assert.equal(initialAccount1Balance.toNumber(), initialAccount1BalanceCache.toNumber(), "account1: Actual and cacheValue mismatch");
-    assert.equal(initialAccount3Balance.toNumber(), initialAccount3BalanceCache.toNumber(), "account3: Actual and cacheValue mismatch");
-    assert.equal(initialAccount4Balance.toNumber(), initialAccount4BalanceCache.toNumber(), "account4: Actual and cacheValue mismatch");
-
-    const beneficiary = constants.account3
-      , commissionAmount = new BigNumber(airdropOstUsd.toWei('2'))
-      , commissionBeneficiary = constants.account4
-      , currency = constants.currencyUSD
-      , transferAmount = new BigNumber(airdropOstUsd.toWei('7'))
-    ;
-
-    const acceptedMarginData = await airdropOstUsd.acceptedMargins(currency);
-    assert.equal(acceptedMarginData.isSuccess(), true);
-
-    const estimatedValues = await airdropOstUsd.getPricePointAndCalculatedAmounts(
-      transferAmount,
-      commissionAmount,
-      currency);
-
-    assert.equal(estimatedValues.isSuccess(), true);
-
-    const estimatedTokenAmount = new BigNumber(estimatedValues.data.tokenAmount);
-    const estimatedCommissionTokenAmount = new BigNumber(estimatedValues.data.commissionTokenAmount);
-
-    const intendedPricePoint = estimatedValues.data.pricePoint;
-
-    const estimatedTotalAmount = new BigNumber(0).plus(estimatedTokenAmount).plus(estimatedCommissionTokenAmount);
-    const airdropBudgetAmount = new BigNumber(airdropOstUsd.toWei('1000000')); // 1 million
-
-    // Approve airdropBudgetHolder for transfer
-    const airdropBudgetHolderApproveResponse = await TC5.approve(
-      constants.airdropBudgetHolder,
-      constants.airdropBudgetHolderPassphrase,
-      constants.airdropOstUsdAddress,
-      airdropBudgetAmount,
-      constants.gasUsed);
-    console.log("airdropBudgetHolder approve");
-    console.log(airdropBudgetHolderApproveResponse);
-
-    // Approve account1 for transfer
-    const account1ApproveResponse = await TC5.approve(
-      constants.account1,
-      constants.accountPassphrase1,
-      constants.airdropOstUsdAddress,
-      estimatedTotalAmount,
-      constants.gasUsed);
-
-    console.log("user approve");
-    console.log(account1ApproveResponse);
-
-    const payResponse = await airdropOstUsd.pay(
-      constants.workerAccount1,
-      constants.workerAccountPassphrase1,
-      beneficiary,
-      transferAmount,
-      commissionBeneficiary,
-      commissionAmount,
-      currency,
-      intendedPricePoint,
-      constants.account1,
-      0,
-      constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
-
-    console.log("payResponse");
-    console.log(payResponse);
-
-
-    // verify if the transaction receipt is valid
-    utils.verifyTransactionReceipt(payResponse);
-
-    // verify if the transaction is actually mined
-    await utils.verifyIfMined(airdropOstUsd, payResponse.data.transaction_hash);
-
-    const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
-      , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
-      , account4Balance = new BigNumber(await TC5.balanceOf(constants.account4))
-    ;
-
-    assert.equal(
-      new BigNumber(0).plus(initialAccount1Balance)
-        .minus(estimatedTokenAmount)
-        .minus(estimatedCommissionTokenAmount)
-        .toNumber(), account1Balance.toNumber());
-
-    assert.equal(
-      new BigNumber(0).plus(initialAccount3Balance)
-        .plus(estimatedTokenAmount)
-        .toNumber(), account3Balance.toNumber());
-
-    assert.equal(
-      new BigNumber(0).plus(initialAccount4Balance)
-        .plus(estimatedCommissionTokenAmount)
-        .toNumber(), account4Balance.toNumber());
-
-    // Cache check
-    const finalAccount1BalanceCache = await getAmountFromCache(constants.account1)
-      , finalAccount3BalanceCache = await getAmountFromCache(constants.account3)
-      , finalAccount4BalanceCache = await getAmountFromCache(constants.account4)
-    ;
-
-    assert.equal(account1Balance.toNumber(), finalAccount1BalanceCache.toNumber(), "account1: Actual and cacheValue mismatch after test");
-    assert.equal(account3Balance.toNumber(), finalAccount3BalanceCache.toNumber(), "account3: Actual and cacheValue mismatch after test");
-    assert.equal(account4Balance.toNumber(), finalAccount4BalanceCache.toNumber(), "account4: Actual and cacheValue mismatch after test");
-
-  });
+  // it('should pass when all parameters are valid', async function() {
+  //   // eslint-disable-next-line no-invalid-this
+  //   this.timeout(100000);
+  //
+  //   const initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
+  //     , initialAccount3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
+  //     , initialAccount4Balance = new BigNumber(await TC5.balanceOf(constants.account4))
+  //   ;
+  //
+  //   // Cache check
+  //   const initialAccount1BalanceCache = await getAmountFromCache(constants.account1)
+  //     , initialAccount3BalanceCache = await getAmountFromCache(constants.account3)
+  //     , initialAccount4BalanceCache = await getAmountFromCache(constants.account4)
+  //   ;
+  //
+  //   assert.equal(initialAccount1Balance.toNumber(), initialAccount1BalanceCache.toNumber(), "account1: Actual and cacheValue mismatch");
+  //   assert.equal(initialAccount3Balance.toNumber(), initialAccount3BalanceCache.toNumber(), "account3: Actual and cacheValue mismatch");
+  //   assert.equal(initialAccount4Balance.toNumber(), initialAccount4BalanceCache.toNumber(), "account4: Actual and cacheValue mismatch");
+  //
+  //   const beneficiary = constants.account3
+  //     , commissionAmount = new BigNumber(airdropOstUsd.toWei('2'))
+  //     , commissionBeneficiary = constants.account4
+  //     , currency = constants.currencyUSD
+  //     , transferAmount = new BigNumber(airdropOstUsd.toWei('7'))
+  //   ;
+  //
+  //   const acceptedMarginData = await airdropOstUsd.acceptedMargins(currency);
+  //   assert.equal(acceptedMarginData.isSuccess(), true);
+  //
+  //   const estimatedValues = await airdropOstUsd.getPricePointAndCalculatedAmounts(
+  //     transferAmount,
+  //     commissionAmount,
+  //     currency);
+  //
+  //   assert.equal(estimatedValues.isSuccess(), true);
+  //
+  //   const estimatedTokenAmount = new BigNumber(estimatedValues.data.tokenAmount);
+  //   const estimatedCommissionTokenAmount = new BigNumber(estimatedValues.data.commissionTokenAmount);
+  //
+  //   const intendedPricePoint = estimatedValues.data.pricePoint;
+  //
+  //   const estimatedTotalAmount = new BigNumber(0).plus(estimatedTokenAmount).plus(estimatedCommissionTokenAmount);
+  //   const airdropBudgetAmount = new BigNumber(airdropOstUsd.toWei('1000000')); // 1 million
+  //
+  //   // Approve airdropBudgetHolder for transfer
+  //   const airdropBudgetHolderApproveResponse = await TC5.approve(
+  //     constants.airdropBudgetHolder,
+  //     constants.airdropBudgetHolderPassphrase,
+  //     constants.airdropOstUsdAddress,
+  //     airdropBudgetAmount,
+  //     constants.gasUsed);
+  //   console.log("airdropBudgetHolder approve");
+  //   console.log(airdropBudgetHolderApproveResponse);
+  //
+  //   // Approve account1 for transfer
+  //   const account1ApproveResponse = await TC5.approve(
+  //     constants.account1,
+  //     constants.accountPassphrase1,
+  //     constants.airdropOstUsdAddress,
+  //     estimatedTotalAmount,
+  //     constants.gasUsed);
+  //
+  //   console.log("user approve");
+  //   console.log(account1ApproveResponse);
+  //
+  //   const payResponse = await airdropOstUsd.pay(
+  //     constants.workerAccount1,
+  //     constants.workerAccountPassphrase1,
+  //     beneficiary,
+  //     transferAmount,
+  //     commissionBeneficiary,
+  //     commissionAmount,
+  //     currency,
+  //     intendedPricePoint,
+  //     constants.account1,
+  //     0,
+  //     constants.gasUsed,
+  //     {returnType: constants.returnTypeReceipt});
+  //
+  //   console.log("payResponse");
+  //   console.log(payResponse);
+  //
+  //
+  //   // verify if the transaction receipt is valid
+  //   utils.verifyTransactionReceipt(payResponse);
+  //
+  //   // verify if the transaction is actually mined
+  //   await utils.verifyIfMined(airdropOstUsd, payResponse.data.transaction_hash);
+  //
+  //   const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
+  //     , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
+  //     , account4Balance = new BigNumber(await TC5.balanceOf(constants.account4))
+  //   ;
+  //
+  //   assert.equal(
+  //     new BigNumber(0).plus(initialAccount1Balance)
+  //       .minus(estimatedTokenAmount)
+  //       .minus(estimatedCommissionTokenAmount)
+  //       .toNumber(), account1Balance.toNumber());
+  //
+  //   assert.equal(
+  //     new BigNumber(0).plus(initialAccount3Balance)
+  //       .plus(estimatedTokenAmount)
+  //       .toNumber(), account3Balance.toNumber());
+  //
+  //   assert.equal(
+  //     new BigNumber(0).plus(initialAccount4Balance)
+  //       .plus(estimatedCommissionTokenAmount)
+  //       .toNumber(), account4Balance.toNumber());
+  //
+  //   // Cache check
+  //   const finalAccount1BalanceCache = await getAmountFromCache(constants.account1)
+  //     , finalAccount3BalanceCache = await getAmountFromCache(constants.account3)
+  //     , finalAccount4BalanceCache = await getAmountFromCache(constants.account4)
+  //   ;
+  //
+  //   assert.equal(account1Balance.toNumber(), finalAccount1BalanceCache.toNumber(), "account1: Actual and cacheValue mismatch after test");
+  //   assert.equal(account3Balance.toNumber(), finalAccount3BalanceCache.toNumber(), "account3: Actual and cacheValue mismatch after test");
+  //   assert.equal(account4Balance.toNumber(), finalAccount4BalanceCache.toNumber(), "account4: Actual and cacheValue mismatch after test");
+  //
+  // });
 
 });

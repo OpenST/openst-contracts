@@ -38,13 +38,13 @@ node tools/deploy/EIP20TokenMock.js conversionRate symbol name decimals gasPrice
 ### Run Deployment Script for Workers:
 
 ```bash
-node tools/deploy/workers.js gasPrice
+node tools/deploy/workers.js gasPrice chainId
 ```
 
 ### Run Deployment Script for Airdrop:
 
 ```bash
-node tools/deploy/airdrop.js brandedTokenContractAddress baseCurrency workerContractAddress airdropBudgetHolder gasPrice
+node tools/deploy/airdrop.js brandedTokenContractAddress baseCurrency workerContractAddress airdropBudgetHolder gasPrice chainId
 ```
 
 ### Set Caching Engine:
@@ -75,14 +75,14 @@ node migrations/create_tables.js
 ```js
 const OpenSTPayment = require('@openstfoundation/openst-payments')
   , deployer = new OpenSTPayment.deployer()
-  , opsManaged = new OpenSTPayment.opsManaged()
+  , opsManaged = new OpenSTPayment.opsManaged(contractAddress, gasPrice, chainId)
   , workers = new OpenSTPayment.worker(workerContractAddress, chainId)
   , airdrop = new OpenSTPayment.airdrop(airdropContractAddress, chainId)
 ;  
   // Deploy Contract
   deployer.deploy( contractName, constructorArgs, gasPrice, options);
   // Set Ops Address
-  opsManaged.setOpsAddress(deployerName, opsAddress, options);
+  opsManaged.setOpsAddress(deployerAddress, deployerPassphrase, opsAddress, options);
   // Set Worker
   workers.setWorker(senderAddress, senderPassphrase, workerAddress, deactivationHeight, gasPrice, options);
   // Set Price Oracle

@@ -24,10 +24,13 @@ const coreAddresses = require(rootPrefix + '/config/core_addresses');
 const prompts = readline.createInterface(process.stdin, process.stdout);
 const logger = require(rootPrefix + '/helpers/custom_console_logger');
 const OpsManagedContract = require(rootPrefix + "/lib/contract_interact/ops_managed_contract");
+const returnTypes = require(rootPrefix + "/lib/global_constant/return_types");
 
 // Different addresses used for deployment
-const deployerName = "deployer";
-const deployerAddress = coreAddresses.getAddressForUser(deployerName);
+const deployerName = "deployer"
+  , deployerAddress = coreAddresses.getAddressForUser(deployerName)
+  , deployerPassphrase = coreAddresses.getPassphraseForUser(deployerName)
+;
 
 const opsName = "ops";
 const opsAddress = coreAddresses.getAddressForUser(opsName);
@@ -41,24 +44,28 @@ const opsAddress = coreAddresses.getAddressForUser(opsName);
  * @return {}
  */
 function validate(argv) {
-  if (argv[2] === undefined || argv[2] === '') {
+  if (!argv[2]) {
     logger.error("brandedTokenAddress is mandatory!");
     process.exit(0);
   }
-  if (argv[3] === undefined || argv[3] === '') {
+  if (!argv[3]) {
     logger.error("Base currency is mandatory!");
     process.exit(0);
   }
-  if (argv[4] === undefined || argv[4] === '') {
+  if (!argv[4]) {
     logger.error("Worker Contract Address is mandatory!");
     process.exit(0);
   }
-  if (argv[5] === undefined || argv[5] === '') {
+  if (!argv[5]) {
     logger.error("airdropbudgetholder is mandatory!");
     process.exit(0);
   }
-  if (argv[6] === undefined || argv[6] === '') {
+  if (!argv[6]) {
     logger.error("gas price is mandatory!");
+    process.exit(0);
+  }
+  if (!argv[7]) {
+    logger.error("chainId is mandatory!");
     process.exit(0);
   }
 }
@@ -79,8 +86,9 @@ async function performer(argv) {
   logger.info("argv[4]: " + argv[4]); // worker contract address
   logger.info("argv[5]: " + argv[5]); // airdropBudgetHolder address
   logger.info("argv[6]: " + argv[6]); // gas price
-  logger.info("argv[7]: " + argv[7]); // isTravisCIEnabled
-  logger.info("argv[8]: " + argv[8]); // file to write airdrop contract address
+  logger.info("argv[7]: " + argv[7]); // chain Id
+  logger.info("argv[8]: " + argv[8]); // isTravisCIEnabled
+  logger.info("argv[9]: " + argv[9]); // file to write airdrop contract address
 
   validate(argv);
   const brandedTokenAddress = argv[2].trim();
@@ -88,11 +96,12 @@ async function performer(argv) {
   const workerContractAddress = argv[4].trim();
   const airdropBudgetHolder = argv[5].trim();
   const gasPrice = argv[6].trim();
+  const chainId = argv[7].trim();
   var isTravisCIEnabled = false;
-  if (argv[7] !== undefined) {
-    isTravisCIEnabled = argv[7].trim() === 'travis';
+  if (argv[8] !== undefined) {
+    isTravisCIEnabled = argv[8].trim() === 'travis';
   }
-  const fileForContractAddress = (argv[8] !== undefined) ? argv[8].trim() : '';
+  const fileForContractAddress = (argv[9] !== undefined) ? argv[9].trim() : '';
 
   logger.info("Deployer Address: " + deployerAddress);
   logger.info("Ops Address: " + opsAddress);
@@ -101,6 +110,7 @@ async function performer(argv) {
   logger.info("Worker Contract Address: " + workerContractAddress);
   logger.info("Airdrop Budget Holder: " + airdropBudgetHolder);
   logger.info("Gas price: " + gasPrice);
+  logger.info("chainId: " + chainId);
   logger.info("Travis CI enabled Status: " + isTravisCIEnabled);
   logger.info("File to write For ContractAddress: "+fileForContractAddress);
 
@@ -123,23 +133,22 @@ async function performer(argv) {
     prompts.close();
   }
 
-  const deployerInstance = new Deployer();
+  const contractName = 'airdrop'
+    , deployerInstance = new Deployer()
+  ;
 
-  const contractName = 'airdrop';
-
-  var constructorArgs = [
+  const constructorArgs = [
     brandedTokenAddress,
     web3Provider.utils.asciiToHex(baseCurrency),
     workerContractAddress,
     airdropBudgetHolder
   ];
-  const options = {returnType: "txReceipt"};
-
+  const deployOptions = {returnType: returnTypes.transactionReceipt()};
   const deployResult =  await deployerInstance.deploy(
     contractName,
     constructorArgs,
     gasPrice,
-    options);
+    deployOptions);
 
   if (deployResult.isSuccess()) {
     const contractAddress = deployResult.data.transaction_receipt.contractAddress;
@@ -149,18 +158,24 @@ async function performer(argv) {
     }
 
     logger.info("Setting Ops Address to: " + opsAddress);
-    var opsManaged = new OpsManagedContract(contractAddress, gasPrice);
-    var result = await opsManaged.setOpsAddress(deployerName, opsAddress, {
-      gasPrice: gasPrice,
-      gas: coreConstants.OST_GAS_LIMIT
-    });
-    logger.info(result);
+    const opsManaged = new OpsManagedContract(contractAddress, gasPrice, chainId)
+      , setOpsOptions = {returnType: returnTypes.transactionReceipt()}
+    ;
+    var setOpsResult = await opsManaged.setOpsAddress(deployerAddress,
+      deployerPassphrase,
+      opsAddress,
+      setOpsOptions
+    );
+    logger.info(setOpsResult);
     var contractOpsAddress = await opsManaged.getOpsAddress();
     logger.info("Ops Address Set to: " + contractOpsAddress);
 
+  } else {
+    logger.error("Error deploying contract");
+    logger.error(deployResult);
   }
 
 }
 
-// node tools/deploy/airdrop.js brandedTokenContractAddress baseCurrency workerContractAddress airdropBudgetHolder gasPrice <travis> <fileToWrite>
+// node tools/deploy/airdrop.js brandedTokenContractAddress baseCurrency workerContractAddress airdropBudgetHolder gasPrice chainId <travis> <fileToWrite>
 performer(process.argv);
