@@ -19,9 +19,6 @@ describe('Set worker', function() {
     assert.isDefined(constants.deployer);
     assert.isDefined(constants.ops);
     assert.isDefined(constants.account1);
-    assert.notEqual(constants.deployer, constants.ops);
-    assert.notEqual(constants.deployer, constants.account1);
-    assert.notEqual(constants.ops, constants.account1);
 
   });
 
@@ -264,6 +261,7 @@ describe('Set worker', function() {
   });
 
   it('should succeed', async () => {
+
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
