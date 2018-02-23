@@ -6,7 +6,7 @@ const chai = require('chai')
 const rootPrefix      = "../../.."
     , constants       = require(rootPrefix + '/mocha_test/lib/constants')
     , workersModule   = require(rootPrefix + '/lib/contract_interact/workers')
-    , workers         = new workersModule(constants.workersContractAddress, constants.chainId) // should be workersContractAddress
+    , workers         = new workersModule(constants.workersContractAddress, constants.chainId)
 ;
 
 describe('Is worker', function() {

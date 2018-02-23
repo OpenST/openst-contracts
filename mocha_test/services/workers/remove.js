@@ -7,7 +7,7 @@ const rootPrefix      = "../../.."
     , constants       = require(rootPrefix + '/mocha_test/lib/constants')
     , utils           = require(rootPrefix+'/mocha_test/lib/utils')
     , workersModule   = require(rootPrefix + '/lib/contract_interact/workers')
-    , workers         = new workersModule(constants.workersContractAddress, constants.chainId) // should be workersContractAddress
+    , workers         = new workersModule(constants.workersContractAddress, constants.chainId)
     , web3RpcProvider = require(rootPrefix + '/lib/web3/providers/rpc')
 ;
 
