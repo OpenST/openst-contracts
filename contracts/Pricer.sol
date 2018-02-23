@@ -371,9 +371,9 @@ contract Pricer is OpsManaged, PricerInterface {
         view
         returns (uint256, uint256) /* number of BT ,number of commission BT */
     {
-        uint256 adjConversionRate = pricerConversionRate.mul(10**uint256(pricerDecimals)).div(10**uint256(pricerConversionRateDecimals));
-        uint256 amountBT = _transferAmount.mul(adjConversionRate).div(_pricePoint);
-        uint256 commissionAmountBT = _commissionAmount.mul(adjConversionRate).div(_pricePoint);
+        uint256 conversionRatetoBTWei = pricerConversionRate.mul(10**uint256(pricerDecimals)).div(10**uint256(pricerConversionRateDecimals));
+        uint256 amountBT = _transferAmount.mul(conversionRatetoBTWei).div(_pricePoint);
+        uint256 commissionAmountBT = _commissionAmount.mul(conversionRatetoBTWei).div(_pricePoint);
         return (amountBT, commissionAmountBT);
     }
 
