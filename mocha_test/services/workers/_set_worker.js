@@ -22,76 +22,6 @@ describe('Set worker', function() {
 
   });
 
-	it('should pass interaction layer test when return type is uuid', async () => {
-
-    // eslint-disable-next-line no-invalid-this
-    this.timeout(100000);
-
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
-        , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
-    ;
-
-    // set worker
-    const response = await workers.setWorker(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.workerAccount1,
-      deactivationHeight.toNumber(),
-      constants.gasUsed,
-      {returnType: constants.returnTypeUUID});
-
-    // verify transaction UUID
-    // we will not verify if it got mined as its just interaction layer testing
-    utils.verifyTransactionUUID(response);
-
-  });
-
-  it('should pass interaction layer test when return type is txHash', async () => {
-
-    // eslint-disable-next-line no-invalid-this
-    this.timeout(100000);
-
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
-        , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
-    ;
-
-    // set worker
-    const response = await workers.setWorker(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.workerAccount1,
-      deactivationHeight.toNumber(),
-      constants.gasUsed,
-      {returnType: constants.returnTypeHash});
-
-    // verify transaction hash
-    utils.verifyTransactionHash(response);
-
-  });
-
-  it('should pass interaction layer test when return type is txReceipt', async () => {
-
-    // eslint-disable-next-line no-invalid-this
-    this.timeout(100000);
-
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
-        , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
-    ;
-
-    // set worker
-    const response = await workers.setWorker(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.workerAccount1,
-      deactivationHeight.toNumber(),
-      constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
-
-    // verify transaction receipt
-    utils.verifyTransactionReceipt(response);
-
-	});
-
   it('should fail when gasPrice is null', async () => {
 
     // eslint-disable-next-line no-invalid-this
@@ -164,7 +94,7 @@ describe('Set worker', function() {
 
   });
 
-  it('should fail when deactivationHeight is 0', async () => {
+  it('should fail when deactivationHeight is not present', async () => {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -178,7 +108,7 @@ describe('Set worker', function() {
       constants.ops,
       constants.opsPassphrase,
       constants.workerAccount1,
-      0,
+      null,
       constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
@@ -202,7 +132,7 @@ describe('Set worker', function() {
       constants.ops,
       constants.opsPassphrase,
       constants.workerAccount1,
-      '0',
+      'NaN',
       constants.gasUsed,
       {returnType: constants.returnTypeReceipt});
 
@@ -295,5 +225,76 @@ describe('Set worker', function() {
     assert.equal(isWorkerAfter.data.isValid, true);
 
   });
+
+  // interaction layer tests, which otherwise pass, must come after "should succeed" test
+	it('should pass interaction layer test when return type is uuid', async () => {
+
+    // eslint-disable-next-line no-invalid-this
+    this.timeout(100000);
+
+    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+        , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
+    ;
+
+    // set worker
+    const response = await workers.setWorker(
+      constants.ops,
+      constants.opsPassphrase,
+      constants.workerAccount1,
+      deactivationHeight.toNumber(),
+      constants.gasUsed,
+      {returnType: constants.returnTypeUUID});
+
+    // verify transaction UUID
+    // we will not verify if it got mined as its just interaction layer testing
+    utils.verifyTransactionUUID(response);
+
+  });
+
+  it('should pass interaction layer test when return type is txHash', async () => {
+
+    // eslint-disable-next-line no-invalid-this
+    this.timeout(100000);
+
+    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+        , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
+    ;
+
+    // set worker
+    const response = await workers.setWorker(
+      constants.ops,
+      constants.opsPassphrase,
+      constants.workerAccount1,
+      deactivationHeight.toNumber(),
+      constants.gasUsed,
+      {returnType: constants.returnTypeHash});
+
+    // verify transaction hash
+    utils.verifyTransactionHash(response);
+
+  });
+
+  it('should pass interaction layer test when return type is txReceipt', async () => {
+
+    // eslint-disable-next-line no-invalid-this
+    this.timeout(100000);
+
+    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+        , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
+    ;
+
+    // set worker
+    const response = await workers.setWorker(
+      constants.ops,
+      constants.opsPassphrase,
+      constants.workerAccount1,
+      deactivationHeight.toNumber(),
+      constants.gasUsed,
+      {returnType: constants.returnTypeReceipt});
+
+    // verify transaction receipt
+    utils.verifyTransactionReceipt(response);
+
+	});
 
 });
