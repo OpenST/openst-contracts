@@ -10,9 +10,9 @@ const chai = require('chai')
 eventListener.startObserving();
 
 
-module.exports.verifyIfMined = async (pricer, transactionHash) => {
+module.exports.verifyIfMined = async (contract, transactionHash) => {
 
-  const receipt = await pricer.getTxReceipt(transactionHash);
+  const receipt = await contract.getTxReceipt(transactionHash);
   assert.equal(receipt.isSuccess(), true);
   assert.exists(receipt.data.transactionReceipt);
   assert.equal(transactionHash, receipt.data.transactionReceipt.formattedTransactionReceipt.transactionHash);
