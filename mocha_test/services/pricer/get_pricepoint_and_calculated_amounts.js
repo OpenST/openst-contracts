@@ -109,12 +109,19 @@ describe('Get price point and calculated amounts', function() {
 
     const conversionRateData = await pricerOstUsd.conversionRate();
     assert.equal(conversionRateData.isSuccess(), true);
+
+    const conversionRateDecimalsData = await pricerOstUsd.conversionRateDecimals();
+    assert.equal(conversionRateDecimalsData.isSuccess(), true);
+
     const conversionRate = conversionRateData.data.conversionRate;
+    const conversionRateDecimals = conversionRateDecimalsData.data.conversionRateDecimals;
+
+    const conversionFactor = conversionRate/(10**conversionRateDecimals);
 
     const amount = pricerOstUsd.toWei('1')
       , commissionAmount = pricerOstUsd.toWei('0.5')
-      , calculatedAmount = (amount*conversionRate*(10**decimal))/pricePoint
-      , calculatedCommisionAmount = (commissionAmount*conversionRate*(10**decimal))/pricePoint;
+      , calculatedAmount = (amount*conversionFactor*(10**decimal))/pricePoint
+      , calculatedCommisionAmount = (commissionAmount*conversionFactor*(10**decimal))/pricePoint;
 
     const result = await pricerOstUsd.getPricePointAndCalculatedAmounts(
       amount,
@@ -141,12 +148,19 @@ describe('Get price point and calculated amounts', function() {
 
     const conversionRateData = await pricerOstEur.conversionRate();
     assert.equal(conversionRateData.isSuccess(), true);
+
+    const conversionRateDecimalsData = await pricerOstEur.conversionRateDecimals();
+    assert.equal(conversionRateDecimalsData.isSuccess(), true);
+
     const conversionRate = conversionRateData.data.conversionRate;
+    const conversionRateDecimals = conversionRateDecimalsData.data.conversionRateDecimals;
+
+    const conversionFactor = conversionRate/(10**conversionRateDecimals);
 
     const amount = pricerOstEur.toWei('1')
       , commissionAmount = pricerOstEur.toWei('0.5')
-      , calculatedAmount = (amount*conversionRate*(10**decimal))/pricePoint
-      , calculatedCommisionAmount = (commissionAmount*conversionRate*(10**decimal))/pricePoint;
+      , calculatedAmount = (amount*conversionFactor*(10**decimal))/pricePoint
+      , calculatedCommisionAmount = (commissionAmount*conversionFactor*(10**decimal))/pricePoint;
 
     const result = await pricerOstEur.getPricePointAndCalculatedAmounts(
       amount,

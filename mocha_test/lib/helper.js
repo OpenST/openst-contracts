@@ -9,6 +9,7 @@
  */
 
 const rootPrefix = '../..'
+  , BigNumber = require('bignumber.js')
 ;
 
 /**
@@ -21,3 +22,4 @@ const helper = {
 };
 
 module.exports = helper;
+
