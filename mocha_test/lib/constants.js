@@ -43,6 +43,10 @@ const constants = {
   airdropBudgetHolderPassphrase: process.env.OST_AIRDROP_BUDGET_HOLDER_PASSPHRASE,
   workersContractAddress: process.env.OST_UTILITY_WORKER_CONTRACT_ADDRESS,
   airdropOstUsdAddress: process.env.OST_UTILITY_TEST_AIRDROP1_CONTRACT_ADDRESS,
-  airdropBudgetBrandedTokenBalance: '100'
+  airdropBudgetBrandedTokenBalance: '100',
+  airdropUsers: {
+    '0x934ebd34b2a4f16d4de16256df36a6013785557d': {airdropAmount: 50, expiryTimestamp: 0},
+    '0x934ebd34b2a4f16d4de16256df36a6013785557e': {airdropAmount: 50, expiryTimestamp: 0}
+  }
 };
 module.exports = constants;

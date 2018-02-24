@@ -24,6 +24,8 @@ const airdropKlass = require(rootPrefix + '/app/models/airdrop')
   , airdropManager = require(rootPrefix + '/lib/airdrop_management/base')
 ;
 
+var transferToAirdropBudgetHolderTransactionHash = '';
+
 async function getAmountFromCache(address) {
   console.log("========getAmountFromCache===== for address: "+address);
   const response = await brandedTokenObject.getBalanceFromCache(address);
@@ -165,8 +167,8 @@ describe('Airdrop Pay', function() {
       ,  initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1));
     ;
     assert.isAbove(
-      initialAccount1Balance.toString(),
-      airdropBudgetAmountInWei.toString(),
+      initialAccount1Balance.toNumber(),
+      airdropBudgetAmountInWei.toNumber(),
       "account1 balance should be greater than airdropBudgetAmount")
     ;
     logger.info("=======initialAccount1Balance:", initialAccount1Balance.toString(),
@@ -180,20 +182,21 @@ describe('Airdrop Pay', function() {
       constants.gasUsed,
       constants.chainId,
       {returnType: constants.returnTypeReceipt}
-    )
+    );
     logger.info("=======transferToAirdropBudgetHolderResult=======");
     logger.info(transferToAirdropBudgetHolderResult);
-    const airdropBudgetHolderBalance = new BigNumber(await TC5.balanceOf(constants.airdropBudgetHolder));
-    assert.equal(airdropBudgetHolderBalance.toString(), airdropBudgetAmountInWei.toString());
+    const afterTransferAirdropBudgetHolderBalance = new BigNumber(await TC5.balanceOf(constants.airdropBudgetHolder));
+    assert.equal(afterTransferAirdropBudgetHolderBalance.toString(), airdropBudgetAmountInWei.toString());
     // verify if the transaction receipt is valid
     await utils.verifyTransactionReceipt(transferToAirdropBudgetHolderResult);
 
     // verify if the transaction  was actually mined
     await utils.verifyIfMined(airdropOstUsd, transferToAirdropBudgetHolderResult.data.transaction_hash);
-
+    transferToAirdropBudgetHolderTransactionHash = transferToAirdropBudgetHolderResult.data.transaction_hash;
   });
 
   it('AirdropManager: aidropBudgetHolder is approving airdrop contract', async function() {
+    this.timeout(100000);
     var approveToAirdropBudgetHolderResult = await airdropManager.approve(
       constants.airdropOstUsdAddress,
       constants.airdropBudgetHolderPassphrase,
@@ -209,6 +212,17 @@ describe('Airdrop Pay', function() {
     // verify if the transaction  was actually mined
     await utils.verifyIfMined(airdropOstUsd, approveToAirdropBudgetHolderResult.data.transaction_hash);
 
+  });
+
+  it('AirdropManager: batch allocate to airdrop users', async function() {
+    this.timeout(5000);
+    var transferToAirdropBudgetHolderTransactionHash = '0xbd13c16171a821511a2b477a6cfc87b8123760d8bf611d76fd06c746fe115af4';
+    var batchAllocateAirdropAmountResult = await airdropManager.batchAllocate(
+      constants.airdropOstUsdAddress,
+      transferToAirdropBudgetHolderTransactionHash,
+      constants.airdropUsers
+    );
+    assert.equal(batchAllocateAirdropAmountResult.isSuccess(), false);
   });
 
   // it('should pass when all parameters are valid', async function() {

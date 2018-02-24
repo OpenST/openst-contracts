@@ -21,6 +21,11 @@ const AirdropAllocationProofDetailKlassPrototype = {
 
   tableName: 'airdrop_allocation_proof_details',
 
+  getById: function (id) {
+    var oThis = this;
+    return oThis.QueryDB.read(oThis.tableName, [], 'id=?', [id]);
+  },
+
   getByTransactionHash: function (transaction_hash) {
     var oThis = this;
     return oThis.QueryDB.read(oThis.tableName, [], 'transaction_hash=?', transaction_hash);
@@ -28,45 +33,36 @@ const AirdropAllocationProofDetailKlassPrototype = {
 
   createRecord: async function(transaction_hash, airdrop_amount, airdrop_allocated_amount=0) {
     var oThis = this;
-
-    return new Promise(async function (onResolve, onReject) {
       try {
         const insertedRecord = await oThis.create({
           transaction_hash: transaction_hash,
           airdrop_amount: airdrop_amount,
           airdrop_allocated_amount: airdrop_allocated_amount
         });
-        return onResolve(responseHelper.successWithData({response: insertedRecord}));
+        return responseHelper.successWithData({response: insertedRecord});
       } catch(err){
-        return onResolve(responseHelper.error('l_aapd_cr_1', 'Error creating airdrop_allocation_proof_details record:'+err));
+        return responseHelper.error('l_aapd_cr_1', 'Error creating airdrop_allocation_proof_details record:'+err);
       }
-    });
 
   },
 
   updateAllocatedAmount: async function(id, allocated_amount){
-    var oThis = this;
-    return new Promise(async function (onResolve, onReject) {
-      var airdropAllocationProofDetailRecord = {}
-      airdropAllocationProofDetailRecord['allocated_amount'] = allocated_amount;
-      try {
-        await oThis.edit(
-          {
-            qParams: airdropAllocationProofDetailRecord,
-            whereCondition: {id: id}
-          }
-        );
-      } catch(err){
-        return onResolve(responseHelper.error('l_a_m_aapd_1', 'Something went wrong while updating record id:'+id));
-      }
+    const oThis = this;
+    var airdropAllocationProofDetailRecord = {};
+    airdropAllocationProofDetailRecord['airdrop_allocated_amount'] = allocated_amount;
+    try {
+      await oThis.edit(
+        {
+          qParams: airdropAllocationProofDetailRecord,
+          whereCondition: {id: id}
+        }
+      );
+    } catch(err){
+      return responseHelper.error('l_a_m_aapd_1', 'Something went wrong while updating record id:'+id);
+    }
 
-      return onResolve(responseHelper.successWithData({}));
-
-    });
+    return responseHelper.successWithData({});
   },
-
-
-
 
 };
 

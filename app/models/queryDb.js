@@ -88,13 +88,39 @@ QueryDB.prototype = {
       , queryArgs = queryArgs.concat([currentDateTime, currentDateTime])
       , q = 'INSERT INTO '+tableName+' ('+fields+') VALUES (?)'
     ;
-    logger.info("=======Insert Query=======");
-    logger.info(q);
     return new Promise(
       function (onResolve, onReject) {
         // get a timestamp before running the query
         var pre_query = Date.now();
         var qry = oThis.onWriteConnection().query(q, [queryArgs], function (err, result, fields) {
+          logger.info("(%s ms) %s", (Date.now() - pre_query), qry.sql);
+          if (err) {
+            onReject(err);
+          } else {
+            onResolve({
+              fieldCount: result.fieldCount,
+              affectedRows: result.affectedRows,
+              insertId: result.insertId
+            });
+          }
+        });
+
+      }
+    );
+  },
+
+  bulkInsert: function(tableName, fields, queryArgs, options) {
+
+    var oThis = this
+      , q = 'INSERT INTO '+tableName+' ('+fields+') VALUES ?'
+    ;
+
+    return new Promise(
+      function (onResolve, onReject) {
+        // get a timestamp before running the query
+        var pre_query = Date.now();
+        var qry = oThis.onWriteConnection().query(q, [queryArgs], function (err, result, fields) {
+          logger.info("=======Insert Query=======");
           logger.info("(%s ms) %s", (Date.now() - pre_query), qry.sql);
           if (err) {
             onReject(err);
