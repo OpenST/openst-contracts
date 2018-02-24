@@ -32,9 +32,9 @@ const constants = {
   returnTypeUUID: returnTypeUUID,
   returnTypeHash: returnTypeHash,
   returnTypeReceipt: returnTypeReceipt,
-  optionsUUID: {returnType: returnTypeUUID, tag: "test"},
-  optionsHash: {returnType: returnTypeHash, tag: "test"},
-  optionsReceipt: {returnType: returnTypeReceipt, tag: "test"},
+  optionsUUID: {returnType: returnTypeUUID, tag: "returnTypeUUID"},
+  optionsHash: {returnType: returnTypeHash, tag: "returnTypeHash"},
+  optionsReceipt: {returnType: returnTypeReceipt, tag: "returnTypeReceipt"},
   // Worker specific constants
   workerAccount1: process.env.OST_WORKER_TEST_ACCOUNT1,
   workerAccountPassphrase1: process.env.OST_WORKER_TEST_ACCOUNT1_PASSPHRASE,

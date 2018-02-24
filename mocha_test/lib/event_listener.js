@@ -20,7 +20,8 @@ module.exports.startObserving = function() {
         "payments.airdrop.pay",
         "payments.workers.setWorker",
         "payments.workers.removeWorker",
-        "payments.workers.remove"
+        "payments.workers.remove",
+        "payments.opsManaged.setOpsAddress"
       ],
       function(msgContent) {
         const messageData = JSON.parse(msgContent);

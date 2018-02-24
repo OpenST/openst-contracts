@@ -159,7 +159,10 @@ async function performer(argv) {
 
     logger.info("Setting Ops Address to: " + opsAddress);
     const opsManaged = new OpsManagedContract(contractAddress, gasPrice, chainId)
-      , setOpsOptions = {returnType: returnTypes.transactionReceipt()}
+      , setOpsOptions = {
+          returnType: returnTypes.transactionReceipt(),
+          tag: 'airdropDeployment'
+        }
     ;
     var setOpsResult = await opsManaged.setOpsAddress(deployerAddress,
       deployerPassphrase,
