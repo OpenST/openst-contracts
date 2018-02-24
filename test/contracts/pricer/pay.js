@@ -32,6 +32,10 @@ const pricerUtils = require('./pricer_utils.js');
 ///   fails to pay if pricePoint is not > 0
 ///   fails to pay if pricePoint is not in range
 ///   successfully pays
+///   when an accepted margin is set
+///     fails to pay if currentPricePoint is below intendedPricePoint range
+///     fails to pay if currentPricePoint is above intendedPricePoint range
+///     successfully pays
 
 module.exports.perform = (accounts) => {
   const opsAddress            = accounts[1],
@@ -42,12 +46,13 @@ module.exports.perform = (accounts) => {
         commissionBeneficiary = accounts[3]
         ;
 
-  var contracts          = null,
-      token              = null,
-      pricer             = null,
-      abcPriceOracle     = null,
-      response           = null,
-      intendedPricePoint = null
+  var contracts                    = null,
+      token                        = null,
+      pricer                       = null,
+      abcPriceOracle               = null,
+      response                     = null,
+      intendedPricePoint           = null,
+      convertedTokenTransferAmount = null
       ;
 
   before(async () => {
@@ -105,7 +110,7 @@ module.exports.perform = (accounts) => {
     assert.equal((await token.balanceOf(commissionBeneficiary)).toNumber(), commissionAmount);
     // When currency is blank, transferAmount is equal to tokenAmount
     checkPaymentEvent(response.logs[0], beneficiary, transferAmount, commissionBeneficiary, commissionAmount, '', 0);
-    pricerUtils.utils.logResponse(response, 'Pricer.pay: ' + transferAmount.plus(commissionAmount));
+    pricerUtils.utils.logResponse(response, 'Pricer.pay (commission): ' + transferAmount.plus(commissionAmount));
   });
 
   context('when currency is not empty', async () => {
@@ -126,18 +131,64 @@ module.exports.perform = (accounts) => {
 
       // get amount of tokens from currency value
       var calculatedResponse = (await pricer.getPricePointAndCalculatedAmounts.call(
-      transferAmount, commissionAmount, pricerUtils.currencies.abc));
+        transferAmount, commissionAmount, pricerUtils.currencies.abc));
 
-      var convertedTokenTransferAmount = calculatedResponse[1];
+      convertedTokenTransferAmount = calculatedResponse[1];
 
       await token.approve(pricer.address, convertedTokenTransferAmount);
       assert.ok(await pricer.pay.call(beneficiary, transferAmount, 0, 0, pricerUtils.currencies.abc, intendedPricePoint));
       response = await pricer.pay(beneficiary, transferAmount, 0, 0, pricerUtils.currencies.abc, intendedPricePoint);
       assert.equal((await token.balanceOf(beneficiary)).toNumber(), convertedTokenTransferAmount);
 
-      // Note: Payment event publishes unconverted values--this is OK because the Transfer event will show convertedTransferAmount
       checkPaymentEvent(response.logs[0], beneficiary, convertedTokenTransferAmount, 0, 0, pricerUtils.currencies.abc, intendedPricePoint);
-      pricerUtils.utils.logResponse(response, 'Pricer.pay (currency): ' + transferAmount);
+      pricerUtils.utils.logResponse(response, 'Pricer.pay (currency): ' + convertedTokenTransferAmount);
+    });
+
+    context('when an accepted margin is set', async () => {
+      var margin = 10,
+          offset = margin + 1
+          ;
+
+      before(async () => {
+        // reset token balances to 0
+        await token.setBalance(beneficiary, 0);
+        assert.equal(await token.balanceOf.call(beneficiary), 0);
+
+        // approve Pricer to transfer tokens
+        var calculatedResponse = (await pricer.getPricePointAndCalculatedAmounts.call(
+          transferAmount, commissionAmount, pricerUtils.currencies.abc));
+        convertedTokenTransferAmount = calculatedResponse[1];
+        await token.approve(pricer.address, convertedTokenTransferAmount);
+
+        // set accepted margin
+        await pricer.setAcceptedMargin(pricerUtils.currencies.abc, margin, { from: opsAddress });
+      });
+
+      // currentPricePoint: 2000000000000000000
+      // intendedPricePoint range: 20000000000000000001 - 20000000000000000021
+      it('fails to pay if currentPricePoint is below intendedPricePoint range', async () => {
+        intendedPricePoint = abcPrice.plus(offset);
+        await pricerUtils.utils.expectThrow(pricer.pay.call(beneficiary, transferAmount, 0, 0, pricerUtils.currencies.abc, intendedPricePoint));
+      });
+
+      // currentPricePoint: 2000000000000000000
+      // intendedPricePoint range: 1999999999999999979 - 1999999999999999999
+      it('fails to pay if currentPricePoint is above intendedPricePoint range', async () => {
+        intendedPricePoint = abcPrice.minus(offset);
+        await pricerUtils.utils.expectThrow(pricer.pay.call(beneficiary, transferAmount, 0, 0, pricerUtils.currencies.abc, intendedPricePoint));
+      });
+
+      // currentPricePoint: 2000000000000000000
+      // intendedPricePoint range: 1999999999999999979 - 2000000000000000000
+      it('successfully pays', async () => {
+        intendedPricePoint = abcPrice.minus(margin);
+        assert.ok(await pricer.pay.call(beneficiary, transferAmount, 0, 0, pricerUtils.currencies.abc, intendedPricePoint));
+        response = await pricer.pay(beneficiary, transferAmount, 0, 0, pricerUtils.currencies.abc, intendedPricePoint);
+        assert.equal((await token.balanceOf(beneficiary)).toNumber(), convertedTokenTransferAmount);
+
+        checkPaymentEvent(response.logs[0], beneficiary, convertedTokenTransferAmount, 0, 0, pricerUtils.currencies.abc, intendedPricePoint);
+        pricerUtils.utils.logResponse(response, 'Pricer.pay (margin): ' + convertedTokenTransferAmount);
+      });
     });
 
   });
