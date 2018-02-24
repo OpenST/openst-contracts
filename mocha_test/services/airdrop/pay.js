@@ -16,11 +16,12 @@ const rootPrefix = "../../.."
   , btHelper = require(rootPrefix + '/lib/contract_interact/branded_token')
   , brandedTokenObject = new btHelper(constants.TC5Address, constants.chainId)
   , web3RpcProvider = require(rootPrefix + '/lib/web3/providers/rpc')
-  , airdropManager = require(rootPrefix + '/lib/airdrop_management/base')
+  , logger = require(rootPrefix + '/helpers/custom_console_logger')
 ;
 
 const airdropKlass = require(rootPrefix + '/app/models/airdrop')
   , airdropModel = new airdropKlass()
+  , airdropManager = require(rootPrefix + '/lib/airdrop_management/base')
 ;
 
 async function getAmountFromCache(address) {
@@ -34,7 +35,7 @@ describe('Airdrop Pay', function() {
 
   it('should pass the initial checks', async function() {
     // eslint-disable-next-line no-invalid-this
-    this.timeout(300000);
+    this.timeout(100000);
 
     assert.isDefined(constants.deployer);
     assert.isDefined(constants.ops);
@@ -99,7 +100,7 @@ describe('Airdrop Pay', function() {
     assert.equal(constants.priceOracles.OST.USD, poResult.data.priceOracles);
 
     // Do Airdrop Setup if setup was not done
-    var result = await airdropModel.getByContractAddress(oThis.airdropContractAddress);
+    var result = await airdropModel.getByContractAddress(constants.airdropOstUsdAddress);
     const airdropRecord = result[0];
     if (!airdropRecord) {
       const setupAirdropResponse = await airdropManager.setupAirdrop(
@@ -115,6 +116,7 @@ describe('Airdrop Pay', function() {
       constants.account1,
       airdropOstUsd.toWei(constants.account1InitialBrandedTokenBalance),
       constants.gasUsed);
+
 
     const account1Balance = await TC5.balanceOf(constants.account1);
     assert.equal(account1Balance, airdropOstUsd.toWei(constants.account1InitialBrandedTokenBalance));
@@ -157,30 +159,55 @@ describe('Airdrop Pay', function() {
 
   });
 
-  it('check airdrop manager transfer success to airdropBudgetHolder', async function() {
-    const airdropBudgetAmount = new BigNumber(constants.airdropBudgetBrandedTokenBalance)
-      ,  initialAccount1BalanceCache = await getAmountFromCache(constants.account1)
+  it('AirdropManager: transfer branded token from reserve to airdropBudgetHolder', async function() {
+    this.timeout(100000);
+    const airdropBudgetAmountInWei = new BigNumber(airdropOstUsd.toWei(constants.airdropBudgetBrandedTokenBalance))
+      ,  initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1));
     ;
     assert.isAbove(
-      initialAccount1BalanceCache.toNumber(),
-      airdropBudgetAmount.toNumber(),
+      initialAccount1Balance.toString(),
+      airdropBudgetAmountInWei.toString(),
       "account1 balance should be greater than airdropBudgetAmount")
     ;
-
+    logger.info("=======initialAccount1Balance:", initialAccount1Balance.toString(),
+      "\nairdropBudgetAmount:",airdropBudgetAmountInWei.toString(),
+      "\nairdropOstUsdAddress:",constants.airdropOstUsdAddress);
     var transferToAirdropBudgetHolderResult = await airdropManager.transfer(
       constants.account1,
       constants.accountPassphrase1,
       constants.airdropOstUsdAddress,
-      airdropBudgetAmount.toString(),
+      airdropBudgetAmountInWei.toString(),
       constants.gasUsed,
       constants.chainId,
       {returnType: constants.returnTypeReceipt}
     )
+    logger.info("=======transferToAirdropBudgetHolderResult=======");
+    logger.info(transferToAirdropBudgetHolderResult);
+    const airdropBudgetHolderBalance = new BigNumber(await TC5.balanceOf(constants.airdropBudgetHolder));
+    assert.equal(airdropBudgetHolderBalance.toString(), airdropBudgetAmountInWei.toString());
     // verify if the transaction receipt is valid
     await utils.verifyTransactionReceipt(transferToAirdropBudgetHolderResult);
 
     // verify if the transaction  was actually mined
     await utils.verifyIfMined(airdropOstUsd, transferToAirdropBudgetHolderResult.data.transaction_hash);
+
+  });
+
+  it('AirdropManager: aidropBudgetHolder is approving airdrop contract', async function() {
+    var approveToAirdropBudgetHolderResult = await airdropManager.approve(
+      constants.airdropOstUsdAddress,
+      constants.airdropBudgetHolderPassphrase,
+      constants.gasUsed,
+      constants.chainId,
+      {returnType: constants.returnTypeReceipt}
+    )
+    logger.info("=======approveToAirdropBudgetHolderResult=======");
+    logger.info(approveToAirdropBudgetHolderResult);
+    // verify if the transaction receipt is valid
+    await utils.verifyTransactionReceipt(approveToAirdropBudgetHolderResult);
+
+    // verify if the transaction  was actually mined
+    await utils.verifyIfMined(airdropOstUsd, approveToAirdropBudgetHolderResult.data.transaction_hash);
 
   });
 

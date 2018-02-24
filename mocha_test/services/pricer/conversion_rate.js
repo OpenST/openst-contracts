@@ -18,15 +18,15 @@ describe('Get conversion rate', function() {
 
     const pricerOstUsdResult = await pricerOstUsd.conversionRateDecimals();
     assert.equal(pricerOstUsdResult.isSuccess(), true);
-    assert.equal(pricerOstUsdResult.data.conversionRateDecimals, 10**5);
+    assert.equal(pricerOstUsdResult.data.conversionRateDecimals, 5);
 
     const pricerOstEurResult = await pricerOstEur.conversionRateDecimals();
     assert.equal(pricerOstEurResult.isSuccess(), true);
-    assert.equal(pricerOstEurResult.data.conversionRateDecimals, 10**5);
+    assert.equal(pricerOstEurResult.data.conversionRateDecimals, 5);
 
     const pricerOstUsd10Result = await pricerOstUsd10Decimal.conversionRateDecimals();
     assert.equal(pricerOstUsd10Result.isSuccess(), true);
-    assert.equal(pricerOstUsd10Result.data.conversionRateDecimals, 10**5);
+    assert.equal(pricerOstUsd10Result.data.conversionRateDecimals, 5);
 
   });
 

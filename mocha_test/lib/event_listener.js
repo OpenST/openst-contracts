@@ -21,7 +21,9 @@ module.exports.startObserving = function() {
         "payments.workers.setWorker",
         "payments.workers.removeWorker",
         "payments.workers.remove",
-        "payments.opsManaged.setOpsAddress"
+        "payments.opsManaged.setOpsAddress",
+        "payments.brandedToken.transferToBudgetHolder",
+        "payments.brandedToken.approveToBudgetHolder"
       ],
       function(msgContent) {
         const messageData = JSON.parse(msgContent);
