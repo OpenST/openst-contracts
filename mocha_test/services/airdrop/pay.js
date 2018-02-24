@@ -216,7 +216,6 @@ describe('Airdrop Pay', function() {
 
   it('AirdropManager: batch allocate to airdrop users', async function() {
     this.timeout(5000);
-    var transferToAirdropBudgetHolderTransactionHash = '0x790809e3d9571145b17dc43a033e2e5665b80fe576ff0c3811d715b98e8a93d6';
     var batchAllocateAirdropAmountResult = await airdropManager.batchAllocate(
       constants.airdropOstUsdAddress,
       transferToAirdropBudgetHolderTransactionHash,
