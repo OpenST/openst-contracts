@@ -19,6 +19,22 @@ const UserAirdropDetailKlassPrototype = {
   QueryDB: QueryDBObj,
 
   tableName: 'user_airdrop_details',
+
+  /**
+   * get airdrop amount object for multiple addresses
+   *
+   * @param {Array} userAddresses - user addresses
+   *
+   * @return {Promise}
+   *
+   */
+  getByUserAddresses: function (userAddresses) {
+    var oThis = this;
+    return {
+      'userAddress1': {airdropAmount: 'amounInWei', airdropAmountUsed: 'amountInWei'},
+      'userAddress2': {airdropAmount: 'amounInWei', airdropAmountUsed: 'amountInWei'}
+    };
+  }
 };
 
 Object.assign(UserAirdropDetailKlass.prototype, UserAirdropDetailKlassPrototype);

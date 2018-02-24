@@ -216,13 +216,13 @@ describe('Airdrop Pay', function() {
 
   it('AirdropManager: batch allocate to airdrop users', async function() {
     this.timeout(5000);
-    var transferToAirdropBudgetHolderTransactionHash = '0xbd13c16171a821511a2b477a6cfc87b8123760d8bf611d76fd06c746fe115af4';
+    var transferToAirdropBudgetHolderTransactionHash = '0x790809e3d9571145b17dc43a033e2e5665b80fe576ff0c3811d715b98e8a93d6';
     var batchAllocateAirdropAmountResult = await airdropManager.batchAllocate(
       constants.airdropOstUsdAddress,
       transferToAirdropBudgetHolderTransactionHash,
       constants.airdropUsers
     );
-    assert.equal(batchAllocateAirdropAmountResult.isSuccess(), false);
+    assert.equal(batchAllocateAirdropAmountResult.isSuccess(), true);
   });
 
   // it('should pass when all parameters are valid', async function() {
@@ -346,5 +346,9 @@ describe('Airdrop Pay', function() {
   //   assert.equal(account4Balance.toNumber(), finalAccount4BalanceCache.toNumber(), "account4: Actual and cacheValue mismatch after test");
   //
   // });
+
+  it('Airdrop.Pay: It exits', async function() {
+    process.exit(0);
+  });
 
 });

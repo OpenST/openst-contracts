@@ -26,18 +26,18 @@ const AirdropAllocationProofDetailKlassPrototype = {
     return oThis.QueryDB.read(oThis.tableName, [], 'id=?', [id]);
   },
 
-  getByTransactionHash: function (transaction_hash) {
+  getByTransactionHash: function (transactionHash) {
     var oThis = this;
-    return oThis.QueryDB.read(oThis.tableName, [], 'transaction_hash=?', transaction_hash);
+    return oThis.QueryDB.read(oThis.tableName, [], 'transaction_hash=?', transactionHash);
   },
 
-  createRecord: async function(transaction_hash, airdrop_amount, airdrop_allocated_amount=0) {
+  createRecord: async function(transactionHash, airdropAmount, airdropAllocatedAmount=0) {
     var oThis = this;
       try {
         const insertedRecord = await oThis.create({
-          transaction_hash: transaction_hash,
-          airdrop_amount: airdrop_amount,
-          airdrop_allocated_amount: airdrop_allocated_amount
+          transaction_hash: transactionHash,
+          airdrop_amount: airdropAmount,
+          airdrop_allocated_amount: airdropAllocatedAmount
         });
         return responseHelper.successWithData({response: insertedRecord});
       } catch(err){
@@ -46,10 +46,10 @@ const AirdropAllocationProofDetailKlassPrototype = {
 
   },
 
-  updateAllocatedAmount: async function(id, allocated_amount){
+  updateAllocatedAmount: async function(id, allocatedAmount){
     const oThis = this;
     var airdropAllocationProofDetailRecord = {};
-    airdropAllocationProofDetailRecord['airdrop_allocated_amount'] = allocated_amount;
+    airdropAllocationProofDetailRecord.airdrop_allocated_amount = allocatedAmount;
     try {
       await oThis.edit(
         {

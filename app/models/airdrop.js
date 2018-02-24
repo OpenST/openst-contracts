@@ -39,9 +39,9 @@ const AirdropKlassPrototype = {
     return oThis.QueryDB.read(oThis.tableName, [], 'id=?', [id]);
   },
 
-  getByContractAddress: function (contract_address) {
+  getByContractAddress: function (contractAddress) {
     var oThis = this;
-    return oThis.QueryDB.read(oThis.tableName, [], 'contract_address=?', [contract_address]);
+    return oThis.QueryDB.read(oThis.tableName, [], 'contract_address=?', [contractAddress]);
   }
 
 };
