@@ -8,7 +8,7 @@ const rootPrefix      = "../../.."
     , BigNumber       = require('bignumber.js')
     , utils           = require(rootPrefix+'/mocha_test/lib/utils')
     , workersModule   = require(rootPrefix + '/lib/contract_interact/workers')
-    , workers         = new workersModule(constants.workerContractAddress, constants.chainId) // should be workersContractAddress
+    , workers         = new workersModule(constants.workersContractAddress, constants.chainId)
     , web3RpcProvider = require(rootPrefix + '/lib/web3/providers/rpc')
 ;
 
@@ -38,7 +38,7 @@ describe('Set worker', function() {
       constants.workerAccount1,
       deactivationHeight.toNumber(),
       0,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
@@ -62,7 +62,7 @@ describe('Set worker', function() {
       constants.workerAccount1,
       deactivationHeight.toNumber(),
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
@@ -86,7 +86,7 @@ describe('Set worker', function() {
       0,
       deactivationHeight.toNumber(),
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
@@ -110,7 +110,7 @@ describe('Set worker', function() {
       constants.workerAccount1,
       null,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
@@ -134,7 +134,7 @@ describe('Set worker', function() {
       constants.workerAccount1,
       'NaN',
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
@@ -158,7 +158,7 @@ describe('Set worker', function() {
       constants.workerAccount1,
       -1,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
@@ -182,7 +182,7 @@ describe('Set worker', function() {
       constants.workerAccount1,
       0.1,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
@@ -211,7 +211,7 @@ describe('Set worker', function() {
       constants.workerAccount1,
       deactivationHeight.toNumber(),
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response);
@@ -242,7 +242,7 @@ describe('Set worker', function() {
       constants.workerAccount1,
       deactivationHeight.toNumber(),
       constants.gasUsed,
-      {returnType: constants.returnTypeUUID});
+      constants.optionsUUID);
 
     // verify transaction UUID
     // we will not verify if it got mined as its just interaction layer testing
@@ -266,7 +266,7 @@ describe('Set worker', function() {
       constants.workerAccount1,
       deactivationHeight.toNumber(),
       constants.gasUsed,
-      {returnType: constants.returnTypeHash});
+      constants.optionsHash);
 
     // verify transaction hash
     utils.verifyTransactionHash(response);
@@ -289,7 +289,7 @@ describe('Set worker', function() {
       constants.workerAccount1,
       deactivationHeight.toNumber(),
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify transaction receipt
     utils.verifyTransactionReceipt(response);

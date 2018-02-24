@@ -54,7 +54,7 @@ describe('Get accepted margins', function() {
       constants.currencyUSD,
       50,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response1);
@@ -74,7 +74,7 @@ describe('Get accepted margins', function() {
       constants.currencyUSD,
       300,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response2);
@@ -94,7 +94,7 @@ describe('Get accepted margins', function() {
       constants.currencyEUR,
       100,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response3);

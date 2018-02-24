@@ -41,7 +41,7 @@ describe('Pay', function() {
       constants.currencyUSD,
       50,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(amResponse);
@@ -61,7 +61,7 @@ describe('Pay', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(spoResponse);
@@ -180,7 +180,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(payResponse);
@@ -277,7 +277,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     assert.equal(payResponse.isFailure(), true, "Low balance check");
 
@@ -361,7 +361,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(payResponse);
@@ -448,7 +448,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     assert.equal(payResponse.isFailure(), true);
 
@@ -533,7 +533,7 @@ describe('Pay', function() {
       constants.currencyINR,
       intendedPricePoint,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(payResponse);
@@ -620,7 +620,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     assert.equal(payResponse.isFailure(), true);
 
@@ -705,7 +705,7 @@ describe('Pay', function() {
       currency,
       changedPricePoint,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(payResponse);
@@ -797,7 +797,7 @@ describe('Pay', function() {
       currency,
       changedPricePoint,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(payResponse);
@@ -884,7 +884,7 @@ describe('Pay', function() {
       constants.currencyINR,
       intendedPricePoint,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(payResponse);
@@ -969,7 +969,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(payResponse);
@@ -1042,7 +1042,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(payResponse);
@@ -1125,7 +1125,7 @@ describe('Pay', function() {
       constants.currencyUSD,
       0,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     assert.equal(payResponse.isFailure(), true, "intendedPricePoint 0 cheek");
     // verify if the transaction receipt is valid
@@ -1200,7 +1200,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       constants.gasUsed,
-      {returnType: constants.returnTypeUUID});
+      constants.optionsUUID);
 
     // verify if the transaction receipt is valid
     // we will not verify if it got mined as its just interaction layer testing
@@ -1254,7 +1254,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       constants.gasUsed,
-      {returnType: constants.returnTypeHash});
+      constants.optionsHash);
 
     // verify if the transaction hash is valid
     // we will not verify if it got mined as its just interaction layer testing
@@ -1308,7 +1308,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid.
     // We will not check here if the value is really set as its just interaction layer testing.
@@ -1362,7 +1362,7 @@ describe('Pay', function() {
       currency,
       intendedPricePoint,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     assert.equal(payResponse.isFailure(), true, "insufficient balance cheek");
 

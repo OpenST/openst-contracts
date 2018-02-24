@@ -7,7 +7,7 @@ const rootPrefix      = "../../.."
     , constants       = require(rootPrefix + '/mocha_test/lib/constants')
     , utils           = require(rootPrefix+'/mocha_test/lib/utils')
     , workersModule   = require(rootPrefix + '/lib/contract_interact/workers')
-    , workers         = new workersModule(constants.workerContractAddress, constants.chainId) // should be workersContractAddress
+    , workers         = new workersModule(constants.workersContractAddress, constants.chainId)
     , web3RpcProvider = require(rootPrefix + '/lib/web3/providers/rpc')
 ;
 
@@ -31,7 +31,7 @@ describe('Remove', function() {
       constants.ops,
       constants.opsPassphrase,
       0,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
@@ -49,7 +49,7 @@ describe('Remove', function() {
       0,
       constants.opsPassphrase,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
@@ -67,7 +67,7 @@ describe('Remove', function() {
       constants.ops,
       constants.opsPassphrase,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response);
@@ -76,7 +76,7 @@ describe('Remove', function() {
     await utils.verifyIfMined(workers, response.data.transaction_hash);
 
     // confirm worker address has no code
-    const getCodeResult = await web3RpcProvider.eth.getCode(constants.workerContractAddress);
+    const getCodeResult = await web3RpcProvider.eth.getCode(constants.workersContractAddress);
     assert.equal(getCodeResult, '0x');
 
   });
@@ -91,7 +91,7 @@ describe('Remove', function() {
       constants.ops,
       constants.opsPassphrase,
       constants.gasUsed,
-      {returnType: constants.returnTypeUUID});
+      constants.optionsUUID);
 
     // verify transaction UUID
     // we will not verify if it got mined as its just interaction layer testing
@@ -109,7 +109,7 @@ describe('Remove', function() {
       constants.ops,
       constants.opsPassphrase,
       constants.gasUsed,
-      {returnType: constants.returnTypeHash});
+      constants.optionsHash);
 
     // verify transaction hash
     utils.verifyTransactionHash(response);
@@ -126,7 +126,7 @@ describe('Remove', function() {
       constants.ops,
       constants.opsPassphrase,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify transaction receipt
     utils.verifyTransactionReceipt(response);

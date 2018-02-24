@@ -9,7 +9,7 @@ const rootPrefix = "../../.."
   , utils = require(rootPrefix+'/mocha_test/lib/utils')
   , airdrop = require(rootPrefix + '/lib/contract_interact/airdrop')
   , workers = require(rootPrefix + '/lib/contract_interact/workers')
-  , workersContract = new workers(constants.workerContractAddress, constants.chainId)
+  , workersContract = new workers(constants.workersContractAddress, constants.chainId)
   , airdropOstUsd = new airdrop(constants.airdropOstUsdAddress, constants.chainId)
   , mockToken = require(rootPrefix + '/lib/contract_interact/EIP20TokenMock')
   , TC5 = new mockToken(constants.TC5Address)
@@ -46,7 +46,7 @@ describe('Airdrop Pay', function() {
       constants.workerAccount1,
       deactivationHeight.toNumber(),
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(setWorkerResponse);
@@ -58,7 +58,7 @@ describe('Airdrop Pay', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(spoResponse);
@@ -73,7 +73,7 @@ describe('Airdrop Pay', function() {
       constants.currencyUSD,
       50,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(amResponse);
@@ -184,25 +184,20 @@ describe('Airdrop Pay', function() {
     const airdropBudgetAmount = new BigNumber(airdropOstUsd.toWei('1000000')); // 1 million
 
     // Approve airdropBudgetHolder for transfer
-    const airdropBudgetHolderApproveResponse = await TC5.approve(
+    await TC5.approve(
       constants.airdropBudgetHolder,
       constants.airdropBudgetHolderPassphrase,
       constants.airdropOstUsdAddress,
       airdropBudgetAmount,
       constants.gasUsed);
-    console.log("airdropBudgetHolder approve");
-    console.log(airdropBudgetHolderApproveResponse);
 
     // Approve account1 for transfer
-    const account1ApproveResponse = await TC5.approve(
+    await TC5.approve(
       constants.account1,
       constants.accountPassphrase1,
       constants.airdropOstUsdAddress,
       estimatedTotalAmount,
       constants.gasUsed);
-
-    console.log("user approve");
-    console.log(account1ApproveResponse);
 
     const payResponse = await airdropOstUsd.pay(
       constants.workerAccount1,
@@ -216,11 +211,7 @@ describe('Airdrop Pay', function() {
       constants.account1,
       0,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
-
-    console.log("payResponse");
-    console.log(payResponse);
-
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(payResponse);

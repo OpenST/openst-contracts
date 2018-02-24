@@ -33,7 +33,7 @@ describe('Unset price oracle', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response);
@@ -52,7 +52,7 @@ describe('Unset price oracle', function() {
       constants.deployerPassphrase,
       constants.currencyUSD,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response2);
@@ -76,7 +76,7 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyBlank,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if it failed
     assert.equal(response.isFailure(), true);
@@ -92,7 +92,7 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       0,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if it failed
     assert.equal(response.isFailure(), true);
@@ -107,7 +107,7 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if it failed
     assert.equal(response.isFailure(), true);
@@ -137,7 +137,7 @@ describe('Unset price oracle', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(setResponse);
@@ -156,7 +156,7 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(unsetResponse);
@@ -183,7 +183,7 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.gasUsed,
-      {returnType: constants.returnTypeUUID});
+      constants.optionsUUID);
 
     // verify if the transaction receipt is valid
     // we will not verify if it got mined as its just interaction layer testing
@@ -202,7 +202,7 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.gasUsed,
-      {returnType: constants.returnTypeHash});
+      constants.optionsHash);
 
     // verify if the transaction hash is valid
     // we will not verify if it got mined as its just interaction layer testing
@@ -221,7 +221,7 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.gasUsed,
-      {returnType: constants.returnTypeReceipt});
+      constants.optionsReceipt);
 
     // verify if the transaction receipt is valid.
     // We will not check here if the value is really set as its just interaction layer testing.
