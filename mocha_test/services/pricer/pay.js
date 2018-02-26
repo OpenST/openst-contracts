@@ -27,7 +27,7 @@ describe('Pay', function() {
   it('should pass the initial checks', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(300000);
-/*
+
     assert.isDefined(constants.deployer);
     assert.isDefined(constants.ops);
     assert.isDefined(constants.account1);
@@ -114,7 +114,7 @@ describe('Pay', function() {
 
     const account4Balance = await TC5.balanceOf(constants.account4);
     assert.equal(account4Balance, pricerOstUsd.toWei('0'));
-*/
+
     // populate cache
     const brandedToken = new BrandedTokenKlass(constants.TC5Address, constants.chainId);
     brandedToken.getBalanceOf(constants.account1);
