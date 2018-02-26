@@ -37,7 +37,7 @@ describe('Airdrop Pay', function() {
 
   it('should pass the initial checks', async function() {
     // eslint-disable-next-line no-invalid-this
-    this.timeout(100000);
+    this.timeout(500000);
 
     assert.isDefined(constants.deployer);
     assert.isDefined(constants.ops);
