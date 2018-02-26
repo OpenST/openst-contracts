@@ -31,8 +31,8 @@ const UserAirdropDetailKlassPrototype = {
   getByUserAddresses: function (userAddresses) {
     var oThis = this;
     return {
-      'userAddress1': {airdropAmount: 'amounInWei', airdropAmountUsed: 'amountInWei'},
-      'userAddress2': {airdropAmount: 'amounInWei', airdropAmountUsed: 'amountInWei'}
+      'userAddress1': {totalAirdropAmount: 'amounInWei', airdropUsedAmount: 'amountInWei'},
+      'userAddress2': {totalAirdropAmount: 'amounInWei', airdropUsedAmount: 'amountInWei'}
     };
   }
 };
