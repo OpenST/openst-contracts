@@ -8,7 +8,7 @@ const rootPrefix = '../..'
 const performer = async function () {
 
   const delay = 10 * 1000
-    , timeoutValue = 5 * 60 * 1000
+    , timeoutValue = 30 * 60 * 1000
   ;
 
   var counter = 0
