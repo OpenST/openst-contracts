@@ -55,7 +55,7 @@ const createTables = {
       '  `id` bigint(20) NOT NULL AUTO_INCREMENT,\n' +
       '  `user_address` varchar(50) NOT NULL,\n' +
       '  `airdrop_id` bigint(20) NOT NULL,\n' +
-      '  `total_airdrop_amount` decimal(30,0) NOT NULL DEFAULT \'0\',\n' +
+      '  `airdrop_amount` decimal(30,0) NOT NULL DEFAULT \'0\',\n' +
       '  `airdrop_used_amount` decimal(30,0) NOT NULL DEFAULT \'0\',\n' +
       '  `expiry_timestamp` bigint(20) NOT NULL DEFAULT \'0\',\n' +
       '  `created_at` datetime NOT NULL,\n' +
