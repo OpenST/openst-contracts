@@ -132,6 +132,7 @@ async function performer(argv) {
     logger.error("Error deploying contract");
     logger.error(deployResult);
   }
+  process.exit(0);
 
 }
 

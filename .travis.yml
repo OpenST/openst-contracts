@@ -39,4 +39,3 @@ script:
 after_script:
   - kill $(ps aux | grep 'testrpc' | awk '{print $2}')
   - kill $(ps aux | grep 'geth' | awk '{print $2}')
-  

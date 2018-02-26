@@ -2,11 +2,32 @@
 
 const rootPrefix = '../..'
   , utils = require(rootPrefix + '/lib/utils')
+  , MysqlQueryKlass = require(rootPrefix + '/lib/query_builders/mysql')
+  , mysqlWrapper = require(rootPrefix + "/lib/mysql_wrapper")
+  , responseHelper = require(rootPrefix + '/lib/formatter/response')
+  , logger = require(rootPrefix + '/helpers/custom_console_logger')
 ;
 
-const ModelBaseKlass = function () {};
+const ModelBaseKlass = function (params) {
+  var oThis = this;
 
-ModelBaseKlass.prototype = {
+  oThis.dbName = params.dbName;
+  MysqlQueryKlass.call(this, params);
+};
+
+ModelBaseKlass.prototype = Object.create(MysqlQueryKlass.prototype);
+
+const ModelBaseKlassPrototype = {
+
+  // get read connection
+  onReadConnection: function() {
+    return mysqlWrapper.getPoolFor(this.dbName, 'master');
+  },
+
+  // get read connection
+  onWriteConnection: function() {
+    return mysqlWrapper.getPoolFor(this.dbName, 'master');
+  },
 
   enums: {},
 
@@ -26,6 +47,36 @@ ModelBaseKlass.prototype = {
 
   convertEnumForResult: function (params) {
     return this.convertEnumForDB(params, true);
+  },
+
+  fire: function () {
+    var oThis = this;
+
+    return new Promise(
+      function (onResolve, onReject) {
+
+        const queryGenerator = oThis.generate();
+        console.log("-------------------------");
+        console.log(queryGenerator);
+        if(queryGenerator.isSuccess()){
+          console.log(queryGenerator.data.query, queryGenerator.data.queryData);
+        } else {
+          console.log("-------------------------");
+          console.log(queryGenerator);
+        }
+
+        var pre_query = Date.now();
+        var qry = oThis.onWriteConnection().query(queryGenerator.data.query, queryGenerator.data.queryData, function (err, result, fields) {
+          logger.info("(", (Date.now() - pre_query), "ms)", qry.sql);
+          if (err) {
+            onReject(err);
+          } else {
+            onResolve(result);
+          }
+        });
+      }
+    );
+
   },
 
   create: function (params) {
@@ -111,5 +162,7 @@ ModelBaseKlass.prototype = {
   }
 
 };
+
+Object.assign(ModelBaseKlass.prototype, ModelBaseKlassPrototype);
 
 module.exports = ModelBaseKlass;

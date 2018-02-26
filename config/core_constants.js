@@ -27,4 +27,3 @@ define("MYSQL_USER", process.env.OP_MYSQL_USER);
 define("MYSQL_PASSWORD", process.env.OP_MYSQL_PASSWORD);
 define("MYSQL_DATABASE", process.env.OP_MYSQL_DATABASE);
 define("MYSQL_CONNECTION_POOL_SIZE", process.env.OP_MYSQL_CONNECTION_POOL_SIZE);
-define("MYSQL_TIMEZONE", process.env.OP_MYSQL_TIMEZONE);

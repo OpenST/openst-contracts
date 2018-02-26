@@ -19,8 +19,8 @@ const rootPrefix = "../../.."
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
 ;
 
+
 const airdropKlass = require(rootPrefix + '/app/models/airdrop')
-  , airdropModel = new airdropKlass()
   , airdropManager = require(rootPrefix + '/lib/airdrop_management/base')
 ;
 
@@ -102,14 +102,15 @@ describe('Airdrop Pay', function() {
     assert.equal(constants.priceOracles.OST.USD, poResult.data.priceOracles);
 
     // Do Airdrop Setup if setup was not done
+    var airdropModel = new airdropKlass();
     var result = await airdropModel.getByContractAddress(constants.airdropOstUsdAddress);
     const airdropRecord = result[0];
     if (!airdropRecord) {
-      const setupAirdropResponse = await airdropManager.setupAirdrop(
+      const registerAirdropResponse = await airdropManager.registerAirdrop(
         constants.airdropOstUsdAddress,
         constants.chainId
       );
-      assert.equal(setupAirdropResponse.isSuccess(), true);
+      assert.equal(registerAirdropResponse.isSuccess(), true);
     }
 
     await TC5.setBalance(
@@ -215,13 +216,39 @@ describe('Airdrop Pay', function() {
   });
 
   it('AirdropManager: batch allocate to airdrop users', async function() {
-    this.timeout(5000);
+    this.timeout(10000);
     var batchAllocateAirdropAmountResult = await airdropManager.batchAllocate(
       constants.airdropOstUsdAddress,
       transferToAirdropBudgetHolderTransactionHash,
       constants.airdropUsers
     );
     assert.equal(batchAllocateAirdropAmountResult.isSuccess(), true);
+  });
+
+  it('AirdropManager: Get User Balance and validate balance', async function() {
+    this.timeout(5000);
+    var userAddressArray = [];
+    for (var ua in constants.airdropUsers){
+      userAddressArray.push(ua);
+    }
+    // Without Cache
+    var airdropBalanceResult = await airdropManager.getAirdropBalance(
+      constants.chainId,
+      constants.airdropOstUsdAddress,
+      userAddressArray
+    );
+    assert.equal(airdropBalanceResult.isSuccess(), true);
+    // With Cache
+    var airdropBalanceResult = await airdropManager.getAirdropBalance(
+      constants.chainId,
+      constants.airdropOstUsdAddress,
+      userAddressArray
+    );
+    assert.equal(airdropBalanceResult.isSuccess(), true);
+    for (var userAddress in constants.airdropUsers){
+      // Match airdrop allocated Balance
+      assert.equal(airdropBalanceResult.data[userAddress].totalAirdropAmount, constants.airdropUsers[userAddress].airdropAmount);
+    }
   });
 
   // it('should pass when all parameters are valid', async function() {
@@ -346,8 +373,8 @@ describe('Airdrop Pay', function() {
   //
   // });
 
-  it('Airdrop.Pay: It exits', async function() {
-    process.exit(0);
-  });
+  // it('Airdrop.Pay: It exits', async function() {
+  //   process.exit(0);
+  // });
 
 });

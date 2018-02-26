@@ -60,9 +60,8 @@ For using redis/memcache as cache engine refer - [OpenSTFoundation/ost-price-ora
 export OP_MYSQL_HOST='127.0.0.1'
 export OP_MYSQL_USER=''
 export OP_MYSQL_PASSWORD=''
-export OP_MYSQL_DATABASE='payment_development'
+export OP_MYSQL_DATABASE=''
 export OP_MYSQL_CONNECTION_POOL_SIZE='5'
-export OP_MYSQL_TIMEZONE='+05:30'
 ```
 
 ### Create Airdrop Tables:
@@ -82,6 +81,8 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
 ;  
   // Deploy Contract
   deployer.deploy( contractName, constructorArgs, gasPrice, options);
+  // Register Airdrop
+  airdropManager.registerAirdrop(airdropContractAddress, chainId);
   // Set Ops Address
   opsManaged.setOpsAddress(deployerAddress, deployerPassphrase, opsAddress, options);
   // Set Worker
@@ -90,8 +91,6 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
   airdrop.setPriceOracle(senderAddress, senderPassphrase, currency, address, gasPrice, options);
   // Set Accepted Margin
   airdrop.setAcceptedMargin(senderAddress, senderPassphrase, currency, acceptedMargin, gasPrice, options);
-  // Setup Airdrop
-  airdropManager.transfer(airdropContractAddress, chainId);
   // Transfer Amount to airdrop budget holder
   airdropManager.transfer(senderAddress, senderPassphrase, airdropContractAddress, amount, gasPrice, chainId, options);
   // Approve airdrop budget holder
@@ -99,7 +98,7 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
   // Allocate airdrop amount to users in batch
   airdropManager.batchAllocate(airdropContractAddress, transactionHash, airdropUsers);
   // Get Users Airdrop Balance
-  airdropManager.getUserAirdropBalance(userAddresses);
+  airdropManager.getUserAirdropBalance(chainId, airdropContractAddress, userAddresses);
   // Call Pay method
   airdrop.pay(workerAddress,
               WorkerPassphrase,

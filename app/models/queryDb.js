@@ -2,7 +2,7 @@
 
 var rootPrefix = '../..'
   , mysqlWrapper = require(rootPrefix + "/lib/mysql_wrapper")
-  , util = require(rootPrefix + '/lib/utils')
+  , utils = require(rootPrefix + '/lib/utils')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
 ;
 
@@ -33,12 +33,18 @@ QueryDB.prototype = {
       , whereClauseValues = (!whereClauseValues) ? [] : whereClauseValues
       , q = 'SELECT '+selectFields+' FROM '+tableName+' '+selectWhereClause;
 
-    if (orderByClause){
-      q = q + ' ' + orderByClause;
+    if(options && options.order){
+      q = q + ' ORDER BY ' + options.order + ' ';
     }
 
-    if (paginationClause) {
-      q = q + ' ' + paginationClause;
+    if(options && options.limit){
+      q = q + ' LIMIT ? ';
+      whereClauseValues.push(options.limit);
+    }
+
+    if(options && options.offset){
+      q = q + ' OFFSET ? ';
+      whereClauseValues.push(options.offset);
     }
 
     return new Promise(
@@ -83,11 +89,12 @@ QueryDB.prototype = {
   insert: function(tableName, fields, queryArgs) {
 
     var oThis = this
-      , currentDateTime = util.formatDbDate(new Date())
+      , currentDateTime = utils.formatDbDate(new Date())
       , fields = fields.concat(['created_at', 'updated_at'])
       , queryArgs = queryArgs.concat([currentDateTime, currentDateTime])
       , q = 'INSERT INTO '+tableName+' ('+fields+') VALUES (?)'
     ;
+
     return new Promise(
       function (onResolve, onReject) {
         // get a timestamp before running the query
@@ -139,7 +146,7 @@ QueryDB.prototype = {
 
   edit: function (tableName, fields, fieldValues, whereClause, whereClauseValues) {
     var oThis = this
-      , currentDateTime = util.formatDbDate(new Date())
+      , currentDateTime = utils.formatDbDate(new Date())
       , fieldValues = (!fieldValues) ? [] : fieldValues
       , whereClauseValues = (!whereClauseValues) ? [] : whereClauseValues
       , queryArgs = fieldValues.concat(whereClauseValues)

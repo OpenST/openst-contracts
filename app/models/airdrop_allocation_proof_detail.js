@@ -1,5 +1,11 @@
 "use strict";
-
+/**
+ *
+ * This is a model file which would be used querying airdrop_allocation_proof_details model.<br><br>
+ *
+ * @module app/models/airdrop_allocation_proof_details
+ *
+ */
 const rootPrefix = '../..'
   , coreConstants = require(rootPrefix + '/config/core_constants')
   , QueryDBKlass = require(rootPrefix + '/app/models/queryDb')
@@ -11,7 +17,9 @@ const dbName = coreConstants.MYSQL_DATABASE
   , QueryDBObj = new QueryDBKlass(dbName)
 ;
 
-const AirdropAllocationProofDetailKlass = function () {};
+const AirdropAllocationProofDetailKlass = function () {
+  ModelBaseKlass.call(this, {dbName: dbName});
+};
 
 AirdropAllocationProofDetailKlass.prototype = Object.create(ModelBaseKlass.prototype);
 
@@ -21,16 +29,29 @@ const AirdropAllocationProofDetailKlassPrototype = {
 
   tableName: 'airdrop_allocation_proof_details',
 
-  getById: function (id) {
-    var oThis = this;
-    return oThis.QueryDB.read(oThis.tableName, [], 'id=?', [id]);
-  },
-
+  /**
+   * get data by transaction hash
+   *
+   * @param {Hex} transactionHash - airdrop transfer transaction hash
+   *
+   * @return {Promise}
+   *
+   */
   getByTransactionHash: function (transactionHash) {
     var oThis = this;
-    return oThis.QueryDB.read(oThis.tableName, [], 'transaction_hash=?', transactionHash);
+    return oThis.select().where(["transaction_hash=?", transactionHash]).fire();
   },
 
+  /**
+   * Create Table record during transfer airdrop amount to airdropBudgetHolder
+   *
+   * @param {Hex} transactionHash - airdrop transfer transaction hash
+   * @param {string} airdropAmount - airdropAmount in Wei
+   * @param {String} airdropAllocatedAmount - airdropAllocatedAmount in Wei
+   *
+   * @return {Promise}
+   *
+   */
   createRecord: async function(transactionHash, airdropAmount, airdropAllocatedAmount=0) {
     var oThis = this;
       try {
@@ -46,14 +67,21 @@ const AirdropAllocationProofDetailKlassPrototype = {
 
   },
 
+  /**
+   * Update Allocated Amount
+   *
+   * @param {Integer} id - table id
+   * @param {string} allocatedAmount - allocatedAmount in Wei
+   *
+   * @return {Promise}
+   *
+   */
   updateAllocatedAmount: async function(id, allocatedAmount){
     const oThis = this;
-    var airdropAllocationProofDetailRecord = {};
-    airdropAllocationProofDetailRecord.airdrop_allocated_amount = allocatedAmount;
     try {
-      await oThis.edit(
+      await oThis.update(
         {
-          qParams: airdropAllocationProofDetailRecord,
+          airdrop_allocated_amount: allocatedAmount,
           whereCondition: {id: id}
         }
       );
