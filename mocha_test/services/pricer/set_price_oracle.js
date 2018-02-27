@@ -26,18 +26,12 @@ describe('Set price oracle', function() {
     assert.notEqual(constants.ops, constants.account1);
 
     // unset the price oracle
-    const response = await pricerOstUsd.unsetPriceOracle(
+    await pricerOstUsd.unsetPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.gasUsed,
       constants.optionsReceipt);
-
-    // verify if the transaction receipt is valid
-    utils.verifyTransactionReceipt(response);
-
-    // verify if the transaction has was actually mined
-    await utils.verifyIfMined(pricerOstUsd, response.data.transaction_hash);
 
     // verify if value is changed
     const poResult1 = await pricerOstUsd.priceOracles(constants.currencyUSD);
