@@ -365,11 +365,7 @@ describe('Pay', function() {
       constants.gasUsed,
       constants.optionsReceipt);
 
-    // verify if the transaction receipt is valid
-    utils.verifyTransactionReceipt(payResponse);
-
-    // verify if the transaction has was actually mined
-    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    assert.equal(payResponse.isFailure(), true);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -537,11 +533,7 @@ describe('Pay', function() {
       constants.gasUsed,
       constants.optionsReceipt);
 
-    // verify if the transaction receipt is valid
-    utils.verifyTransactionReceipt(payResponse);
-
-    // verify if the transaction has was actually mined
-    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    assert.equal(payResponse.isFailure(), true);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -709,11 +701,7 @@ describe('Pay', function() {
       constants.gasUsed,
       constants.optionsReceipt);
 
-    // verify if the transaction receipt is valid
-    utils.verifyTransactionReceipt(payResponse);
-
-    // verify if the transaction has was actually mined
-    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    assert.equal(payResponse.isFailure(), true);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -801,11 +789,7 @@ describe('Pay', function() {
       constants.gasUsed,
       constants.optionsReceipt);
 
-    // verify if the transaction receipt is valid
-    utils.verifyTransactionReceipt(payResponse);
-
-    // verify if the transaction has was actually mined
-    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    assert.equal(payResponse.isFailure(), true);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -888,11 +872,7 @@ describe('Pay', function() {
       constants.gasUsed,
       constants.optionsReceipt);
 
-    // verify if the transaction receipt is valid
-    utils.verifyTransactionReceipt(payResponse);
-
-    // verify if the transaction has was actually mined
-    await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
+    assert.equal(payResponse.isFailure(), true);
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -1130,12 +1110,7 @@ describe('Pay', function() {
       constants.optionsReceipt);
 
     assert.equal(payResponse.isFailure(), true, "intendedPricePoint 0 cheek");
-    // verify if the transaction receipt is valid
-    //utils.verifyTransactionReceipt(payResponse);
-
-    // verify if the transaction has was actually mined
-    //await utils.verifyIfMined(pricerOstUsd, payResponse.data.transaction_hash);
-
+    
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
       , account4Balance = new BigNumber(await TC5.balanceOf(constants.account4));

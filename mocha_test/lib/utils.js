@@ -52,6 +52,8 @@ module.exports.verifyTransactionHash = function (response) {
 
 module.exports.verifyTransactionReceipt = function (response) {
 
+  console.log("response");
+  console.log(response);
   // verify if the response is success
   assert.equal(response.isSuccess(), true, "response success check");
 
