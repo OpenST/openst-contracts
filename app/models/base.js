@@ -56,13 +56,8 @@ const ModelBaseKlassPrototype = {
       function (onResolve, onReject) {
 
         const queryGenerator = oThis.generate();
-        console.log("-------------------------");
-        console.log(queryGenerator);
         if(queryGenerator.isSuccess()){
           console.log(queryGenerator.data.query, queryGenerator.data.queryData);
-        } else {
-          console.log("-------------------------");
-          console.log(queryGenerator);
         }
 
         var pre_query = Date.now();

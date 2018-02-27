@@ -50,22 +50,16 @@ const UserAirdropDetailKlassPrototype = {
         where({airdrop_id: airdropId, user_address: userAddresses}).group_by("user_address").fire();
 
         for(var uad in userAirdropDetailResultArray){
-          logger.info("==========uad============");
           userAirdropDetail = userAirdropDetailResultArray[uad];
-          logger.info(uad, userAirdropDetail);
           var totalAirdropAmount = new BigNumber(userAirdropDetail.total_airdrop_amount)
             , totalAirdropUsedAmount = new BigNumber(userAirdropDetail.total_airdrop_used_amount)
             , balanceAirdropAmount = totalAirdropAmount.minus(totalAirdropUsedAmount)
           ;
-          logger.info("==========userAirdropDetail.getByUserAddresses.loop============");
-          logger.info(totalAirdropAmount, totalAirdropUsedAmount, balanceAirdropAmount);
           result[userAirdropDetail.user_address] = {
             totalAirdropAmount: totalAirdropAmount.toString(),
             totalAirdropUsedAmount: totalAirdropUsedAmount.toString(),
             balanceAirdropAmount: balanceAirdropAmount.toString()
           };
-          logger.info("==========result[uad.user_address]============");
-          logger.info(result[userAirdropDetail.user_address]);
         }
         logger.info("========user_airdrop_detail.getByUserAddresses().result=========");
         logger.info(result);
