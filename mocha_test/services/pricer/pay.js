@@ -124,7 +124,7 @@ describe('Pay', function() {
 
   });
 
-/*  it('should pass when all parameters are valid', async function() {
+  it('should pass when all parameters are valid', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
@@ -1155,7 +1155,7 @@ describe('Pay', function() {
 
   });
 
-*/
+
   it('should pass for interaction layer test when return type is uuid', async function() {
 
     // eslint-disable-next-line no-invalid-this
