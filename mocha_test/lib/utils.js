@@ -21,8 +21,6 @@ module.exports.verifyIfMined = async (contract, transactionHash) => {
 
 module.exports.verifyTransactionUUID = function (response) {
 
-  console.log("verifyTransactionUUID");
-  console.log(response);
   // verify if the response is success
   assert.equal(response.isSuccess(), true, "response success check");
 
@@ -35,8 +33,6 @@ module.exports.verifyTransactionUUID = function (response) {
 
 module.exports.verifyTransactionHash = function (response) {
 
-  console.log("verifyTransactionHash");
-  console.log(response);
   // verify if the response is success
   assert.equal(response.isSuccess(), true, "response success check");
 
@@ -52,8 +48,6 @@ module.exports.verifyTransactionHash = function (response) {
 
 module.exports.verifyTransactionReceipt = function (response) {
 
-  console.log("response");
-  console.log(response);
   // verify if the response is success
   assert.equal(response.isSuccess(), true, "response success check");
 

@@ -62,6 +62,9 @@ describe('Airdrop Pay', function() {
       constants.gasUsed,
       constants.optionsReceipt);
 
+    const isWorkerResponse = await workersContract.isWorker(constants.workerAccount1);
+    assert.equal(isWorkerResponse.isSuccess(), true);
+    assert.equal(isWorkerResponse.data.isValid, true);
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(setWorkerResponse);
     // TODO Check for get Worker
@@ -209,7 +212,8 @@ describe('Airdrop Pay', function() {
       constants.gasUsed,
       constants.chainId,
       {returnType: constants.returnTypeReceipt}
-    )
+    );
+    assert.equal(approveToAirdropBudgetHolderResult.isSuccess(), true);
     logger.info("=======approveToAirdropBudgetHolderResult=======");
     logger.info(approveToAirdropBudgetHolderResult);
     // verify if the transaction receipt is valid
@@ -303,10 +307,11 @@ describe('Airdrop Pay', function() {
       constants.airdropOstUsdAddress,
       estimatedTotalAmount.plus(100).toString(),
       constants.gasUsed);
+
     logger.info("============spender approving to contract=============");
     logger.info(account1ApproveResponse);
     var worker1Balance = await web3RpcProvider.eth.getBalance(constants.workerAccount1);
-    logger.info("constants.workerAccount1.balance: ",worker1Balance);
+    logger.info("\nconstants.workerAccount1.balance: ", worker1Balance);
     const payResponse = await airdropOstUsd.pay(
       constants.workerAccount1,
       constants.workerAccountPassphrase1,
