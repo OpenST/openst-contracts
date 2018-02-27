@@ -84,7 +84,7 @@ const AirdropAllocationProofDetailKlassPrototype = {
           airdrop_allocated_amount: allocatedAmount,
           whereCondition: {id: id}
         }
-      );
+      ).fire();
     } catch(err){
       return responseHelper.error('l_a_m_aapd_1', 'Something went wrong while updating record id:'+id);
     }
