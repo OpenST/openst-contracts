@@ -79,17 +79,11 @@ const AirdropAllocationProofDetailKlassPrototype = {
   updateAllocatedAmount: async function(id, allocatedAmount){
     const oThis = this;
     try {
-      await oThis.update(
-        {
-          airdrop_allocated_amount: allocatedAmount,
-          whereCondition: {id: id}
-        }
-      ).fire();
+      await oThis.update({airdrop_allocated_amount: allocatedAmount}).where(["id=?", id]).fire();
+      return responseHelper.successWithData({});
     } catch(err){
-      return responseHelper.error('l_a_m_aapd_1', 'Something went wrong while updating record id:'+id);
+      return responseHelper.error('l_a_m_aapd_1', 'Something went wrong while updating record id:'+id+" err: "+err);
     }
-
-    return responseHelper.successWithData({});
   },
 
 };

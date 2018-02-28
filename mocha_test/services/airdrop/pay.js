@@ -24,6 +24,7 @@ const airdropKlass = require(rootPrefix + '/app/models/airdrop')
   , airdropManager = require(rootPrefix + '/lib/airdrop_management/base')
   , BalanceCacheKlass = require(rootPrefix + '/lib/cache_management/balance')
   , balanceCache = new BalanceCacheKlass(constants.chainId, constants.TC5Address)
+  , airdropAllocationProofDetailKlass = require(rootPrefix + '/app/models/airdrop_allocation_proof_detail')
 ;
 
 var transferToAirdropBudgetHolderTransactionHash = ''
@@ -232,6 +233,9 @@ describe('Airdrop Pay', function() {
       constants.airdropUsers
     );
     assert.equal(batchAllocateAirdropAmountResult.isSuccess(), true);
+    var airdropAllocationProofDetailModel = new airdropAllocationProofDetailKlass();
+    var result = await airdropAllocationProofDetailModel.getByTransactionHash(transferToAirdropBudgetHolderTransactionHash);
+    assert.equal(result.airdrop_allocated_amount, result.airdrop_amount);
   });
 
   it('AirdropManager: Get User Balance and validate balance', async function() {
@@ -256,7 +260,7 @@ describe('Airdrop Pay', function() {
     assert.equal(airdropBalanceResult.isSuccess(), true);
     for (var userAddress in constants.airdropUsers){
       // Match airdrop allocated Balance
-      assert.equal(airdropBalanceResult.data[userAddress].totalAirdropAmount, constants.airdropUsers[userAddress].airdropAmount);
+      assert.equal(airdropBalanceResult.data[userAddress].total_airdrop_amount, constants.airdropUsers[userAddress].airdrop_amount);
     }
   });
 
@@ -363,8 +367,8 @@ describe('Airdrop Pay', function() {
 
   });
 
-  it('Airdrop.Pay: It exits', async function() {
-    process.exit(0);
-  });
+  // it('Airdrop.Pay: It exits', async function() {
+  //   process.exit(0);
+  // });
 
 });
