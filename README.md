@@ -96,7 +96,7 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
   // Approve airdrop budget holder
   airdropManager.approve(airdropContractAddress, airdropBudgetHolderPassphrase, gasPrice, chainId, options);
   // Allocate airdrop amount to users in batch
-  airdropManager.batchAllocate(airdropContractAddress, transactionHash, airdropUsers);
+  airdropManager.batchAllocate(airdropContractAddress, transactionHash, airdropUsers, chainId);
   // Get Users Airdrop Balance
   airdropManager.getUserAirdropBalance(chainId, airdropContractAddress, userAddresses);
   // Call Pay method
@@ -109,6 +109,6 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
               currency,
               intendedPricePoint,
               spender,
-              airdropAmount,
-              gasPrice);
+              gasPrice,
+              {tag:'airdrop.pay', returnType: 'txHash'});
 ```
