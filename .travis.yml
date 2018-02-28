@@ -21,6 +21,7 @@ node_js:
 services:
   - mysql
 before_install:
+  - mysql -e 'CREATE DATABASE payment_development;'
   - sudo apt-get update 
   - sudo apt-get install nodejs 
   - sudo apt-get install npm  
