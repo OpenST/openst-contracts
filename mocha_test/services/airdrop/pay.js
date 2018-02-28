@@ -367,8 +367,8 @@ describe('Airdrop Pay', function() {
 
   });
 
-  // it('Airdrop.Pay: It exits', async function() {
-  //   process.exit(0);
-  // });
+  it('Airdrop.Pay: It exits', async function() {
+    process.exit(0);
+  });
 
 });
