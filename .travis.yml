@@ -32,7 +32,6 @@ before_install:
   - geth version
 install: 
   - npm install 
-  - node migrations/create_tables.js 
 before_script:  
   - nohup sh tools/runTestRpc.sh </dev/null >/dev/null 2>&1 &
   - bash contracts/compile.sh
