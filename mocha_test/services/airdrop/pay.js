@@ -367,7 +367,6 @@ describe('Airdrop Pay', function() {
 
   it('should pass when all parameters are valid with currency USD and allocated airdrop amount is greater than 0', async function() {
     // eslint-disable-next-line no-invalid-this
-    transferToAirdropBudgetHolderTransactionHash = '0x7bdad364682cb63b1c331cc1280e3c75a42c91f6c45c7f2c18b6d34d2fc9aa40';
     this.timeout(100000);
     const beneficiary = constants.account3
       , commissionAmount = new BigNumber(airdropOstUsd.toWei('1'))
