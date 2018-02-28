@@ -28,7 +28,6 @@ const airdropKlass = require(rootPrefix + '/app/models/airdrop')
 ;
 
 var transferToAirdropBudgetHolderTransactionHash = ''
-  , airdropAmountAllocatedUser1 = Object.keys(constants.airdropUsers)[0];
 ;
 
 async function getAmountFromCache(address) {
@@ -173,7 +172,7 @@ describe('Airdrop Pay', function() {
 
   it('AirdropManager: transfer branded token from reserve to airdropBudgetHolder', async function() {
     this.timeout(100000);
-    const airdropBudgetAmountInWei = new BigNumber(airdropOstUsd.toWei(constants.airdropBudgetBrandedTokenBalance))
+    const airdropBudgetAmountInWei = new BigNumber(constants.airdropBudgetBrandedTokenBalance)
       ,  initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1));
     ;
     assert.isAbove(
@@ -230,12 +229,16 @@ describe('Airdrop Pay', function() {
     var batchAllocateAirdropAmountResult = await airdropManager.batchAllocate(
       constants.airdropOstUsdAddress,
       transferToAirdropBudgetHolderTransactionHash,
-      constants.airdropUsers
+      constants.airdropUsers,
+      constants.chainId
     );
     assert.equal(batchAllocateAirdropAmountResult.isSuccess(), true);
     var airdropAllocationProofDetailModel = new airdropAllocationProofDetailKlass();
     var result = await airdropAllocationProofDetailModel.getByTransactionHash(transferToAirdropBudgetHolderTransactionHash);
-    assert.equal(result.airdrop_allocated_amount, result.airdrop_amount);
+    var airdropAllocationProofDetailRecord = result[0];
+    // airdrop_allocated_amount is less than or equal to airdrop_amount
+    assert.isAtMost(new BigNumber(airdropAllocationProofDetailRecord.airdrop_allocated_amount).toNumber(),
+      new BigNumber(airdropAllocationProofDetailRecord.airdrop_amount).toNumber());
   });
 
   it('AirdropManager: Get User Balance and validate balance', async function() {
@@ -359,11 +362,80 @@ describe('Airdrop Pay', function() {
     //     .plus(estimatedCommissionTokenAmount)
     //     .toNumber(), account4Balance.toNumber());
     //
-    // // Cache check
-    // const finalAccount1BalanceCache = await getAmountFromCache(constants.account1)
-    //   , finalAccount3BalanceCache = await getAmountFromCache(constants.account3)
-    //   , finalAccount4BalanceCache = await getAmountFromCache(constants.account4)
-    // ;
+
+  });
+
+  it('should pass when all parameters are valid with currency USD and allocated airdrop amount is greater than 0', async function() {
+    // eslint-disable-next-line no-invalid-this
+    transferToAirdropBudgetHolderTransactionHash = '0x7bdad364682cb63b1c331cc1280e3c75a42c91f6c45c7f2c18b6d34d2fc9aa40';
+    this.timeout(100000);
+    const beneficiary = constants.account3
+      , commissionAmount = new BigNumber(airdropOstUsd.toWei('1'))
+      , commissionBeneficiary = constants.account4
+      , currency = constants.currencyUSD
+      , transferAmount = new BigNumber(airdropOstUsd.toWei('9'))
+    ;
+
+    const estimatedValues = await airdropOstUsd.getPricePointAndCalculatedAmounts(
+      transferAmount,
+      commissionAmount,
+      currency);
+    assert.equal(estimatedValues.isSuccess(), true);
+
+    const estimatedTokenAmount = new BigNumber(estimatedValues.data.tokenAmount);
+    const estimatedCommissionTokenAmount = new BigNumber(estimatedValues.data.commissionTokenAmount);
+    const intendedPricePoint = estimatedValues.data.pricePoint;
+
+    const estimatedTotalAmount = new BigNumber(0).plus(estimatedTokenAmount).plus(estimatedCommissionTokenAmount);
+    // Batch allocate airdrop amount to account1
+    var airdropUsers = {};
+    airdropUsers[constants.account1] = {airdropAmount: '50000000000000000000', expiryTimestamp: 0};
+    var batchAllocateAirdropAmountResult = await airdropManager.batchAllocate(
+      constants.airdropOstUsdAddress,
+      transferToAirdropBudgetHolderTransactionHash,
+      airdropUsers,
+      constants.chainId
+    );
+    assert.equal(batchAllocateAirdropAmountResult.isSuccess(), true);
+    var airdropAllocationProofDetailModel = new airdropAllocationProofDetailKlass();
+    var result = await airdropAllocationProofDetailModel.getByTransactionHash(transferToAirdropBudgetHolderTransactionHash);
+    var airdropAllocationProofDetailRecord = result[0];
+    assert.isAtMost(new BigNumber(airdropAllocationProofDetailRecord.airdrop_allocated_amount).toNumber(),
+      new BigNumber(airdropAllocationProofDetailRecord.airdrop_amount).toNumber());
+
+    // Approve account1 for transfer
+    const account1ApproveResponse = await TC5.approve(
+      constants.account1,
+      constants.accountPassphrase1,
+      constants.airdropOstUsdAddress,
+      estimatedTotalAmount.plus(100).toString(),
+      constants.gasUsed);
+
+    logger.info("============spender approving to contract=============");
+    logger.info(account1ApproveResponse);
+    var worker1Balance = await web3RpcProvider.eth.getBalance(constants.workerAccount1);
+    logger.info("\nconstants.workerAccount1.balance: ", worker1Balance);
+    const payResponse = await airdropOstUsd.pay(
+      constants.workerAccount1,
+      constants.workerAccountPassphrase1,
+      beneficiary,
+      transferAmount.toString(),
+      commissionBeneficiary,
+      commissionAmount.toString(),
+      currency,
+      intendedPricePoint,
+      constants.account1,
+      constants.gasUsed,
+      {returnType: constants.returnTypeReceipt, tag: 'airdrop.pay'});
+    logger.info("============mocha_test.airdrop.pay response=============");
+    logger.info(payResponse);
+
+
+    // verify if the transaction receipt is valid
+    utils.verifyTransactionReceipt(payResponse);
+
+    // verify if the transaction is actually mined
+    await utils.verifyIfMined(airdropOstUsd, payResponse.data.transaction_hash);
 
   });
 

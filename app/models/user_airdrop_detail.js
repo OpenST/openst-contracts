@@ -11,6 +11,7 @@ const rootPrefix = '../..'
 
 const dbName = coreConstants.MYSQL_DATABASE
   , QueryDBObj = new QueryDBKlass(dbName)
+  , airdropKlass = require(rootPrefix + '/app/models/airdrop')
 ;
 
 const UserAirdropDetailKlass = function () {
@@ -76,16 +77,22 @@ const UserAirdropDetailKlassPrototype = {
    *
    * @param {Hex} userAddress - user address
    * @param {String} airdropAmountUsed - wei value
+   * @param {Bool} debit - true/false
    *
    * @return {Promise}
    *
    */
-  updateAirdropUsedAmount: function(userAddress, airdropAmountUsed){
+  updateAirdropUsedAmount: function(airdropContractAddress, userAddress, airdropAmountUsed){
     const oThis = this;
     logger.info("==========user_airdrop_detail.updateAirdropUsedAmount.params============");
-    logger.info("\nuserAddress: ", userAddress, "airdropAmountUsed: ", airdropAmountUsed);
+    logger.info("airdropContractAddress: "+ airdropContractAddress,
+      "userAddress: ", userAddress,
+      "airdropAmountUsed: ", airdropAmountUsed, "\n");
     return new Promise(async function(onResolve, onReject){
       try {
+        const airdropModel = new airdropKlass();
+        const airdropModelResult =  await airdropModel.getByContractAddress(airdropContractAddress);
+        const airdropRecord = airdropModelResult[0];
         var totalRemainingAmountToAdjust = new BigNumber(airdropAmountUsed);
         if (totalRemainingAmountToAdjust.lte(0)){
           return onResolve(responseHelper.successWithData());
@@ -93,32 +100,38 @@ const UserAirdropDetailKlassPrototype = {
         if (!userAddress){
           return onResolve(responseHelper.error('uad_uaua_1', 'Invalid User Address'));
         }
-        const userAirdropDetailResults = await oThis.select("id, user_address, airdrop_amount, airdrop_used_amount").
-        where(["airdrop_amount > airdrop_used_amount AND user_address=?", userAddress]).fire();
+        const userAirdropDetailResults = await oThis.select("id, airdrop_id, user_address, airdrop_amount, airdrop_used_amount").
+        where(["airdrop_id = ? AND airdrop_amount > airdrop_used_amount AND user_address=?", airdropRecord.id, userAddress]).fire();
+        logger.info("======updateAirdropUsedAmount.userAirdropDetailResults=========");
+        logger.info(userAirdropDetailResults);
+        // Return success if no record found
+        if (!userAirdropDetailResults[0]){
+          return onResolve(responseHelper.error('uad_uaua_3', 'airdrop amount not available for adjusting: '));
+        }
+
         var amountToAdjustWithCurrentRecord = new BigNumber(0)
           , dbAmountForAdjusting = new BigNumber(0)
           , dbAirdropUsedAmount = new BigNumber(0)
           , airdropUsedAmountToUpdate = new BigNumber(0)
         ;
-
-        for (var uad in userAirdropDetailResults){
-          dbAirdropUsedAmount = new BigNumber(uad.airdrop_used_amount);
+        for (var uadIndex in userAirdropDetailResults){
+          var uad = userAirdropDetailResults[uadIndex];
           dbAmountForAdjusting = new BigNumber(uad.airdrop_amount).minus(dbAirdropUsedAmount);
-          amountToAdjustWithCurrentRecord = Math.min(totalRemainingAmountToAdjust.toNumber(), dbAmountForAdjusting.toNumber());
+          dbAirdropUsedAmount = new BigNumber(uad.airdrop_used_amount);
+          amountToAdjustWithCurrentRecord = new BigNumber(Math.min(totalRemainingAmountToAdjust.toNumber(), dbAmountForAdjusting.toNumber()));
           if (amountToAdjustWithCurrentRecord.lte(0)){
             return onResolve(responseHelper.successWithData());
           }
           var airdropUsedAmountToUpdate = (dbAirdropUsedAmount.plus(amountToAdjustWithCurrentRecord)).toString();
           logger.info("==========user_airdrop_detail.updateAirdropUsedAmount.updating============");
           logger.info("\nid: ", uad.id, "airdropUsedAmountToUpdate: ", airdropUsedAmountToUpdate);
-          oThis.update({airdrop_used_amount: airdropUsedAmountToUpdate, id: uad.id}).fire();
+          await oThis.update({airdrop_used_amount: airdropUsedAmountToUpdate}).where(["id = ?",uad.id]).fire();
           totalRemainingAmountToAdjust = totalRemainingAmountToAdjust.minus(amountToAdjustWithCurrentRecord);
         }
       } catch(err) {
         return onResolve(responseHelper.error('uad_uaua_2', 'Error in updateAirdropUsedAmount: ' + err));
       }
       return onResolve(responseHelper.successWithData());
-
     });
 
   }
