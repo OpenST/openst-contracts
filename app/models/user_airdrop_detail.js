@@ -46,8 +46,9 @@ const UserAirdropDetailKlassPrototype = {
       var result = {}
         , userAirdropDetail = {}
       ;
+
       try{
-        const userAirdropDetailResultArray = await oThis.select("user_address, sum(airdrop_amount) as total_airdrop_amount, sum(airdrop_used_amount) as total_airdrop_used_amount").
+        const userAirdropDetailResultArray = await oThis.select("user_address, CONVERT(sum(airdrop_amount), char) as total_airdrop_amount, CONVERT(sum(airdrop_used_amount), char) as total_airdrop_used_amount").
         where({airdrop_id: airdropId, user_address: userAddresses}).group_by("user_address").fire();
 
         for(var uad in userAirdropDetailResultArray){
@@ -100,7 +101,7 @@ const UserAirdropDetailKlassPrototype = {
         if (!userAddress){
           return onResolve(responseHelper.error('uad_daua_1', 'Invalid User Address'));
         }
-        const userAirdropDetailResults = await oThis.select("id, airdrop_id, user_address, airdrop_amount, airdrop_used_amount").
+        const userAirdropDetailResults = await oThis.select("id, airdrop_id, user_address, CONVERT(airdrop_amount, char) as airdrop_amount, CONVERT(airdrop_used_amount, char) as airdrop_used_amount").
         where(["airdrop_id = ? AND airdrop_amount > airdrop_used_amount AND user_address=?", airdropRecord.id, userAddress]).fire();
         logger.info("======debitAirdropUsedAmount.userAirdropDetailResults=========");
         logger.info(userAirdropDetailResults);
@@ -118,7 +119,7 @@ const UserAirdropDetailKlassPrototype = {
           var uad = userAirdropDetailResults[uadIndex];
           dbAmountForAdjusting = new BigNumber(uad.airdrop_amount).minus(dbAirdropUsedAmount);
           dbAirdropUsedAmount = new BigNumber(uad.airdrop_used_amount);
-          amountToAdjustWithCurrentRecord = new BigNumber(Math.min(totalRemainingAmountToAdjust.toNumber(), dbAmountForAdjusting.toNumber()));
+          amountToAdjustWithCurrentRecord = BigNumber.min(totalRemainingAmountToAdjust, dbAmountForAdjusting);
           if (amountToAdjustWithCurrentRecord.lte(0)){
             return onResolve(responseHelper.successWithData());
           }
@@ -164,7 +165,7 @@ const UserAirdropDetailKlassPrototype = {
         if (!userAddress){
           return onResolve(responseHelper.error('uad_caua_1', 'Invalid User Address'));
         }
-        const userAirdropDetailResults = await oThis.select("id, airdrop_id, user_address, airdrop_amount, airdrop_used_amount").
+        const userAirdropDetailResults = await oThis.select("id, airdrop_id, user_address, CONVERT(airdrop_amount, char) as airdrop_amount, CONVERT(airdrop_used_amount, char) as airdrop_used_amount").
           where(["airdrop_id = ? AND airdrop_used_amount > 0 AND user_address=?", airdropRecord.id, userAddress]).fire();
         logger.info("======creditAirdropUsedAmount.userAirdropDetailResults=========");
         logger.info(userAirdropDetailResults);
@@ -181,7 +182,7 @@ const UserAirdropDetailKlassPrototype = {
         for (var uadIndex in userAirdropDetailResults){
           var uad = userAirdropDetailResults[uadIndex];
           dbAirdropUsedAmount = new BigNumber(uad.airdrop_used_amount);
-          amountToAdjustWithCurrentRecord = new BigNumber(Math.min(totalRemainingAmountToAdjust.toNumber(), dbAmountForAdjusting.toNumber()));
+          amountToAdjustWithCurrentRecord = BigNumber.min(totalRemainingAmountToAdjust, dbAmountForAdjusting);
           if (amountToAdjustWithCurrentRecord.lte(0)){
             return onResolve(responseHelper.successWithData());
           }
