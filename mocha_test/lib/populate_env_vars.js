@@ -24,6 +24,8 @@ const addressTemplate = "export OST_UTILITY_DEPLOYER_ADDR='{{ost_utility_deploye
   "export OST_UTILITY_TEST_ACCOUNT3_PASSPHRASE='testtest'\n" +
   "export OST_UTILITY_TEST_ACCOUNT4='{{ost_utility_test_account_4}}'\n" +
   "export OST_UTILITY_TEST_ACCOUNT4_PASSPHRASE='testtest'\n" +
+  "export OST_UTILITY_TEST_ACCOUNT5='{{ost_utility_test_account_5}}'\n" +
+  "export OST_UTILITY_TEST_ACCOUNT5_PASSPHRASE='testtest'\n" +
   "export OST_AIRDROP_BUDGET_HOLDER='{{ost_airdrop_budget_holder}}'\n" +
   "export OST_AIRDROP_BUDGET_HOLDER_PASSPHRASE='testtest'\n" +
   "export OST_WORKER_TEST_ACCOUNT1='{{ost_worker_test_account_1}}'\n" +

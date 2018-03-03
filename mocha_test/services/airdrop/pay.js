@@ -1,5 +1,5 @@
 /* global describe, it */
-
+/*
 const chai = require('chai')
   , assert = chai.assert;
 
@@ -443,3 +443,4 @@ describe('Airdrop Pay', function() {
   });
 
 });
+*/

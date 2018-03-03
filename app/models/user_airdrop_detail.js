@@ -58,9 +58,9 @@ const UserAirdropDetailKlassPrototype = {
             , balanceAirdropAmount = totalAirdropAmount.minus(totalAirdropUsedAmount)
           ;
           result[userAirdropDetail.user_address] = {
-            totalAirdropAmount: totalAirdropAmount.toString(),
-            totalAirdropUsedAmount: totalAirdropUsedAmount.toString(),
-            balanceAirdropAmount: balanceAirdropAmount.toString()
+            totalAirdropAmount: totalAirdropAmount.toString(10),
+            totalAirdropUsedAmount: totalAirdropUsedAmount.toString(10),
+            balanceAirdropAmount: balanceAirdropAmount.toString(10)
           };
         }
         logger.info("========user_airdrop_detail.getByUserAddresses().result=========");
@@ -123,7 +123,7 @@ const UserAirdropDetailKlassPrototype = {
           if (amountToAdjustWithCurrentRecord.lte(0)){
             return onResolve(responseHelper.successWithData());
           }
-          var airdropUsedAmountToUpdate = (dbAirdropUsedAmount.plus(amountToAdjustWithCurrentRecord)).toString();
+          var airdropUsedAmountToUpdate = (dbAirdropUsedAmount.plus(amountToAdjustWithCurrentRecord)).toString(10);
           logger.info("==========user_airdrop_detail.debitAirdropUsedAmount.updating============");
           logger.info("\nid: ", uad.id, "airdropUsedAmountToUpdate: ", airdropUsedAmountToUpdate);
           await oThis.update({airdrop_used_amount: airdropUsedAmountToUpdate}).where(["id = ?",uad.id]).fire();
@@ -147,22 +147,22 @@ const UserAirdropDetailKlassPrototype = {
    * @return {Promise}
    *
    */
-  creditAirdropUsedAmount: function(airdropContractAddress, userAddress, airdropAmountUsed){
+  creditAirdropUsedAmount: function(airdropContractAddress, userAddress, airdropAmountUsed) {
     const oThis = this;
     logger.info("==========user_airdrop_detail.creditAirdropUsedAmount.params============");
     logger.info("airdropContractAddress: "+ airdropContractAddress,
       "userAddress: ", userAddress,
       "airdropAmountUsed: ", airdropAmountUsed, "\n");
-    return new Promise(async function(onResolve, onReject){
+    return new Promise(async function(onResolve, onReject) {
       try {
         const airdropModel = new airdropKlass();
         const airdropModelResult =  await airdropModel.getByContractAddress(airdropContractAddress);
         const airdropRecord = airdropModelResult[0];
         var totalRemainingAmountToAdjust = new BigNumber(airdropAmountUsed);
-        if (totalRemainingAmountToAdjust.lte(0)){
+        if (totalRemainingAmountToAdjust.lte(0)) {
           return onResolve(responseHelper.successWithData());
         }
-        if (!userAddress){
+        if (!userAddress) {
           return onResolve(responseHelper.error('uad_caua_1', 'Invalid User Address'));
         }
         const userAirdropDetailResults = await oThis.select("id, airdrop_id, user_address, CONVERT(airdrop_amount, char) as airdrop_amount, CONVERT(airdrop_used_amount, char) as airdrop_used_amount").
@@ -174,24 +174,49 @@ const UserAirdropDetailKlassPrototype = {
           return onResolve(responseHelper.error('uad_caua_2', 'no airdrop record available for adjusting: '));
         }
 
+        for (var uadIndex in userAirdropDetailResults) {
+          const uad = userAirdropDetailResults[uadIndex];
+          const dbAmount = new BigNumber(uad.airdrop_used_amount);
+
+          const toAdjustAmount = BigNumber.min(dbAmount, totalRemainingAmountToAdjust);
+          const amountToUpdate = dbAmount.minus(toAdjustAmount);
+
+          await oThis.update({airdrop_used_amount: amountToUpdate.toString()}).where(["id = ?", uad.id]).fire();
+          totalRemainingAmountToAdjust = totalRemainingAmountToAdjust.minus(toAdjustAmount);
+          if (totalRemainingAmountToAdjust.lte(0)) {
+            return onResolve(responseHelper.successWithData());
+          }
+        }
+
+        /*
         var amountToAdjustWithCurrentRecord = new BigNumber(0)
           , dbAmountForAdjusting = new BigNumber(0)
           , dbAirdropUsedAmount = new BigNumber(0)
           , airdropUsedAmountToUpdate = new BigNumber(0)
         ;
+        console.log("userAirdropDetailResults");
+        console.log(userAirdropDetailResults);
+
         for (var uadIndex in userAirdropDetailResults){
           var uad = userAirdropDetailResults[uadIndex];
           dbAirdropUsedAmount = new BigNumber(uad.airdrop_used_amount);
+          console.log("================uad.airdrop_used_amount", uad.airdrop_used_amount.toString(10));
+          console.log("================airdropAmountUsed", airdropAmountUsed.toString(10));
           amountToAdjustWithCurrentRecord = BigNumber.min(totalRemainingAmountToAdjust, dbAmountForAdjusting);
+          console.log("amountToAdjustWithCurrentRecord");
+          console.log(amountToAdjustWithCurrentRecord);
           if (amountToAdjustWithCurrentRecord.lte(0)){
+            console.log("Returning from check point 4");
             return onResolve(responseHelper.successWithData());
           }
-          var airdropUsedAmountToUpdate = (dbAirdropUsedAmount.minus(amountToAdjustWithCurrentRecord)).toString();
+          var airdropUsedAmountToUpdate = (dbAirdropUsedAmount.minus(amountToAdjustWithCurrentRecord)).toString(10);
           logger.info("==========user_airdrop_detail.updateAirdropUsedAmount.updating============");
           logger.info("\nid: ", uad.id, "airdropUsedAmountToUpdate: ", airdropUsedAmountToUpdate);
           await oThis.update({airdrop_used_amount: airdropUsedAmountToUpdate}).where(["id = ?",uad.id]).fire();
           totalRemainingAmountToAdjust = totalRemainingAmountToAdjust.minus(amountToAdjustWithCurrentRecord);
+
         }
+        */
       } catch(err) {
         return onResolve(responseHelper.error('uad_caua_3', 'Error in updateAirdropUsedAmount: ' + err));
       }
