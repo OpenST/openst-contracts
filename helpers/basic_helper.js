@@ -6,8 +6,7 @@
  * @module helpers/basic_helper
  */
 
-const rootPrefix = '..'
-  , BigNumber = require('bignumber.js')
+const BigNumber = require('bignumber.js')
 ;
 
 

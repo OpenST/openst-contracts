@@ -21,7 +21,7 @@ const coreAbis = {
   eip20tokenmock: parseFile(rootPrefix + '/contracts/abi/EIP20TokenMock.abi', "utf8"),
   opsManaged: parseFile(rootPrefix + '/contracts/abi/OpsManaged.abi', "utf8"),
   workers: parseFile(rootPrefix + '/contracts/abi/Workers.abi', "utf8"),
-  brandedtoken: parseFile(rootPrefix + '/contracts/abi/EIP20Token.abi', "utf8"),
+  brandedToken: parseFile(rootPrefix + '/contracts/abi/EIP20Token.abi', "utf8"),
   airdrop: parseFile(rootPrefix + '/contracts/abi/Airdrop.abi', "utf8")
 };
 

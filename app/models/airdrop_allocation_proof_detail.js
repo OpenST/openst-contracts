@@ -77,7 +77,9 @@ const AirdropAllocationProofDetailKlassPrototype = {
    *
    */
   updateAllocatedAmount: async function(id, allocatedAmount){
-    const oThis = this;
+    const oThis = this
+    ;
+
     try {
       await oThis.update({airdrop_allocated_amount: allocatedAmount}).where(["id=?", id]).fire();
       return responseHelper.successWithData({});
