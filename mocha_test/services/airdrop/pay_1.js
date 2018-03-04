@@ -222,7 +222,7 @@ async function transferTokenToAirdropBugetHolder (token, airdropAddress, fromAdd
   await utils.verifyIfMined(airdropOstUsd, transferToAirdropBudgetHolderResult.data.transaction_hash);
 
   const afterTransferAirdropBudgetHolderBalance = new BigNumber(await token.balanceOf(budgetHolderAddress));
-  assert.equal((beforeTransferAirdropBudgetHolderBalance.plus(afterTransferAirdropBudgetHolderBalance)).equals(airdropBudgetAmountInWei), true);
+  assert.equal((beforeTransferAirdropBudgetHolderBalance.plus(airdropBudgetAmountInWei)).equals( afterTransferAirdropBudgetHolderBalance), true);
 
   // set transaction hash
   transferToAirdropBudgetHolderTransactionHash = transferToAirdropBudgetHolderResult.data.transaction_hash;
@@ -371,7 +371,7 @@ async function getBalanceFromCache(tokenObj, address) {
   *
   */
 
-function validateContractAndCacheBalance(cacheBalance, contractBalances) {
+function validateContractAndCacheBalance(cacheBalance, contractBalances) {  
   const contractKeys = Object.keys(cacheBalance);
   const cacheKeys = Object.keys(contractBalances);
   assert.equal(contractKeys.length, cacheKeys.length);
@@ -521,6 +521,15 @@ describe('Airdrop Pay', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
+    const address = [
+      constants.account1,
+      constants.airdropBudgetHolder
+    ];
+    const initalBalancesFromContract = await getBalanceFromContract(TC5, address);
+    const initalBalancesCache = await getBalanceFromCache(brandedTokenObject, address);
+    validateContractAndCacheBalance(initalBalancesFromContract, initalBalancesCache);
+
+
     // transfer amount
     await transferTokenToAirdropBugetHolder(TC5,
       constants.airdropOstUsdAddress,
@@ -528,6 +537,10 @@ describe('Airdrop Pay', function() {
       constants.accountPassphrase1,
       constants.airdropBudgetHolder,
       constants.airdropBudgetBrandedTokenBalance);
+
+    const balanceFromContract = await getBalanceFromContract(TC5, address);
+    const balancesFromCache = await getBalanceFromCache(brandedTokenObject, address);
+    validateContractAndCacheBalance(balanceFromContract, balancesFromCache);
 
     // approve
     var approveToAirdropBudgetHolderResult = await airdropManager.approve(
@@ -1107,6 +1120,6 @@ describe('Airdrop Pay', function() {
   it('Airdrop.Pay: It exits', async function() {
     process.exit(0);
   });
-  
+
 
 });
