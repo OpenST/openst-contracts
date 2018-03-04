@@ -29,16 +29,6 @@ const BigNumber = require('bignumber.js');
 
 async function performer(argv) {
 
-  logger.info("argv[0]: " + argv[0]);
-  logger.info("argv[1]: " + argv[1]);
-  logger.info("argv[2]: " + argv[2]);
-  logger.info("argv[3]: " + argv[3]);
-  logger.info("argv[4]: " + argv[4]);
-  logger.info("argv[5]: " + argv[5]);
-  logger.info("argv[6]: " + argv[6]);
-  logger.info("argv[7]: " + argv[7]);
-  logger.info("argv[8]: " + argv[8]);
-
   if (argv.length < 7) {
     logger.error("Invalid arguments !!!");
     process.exit(0);

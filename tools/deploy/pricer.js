@@ -74,14 +74,14 @@ function validate(argv) {
  */
 async function performer(argv) {
 
-  logger.info("argv[0]: " + argv[0]);
-  logger.info("argv[1]: " + argv[1]);
-  logger.info("argv[2]: " + argv[2]);
-  logger.info("argv[3]: " + argv[3]);
-  logger.info("argv[4]: " + argv[4]);
-  logger.info("argv[5]: " + argv[5]);
-  logger.info("argv[6]: " + argv[6]);
-  logger.info("argv[7]: " + argv[7]);
+  // logger.info("argv[0]: " + argv[0]);
+  // logger.info("argv[1]: " + argv[1]);
+  // logger.info("argv[2]: " + argv[2]);
+  // logger.info("argv[3]: " + argv[3]);
+  // logger.info("argv[4]: " + argv[4]);
+  // logger.info("argv[5]: " + argv[5]);
+  // logger.info("argv[6]: " + argv[6]);
+  // logger.info("argv[7]: " + argv[7]);
 
   validate(argv);
   const brandedTokenAddress = argv[2].trim();
@@ -145,8 +145,8 @@ async function performer(argv) {
 
     logger.info("Setting Ops Address to: " + opsAddress);
     const setOpsOptions = {
-      returnType: returnTypes.transactionReceipt(),
-      tag: 'pricerDeployment'
+        returnType: returnTypes.transactionReceipt(),
+        tag: 'pricerDeployment'
       }
       ,  opsManaged = new OpsManagedContract(contractAddress, gasPrice, chainId)
     ;
@@ -159,7 +159,7 @@ async function performer(argv) {
     const contractOpsAddress = await opsManaged.getOpsAddress();
     logger.info("Ops Address Set to: " + contractOpsAddress);
 
-  } else{
+  } else {
     logger.error("Error deploying contract");
     logger.error(deployResult);
   }

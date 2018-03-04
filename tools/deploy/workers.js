@@ -45,13 +45,6 @@ const opsName = "ops"
  */
 async function performer(argv) {
 
-  logger.info("argv[0]: " + argv[0]);
-  logger.info("argv[1]: " + argv[1]);
-  logger.info("argv[2]: " + argv[2]);
-  logger.info("argv[3]: " + argv[3]);
-  logger.info("argv[4]: " + argv[4]);
-  logger.info("argv[5]: " + argv[5]);
-
   if (!argv[2]) {
     logger.error("Gas Price is mandatory!");
     process.exit(0);

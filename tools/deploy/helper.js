@@ -122,7 +122,7 @@ const deployHelper = {
     console.log("Unlocking!!!");
 
     console.log("deployerAddr: "+deployerAddr);
-    console.log("deployerAddrPassphrase: "+deployerAddrPassphrase);
+
     await web3Provider.eth.personal.unlockAccount(deployerAddr, deployerAddrPassphrase);
 
     console.log("Deploying contract " + contractName);

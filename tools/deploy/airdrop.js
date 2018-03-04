@@ -79,17 +79,6 @@ function validate(argv) {
  */
 async function performer(argv) {
 
-  logger.info("argv[0]: " + argv[0]);
-  logger.info("argv[1]: " + argv[1]);
-  logger.info("argv[2]: " + argv[2]); // branded Toke Contract Address
-  logger.info("argv[3]: " + argv[3]); // base Currency
-  logger.info("argv[4]: " + argv[4]); // worker contract address
-  logger.info("argv[5]: " + argv[5]); // airdropBudgetHolder address
-  logger.info("argv[6]: " + argv[6]); // gas price
-  logger.info("argv[7]: " + argv[7]); // chain Id
-  logger.info("argv[8]: " + argv[8]); // isTravisCIEnabled
-  logger.info("argv[9]: " + argv[9]); // file to write airdrop contract address
-
   validate(argv);
   const brandedTokenAddress = argv[2].trim();
   const baseCurrency = argv[3].trim();
