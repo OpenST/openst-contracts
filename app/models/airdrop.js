@@ -17,11 +17,12 @@ const dbName = coreConstants.MYSQL_DATABASE
 ;
 
 /**
-* Constructor for class airdrop
-*
-* @constructor
-*
-*/
+ * Constructor for class airdrop
+ *
+ * @constructor
+ * @augments ModelBaseKlass
+ *
+ */
 const AirdropKlass = function () {
   ModelBaseKlass.call(this, {dbName: dbName});
 };
@@ -30,8 +31,20 @@ AirdropKlass.prototype = Object.create(ModelBaseKlass.prototype);
 
 const AirdropKlassPrototype = {
 
+  /**
+   * Query DB Object
+   *
+   * @return {object}
+   *
+   */
   QueryDB: QueryDBObj,
 
+  /**
+   * Table name
+   *
+   * @constant {string}
+   *
+   */
   tableName: 'airdrops',
 
   /**
@@ -43,11 +56,12 @@ const AirdropKlassPrototype = {
    *
    */
   getByContractAddress: function (airdropContractAddress) {
-    var oThis = this;
+    const oThis = this
+    ;
+    
     return oThis.select().where(["contract_address=?", airdropContractAddress]).
       limit(1).fire();
   }
-
 };
 
 Object.assign(AirdropKlass.prototype, AirdropKlassPrototype);

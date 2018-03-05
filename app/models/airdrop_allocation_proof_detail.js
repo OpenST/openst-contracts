@@ -3,7 +3,7 @@
  *
  * This is a model file which would be used querying airdrop_allocation_proof_details model.<br><br>
  *
- * @module app/models/airdrop_allocation_proof_details
+ * @module app/models/airdrop_allocation_proof_detail
  *
  */
 const rootPrefix = '../..'
