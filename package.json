@@ -1,6 +1,6 @@
 {
   "name": "@openstfoundation/openst-payments",
-  "version": "1.0.0-beta.15",
+  "version": "1.0.0-beta.16",
   "description": "",
   "dependencies": {
     "@openstfoundation/openst-cache": "1.0.1-beta.1",
