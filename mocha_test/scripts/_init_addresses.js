@@ -8,6 +8,7 @@ const _addresses = {
   "account2": null,
   "account3": null,
   "account4": null,
+  "account5": null,
   "airdropBudgetHolder": null
 };
 
@@ -46,6 +47,9 @@ function main( addressFile ) {
     } else if ( !_addresses.account4 ) {
       _addresses.account4 = thisAddress;
       fundAddress(thisAddress);
+    } else if ( !_addresses.account5 ) {
+      _addresses.account5 = thisAddress;
+      fundAddress(thisAddress);
     } else if ( !_addresses.airdropBudgetHolder ) {
       _addresses.airdropBudgetHolder = thisAddress;
       fundAddress(thisAddress);
@@ -62,9 +66,10 @@ function main( addressFile ) {
     ost_utility_test_account_2: _addresses.account2,
     ost_utility_test_account_3: _addresses.account3,
     ost_utility_test_account_4: _addresses.account4,
+    ost_utility_test_account_5: _addresses.account5,
     ost_airdrop_budget_holder: _addresses.airdropBudgetHolder,
     ost_worker_test_account_1: _addresses.workerAccount1
-   }
+  }
   );
 }
 

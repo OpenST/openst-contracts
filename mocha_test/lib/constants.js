@@ -1,7 +1,6 @@
-
-const returnTypeUUID = "uuid";
-const returnTypeHash = "txHash";
-const returnTypeReceipt = "txReceipt";
+const rootPrefix = '../..'
+  , returnTypes = require(rootPrefix + "/lib/global_constant/return_types")
+;
 
 const constants = {
   gasUsed: 0xBA43B7400,
@@ -17,6 +16,8 @@ const constants = {
   accountPassphrase3: process.env.OST_UTILITY_TEST_ACCOUNT3_PASSPHRASE,
   account4: process.env.OST_UTILITY_TEST_ACCOUNT4,
   accountPassphrase4: process.env.OST_UTILITY_TEST_ACCOUNT4_PASSPHRASE,
+  account5: process.env.OST_UTILITY_TEST_ACCOUNT5,
+  accountPassphrase5: process.env.OST_UTILITY_TEST_ACCOUNT5_PASSPHRASE,
   currencyUSD: "USD",
   currencyEUR: "EUR",
   currencyINR: "INR",
@@ -29,12 +30,12 @@ const constants = {
   TC2Address: process.env.OST_UTILITY_TEST_COIN2_C2_ADDRESS,
   TC3Address: process.env.OST_UTILITY_TEST_COIN3_C3_ADDRESS,
   chainId: process.env.OST_UTILITY_CHAIN_ID,
-  returnTypeUUID: returnTypeUUID,
-  returnTypeHash: returnTypeHash,
-  returnTypeReceipt: returnTypeReceipt,
-  optionsUUID: {returnType: returnTypeUUID, tag: "test"},
-  optionsHash: {returnType: returnTypeHash, tag: "test"},
-  optionsReceipt: {returnType: returnTypeReceipt, tag: "test"},
+  returnTypeUUID: returnTypes.transactionUuid(),
+  returnTypeHash: returnTypes.transactionHash(),
+  returnTypeReceipt: returnTypes.transactionReceipt(),
+  optionsUUID: {returnType: returnTypes.transactionUuid(), tag: returnTypes.transactionUuid()},
+  optionsHash: {returnType: returnTypes.transactionHash(), tag: returnTypes.transactionHash()},
+  optionsReceipt: {returnType: returnTypes.transactionReceipt(), tag: returnTypes.transactionReceipt()},
   // Worker specific constants
   workerAccount1: process.env.OST_WORKER_TEST_ACCOUNT1,
   workerAccountPassphrase1: process.env.OST_WORKER_TEST_ACCOUNT1_PASSPHRASE,
@@ -42,6 +43,12 @@ const constants = {
   airdropBudgetHolder: process.env.OST_AIRDROP_BUDGET_HOLDER,
   airdropBudgetHolderPassphrase: process.env.OST_AIRDROP_BUDGET_HOLDER_PASSPHRASE,
   workersContractAddress: process.env.OST_UTILITY_WORKER_CONTRACT_ADDRESS,
-  airdropOstUsdAddress: process.env.OST_UTILITY_TEST_AIRDROP1_CONTRACT_ADDRESS
+  airdropOstUsdAddress: process.env.OST_UTILITY_TEST_AIRDROP1_CONTRACT_ADDRESS,
+  account1InitialBrandedTokenBalance: '200001',
+  airdropBudgetBrandedTokenBalance: '100000',
+  airdropUsers: {
+    '0x934ebd34b2a4f16d4de16256df36a6013785557d': {airdropAmount: 50*10**18, expiryTimestamp: 0},
+    '0x934ebd34b2a4f16d4de16256df36a6013785557e': {airdropAmount: 50*10**18, expiryTimestamp: 0}
+  }
 };
 module.exports = constants;

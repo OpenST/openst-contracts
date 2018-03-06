@@ -54,11 +54,8 @@ describe('Unset price oracle', function() {
       constants.gasUsed,
       constants.optionsReceipt);
 
-    // verify if the transaction receipt is valid
-    utils.verifyTransactionReceipt(response2);
-
-    // verify if the transaction has was actually mined
-    await utils.verifyIfMined(pricerOstUsd, response2.data.transaction_hash);
+    // verify if it failed
+    assert.equal(response2.isFailure(), true);
 
     // verify if value is changed
     const poResult2 = await pricerOstUsd.priceOracles(constants.currencyUSD);
@@ -211,6 +208,29 @@ describe('Unset price oracle', function() {
   });
 
   it('should pass for interaction layer test when return type is txReceipt', async function() {
+
+    // eslint-disable-next-line no-invalid-this
+    this.timeout(100000);
+
+    // set the price oracle
+    const setResponse = await pricerOstUsd.setPriceOracle(
+      constants.ops,
+      constants.opsPassphrase,
+      constants.currencyUSD,
+      constants.priceOracles.OST.USD,
+      constants.gasUsed,
+      constants.optionsReceipt);
+
+    // verify if the transaction receipt is valid
+    utils.verifyTransactionReceipt(setResponse);
+
+    // verify if the transaction has was actually mined
+    await utils.verifyIfMined(pricerOstUsd, setResponse.data.transaction_hash);
+
+    // verify if value is changed
+    const poResult1 = await pricerOstUsd.priceOracles(constants.currencyUSD);
+    assert.equal(poResult1.isSuccess(), true);
+    assert.equal(poResult1.data.priceOracles, constants.priceOracles.OST.USD);
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);

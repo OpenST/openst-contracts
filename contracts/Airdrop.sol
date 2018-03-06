@@ -40,7 +40,7 @@ contract Airdrop is Pricer {
         bytes3 _currency,
         uint256 _actualPricePoint,
         address indexed _spender,
-        uint256 _airdropAmount
+        uint256 _airdropUsed
         );
 
     /*
@@ -87,7 +87,7 @@ contract Airdrop is Pricer {
     /// @param _intendedPricePoint intendedPricePoint
     /// @param _spender spender
     /// @param _airdropAmount airdropAmount
-    /// @return uint256 totalPaid
+    /// @return uint256 totalPaid, uint256 airdropUsed
     function payAirdrop(
         address _beneficiary,
         uint256 _transferAmount,
@@ -99,7 +99,8 @@ contract Airdrop is Pricer {
         uint256 _airdropAmount)
         public
         returns (
-            uint256 /* totalPaid */)
+            uint256, /* totalPaid */
+            uint256 /* airdropUsed */)
     {
         require(workers.isWorker(msg.sender));
         require(_spender != address(0));
@@ -117,16 +118,16 @@ contract Airdrop is Pricer {
                 _intendedPricePoint, _transferAmount, _commissionAmount);
         }
 
-        require(performAirdropTransferToSpender(_spender, _airdropAmount,
-            tokenAmount, commissionTokenAmount));
+        uint256 airdropUsed = performAirdropTransferToSpender(_spender, _airdropAmount,
+            tokenAmount, commissionTokenAmount);
         require(performTransfers(_spender, _beneficiary, tokenAmount,
             _commissionBeneficiary, commissionTokenAmount));
 
         /// Emit AirdropPayment Event
         AirdropPayment(_beneficiary, tokenAmount, _commissionBeneficiary,
-            commissionTokenAmount, _currency, pricePoint, _spender, _airdropAmount);
+            commissionTokenAmount, _currency, pricePoint, _spender, airdropUsed);
 
-        return ((tokenAmount + commissionTokenAmount));
+        return ((tokenAmount + commissionTokenAmount), airdropUsed);
     }
 
     /*
@@ -148,11 +149,11 @@ contract Airdrop is Pricer {
         uint256 _commissionTokenAmount)
         private
         returns (
-            bool /* boolean value */)
+            uint256 airdropUsed /* airdrop used */)
     {
         uint256 totalPaid = (_tokenAmount + _commissionTokenAmount);
         // Find out minimum of totalPaid and _airdropAmount
-        uint256 airdropUsed = _airdropAmount;
+        airdropUsed = _airdropAmount;
         if (totalPaid < airdropUsed) {
             airdropUsed = totalPaid;
         }
@@ -162,7 +163,7 @@ contract Airdrop is Pricer {
             require(EIP20Interface(brandedToken()).transferFrom(airdropBudgetHolder, _spender, airdropUsed));
         }
 
-        return true;
+        return airdropUsed;
     }
 
 }

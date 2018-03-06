@@ -16,6 +16,7 @@ const prompts = readline.createInterface(process.stdin, process.stdout);
 const logger = require(rootPrefix + '/helpers/custom_console_logger');
 const Deployer = require(rootPrefix + '/lib/deployer');
 const coreConstants = require(rootPrefix + '/config/core_constants');
+const BigNumber = require('bignumber.js');
 
 /**
  * It is the main performer method of this deployment script
@@ -28,28 +29,18 @@ const coreConstants = require(rootPrefix + '/config/core_constants');
 
 async function performer(argv) {
 
-  logger.info("argv[0]: " + argv[0]);
-  logger.info("argv[1]: " + argv[1]);
-  logger.info("argv[2]: " + argv[2]);
-  logger.info("argv[3]: " + argv[3]);
-  logger.info("argv[4]: " + argv[4]);
-  logger.info("argv[5]: " + argv[5]);
-  logger.info("argv[6]: " + argv[6]);
-  logger.info("argv[7]: " + argv[7]);
-  logger.info("argv[8]: " + argv[8]);
-
   if (argv.length < 7) {
     logger.error("Invalid arguments !!!");
     process.exit(0);
   }
-  //argv[2] => uint256 conversionRate;
+  //argv[2] => uint256 conversionFactor;
   //argv[3] => string symbol;
   //argv[4] => string name;
   //argv[5] => uint8 decimals;
   //argv[6] => hex gasPrice;
   //argv[7] => string travis;
   //argv[8] => string File name where contract address needs to write;
-  const conversionRate = argv[2].trim();
+  const conversionFactor = argv[2].trim();
   const symbol = argv[3].trim();
   const name = argv[4].trim();
   const decimals = argv[5].trim();
@@ -60,7 +51,18 @@ async function performer(argv) {
   }
   const fileForContractAddress = (argv[8] !== undefined) ? argv[8].trim() : '';
 
+
+  const conversionDecimals = 5;
+  const conversionRate = (new BigNumber(String(conversionFactor))).mul((new BigNumber(10)).toPower(conversionDecimals));
+  if (!conversionRate.modulo(1).equals(0)){
+    logger.error('Exiting deployment scripts. Invalid conversion factor');
+    process.exit(1);
+  }
+
+
+  logger.info("conversionFactor: " + conversionFactor);
   logger.info("conversionRate: " + conversionRate);
+  logger.info("conversionDecimals: " + conversionDecimals);
   logger.info("symbol: " + symbol);
   logger.info("name: " + name);
   logger.info("decimals: " + decimals);
@@ -90,6 +92,7 @@ async function performer(argv) {
 
   var constructorArgs = [
     conversionRate,
+    conversionDecimals,
     symbol,
     name,
     decimals
@@ -113,6 +116,8 @@ async function performer(argv) {
     }
   }
 }
+
+
 
 // example: node ../tools/deploy/EIP20TokenMock.js 5 DKN deepeshCoin 18 0x12A05F200 travis bt.txt
 performer(process.argv);

@@ -26,18 +26,12 @@ describe('Set price oracle', function() {
     assert.notEqual(constants.ops, constants.account1);
 
     // unset the price oracle
-    const response = await pricerOstUsd.unsetPriceOracle(
+    await pricerOstUsd.unsetPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.gasUsed,
       constants.optionsReceipt);
-
-    // verify if the transaction receipt is valid
-    utils.verifyTransactionReceipt(response);
-
-    // verify if the transaction has was actually mined
-    await utils.verifyIfMined(pricerOstUsd, response.data.transaction_hash);
 
     // verify if value is changed
     const poResult1 = await pricerOstUsd.priceOracles(constants.currencyUSD);
@@ -45,18 +39,12 @@ describe('Set price oracle', function() {
     assert.equal(0x0, poResult1.data.priceOracles);
 
     // unset the price oracle
-    const response2 = await pricerOstEur.unsetPriceOracle(
+    await pricerOstEur.unsetPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyEUR,
       constants.gasUsed,
       constants.optionsReceipt);
-
-    // verify if the transaction receipt is valid
-    utils.verifyTransactionReceipt(response2);
-
-    // verify if the transaction has was actually mined
-    await utils.verifyIfMined(pricerOstUsd, response2.data.transaction_hash);
 
     // verify if value is changed
     const poResult2 = await pricerOstEur.priceOracles(constants.currencyEUR);
@@ -79,11 +67,8 @@ describe('Set price oracle', function() {
       constants.gasUsed,
       constants.optionsReceipt);
 
-    // verify if the transaction receipt is valid
-    utils.verifyTransactionReceipt(setResponse);
-
-    // verify if the transaction has was actually mined
-    await utils.verifyIfMined(pricerOstUsd, setResponse.data.transaction_hash);
+    // check if the response is failure
+    assert.equal(setResponse.isFailure(), true);
 
     // verify if its not set
     const poResult2 = await pricerOstUsd.priceOracles(constants.currencyUSD);
@@ -174,11 +159,8 @@ describe('Set price oracle', function() {
       constants.gasUsed,
       constants.optionsReceipt);
 
-    // verify if the transaction receipt is valid
-    utils.verifyTransactionReceipt(response);
-
-    // verify if the transaction has was actually mined
-    await utils.verifyIfMined(pricerOstUsd, response.data.transaction_hash);
+    // check if the response is failure
+    assert.equal(response.isFailure(), true);
 
     // verify if its not set
     const poResult = await pricerOstUsd.priceOracles(constants.currencyUSD);
@@ -201,11 +183,8 @@ describe('Set price oracle', function() {
       constants.gasUsed,
       constants.optionsReceipt);
 
-    // verify if the transaction receipt is valid
-    utils.verifyTransactionReceipt(response);
-
-    // verify if the transaction has was actually mined
-    await utils.verifyIfMined(pricerOstUsd, response.data.transaction_hash);
+    // check if the response is failure
+    assert.equal(response.isFailure(), true);
 
     // verify if its not set
     const poResult = await pricerOstUsd.priceOracles(constants.currencyUSD);

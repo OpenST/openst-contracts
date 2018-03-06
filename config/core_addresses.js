@@ -43,9 +43,9 @@ const allAddresses = {
       abi: coreAbis.workers,
       bin: coreBins.workers
     },
-    brandedtoken: {
-      abi: coreAbis.brandedtoken,
-      bin: coreBins.brandedtoken
+    brandedToken: {
+      abi: coreAbis.brandedToken,
+      bin: coreBins.brandedToken
     },
     airdrop: {
       abi: coreAbis.airdrop,

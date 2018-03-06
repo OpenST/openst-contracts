@@ -17,12 +17,23 @@
 
 const readline = require('readline');
 const rootPrefix = '../..';
-const coreConstants = require(rootPrefix + '/config/core_constants');
 const coreAddresses = require(rootPrefix + '/config/core_addresses');
 const prompts = readline.createInterface(process.stdin, process.stdout);
 const logger = require(rootPrefix + '/helpers/custom_console_logger');
 const OpsManagedContract = require(rootPrefix + "/lib/contract_interact/ops_managed_contract");
 const Deployer = require(rootPrefix + '/lib/deployer');
+const returnTypes = require(rootPrefix + "/lib/global_constant/return_types");
+
+// Different addresses used for deployment
+const deployerName = "deployer"
+  , deployerAddress = coreAddresses.getAddressForUser(deployerName)
+  , deployerPassphrase = coreAddresses.getPassphraseForUser(deployerName)
+;
+
+// Set Ops Address
+const opsName = "ops"
+  , opsAddress = coreAddresses.getAddressForUser(opsName)
+;
 
 
 /**
@@ -34,28 +45,30 @@ const Deployer = require(rootPrefix + '/lib/deployer');
  */
 async function performer(argv) {
 
-  logger.info("argv[0]: " + argv[0]);
-  logger.info("argv[1]: " + argv[1]);
-  logger.info("argv[2]: " + argv[2]);
-  logger.info("argv[3]: " + argv[3]);
-  logger.info("argv[4]: " + argv[4]);
-
-  if (argv[2] === undefined || argv[2] === '') {
+  if (!argv[2]) {
     logger.error("Gas Price is mandatory!");
     process.exit(0);
   }
-
-  const gasPrice = argv[2].trim();
-  var isTravisCIEnabled = false;
-  if (argv[3] !== undefined) {
-    isTravisCIEnabled = argv[3].trim() === 'travis';
+  if (!argv[3]) {
+    logger.error("chainId is mandatory!");
+    process.exit(0);
   }
 
-  const fileForContractAddress = (argv[4] !== undefined) ? argv[4].trim() : '';
+  const gasPrice = argv[2].trim()
+    , chainId = argv[3].trim()
+  ;
+  var isTravisCIEnabled = false;
+  if (argv[4] !== undefined) {
+    isTravisCIEnabled = argv[4].trim() === 'travis';
+  }
+
+  const fileForContractAddress = (argv[5] !== undefined) ? argv[5].trim() : '';
 
   logger.info("Gas price: " + gasPrice);
+  logger.info("chainId: " + chainId);
   logger.info("Travis CI enabled Status: " + isTravisCIEnabled);
   logger.info("File to write For ContractAddress: "+fileForContractAddress);
+
   if (isTravisCIEnabled === false ) {
     await new Promise(
       function (onResolve, onReject) {
@@ -75,19 +88,17 @@ async function performer(argv) {
     prompts.close();
   }
 
-  const contractName = 'workers';
-
-  var constructorArgs = [];
-
-  const deployerInstance = new Deployer();
-
-  const options = {returnType: "txReceipt"};
+  const contractName = 'workers'
+    , constructorArgs = []
+    , deployerInstance = new Deployer()
+    , deployOptions = {returnType: returnTypes.transactionReceipt()}
+  ;
 
   const deployResult =  await deployerInstance.deploy(
     contractName,
     constructorArgs,
     gasPrice,
-    options);
+    deployOptions);
 
   if (deployResult.isSuccess()) {
     const contractAddress = deployResult.data.transaction_receipt.contractAddress;
@@ -96,24 +107,27 @@ async function performer(argv) {
       deployerInstance.writeContractAddressToFile(fileForContractAddress, contractAddress);
     }
 
-    // set ops address
-    const opsName = "ops";
-    const opsAddress = coreAddresses.getAddressForUser(opsName);
-
     logger.info("Setting Ops Address to: " + opsAddress);
-    var opsManaged = new OpsManagedContract(contractAddress, gasPrice);
-    const deployerName = "deployer";
-    var result = await opsManaged.setOpsAddress(deployerName, opsAddress, {
-      gasPrice: gasPrice,
-      gas: coreConstants.OST_GAS_LIMIT
-    });
+    const setOpsOptions = {
+        returnType: returnTypes.transactionReceipt(),
+        tag: 'workersDeployment'
+      }
+      , opsManaged = new OpsManagedContract(contractAddress, gasPrice, chainId)
+    ;
+    var result = await opsManaged.setOpsAddress(deployerAddress,
+      deployerPassphrase,
+      opsAddress,
+      setOpsOptions);
     logger.info(result);
     var contractOpsAddress = await opsManaged.getOpsAddress();
     logger.info("Ops Address Set to: " + contractOpsAddress);
-
+  } else{
+    logger.error("Error deploying contract");
+    logger.error(deployResult);
   }
+  process.exit(0);
 
 }
 
-// node tools/deploy/worker.js gasPrice <travis> <fileToWrite>
+// node tools/deploy/worker.js gasPrice chainId <travis> <fileToWrite>
 performer(process.argv);

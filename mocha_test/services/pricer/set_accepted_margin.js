@@ -209,11 +209,8 @@ describe('Set accepted margins', function() {
       constants.gasUsed,
       constants.optionsReceipt);
 
-    // verify if the transaction receipt is valid
-    utils.verifyTransactionReceipt(response2);
-
-    // verify if the transaction has was actually mined
-    await utils.verifyIfMined(pricerOstUsd, response2.data.transaction_hash);
+    // verify if the response is failure
+    assert.equal(response2.isFailure(), true);
 
     // verify if the accepted margin is still set to 3
     const amResult2 = await pricerOstUsd.acceptedMargins(constants.currencyUSD);

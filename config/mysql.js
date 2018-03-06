@@ -7,7 +7,6 @@ const mysqlConfig = {
   "commonNodeConfig": {
     "connectionLimit": coreConstants.MYSQL_CONNECTION_POOL_SIZE,
     "charset": "UTF8_UNICODE_CI",
-    "timezone": coreConstants.MYSQL_TIMEZONE,
     "bigNumberStrings": true,
     "supportBigNumbers": true,
     "dateStrings": true,

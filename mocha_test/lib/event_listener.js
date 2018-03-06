@@ -16,11 +16,14 @@ module.exports.startObserving = function() {
         "payments.pricer.setAcceptedMargin",
         "payments.pricer.setPriceOracle",
         "payments.pricer.unsetPriceOracle",
-        "payments.pricer.pay",
-        "payments.airdrop.pay",
+        "transfer.payments.pricer.pay",
+        "transfer.payments.airdrop.pay",
         "payments.workers.setWorker",
         "payments.workers.removeWorker",
-        "payments.workers.remove"
+        "payments.workers.remove",
+        "payments.opsManaged.setOpsAddress",
+        "transfer.payments.brandedToken.transferToBudgetHolder",
+        "payments.brandedToken.approveToBudgetHolder"
       ],
       function(msgContent) {
         const messageData = JSON.parse(msgContent);

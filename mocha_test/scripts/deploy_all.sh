@@ -30,7 +30,7 @@ echo "\n********* Done *************"
 
 echo "\n********* Deploying Pricer 1 *************"
 . ./scripts/env_vars.sh
-node ../tools/deploy/pricer.js $OST_UTILITY_TEST_COIN1_C5_ADDRESS OST 0x12A05F200 travis tp1.txt
+node ../tools/deploy/pricer.js $OST_UTILITY_TEST_COIN1_C5_ADDRESS OST 0x12A05F200 $OST_UTILITY_CHAIN_ID travis tp1.txt
 export OST_UTILITY_TEST_PRICER_C5_ADDRESS=$(cat ../lib/tp1.txt)
 echo '\nexport OST_UTILITY_TEST_PRICER_C5_ADDRESS='\'$OST_UTILITY_TEST_PRICER_C5_ADDRESS\'>>scripts/env_vars.sh
 rm ../lib/tp1.txt
@@ -38,7 +38,7 @@ echo "\n********* Done *************"
 
 echo "\n********* Deploying Pricer 2 *************"
 . ./scripts/env_vars.sh
-node ../tools/deploy/pricer.js $OST_UTILITY_TEST_COIN2_C2_ADDRESS OST 0x12A05F200 travis tp2.txt
+node ../tools/deploy/pricer.js $OST_UTILITY_TEST_COIN2_C2_ADDRESS OST 0x12A05F200 $OST_UTILITY_CHAIN_ID travis tp2.txt
 export OST_UTILITY_TEST_PRICER_C2_ADDRESS=$(cat ../lib/tp2.txt)
 echo '\nexport OST_UTILITY_TEST_PRICER_C2_ADDRESS='\'$OST_UTILITY_TEST_PRICER_C2_ADDRESS\'>>scripts/env_vars.sh
 rm ../lib/tp2.txt
@@ -46,14 +46,14 @@ echo "\n********* Done *************"
 
 echo "\n********* Deploying Pricer 3 *************"
 . ./scripts/env_vars.sh
-node ../tools/deploy/pricer.js $OST_UTILITY_TEST_COIN3_C3_ADDRESS OST 0x12A05F200 travis tp3.txt
+node ../tools/deploy/pricer.js $OST_UTILITY_TEST_COIN3_C3_ADDRESS OST 0x12A05F200 $OST_UTILITY_CHAIN_ID travis tp3.txt
 export OST_UTILITY_TEST_PRICER_C3_ADDRESS=$(cat ../lib/tp3.txt)
 echo '\nexport OST_UTILITY_TEST_PRICER_C3_ADDRESS='\'$OST_UTILITY_TEST_PRICER_C3_ADDRESS\'>>scripts/env_vars.sh
 rm ../lib/tp3.txt
 echo "\n********* Done *************"
 
 echo "\n********* Deploying Worker Contract Address *************"
-node ../tools/deploy/workers.js 0x12A05F200 travis w1.txt
+node ../tools/deploy/workers.js 0x12A05F200 $OST_UTILITY_CHAIN_ID travis w1.txt
 export OST_UTILITY_WORKER_CONTRACT_ADDRESS=$(cat ../lib/w1.txt)
 echo '\nexport OST_UTILITY_WORKER_CONTRACT_ADDRESS='\'$OST_UTILITY_WORKER_CONTRACT_ADDRESS\'>>scripts/env_vars.sh
 rm ../lib/w1.txt
@@ -64,7 +64,7 @@ echo "\n Sourcing env_vars again"
 
 echo "\n********* Deploying Airdrop Contract Address *************"
 . ./scripts/env_vars.sh
-node ../tools/deploy/airdrop.js $OST_UTILITY_TEST_COIN1_C5_ADDRESS OST $OST_UTILITY_WORKER_CONTRACT_ADDRESS $OST_AIRDROP_BUDGET_HOLDER 0x12A05F200 travis ad1.txt
+node ../tools/deploy/airdrop.js $OST_UTILITY_TEST_COIN1_C5_ADDRESS OST $OST_UTILITY_WORKER_CONTRACT_ADDRESS $OST_AIRDROP_BUDGET_HOLDER 0x12A05F200 $OST_UTILITY_CHAIN_ID travis ad1.txt
 export OST_UTILITY_TEST_AIRDROP1_CONTRACT_ADDRESS=$(cat ../lib/ad1.txt)
 echo '\nexport OST_UTILITY_TEST_AIRDROP1_CONTRACT_ADDRESS='\'$OST_UTILITY_TEST_AIRDROP1_CONTRACT_ADDRESS\'>>scripts/env_vars.sh
 rm ../lib/ad1.txt

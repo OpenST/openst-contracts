@@ -38,13 +38,13 @@ node tools/deploy/EIP20TokenMock.js conversionRate symbol name decimals gasPrice
 ### Run Deployment Script for Workers:
 
 ```bash
-node tools/deploy/workers.js gasPrice
+node tools/deploy/workers.js gasPrice chainId
 ```
 
 ### Run Deployment Script for Airdrop:
 
 ```bash
-node tools/deploy/airdrop.js brandedTokenContractAddress baseCurrency workerContractAddress airdropBudgetHolder gasPrice
+node tools/deploy/airdrop.js brandedTokenContractAddress baseCurrency workerContractAddress airdropBudgetHolder gasPrice chainId
 ```
 
 ### Set Caching Engine:
@@ -60,9 +60,8 @@ For using redis/memcache as cache engine refer - [OpenSTFoundation/ost-price-ora
 export OP_MYSQL_HOST='127.0.0.1'
 export OP_MYSQL_USER=''
 export OP_MYSQL_PASSWORD=''
-export OP_MYSQL_DATABASE='payment_development'
+export OP_MYSQL_DATABASE=''
 export OP_MYSQL_CONNECTION_POOL_SIZE='5'
-export OP_MYSQL_TIMEZONE='+05:30'
 ```
 
 ### Create Airdrop Tables:
@@ -75,14 +74,17 @@ node migrations/create_tables.js
 ```js
 const OpenSTPayment = require('@openstfoundation/openst-payments')
   , deployer = new OpenSTPayment.deployer()
-  , opsManaged = new OpenSTPayment.opsManaged()
+  , opsManaged = new OpenSTPayment.opsManaged(contractAddress, gasPrice, chainId)
   , workers = new OpenSTPayment.worker(workerContractAddress, chainId)
   , airdrop = new OpenSTPayment.airdrop(airdropContractAddress, chainId)
+  , airdropManager = OpenSTPayment.airdropManager
 ;  
   // Deploy Contract
   deployer.deploy( contractName, constructorArgs, gasPrice, options);
+  // Register Airdrop
+  airdropManager.registerAirdrop(airdropContractAddress, chainId);
   // Set Ops Address
-  opsManaged.setOpsAddress(deployerName, opsAddress, options);
+  opsManaged.setOpsAddress(deployerAddress, deployerPassphrase, opsAddress, options);
   // Set Worker
   workers.setWorker(senderAddress, senderPassphrase, workerAddress, deactivationHeight, gasPrice, options);
   // Set Price Oracle
@@ -90,8 +92,13 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
   // Set Accepted Margin
   airdrop.setAcceptedMargin(senderAddress, senderPassphrase, currency, acceptedMargin, gasPrice, options);
   // Transfer Amount to airdrop budget holder
+  airdropManager.transfer(senderAddress, senderPassphrase, airdropContractAddress, amount, gasPrice, chainId, options);
   // Approve airdrop budget holder
-  // Approve spender
+  airdropManager.approve(airdropContractAddress, airdropBudgetHolderPassphrase, gasPrice, chainId, options);
+  // Allocate airdrop amount to users in batch
+  airdropManager.batchAllocate(airdropContractAddress, transactionHash, airdropUsers, chainId);
+  // Get Users Airdrop Balance
+  airdropManager.getUserAirdropBalance(chainId, airdropContractAddress, userAddresses);
   // Call Pay method
   airdrop.pay(workerAddress,
               WorkerPassphrase,
@@ -102,6 +109,6 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
               currency,
               intendedPricePoint,
               spender,
-              airdropAmount,
-              gasPrice);
+              gasPrice,
+              {tag:'airdrop.pay', returnType: 'txHash'});
 ```
