@@ -111,8 +111,11 @@ const deployHelper = {
     contract.setProvider(web3Provider.currentProvider);
 
     const deploy = function () {
+      const encodeABI = contract.deploy(options).encodeABI();
+      options.data = encodeABI;
+
       return new Promise(function (onResolve, onReject) {
-        contract.deploy(options).send()
+        web3Provider.eth.sendTransaction(options)
           .on('transactionHash', onResolve)
           .on('error', onReject);
       });
