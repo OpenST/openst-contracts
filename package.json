@@ -5,7 +5,6 @@
   "dependencies": {
     "@openstfoundation/openst-cache": "1.0.1-beta.1",
     "@openstfoundation/openst-notification": "1.0.0-beta.10",
-    "@ostdotcom/ost-price-oracle": "^1.0.0-beta.5",
     "bignumber.js": "4.1.0",
     "mustache": "2.3.0",
     "mysql": "2.14.1",
