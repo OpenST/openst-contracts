@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>OpenST Payments Module: tools/deploy/DeployHelper</title>
+	<title>OpenST Payments Class: BrandedToken</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -86,10 +86,17 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Module: tools/deploy/DeployHelper</h1>
+	<h1 class="page-title">Class: BrandedToken</h1>
 <section>
 
 <header>
+    
+        <h2>
+            <span class="ancestors"><a href="module-lib_contract_interact_branded_token.html">lib/contract_interact/branded_token</a>~</span>
+        
+        BrandedToken
+        </h2>
+        
     
 </header>
 
@@ -98,73 +105,9 @@
     <div class="container-overview">
     
         
-            <div class="description">Deploy Helper class to perform deploy</div>
-        
-
-        
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
-            
 <hr>
 <dt>
-    <h4 class="name" id=".writeContractAddressToFile"><span class="type-signature">&lt;static> </span>writeContractAddressToFile(fileName, contractAddress)</h4>
+    <h4 class="name" id="BrandedToken"><span class="type-signature"></span>new BrandedToken(brandedTokenAddress, chainId)</h4>
     
     
 </dt>
@@ -172,7 +115,7 @@
 
     
     <div class="description">
-        Write contract address to file based on parameter
+        Constructor to create object of BrandedToken
     </div>
     
 
@@ -207,13 +150,13 @@
 
         <tr>
             
-                <td class="name"><code>fileName</code></td>
+                <td class="name"><code>brandedTokenAddress</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
 
@@ -224,20 +167,20 @@
 
             
 
-            <td class="description last">file name</td>
+            <td class="description last">Branded token address</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>contractAddress</code></td>
+                <td class="name"><code>chainId</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Hex</span>
+<span class="param-type">number</span>
 
 
 
@@ -248,7 +191,7 @@
 
             
 
-            <td class="description last">contract Address</td>
+            <td class="description last">chainId</td>
         </tr>
 
     
@@ -308,13 +251,82 @@
     
 
     
-    <h5>Returns:</h5>
+
     
+</dd>
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        <dl>
             
+<hr>
+<dt class="name" id="balanceCache">
+    <h4 id="balanceCache"><span class="type-signature"></span>balanceCache<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        balance cache
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
 
 
 
-        
+	
+
+	
+
+	
+
+	
+</dl>
+
 
     
 </dd>
@@ -322,8 +334,134 @@
         
             
 <hr>
+<dt class="name" id="brandedTokenAddress">
+    <h4 id="brandedTokenAddress"><span class="type-signature"></span>brandedTokenAddress<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        branded token address
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id="chainId">
+    <h4 id="chainId"><span class="type-signature"></span>chainId<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        chain id
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        </dl>
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<hr>
 <dt>
-    <h4 class="name" id="~perform"><span class="type-signature">&lt;async, inner> </span>perform(contractName, web3Provider, contractAbi, contractBin, deployerName [, customOptions] [, constructorArgs])</h4>
+    <h4 class="name" id="approveByBudgetHolder"><span class="type-signature"></span>approveByBudgetHolder(airdropBudgetHolderAddress, airdropBudgetHolderPassphrase, airdropContractAddress, amount, gasPrice, options)</h4>
     
     
 </dt>
@@ -331,7 +469,7 @@
 
     
     <div class="description">
-        Method deploys contract
+        Approve amount to budget holder
     </div>
     
 
@@ -354,8 +492,6 @@
         <th>Type</th>
 
         
-        <th>Argument</th>
-        
 
         
 
@@ -368,13 +504,13 @@
 
         <tr>
             
-                <td class="name"><code>contractName</code></td>
+                <td class="name"><code>airdropBudgetHolderAddress</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
 
@@ -382,31 +518,23 @@
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">Contract Name to be deployed</td>
+            <td class="description last">address of airdropBudgetHolder</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>web3Provider</code></td>
+                <td class="name"><code>airdropBudgetHolderPassphrase</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Web3</span>
+<span class="param-type">string</span>
 
 
 
@@ -414,31 +542,23 @@
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">Web3 Provider object</td>
+            <td class="description last">Passphrase of airdropBudgetHolder</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>contractAbi</code></td>
+                <td class="name"><code>airdropContractAddress</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
 
@@ -446,31 +566,23 @@
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">Contract Abi to be deployed</td>
+            <td class="description last">airdrop contract address</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>contractBin</code></td>
+                <td class="name"><code>amount</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">BigNumber</span>
 
 
 
@@ -478,31 +590,23 @@
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">Contract Bin file to be deployed</td>
+            <td class="description last">amount in wei</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>deployerName</code></td>
+                <td class="name"><code>gasPrice</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">BigNumber</span>
 
 
 
@@ -510,31 +614,23 @@
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">Deployer name</td>
+            <td class="description last">gas price</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>customOptions</code></td>
+                <td class="name"><code>options</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">object</span>
 
 
 
@@ -542,54 +638,10 @@
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">Custom options for value/utility chain</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>constructorArgs</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Arguments to be passed while deploying contract</td>
+            <td class="description last">for params like returnType, tag.</td>
         </tr>
 
     
@@ -660,7 +712,1087 @@
     </dt>
     <dd>
         
-<span class="param-type">Promise.&lt;Object></span>
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="creditBalance"><span class="type-signature"></span>creditBalance(owner, bigAmount)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Credit balance in cache
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>owner</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Account address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>bigAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">amount to be credited</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="debitBalance"><span class="type-signature"></span>debitBalance(owner, bigAmount)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Debit balance in cache
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>owner</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Account address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>bigAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">amount to be debited</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getBalanceFromContract"><span class="type-signature"></span>getBalanceFromContract(owner)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Fetch Balance For a given address from contract
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>owner</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">address for which balance is to be fetched</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getBalanceOf"><span class="type-signature"></span>getBalanceOf(owner)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Fetch Balance For a given address
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>owner</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">address for which balance is to be fetched</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="setBalanceInCache"><span class="type-signature"></span>setBalanceInCache(owner, bigAmount)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Set balance in cache
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>owner</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Account address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>bigAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">amount to be set</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="transferToAirdropBudgetHolder"><span class="type-signature"></span>transferToAirdropBudgetHolder(senderAddress, senderPassphrase, airdropBudgetHolderAddress, amount, gasPrice, options)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Transfer amount to budget holder
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>senderAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">address of sender</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>senderPassphrase</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">passphrase of sender</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropBudgetHolderAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">recipient address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>amount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">amount in wei</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gasPrice</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">gas price</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">for params like returnType, tag.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
 
 
 

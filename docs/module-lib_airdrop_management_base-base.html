@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>OpenST Payments Module: tools/deploy/DeployHelper</title>
+	<title>OpenST Payments Class: base</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -86,10 +86,17 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Module: tools/deploy/DeployHelper</h1>
+	<h1 class="page-title">Class: base</h1>
 <section>
 
 <header>
+    
+        <h2>
+            <span class="ancestors"><a href="module-lib_airdrop_management_base.html">lib/airdrop_management/base</a>~</span>
+        
+        base
+        </h2>
+        
     
 </header>
 
@@ -98,10 +105,28 @@
     <div class="container-overview">
     
         
-            <div class="description">Deploy Helper class to perform deploy</div>
-        
+<hr>
+<dt>
+    <h4 class="name" id="base"><span class="type-signature"></span>new base()</h4>
+    
+    
+</dt>
+<dd>
 
-        
+    
+    <div class="description">
+        Constructor to create object of base
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
 <dl class="details">
     
 
@@ -141,7 +166,21 @@
 </dl>
 
 
-        
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
     
     </div>
 
@@ -164,7 +203,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id=".writeContractAddressToFile"><span class="type-signature">&lt;static> </span>writeContractAddressToFile(fileName, contractAddress)</h4>
+    <h4 class="name" id="approve"><span class="type-signature"></span>approve(airdropContractAddress, airdropBudgetHolderPassphrase, gasPrice, chainId, options)</h4>
     
     
 </dt>
@@ -172,7 +211,7 @@
 
     
     <div class="description">
-        Write contract address to file based on parameter
+        approve airdrop amount to airdrop contract address
     </div>
     
 
@@ -207,31 +246,7 @@
 
         <tr>
             
-                <td class="name"><code>fileName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">file name</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>contractAddress</code></td>
+                <td class="name"><code>airdropContractAddress</code></td>
             
 
             <td class="type">
@@ -248,133 +263,20 @@
 
             
 
-            <td class="description last">contract Address</td>
+            <td class="description last">airdrop contract address</td>
         </tr>
 
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-
-        
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="~perform"><span class="type-signature">&lt;async, inner> </span>perform(contractName, web3Provider, contractAbi, contractBin, deployerName [, customOptions] [, constructorArgs])</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Method deploys contract
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Argument</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
     
 
         <tr>
             
-                <td class="name"><code>contractName</code></td>
+                <td class="name"><code>airdropBudgetHolderPassphrase</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
 
@@ -382,31 +284,23 @@
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">Contract Name to be deployed</td>
+            <td class="description last">passphrase</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>web3Provider</code></td>
+                <td class="name"><code>gasPrice</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Web3</span>
+<span class="param-type">Hex</span>
 
 
 
@@ -414,31 +308,23 @@
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">Web3 Provider object</td>
+            <td class="description last">gasPrice</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>contractAbi</code></td>
+                <td class="name"><code>chainId</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">Number</span>
 
 
 
@@ -446,89 +332,17 @@
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">Contract Abi to be deployed</td>
+            <td class="description last">chainId</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>contractBin</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Contract Bin file to be deployed</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>deployerName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Deployer name</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>customOptions</code></td>
+                <td class="name"><code>options</code></td>
             
 
             <td class="type">
@@ -542,54 +356,10 @@
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">Custom options for value/utility chain</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>constructorArgs</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Arguments to be passed while deploying contract</td>
+            <td class="description last">options e.g. {returnType: '', tag: ''}</td>
         </tr>
 
     
@@ -660,7 +430,894 @@
     </dt>
     <dd>
         
-<span class="param-type">Promise.&lt;Object></span>
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="batchAllocate"><span class="type-signature"></span>batchAllocate(airdropContractAddress, transactionHash, airdropUsers, chainId)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        batch allocate to users
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropContractAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Hex</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">airdrop contract address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>transactionHash</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Hex</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">transfer transaction hash</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropUsers</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">airdropUsers => {address: {airdropAmount:2, expiryTimestamp: timestamp}}</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>chainId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">chainId</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">response</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getAirdropBalance"><span class="type-signature"></span>getAirdropBalance(chainId, airdropContractAddress, userAddresses)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Get user airdrop balance
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>chainId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Integer</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">chain Id</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropContractAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Hex</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">airdrop contract address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>userAddresses</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">array of user addresses</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    - {
+  '0x934ebd34b2a4f16d4de16256df36a6013785557d': {totalAirdropAmount: '10000000000000000', totalAirdropUsedAmount: '10000000000000000', balanceAirdropAmount: '10000000000000000'},
+  '0x934ebd34b2a4f16d4de16256df36a6013785557e': {totalAirdropAmount: '20000000000000000', totalAirdropUsedAmount: '20000000000000000', balanceAirdropAmount: '10000000000000000'}
+}
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">response</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="registerAirdrop"><span class="type-signature"></span>registerAirdrop(airdropContractAddress, chainId)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Register Airdrop
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropContractAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Hex</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">airdrop contract address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>chainId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">chain Id</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="transfer"><span class="type-signature"></span>transfer(senderAddress, senderPassphrase, airdropContractAddress, amount, gasPrice, chainId, options)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Transfer airdrop amount to airdrop budget holder
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>senderAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Hex</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Sender Address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>senderPassphrase</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">passphrase</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropContractAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Hex</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">airdrop contract address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>amount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">amount to transfer</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gasPrice</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Hex</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">gasPrice</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>chainId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">chainId</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">options e.g. {returnType: '', tag: ''}</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
 
 
 

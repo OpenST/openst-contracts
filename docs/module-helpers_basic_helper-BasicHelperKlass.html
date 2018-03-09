@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>OpenST Payments Module: tools/deploy/pricer</title>
+	<title>OpenST Payments Class: BasicHelperKlass</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -86,10 +86,17 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Module: tools/deploy/pricer</h1>
+	<h1 class="page-title">Class: BasicHelperKlass</h1>
 <section>
 
 <header>
+    
+        <h2>
+            <span class="ancestors"><a href="module-helpers_basic_helper.html">helpers/basic_helper</a>~</span>
+        
+        BasicHelperKlass
+        </h2>
+        
     
 </header>
 
@@ -98,20 +105,28 @@
     <div class="container-overview">
     
         
-            <div class="description">This is script for deploying Pricer contract on any chain.<br><br>
+<hr>
+<dt>
+    <h4 class="name" id="BasicHelperKlass"><span class="type-signature"></span>new BasicHelperKlass()</h4>
+    
+    
+</dt>
+<dd>
 
-  Prerequisite:
-   <ol>
-      <li>Deployer Address</li>
-    </ol>
+    
+    <div class="description">
+        Basic helper methods constructor
+    </div>
+    
 
-  These are the following steps:<br>
-    <ol>
-      <li>Deploy Pricer contract</li>
-    </ol></div>
-        
+    
 
-        
+    
+
+    
+    
+
+    
 <dl class="details">
     
 
@@ -151,7 +166,21 @@
 </dl>
 
 
-        
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
     
     </div>
 
@@ -174,7 +203,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="~performer"><span class="type-signature">&lt;async, inner> </span>performer(arguments)</h4>
+    <h4 class="name" id="convertToBigNumber"><span class="type-signature"></span>convertToBigNumber(amountInWei)</h4>
     
     
 </dt>
@@ -182,7 +211,7 @@
 
     
     <div class="description">
-        It is the main performer method of this deployment script
+        Convert number to big number. Make sure it's a valid number
     </div>
     
 
@@ -217,13 +246,13 @@
 
         <tr>
             
-                <td class="name"><code>arguments</code></td>
+                <td class="name"><code>amountInWei</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">number</span>
 
 
 
@@ -234,7 +263,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">amount in wei to be formatted</td>
         </tr>
 
     
@@ -298,6 +327,19 @@
     
             
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">BigNumber</span>
+
+
+
+    </dd>
+</dl>
 
 
         
@@ -309,7 +351,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="~performer"><span class="type-signature">&lt;async, inner> </span>performer(arguments)</h4>
+    <h4 class="name" id="formatWeiToString"><span class="type-signature"></span>formatWeiToString(amountInWei)</h4>
     
     
 </dt>
@@ -317,7 +359,7 @@
 
     
     <div class="description">
-        It is the main performer method of this deployment script
+        Convert wei to proper string. Make sure it's a valid number
     </div>
     
 
@@ -352,13 +394,13 @@
 
         <tr>
             
-                <td class="name"><code>arguments</code></td>
+                <td class="name"><code>amountInWei</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">number</span>
 
 
 
@@ -369,7 +411,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">amount in wei to be formatted</td>
         </tr>
 
     
@@ -433,6 +475,19 @@
     
             
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+
+    </dd>
+</dl>
 
 
         
@@ -444,7 +499,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="~validate"><span class="type-signature">&lt;inner> </span>validate(arguments)</h4>
+    <h4 class="name" id="getReturnType"><span class="type-signature"></span>getReturnType(returnType)</h4>
     
     
 </dt>
@@ -452,7 +507,7 @@
 
     
     <div class="description">
-        Validation Method
+        get return type for transaction
     </div>
     
 
@@ -487,13 +542,13 @@
 
         <tr>
             
-                <td class="name"><code>arguments</code></td>
+                <td class="name"><code>returnType</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">string</span>
 
 
 
@@ -504,7 +559,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">return from geth transactions when following event is received</td>
         </tr>
 
     
@@ -568,6 +623,19 @@
     
             
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+
+    </dd>
+</dl>
 
 
         
@@ -579,7 +647,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="~validate"><span class="type-signature">&lt;inner> </span>validate(arguments)</h4>
+    <h4 class="name" id="isAddressValid"><span class="type-signature"></span>isAddressValid(address)</h4>
     
     
 </dt>
@@ -587,7 +655,7 @@
 
     
     <div class="description">
-        Validation Method
+        Check if address is valid or not
     </div>
     
 
@@ -622,13 +690,13 @@
 
         <tr>
             
-                <td class="name"><code>arguments</code></td>
+                <td class="name"><code>address</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">string</span>
 
 
 
@@ -639,7 +707,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Address</td>
         </tr>
 
     
@@ -704,237 +772,18 @@
             
 
 
-
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
         
-
-    
-</dd>
-
-        </dl>
-    
-
-    
-
-    
-</article>
-
-</section>
+<span class="param-type">boolean</span>
 
 
 
-
-	<h1 class="page-title">Module: tools/deploy/pricer</h1>
-<section>
-
-<header>
-    
-</header>
-
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description">This is script for deploying Pricer contract on any chain.<br><br>
-
-  Prerequisite:
-   <ol>
-      <li>Deployer Address</li>
-    </ol>
-
-  These are the following steps:<br>
-    <ol>
-      <li>Deploy Airdrop contract</li>
-    </ol></div>
-        
-
-        
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
+    </dd>
 </dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="~performer"><span class="type-signature">&lt;async, inner> </span>performer(arguments)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        It is the main performer method of this deployment script
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>arguments</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
 
 
         
@@ -946,7 +795,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="~performer"><span class="type-signature">&lt;async, inner> </span>performer(arguments)</h4>
+    <h4 class="name" id="isBTConversionRateValid"><span class="type-signature"></span>isBTConversionRateValid(conversionRate)</h4>
     
     
 </dt>
@@ -954,7 +803,7 @@
 
     
     <div class="description">
-        It is the main performer method of this deployment script
+        Check if branded token conversion rate is valid or not
     </div>
     
 
@@ -989,13 +838,13 @@
 
         <tr>
             
-                <td class="name"><code>arguments</code></td>
+                <td class="name"><code>conversionRate</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">number</span>
 
 
 
@@ -1006,7 +855,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Branded token conversion rate</td>
         </tr>
 
     
@@ -1070,6 +919,19 @@
     
             
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+
+    </dd>
+</dl>
 
 
         
@@ -1081,7 +943,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="~validate"><span class="type-signature">&lt;inner> </span>validate(arguments)</h4>
+    <h4 class="name" id="isBTNameValid"><span class="type-signature"></span>isBTNameValid(name)</h4>
     
     
 </dt>
@@ -1089,7 +951,7 @@
 
     
     <div class="description">
-        Validation Method
+        Check if branded token name is valid or not
     </div>
     
 
@@ -1124,13 +986,13 @@
 
         <tr>
             
-                <td class="name"><code>arguments</code></td>
+                <td class="name"><code>name</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">string</span>
 
 
 
@@ -1141,7 +1003,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Branded token name</td>
         </tr>
 
     
@@ -1205,6 +1067,19 @@
     
             
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+
+    </dd>
+</dl>
 
 
         
@@ -1216,7 +1091,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="~validate"><span class="type-signature">&lt;inner> </span>validate(arguments)</h4>
+    <h4 class="name" id="isBTSymbolValid"><span class="type-signature"></span>isBTSymbolValid(symbol)</h4>
     
     
 </dt>
@@ -1224,7 +1099,7 @@
 
     
     <div class="description">
-        Validation Method
+        Check if branded token symbol is valid or not
     </div>
     
 
@@ -1259,13 +1134,13 @@
 
         <tr>
             
-                <td class="name"><code>arguments</code></td>
+                <td class="name"><code>symbol</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">string</span>
 
 
 
@@ -1276,7 +1151,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Branded token symbol</td>
         </tr>
 
     
@@ -1340,6 +1215,1203 @@
     
             
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="isNonZeroWeiValid"><span class="type-signature"></span>isNonZeroWeiValid(amountInWei)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Check if amount is valid wei number and not zero
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>amountInWei</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">amount in wei</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="isReturnTypeTxHash"><span class="type-signature"></span>isReturnTypeTxHash(returnType)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        check if return type is txHash or not
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>returnType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return type</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="isReturnTypeTxReceipt"><span class="type-signature"></span>isReturnTypeTxReceipt(returnType)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        check if return type is txReceipt or not
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>returnType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return type</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="isReturnTypeUUID"><span class="type-signature"></span>isReturnTypeUUID(returnType)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        check if return type is uuid or not
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>returnType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">return type</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="isTagValid"><span class="type-signature"></span>isTagValid(tag)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Check if tag is valid or not
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tag</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">transaction tag</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="isTxHashValid"><span class="type-signature"></span>isTxHashValid(transactionHash)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Check if transaction hash is valid or not
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>transactionHash</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Transaction hash</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="isUuidValid"><span class="type-signature"></span>isUuidValid(uuid)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Check if uuid is valid or not
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>uuid</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Branded Token UUID</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="isValidChainId"><span class="type-signature"></span>isValidChainId(chainId)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Check if chainId is valid
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>chainId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">chainId</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Bool</span>
+
+
+
+    </dd>
+</dl>
 
 
         

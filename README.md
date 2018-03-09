@@ -1,5 +1,8 @@
 # OpenST Payments - Advance Payment infrastructure on top of the [OpenST network](https://simpletoken.org)
 
+[![Latest version](https://img.shields.io/npm/v/@openstfoundation/openst-payments.svg?maxAge=3600)](https://www.npmjs.com/package/@openstfoundation/openst-payments)
+[![Travis](https://img.shields.io/travis/OpenSTFoundation/openst-payments.svg?maxAge=600)](https://travis-ci.org/OpenSTFoundation/openst-payments)
+[![Downloads per month](https://img.shields.io/npm/dm/@openstfoundation/openst-payments.svg?maxAge=3600)](https://www.npmjs.com/package/@openstfoundation/openst-payments)
 [![Gitter: JOIN CHAT](https://img.shields.io/badge/gitter-JOIN%20CHAT-brightgreen.svg)](https://gitter.im/OpenSTFoundation/SimpleToken)
 
 While OpenST 0.9 is available as-is for anyone to use, we caution that this is early stage software and under heavy ongoing development and improvement. Please report bugs and suggested improvements.
@@ -112,3 +115,5 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
               gasPrice,
               {tag:'airdrop.pay', returnType: 'txHash'});
 ```
+
+For further implementation details, please refer to the [API documentation](https://openstfoundation.github.io/openst-payments/).

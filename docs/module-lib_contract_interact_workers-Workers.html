@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>OpenST Payments Module: tools/deploy/pricer</title>
+	<title>OpenST Payments Class: Workers</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -86,10 +86,17 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Module: tools/deploy/pricer</h1>
+	<h1 class="page-title">Class: Workers</h1>
 <section>
 
 <header>
+    
+        <h2>
+            <span class="ancestors"><a href="module-lib_contract_interact_workers.html">lib/contract_interact/workers</a>~</span>
+        
+        Workers
+        </h2>
+        
     
 </header>
 
@@ -98,20 +105,102 @@
     <div class="container-overview">
     
         
-            <div class="description">This is script for deploying Pricer contract on any chain.<br><br>
+<hr>
+<dt>
+    <h4 class="name" id="Workers"><span class="type-signature"></span>new Workers(workerAddress, chainId)</h4>
+    
+    
+</dt>
+<dd>
 
-  Prerequisite:
-   <ol>
-      <li>Deployer Address</li>
-    </ol>
+    
+    <div class="description">
+        Workers contract interact class constructor
+    </div>
+    
 
-  These are the following steps:<br>
-    <ol>
-      <li>Deploy Pricer contract</li>
-    </ol></div>
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
         
 
         
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>workerAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">address of worker (external address)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>chainId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">chain id</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
 <dl class="details">
     
 
@@ -151,7 +240,21 @@
 </dl>
 
 
-        
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
     
     </div>
 
@@ -174,7 +277,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="~performer"><span class="type-signature">&lt;async, inner> </span>performer(arguments)</h4>
+    <h4 class="name" id="_validateRemoveParams"><span class="type-signature"></span>_validateRemoveParams(senderAddress, gasPrice)</h4>
     
     
 </dt>
@@ -182,7 +285,7 @@
 
     
     <div class="description">
-        It is the main performer method of this deployment script
+        Validate Remove (selfdestruct) params
     </div>
     
 
@@ -217,13 +320,13 @@
 
         <tr>
             
-                <td class="name"><code>arguments</code></td>
+                <td class="name"><code>senderAddress</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">string</span>
 
 
 
@@ -234,7 +337,31 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">address of sender</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gasPrice</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">gas price</td>
         </tr>
 
     
@@ -298,6 +425,19 @@
     
             
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">result</span>
+
+
+
+    </dd>
+</dl>
 
 
         
@@ -309,7 +449,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="~performer"><span class="type-signature">&lt;async, inner> </span>performer(arguments)</h4>
+    <h4 class="name" id="_validateRemoveWorkerParams"><span class="type-signature"></span>_validateRemoveWorkerParams(senderAddress, workerAddress, gasPrice)</h4>
     
     
 </dt>
@@ -317,7 +457,7 @@
 
     
     <div class="description">
-        It is the main performer method of this deployment script
+        Validate remove worker params
     </div>
     
 
@@ -352,13 +492,13 @@
 
         <tr>
             
-                <td class="name"><code>arguments</code></td>
+                <td class="name"><code>senderAddress</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">string</span>
 
 
 
@@ -369,7 +509,55 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">address of sender</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>workerAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">worker address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gasPrice</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">gas price</td>
         </tr>
 
     
@@ -433,6 +621,19 @@
     
             
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">result</span>
+
+
+
+    </dd>
+</dl>
 
 
         
@@ -444,7 +645,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="~validate"><span class="type-signature">&lt;inner> </span>validate(arguments)</h4>
+    <h4 class="name" id="_validateSetWorkersParams"><span class="type-signature"></span>_validateSetWorkersParams(senderAddress, workerAddress, deactivationHeight, gasPrice)</h4>
     
     
 </dt>
@@ -452,7 +653,7 @@
 
     
     <div class="description">
-        Validation Method
+        Validate set workers params
     </div>
     
 
@@ -487,13 +688,13 @@
 
         <tr>
             
-                <td class="name"><code>arguments</code></td>
+                <td class="name"><code>senderAddress</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">string</span>
 
 
 
@@ -504,7 +705,79 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">address of sender</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>workerAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">worker address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>deactivationHeight</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">block number till which the worker is valid</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gasPrice</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">gas price</td>
         </tr>
 
     
@@ -568,6 +841,19 @@
     
             
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">result</span>
+
+
+
+    </dd>
+</dl>
 
 
         
@@ -579,7 +865,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="~validate"><span class="type-signature">&lt;inner> </span>validate(arguments)</h4>
+    <h4 class="name" id="getTxReceipt"><span class="type-signature"></span>getTxReceipt(transactionHash)</h4>
     
     
 </dt>
@@ -587,7 +873,7 @@
 
     
     <div class="description">
-        Validation Method
+        Get transaction receipt from transaction hash
     </div>
     
 
@@ -622,13 +908,13 @@
 
         <tr>
             
-                <td class="name"><code>arguments</code></td>
+                <td class="name"><code>transactionHash</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">string</span>
 
 
 
@@ -639,7 +925,8 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">transaction hash
+TODO - this can be moved to a util class</td>
         </tr>
 
     
@@ -704,237 +991,18 @@
             
 
 
-
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
         
-
-    
-</dd>
-
-        </dl>
-    
-
-    
-
-    
-</article>
-
-</section>
+<span class="param-type">promise.&lt;result></span>
 
 
 
-
-	<h1 class="page-title">Module: tools/deploy/pricer</h1>
-<section>
-
-<header>
-    
-</header>
-
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description">This is script for deploying Pricer contract on any chain.<br><br>
-
-  Prerequisite:
-   <ol>
-      <li>Deployer Address</li>
-    </ol>
-
-  These are the following steps:<br>
-    <ol>
-      <li>Deploy Airdrop contract</li>
-    </ol></div>
-        
-
-        
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
+    </dd>
 </dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="~performer"><span class="type-signature">&lt;async, inner> </span>performer(arguments)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        It is the main performer method of this deployment script
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>arguments</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
 
 
         
@@ -946,7 +1014,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="~performer"><span class="type-signature">&lt;async, inner> </span>performer(arguments)</h4>
+    <h4 class="name" id="isWorker"><span class="type-signature"></span>isWorker(workerAddress)</h4>
     
     
 </dt>
@@ -954,7 +1022,7 @@
 
     
     <div class="description">
-        It is the main performer method of this deployment script
+        Check if the given worker address is valid or not
     </div>
     
 
@@ -989,13 +1057,13 @@
 
         <tr>
             
-                <td class="name"><code>arguments</code></td>
+                <td class="name"><code>workerAddress</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">string</span>
 
 
 
@@ -1006,7 +1074,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">worker address</td>
         </tr>
 
     
@@ -1070,6 +1138,19 @@
     
             
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
 
 
         
@@ -1081,7 +1162,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="~validate"><span class="type-signature">&lt;inner> </span>validate(arguments)</h4>
+    <h4 class="name" id="remove"><span class="type-signature"></span>remove(senderAddr, senderPassphrase, gasPrice, object)</h4>
     
     
 </dt>
@@ -1089,7 +1170,7 @@
 
     
     <div class="description">
-        Validation Method
+        Remove (selfdestruct)
     </div>
     
 
@@ -1124,13 +1205,13 @@
 
         <tr>
             
-                <td class="name"><code>arguments</code></td>
+                <td class="name"><code>senderAddr</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">string</span>
 
 
 
@@ -1141,7 +1222,79 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">address of sender</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>senderPassphrase</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">passphrase of sender</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gasPrice</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">gas price</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>object</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">options</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">for params like returnType, tag.</td>
         </tr>
 
     
@@ -1205,6 +1358,19 @@
     
             
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
 
 
         
@@ -1216,7 +1382,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="~validate"><span class="type-signature">&lt;inner> </span>validate(arguments)</h4>
+    <h4 class="name" id="removeWorker"><span class="type-signature"></span>removeWorker(senderAddress, senderPassphrase, workerAddress, gasPrice, options)</h4>
     
     
 </dt>
@@ -1224,7 +1390,7 @@
 
     
     <div class="description">
-        Validation Method
+        Remove worker
     </div>
     
 
@@ -1259,13 +1425,13 @@
 
         <tr>
             
-                <td class="name"><code>arguments</code></td>
+                <td class="name"><code>senderAddress</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">string</span>
 
 
 
@@ -1276,7 +1442,103 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">address of sender</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>senderPassphrase</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">passphrase of sender</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>workerAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">worker address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gasPrice</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">gas price</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">for params like returnType, tag.</td>
         </tr>
 
     
@@ -1340,6 +1602,287 @@
     
             
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="setWorker"><span class="type-signature"></span>setWorker(senderAddress, senderPassphrase, workerAddress, deactivationHeight, gasPrice, options)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Set or update the worker
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>senderAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">address of sender</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>senderPassphrase</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">passphrase of sender</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>workerAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">worker address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>deactivationHeight</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">block number till which the worker is valid</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gasPrice</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">gas price</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">for params like returnType, tag.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
 
 
         

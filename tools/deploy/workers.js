@@ -17,29 +17,18 @@
 
 const readline = require('readline');
 const rootPrefix = '../..';
-const coreAddresses = require(rootPrefix + '/config/core_addresses');
 const prompts = readline.createInterface(process.stdin, process.stdout);
 const logger = require(rootPrefix + '/helpers/custom_console_logger');
-const OpsManagedContract = require(rootPrefix + "/lib/contract_interact/ops_managed_contract");
 const Deployer = require(rootPrefix + '/lib/deployer');
-const returnTypes = require(rootPrefix + "/lib/global_constant/return_types");
-
-// Different addresses used for deployment
-const deployerName = "deployer"
-  , deployerAddress = coreAddresses.getAddressForUser(deployerName)
-  , deployerPassphrase = coreAddresses.getPassphraseForUser(deployerName)
-;
-
-// Set Ops Address
-const opsName = "ops"
-  , opsAddress = coreAddresses.getAddressForUser(opsName)
-;
+const SetWorkerAndOpsKlass = require(rootPrefix + '/lib/set_worker_and_ops')
+  , setWorkerOps = new SetWorkerAndOpsKlass();
 
 
 /**
  * It is the main performer method of this deployment script
  *
- * @param {Array} arguments
+ * Example:
+ * node tools/deploy/worker.js gasPrice chainId <travis> <fileToWrite>
  *
  * @return {}
  */
@@ -88,43 +77,13 @@ async function performer(argv) {
     prompts.close();
   }
 
-  const contractName = 'workers'
-    , constructorArgs = []
-    , deployerInstance = new Deployer()
-    , deployOptions = {returnType: returnTypes.transactionReceipt()}
-  ;
-
-  const deployResult =  await deployerInstance.deploy(
-    contractName,
-    constructorArgs,
-    gasPrice,
-    deployOptions);
-
-  if (deployResult.isSuccess()) {
-    const contractAddress = deployResult.data.transaction_receipt.contractAddress;
-    logger.win("contractAddress: " + contractAddress);
-    if (fileForContractAddress !== '') {
-      deployerInstance.writeContractAddressToFile(fileForContractAddress, contractAddress);
-    }
-
-    logger.info("Setting Ops Address to: " + opsAddress);
-    const setOpsOptions = {
-        returnType: returnTypes.transactionReceipt(),
-        tag: 'workersDeployment'
-      }
-      , opsManaged = new OpsManagedContract(contractAddress, gasPrice, chainId)
-    ;
-    var result = await opsManaged.setOpsAddress(deployerAddress,
-      deployerPassphrase,
-      opsAddress,
-      setOpsOptions);
-    logger.info(result);
-    var contractOpsAddress = await opsManaged.getOpsAddress();
-    logger.info("Ops Address Set to: " + contractOpsAddress);
-  } else{
-    logger.error("Error deploying contract");
-    logger.error(deployResult);
+  var response = await setWorkerOps.perform({gasPrice: gasPrice, chainId: chainId});
+  logger.info("**** Deployment Response", response);
+  if (response.isSuccess() && fileForContractAddress !== '') {
+    var deployerInstance = new Deployer();
+    deployerInstance.writeContractAddressToFile(fileForContractAddress, response.data.workerContractAddress);
   }
+
   process.exit(0);
 
 }
