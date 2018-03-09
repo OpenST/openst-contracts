@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>OpenST Payments Module: tools/deploy/DeployHelper</title>
+	<title>OpenST Payments Class: BalanceCache</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -86,10 +86,17 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Module: tools/deploy/DeployHelper</h1>
+	<h1 class="page-title">Class: BalanceCache</h1>
 <section>
 
 <header>
+    
+        <h2>
+            <span class="ancestors"><a href="module-lib_cache_management_balance_cache.html">lib/cache_management/balance_cache</a>~</span>
+        
+        BalanceCache
+        </h2>
+        
     
 </header>
 
@@ -98,73 +105,9 @@
     <div class="container-overview">
     
         
-            <div class="description">Deploy Helper class to perform deploy</div>
-        
-
-        
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
-            
 <hr>
 <dt>
-    <h4 class="name" id=".writeContractAddressToFile"><span class="type-signature">&lt;static> </span>writeContractAddressToFile(fileName, contractAddress)</h4>
+    <h4 class="name" id="BalanceCache"><span class="type-signature"></span>new BalanceCache(chainId, brandedTokenAddress)</h4>
     
     
 </dt>
@@ -172,7 +115,7 @@
 
     
     <div class="description">
-        Write contract address to file based on parameter
+        constructor
     </div>
     
 
@@ -207,13 +150,13 @@
 
         <tr>
             
-                <td class="name"><code>fileName</code></td>
+                <td class="name"><code>chainId</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
 
@@ -224,20 +167,20 @@
 
             
 
-            <td class="description last">file name</td>
+            <td class="description last">Chain id</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>contractAddress</code></td>
+                <td class="name"><code>brandedTokenAddress</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Hex</span>
+<span class="param-type">string</span>
 
 
 
@@ -248,7 +191,7 @@
 
             
 
-            <td class="description last">contract Address</td>
+            <td class="description last">address of branded token contract</td>
         </tr>
 
     
@@ -308,22 +251,33 @@
     
 
     
-    <h5>Returns:</h5>
-    
-            
-
-
-
-        
 
     
 </dd>
 
-        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
             
 <hr>
 <dt>
-    <h4 class="name" id="~perform"><span class="type-signature">&lt;async, inner> </span>perform(contractName, web3Provider, contractAbi, contractBin, deployerName [, customOptions] [, constructorArgs])</h4>
+    <h4 class="name" id="clearBalance"><span class="type-signature"></span>clearBalance(owner)</h4>
     
     
 </dt>
@@ -331,7 +285,7 @@
 
     
     <div class="description">
-        Method deploys contract
+        Clear balance from cache
     </div>
     
 
@@ -354,8 +308,6 @@
         <th>Type</th>
 
         
-        <th>Argument</th>
-        
 
         
 
@@ -368,13 +320,13 @@
 
         <tr>
             
-                <td class="name"><code>contractName</code></td>
+                <td class="name"><code>owner</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
 
@@ -382,214 +334,10 @@
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">Contract Name to be deployed</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>web3Provider</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Web3</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Web3 Provider object</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>contractAbi</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Contract Abi to be deployed</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>contractBin</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Contract Bin file to be deployed</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>deployerName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Deployer name</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>customOptions</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Custom options for value/utility chain</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>constructorArgs</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Arguments to be passed while deploying contract</td>
+            <td class="description last">address of user whose balance is to be set</td>
         </tr>
 
     
@@ -660,7 +408,327 @@
     </dt>
     <dd>
         
-<span class="param-type">Promise.&lt;Object></span>
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getBalance"><span class="type-signature"></span>getBalance(owner)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Get balance from cache
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>owner</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">address of user whose balance is to be found</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="setBalance"><span class="type-signature"></span>setBalance(owner, balance)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Set balance to cache
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>owner</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">address of user whose balance is to be set</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>balance</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">balance of the user</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
 
 
 

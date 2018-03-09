@@ -13,9 +13,9 @@
   ],
   "recurseDepth": 5,
   "templates": {
-    "systemName"            : "Pricer Contracts and Service Layer",
+    "systemName"            : "OpenST Payments",
     "footer"                : "<style>.copyright, .jsdoc-message, footer { color: #555555;} footer { border-color:#eeeeee;} }</style>",
-    "copyright"             : "OST.com Ltd.",
+    "copyright"             : "OpenST Foundation Ltd.",
     "includeDate"           : false,
     "theme"                 : "lumen",
     "navType"               : "vertical",

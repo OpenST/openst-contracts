@@ -1,10 +1,30 @@
 {
   "name": "@openstfoundation/openst-payments",
   "version": "1.0.0-beta.23",
-  "description": "",
+  "description": "Payment infrastructure on top of the OpenST network.",
+  "keywords": [
+    "openst",
+    "OST",
+    "simpletoken",
+    "Payment"
+  ],
+  "homepage": "https://openst.org",
+  "author": "OpenST Foundation Ltd.",
+  "license": "LGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenSTFoundation/openst-payments.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OpenSTFoundation/openst-payments/issues"
+  },
+  "scripts": {
+    "make-docs": "node_modules/.bin/jsdoc -c .jsdoc.json"
+  },
   "dependencies": {
     "@openstfoundation/openst-cache": "1.0.1-beta.1",
     "@openstfoundation/openst-notification": "1.0.0-beta.11",
+    "@ostdotcom/ost-price-oracle": "1.0.0-beta.6",
     "bignumber.js": "4.1.0",
     "mustache": "2.3.0",
     "mysql": "2.14.1",
@@ -28,10 +48,5 @@
     "mocha": "5.0.0",
     "solc": "0.4.19",
     "chai": "4.1.2"
-  },
-  "scripts": {
-    "make-docs": "node_modules/.bin/jsdoc -c .jsdoc.json"
-  },
-  "author": "OpenST Foundation Ltd.",
-  "license": "LGPL-3.0"
+  }
 }

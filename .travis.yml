@@ -9,11 +9,7 @@ branches:
 notifications:
   email:
     recipients:
-      - devops@pepo.com
-      - deepesh@ost.com
-      - abhay@ost.com
-      - ben@ost.com
-      - jason.banks@ost.com     
+      - ci.report@ost.com
     on_success: always
     on_failure: always
 node_js:
