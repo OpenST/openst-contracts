@@ -146,7 +146,7 @@ async function performer(argv) {
     logger.info("Setting Ops Address to: " + opsAddress);
     const setOpsOptions = {
         returnType: returnTypes.transactionReceipt(),
-        tag: 'pricerDeployment'
+        tag: ''
       }
       ,  opsManaged = new OpsManagedContract(contractAddress, gasPrice, chainId)
     ;

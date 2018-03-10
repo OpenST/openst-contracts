@@ -88,20 +88,6 @@ BasicHelperKlass.prototype = {
   },
 
   /**
-   * Check if tag is valid or not
-   *
-   * @param {string} tag - transaction tag
-   *
-   * @return {boolean}
-   */
-  isTagValid: function (tag) {
-    if (typeof tag !== "string") {
-      return false;
-    }
-    return (/^[a-z0-9_\-.]{1,}$/i).test(tag);
-  },
-
-  /**
    * get return type for transaction
    *
    * @param {string} returnType - return from geth transactions when following event is received
