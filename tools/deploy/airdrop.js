@@ -150,7 +150,7 @@ async function performer(argv) {
     const opsManaged = new OpsManagedContract(contractAddress, gasPrice, chainId)
       , setOpsOptions = {
           returnType: returnTypes.transactionReceipt(),
-          tag: 'airdropDeployment'
+          tag: ''
         }
     ;
     var setOpsResult = await opsManaged.setOpsAddress(deployerAddress,
