@@ -12,6 +12,10 @@ const WIN_PRE = "\x1b[32m"; //Success (GREEN)
 const WARN_PRE = "\x1b[43m";
 const STEP_PRE = "\n\x1b[34m"; //Step Description (BLUE)
 
+const rootPrefix = '..'
+  , coreConstants = require(rootPrefix + '/config/core_constants')
+;
+
 module.exports = {
   "STEP_PRE": STEP_PRE,
 
@@ -53,6 +57,15 @@ module.exports = {
     args = args.concat(Array.prototype.slice.call(arguments));
     args.push(this.CONSOLE_RESET);
     console.log.apply(console, args);
+  },
+
+  debug: function () {
+    if (coreConstants.DEBUG_ENABLED == 1) {
+      var args = [this.INFO_PRE];
+      args = args.concat(Array.prototype.slice.call(arguments));
+      args.push(this.CONSOLE_RESET);
+      console.log.apply(console, args);
+    }
   },
 
   //Method to Log Success/Win.

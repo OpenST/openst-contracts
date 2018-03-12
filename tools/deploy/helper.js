@@ -170,8 +170,8 @@ const deployHelper = {
     var eventData = formattedEvents[eventName];
     if (eventData === undefined || eventData == '') {
       logger.error("Event: " + eventName + " is not found");
-      logger.info(" eventData ");
-      logger.info(eventData);
+      logger.debug(" eventData ");
+      logger.debug(eventData);
       process.exit(0);
     } else {
       logger.win(" event: " + eventName + " is present in Reciept.");

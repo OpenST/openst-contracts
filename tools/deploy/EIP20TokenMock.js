@@ -60,21 +60,21 @@ async function performer(argv) {
   }
 
 
-  logger.info("conversionFactor: " + conversionFactor);
-  logger.info("conversionRate: " + conversionRate);
-  logger.info("conversionDecimals: " + conversionDecimals);
-  logger.info("symbol: " + symbol);
-  logger.info("name: " + name);
-  logger.info("decimals: " + decimals);
-  logger.info("gasPrice: " + gasPrice);
-  logger.info("Travis CI enabled Status: " + isTravisCIEnabled);
+  logger.debug("conversionFactor: " + conversionFactor);
+  logger.debug("conversionRate: " + conversionRate);
+  logger.debug("conversionDecimals: " + conversionDecimals);
+  logger.debug("symbol: " + symbol);
+  logger.debug("name: " + name);
+  logger.debug("decimals: " + decimals);
+  logger.debug("gasPrice: " + gasPrice);
+  logger.debug("Travis CI enabled Status: " + isTravisCIEnabled);
 
   if (isTravisCIEnabled === false ) {
     await new Promise(
       function (onResolve, onReject) {
         prompts.question("Please verify all above details. Do you want to proceed? [Y/N]", function (intent) {
           if (intent === 'Y') {
-            logger.info('Great! Proceeding deployment.');
+            logger.debug('Great! Proceeding deployment.');
             prompts.close();
             onResolve();
           } else {

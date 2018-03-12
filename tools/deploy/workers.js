@@ -53,17 +53,17 @@ async function performer(argv) {
 
   const fileForContractAddress = (argv[5] !== undefined) ? argv[5].trim() : '';
 
-  logger.info("Gas price: " + gasPrice);
-  logger.info("chainId: " + chainId);
-  logger.info("Travis CI enabled Status: " + isTravisCIEnabled);
-  logger.info("File to write For ContractAddress: "+fileForContractAddress);
+  logger.debug("Gas price: " + gasPrice);
+  logger.debug("chainId: " + chainId);
+  logger.debug("Travis CI enabled Status: " + isTravisCIEnabled);
+  logger.debug("File to write For ContractAddress: "+fileForContractAddress);
 
   if (isTravisCIEnabled === false ) {
     await new Promise(
       function (onResolve, onReject) {
         prompts.question("Please verify all above details. Do you want to proceed? [Y/N]", function (intent) {
           if (intent === 'Y') {
-            logger.info('Great! Proceeding deployment.');
+            logger.debug('Great! Proceeding deployment.');
             prompts.close();
             onResolve();
           } else {
@@ -78,7 +78,7 @@ async function performer(argv) {
   }
 
   var response = await setWorkerOps.perform({gasPrice: gasPrice, chainId: chainId});
-  logger.info("**** Deployment Response", response);
+  logger.debug("**** Deployment Response", response);
   if (response.isSuccess() && fileForContractAddress !== '') {
     var deployerInstance = new Deployer();
     deployerInstance.writeContractAddressToFile(fileForContractAddress, response.data.workerContractAddress);

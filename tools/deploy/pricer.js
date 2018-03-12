@@ -74,14 +74,14 @@ function validate(argv) {
  */
 async function performer(argv) {
 
-  // logger.info("argv[0]: " + argv[0]);
-  // logger.info("argv[1]: " + argv[1]);
-  // logger.info("argv[2]: " + argv[2]);
-  // logger.info("argv[3]: " + argv[3]);
-  // logger.info("argv[4]: " + argv[4]);
-  // logger.info("argv[5]: " + argv[5]);
-  // logger.info("argv[6]: " + argv[6]);
-  // logger.info("argv[7]: " + argv[7]);
+  // logger.debug("argv[0]: " + argv[0]);
+  // logger.debug("argv[1]: " + argv[1]);
+  // logger.debug("argv[2]: " + argv[2]);
+  // logger.debug("argv[3]: " + argv[3]);
+  // logger.debug("argv[4]: " + argv[4]);
+  // logger.debug("argv[5]: " + argv[5]);
+  // logger.debug("argv[6]: " + argv[6]);
+  // logger.debug("argv[7]: " + argv[7]);
 
   validate(argv);
   const brandedTokenAddress = argv[2].trim();
@@ -94,18 +94,18 @@ async function performer(argv) {
   }
   const fileForContractAddress = (argv[7] !== undefined) ? argv[7].trim() : '';
 
-  logger.info("Branded Token Address: " + brandedTokenAddress);
-  logger.info("Base currency: " + baseCurrency);
-  logger.info("Gas price: " + gasPrice);
-  logger.info("Chain id: " + chainId);
-  logger.info("Travis CI enabled Status: " + isTravisCIEnabled);
-  logger.info("File to write For ContractAddress: "+fileForContractAddress);
+  logger.debug("Branded Token Address: " + brandedTokenAddress);
+  logger.debug("Base currency: " + baseCurrency);
+  logger.debug("Gas price: " + gasPrice);
+  logger.debug("Chain id: " + chainId);
+  logger.debug("Travis CI enabled Status: " + isTravisCIEnabled);
+  logger.debug("File to write For ContractAddress: "+fileForContractAddress);
   if (isTravisCIEnabled === false ) {
     await new Promise(
       function (onResolve, onReject) {
         prompts.question("Please verify all above details. Do you want to proceed? [Y/N]", function (intent) {
           if (intent === 'Y') {
-            logger.info('Great! Proceeding deployment.');
+            logger.debug('Great! Proceeding deployment.');
             prompts.close();
             onResolve();
           } else {
@@ -143,7 +143,7 @@ async function performer(argv) {
       deployerInstance.writeContractAddressToFile(fileForContractAddress, contractAddress);
     }
 
-    logger.info("Setting Ops Address to: " + opsAddress);
+    logger.debug("Setting Ops Address to: " + opsAddress);
     const setOpsOptions = {
         returnType: returnTypes.transactionReceipt(),
         tag: ''
@@ -155,9 +155,9 @@ async function performer(argv) {
       deployerPassphrase,
       opsAddress,
       setOpsOptions);
-    logger.info(setOpsResult);
+    logger.debug(setOpsResult);
     const contractOpsAddress = await opsManaged.getOpsAddress();
-    logger.info("Ops Address Set to: " + contractOpsAddress);
+    logger.debug("Ops Address Set to: " + contractOpsAddress);
 
   } else {
     logger.error("Error deploying contract");

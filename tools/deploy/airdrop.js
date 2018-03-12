@@ -92,23 +92,23 @@ async function performer(argv) {
   }
   const fileForContractAddress = (argv[9] !== undefined) ? argv[9].trim() : '';
 
-  logger.info("Deployer Address: " + deployerAddress);
-  logger.info("Ops Address: " + opsAddress);
-  logger.info("Branded Token Address: " + brandedTokenAddress);
-  logger.info("Base currency: " + baseCurrency);
-  logger.info("Worker Contract Address: " + workerContractAddress);
-  logger.info("Airdrop Budget Holder: " + airdropBudgetHolder);
-  logger.info("Gas price: " + gasPrice);
-  logger.info("chainId: " + chainId);
-  logger.info("Travis CI enabled Status: " + isTravisCIEnabled);
-  logger.info("File to write For ContractAddress: "+fileForContractAddress);
+  logger.debug("Deployer Address: " + deployerAddress);
+  logger.debug("Ops Address: " + opsAddress);
+  logger.debug("Branded Token Address: " + brandedTokenAddress);
+  logger.debug("Base currency: " + baseCurrency);
+  logger.debug("Worker Contract Address: " + workerContractAddress);
+  logger.debug("Airdrop Budget Holder: " + airdropBudgetHolder);
+  logger.debug("Gas price: " + gasPrice);
+  logger.debug("chainId: " + chainId);
+  logger.debug("Travis CI enabled Status: " + isTravisCIEnabled);
+  logger.debug("File to write For ContractAddress: "+fileForContractAddress);
 
   if (isTravisCIEnabled === false ) {
     await new Promise(
       function (onResolve, onReject) {
         prompts.question("Please verify all above details. Do you want to proceed? [Y/N]", function (intent) {
           if (intent === 'Y') {
-            logger.info('Great! Proceeding deployment.');
+            logger.debug('Great! Proceeding deployment.');
             prompts.close();
             onResolve();
           } else {
@@ -146,7 +146,7 @@ async function performer(argv) {
       deployerInstance.writeContractAddressToFile(fileForContractAddress, contractAddress);
     }
 
-    logger.info("Setting Ops Address to: " + opsAddress);
+    logger.debug("Setting Ops Address to: " + opsAddress);
     const opsManaged = new OpsManagedContract(contractAddress, gasPrice, chainId)
       , setOpsOptions = {
           returnType: returnTypes.transactionReceipt(),
@@ -158,9 +158,9 @@ async function performer(argv) {
       opsAddress,
       setOpsOptions
     );
-    logger.info(setOpsResult);
+    logger.debug(setOpsResult);
     var contractOpsAddress = await opsManaged.getOpsAddress();
-    logger.info("Ops Address Set to: " + contractOpsAddress);
+    logger.debug("Ops Address Set to: " + contractOpsAddress);
 
   } else {
     logger.error("Error deploying contract");
