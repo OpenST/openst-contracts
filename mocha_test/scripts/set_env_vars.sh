@@ -16,3 +16,5 @@ export OP_MYSQL_USER='travis'
 export OP_MYSQL_PASSWORD=''
 export OP_MYSQL_DATABASE='payment_development'
 export OP_MYSQL_CONNECTION_POOL_SIZE='5'
+
+export OST_CACHING_ENGINE='none'

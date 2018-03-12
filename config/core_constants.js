@@ -15,6 +15,8 @@ function define(name, value) {
     enumerable: true
   });
 }
+//Cache engine
+define('CACHING_ENGINE', process.env.OST_CACHING_ENGINE),
 
 // Geth
 define('OST_UTILITY_GETH_RPC_PROVIDER', process.env.OST_UTILITY_GETH_RPC_PROVIDER);
