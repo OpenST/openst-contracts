@@ -17,9 +17,4 @@ export OP_MYSQL_PASSWORD=''
 export OP_MYSQL_DATABASE='payment_development'
 export OP_MYSQL_CONNECTION_POOL_SIZE='5'
 
-export OST_CACHING_ENGINE='redis'
-export OST_DEFAULT_TTL='36000'
-export OST_REDIS_HOST='127.0.0.1'
-export OST_REDIS_PORT=6379
-export OST_REDIS_PASS=st123
-export OST_REDIS_TLS_ENABLED=0
+export OST_CACHING_ENGINE='none'
