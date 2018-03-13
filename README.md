@@ -13,7 +13,7 @@ While OpenST 0.9 is available as-is for anyone to use, we caution that this is e
 npm install @openstfoundation/openst-payments --save
 ```
 
-# Run Chain
+# Run Test Chain
 
 ```bash
 cd mocha_test/scripts/
