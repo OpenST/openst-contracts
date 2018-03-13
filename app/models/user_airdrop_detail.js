@@ -89,8 +89,8 @@ const UserAirdropDetailKlassPrototype = {
    */
   debitAirdropUsedAmount: function (airdropContractAddress, userAddress, airdropAmountUsed) {
     const oThis = this;
-    logger.info("==========user_airdrop_detail.debitAirdropUsedAmount.params============");
-    logger.info("airdropContractAddress: " + airdropContractAddress,
+    logger.info("\n==========user_airdrop_detail.debitAirdropUsedAmount.params============");
+    logger.info("\nairdropContractAddress: " + airdropContractAddress,
       "userAddress: ", userAddress,
       "airdropAmountUsed: ", airdropAmountUsed, "\n");
     return new Promise(async function (onResolve, onReject) {
@@ -105,37 +105,40 @@ const UserAirdropDetailKlassPrototype = {
         if (!userAddress) {
           return onResolve(responseHelper.error('uad_daua_1', 'Invalid User Address'));
         }
-        const userAirdropDetailResults = await oThis.select("id, airdrop_id, user_address, CONVERT(airdrop_amount, char) as airdrop_amount, CONVERT(airdrop_used_amount, char) as airdrop_used_amount").where(["airdrop_id = ? AND airdrop_amount > airdrop_used_amount AND user_address=?", airdropRecord.id, userAddress]).fire();
-        logger.info("======debitAirdropUsedAmount.userAirdropDetailResults=========");
-        logger.info(userAirdropDetailResults);
+        const userAirdropDetailResults = await oThis.select("id, airdrop_id, user_address, CONVERT(airdrop_amount, char) as airdrop_amount, CONVERT(airdrop_used_amount, char) as airdrop_used_amount").where({airdrop_id: airdropRecord.id, user_address: userAddress}).where(["airdrop_amount > airdrop_used_amount"]).fire();
+        logger.info("\n======debitAirdropUsedAmount.userAirdropDetailResults=========", userAirdropDetailResults);
         // Return error if no record found. Means airdrop_used_amount is not updated correctly in previous adjustments
         if (!userAirdropDetailResults[0]) {
           return onResolve(responseHelper.error('uad_daua_2', 'no airdrop record available for adjusting: '));
         }
-
-        var amountToAdjustWithCurrentRecord = new BigNumber(0)
-          , dbAmountForAdjusting = new BigNumber(0)
-          , dbAirdropUsedAmount = new BigNumber(0)
-          , airdropUsedAmountToUpdate = new BigNumber(0)
-        ;
+        var amountAdjustedLog = {};
         for (var uadIndex in userAirdropDetailResults) {
-          var uad = userAirdropDetailResults[uadIndex];
-          dbAmountForAdjusting = new BigNumber(uad.airdrop_amount).minus(dbAirdropUsedAmount);
-          dbAirdropUsedAmount = new BigNumber(uad.airdrop_used_amount);
-          amountToAdjustWithCurrentRecord = BigNumber.min(totalRemainingAmountToAdjust, dbAmountForAdjusting);
+          const uad = userAirdropDetailResults[uadIndex];
+          const dbAirdropUsedAmount = new BigNumber(uad.airdrop_used_amount);
+          const dbAmountForAdjusting = new BigNumber(uad.airdrop_amount).minus(dbAirdropUsedAmount);
+          const amountToAdjustWithCurrentRecord = BigNumber.min(totalRemainingAmountToAdjust, dbAmountForAdjusting);
           if (amountToAdjustWithCurrentRecord.lte(0)) {
-            return onResolve(responseHelper.successWithData());
+            return onResolve(responseHelper.successWithData({amountAdjustedLog: amountAdjustedLog}));
           }
-          var airdropUsedAmountToUpdate = (dbAirdropUsedAmount.plus(amountToAdjustWithCurrentRecord)).toString(10);
-          logger.info("==========user_airdrop_detail.debitAirdropUsedAmount.updating============");
-          logger.info("\nid: ", uad.id, "airdropUsedAmountToUpdate: ", airdropUsedAmountToUpdate);
-          await oThis.update({airdrop_used_amount: airdropUsedAmountToUpdate}).where(["id = ?", uad.id]).fire();
-          totalRemainingAmountToAdjust = totalRemainingAmountToAdjust.minus(amountToAdjustWithCurrentRecord);
+
+          const updateResult = await oThis.update(["airdrop_used_amount=airdrop_used_amount+?", amountToAdjustWithCurrentRecord.toString(10)]).
+            where(["id = ? AND ((airdrop_used_amount+?) <= airdrop_amount)", uad.id, amountToAdjustWithCurrentRecord.toString(10)]).fire();
+          logger.info("\ndebitAirdropUsedAmount.updateResult: ", updateResult);
+          if (updateResult.affectedRows < 1) {
+            continue; // Don't subtract totalRemainingAmountToAdjust if update is failed
+          } else{
+            amountAdjustedLog[uad.id] = amountToAdjustWithCurrentRecord;
+            totalRemainingAmountToAdjust = totalRemainingAmountToAdjust.minus(amountToAdjustWithCurrentRecord);
+          }
         }
       } catch (err) {
-        return onResolve(responseHelper.error('uad_daua_4', 'Error in debitAirdropUsedAmount: ' + err));
+        return onResolve(responseHelper.errorWithData({amountAdjustedLog: amountAdjustedLog}, 'uad_daua_4', 'Error in debitAirdropUsedAmount: ' + err));
       }
-      return onResolve(responseHelper.successWithData());
+      // In case totalRemainingAmountToAdjust > 0 means no record available for adjusting or parallel requests issue
+      if (totalRemainingAmountToAdjust.gte(0)) {
+        return onResolve(responseHelper.errorWithData({amountAdjustedLog: amountAdjustedLog}, 'uad_daua_5', 'Amount fully not adjusted'));
+      }
+      return onResolve(responseHelper.successWithData({amountAdjustedLog: amountAdjustedLog}));
     });
 
   },
@@ -168,31 +171,38 @@ const UserAirdropDetailKlassPrototype = {
         if (!userAddress) {
           return onResolve(responseHelper.error('uad_caua_1', 'Invalid User Address'));
         }
-        const userAirdropDetailResults = await oThis.select("id, airdrop_id, user_address, CONVERT(airdrop_amount, char) as airdrop_amount, CONVERT(airdrop_used_amount, char) as airdrop_used_amount").where(["airdrop_id = ? AND airdrop_used_amount > 0 AND user_address=?", airdropRecord.id, userAddress]).fire();
+        const userAirdropDetailResults = await oThis.select("id, airdrop_id, user_address, CONVERT(airdrop_amount, char) as airdrop_amount, CONVERT(airdrop_used_amount, char) as airdrop_used_amount").where({airdrop_id: airdropRecord.id, user_address: userAddress}).where(["airdrop_used_amount > 0 AND (airdrop_amount >= airdrop_used_amount)"]).fire();
         logger.info("======creditAirdropUsedAmount.userAirdropDetailResults=========");
         logger.info(userAirdropDetailResults);
         // Return error if no record found to adjust
         if (!userAirdropDetailResults[0]) {
           return onResolve(responseHelper.error('uad_caua_2', 'no airdrop record available for adjusting: '));
         }
-
+        var amountAdjustedLog = {};
         for (var uadIndex in userAirdropDetailResults) {
           const uad = userAirdropDetailResults[uadIndex];
           const dbAmount = new BigNumber(uad.airdrop_used_amount);
-
           const toAdjustAmount = BigNumber.min(dbAmount, totalRemainingAmountToAdjust);
-          const amountToUpdate = dbAmount.minus(toAdjustAmount);
-
-          await oThis.update({airdrop_used_amount: amountToUpdate.toString()}).where(["id = ?", uad.id]).fire();
-          totalRemainingAmountToAdjust = totalRemainingAmountToAdjust.minus(toAdjustAmount);
-          if (totalRemainingAmountToAdjust.lte(0)) {
-            return onResolve(responseHelper.successWithData());
+          // Saves Query
+          if (toAdjustAmount.lte(0)) {
+            return onResolve(responseHelper.successWithData({amountAdjustedLog: amountAdjustedLog}));
+          }
+          const updateResult = await oThis.update(["airdrop_used_amount=airdrop_used_amount-?",toAdjustAmount.toString(10)]).where(["id = ? AND (airdrop_amount >= airdrop_used_amount) AND (airdrop_used_amount-?)>0", uad.id, toAdjustAmount.toString(10)]).fire();
+          if (updateResult.affectedRows < 1) {
+            continue; // Don't subtract totalRemainingAmountToAdjust if update is failed
+          } else {
+            totalRemainingAmountToAdjust = totalRemainingAmountToAdjust.minus(toAdjustAmount);
+            amountAdjustedLog[uad.id] = toAdjustAmount;
           }
         }
       } catch (err) {
-        return onResolve(responseHelper.error('uad_caua_3', 'Error in updateAirdropUsedAmount: ' + err));
+        return onResolve(responseHelper.errorWithData({amountAdjustedLog: amountAdjustedLog}, 'uad_caua_3', 'Error in updateAirdropUsedAmount: ' + err));
       }
-      return onResolve(responseHelper.successWithData());
+      // In case totalRemainingAmountToAdjust > 0 means no record available for adjusting or parallel requests issue
+      if (totalRemainingAmountToAdjust.gte(0)) {
+        return onResolve(responseHelper.errorWithData({amountAdjustedLog: amountAdjustedLog}, 'uad_caua_4', 'Amount fully not adjusted'));
+      }
+      return onResolve(responseHelper.successWithData({amountAdjustedLog: amountAdjustedLog}));
     });
 
   }

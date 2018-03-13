@@ -5,7 +5,6 @@ branches:
   only:
   - master
   - develop
-  - airdrop_manager
 notifications:
   email:
     recipients:
