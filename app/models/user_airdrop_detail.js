@@ -55,13 +55,20 @@ const UserAirdropDetailKlassPrototype = {
           user_address: userAddresses
         }).group_by("user_address").fire();
 
+        const userAddressesMap = {};
+        for (var i in userAddresses) {
+          userAddressesMap[userAddresses[i].toLowerCase()] = userAddresses[i];
+        }
+        logger.info("userAddressesMap ", userAddressesMap);
+
         for (var uadIndex in userAirdropDetailResultArray) {
           userAirdropDetail = userAirdropDetailResultArray[uadIndex];
           var totalAirdropAmount = new BigNumber(userAirdropDetail.total_airdrop_amount)
             , totalAirdropUsedAmount = new BigNumber(userAirdropDetail.total_airdrop_used_amount)
             , balanceAirdropAmount = totalAirdropAmount.minus(totalAirdropUsedAmount)
+            , userAddressInProperCase = userAddressesMap[userAirdropDetail.user_address.toLowerCase()]
           ;
-          result[userAirdropDetail.user_address] = {
+          result[userAddressInProperCase] = {
             totalAirdropAmount: totalAirdropAmount.toString(10),
             totalAirdropUsedAmount: totalAirdropUsedAmount.toString(10),
             balanceAirdropAmount: balanceAirdropAmount.toString(10)
