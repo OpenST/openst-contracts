@@ -101,7 +101,7 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
   // Allocate airdrop amount to users in batch
   airdropManager.batchAllocate(airdropContractAddress, transactionHash, airdropUsers, chainId);
   // Get Users Airdrop Balance
-  airdropManager.getUserAirdropBalance(chainId, airdropContractAddress, userAddresses);
+  airdropManager.getAirdropBalance(chainId, airdropContractAddress, userAddresses);
   // Call Pay method
   airdrop.pay(workerAddress,
               WorkerPassphrase,
