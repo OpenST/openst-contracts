@@ -25,26 +25,26 @@ sh start_test_chain.sh
 ### Setup Initial Setup Variables:
 
 ```bash
-export OST_UTILITY_GETH_RPC_PROVIDER='http://127.0.0.1:9546'
+export OST_UTILITY_GETH_RPC_PROVIDER=''
 export OST_UTILITY_DEPLOYER_ADDR=''
 export OST_UTILITY_DEPLOYER_PASSPHRASE=''
 export OST_UTILITY_OPS_ADDR=''
 export OST_UTILITY_OPS_PASSPHRASE=''
 ```
 
-### Run Deployment Script for Branded Token:
+### Deploy Branded Token Contract:
 
 ```bash
 node tools/deploy/EIP20TokenMock.js conversionRate symbol name decimals gasPrice
 ```
 
-### Run Deployment Script for Workers:
+### Deploy Workers Contract:
 
 ```bash
 node tools/deploy/workers.js gasPrice chainId
 ```
 
-### Run Deployment Script for Airdrop:
+### Deploy Airdrop Contract:
 
 ```bash
 node tools/deploy/airdrop.js brandedTokenContractAddress baseCurrency workerContractAddress airdropBudgetHolder gasPrice chainId
@@ -60,7 +60,7 @@ For using redis/memcache as cache engine refer - [OpenSTFoundation/ost-price-ora
 ### Set DB Details For Payments/Airdrop:
 
 ```bash
-export OP_MYSQL_HOST='127.0.0.1'
+export OP_MYSQL_HOST=''
 export OP_MYSQL_USER=''
 export OP_MYSQL_PASSWORD=''
 export OP_MYSQL_DATABASE=''
