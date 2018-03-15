@@ -39,8 +39,8 @@ const UserAirdropDetailKlassPrototype = {
    */
   getByUserAddresses: async function (airdropId, userAddresses) {
     var oThis = this;
-    logger.info("========user_airdrop_detail.getByUserAddresses().userAddresses=========");
-    logger.info(userAddresses);
+    logger.debug("========user_airdrop_detail.getByUserAddresses().userAddresses=========");
+    logger.debug(userAddresses);
     return new Promise(async function (onResolve, onReject) {
       var result = {}
         , userAirdropDetail = {}
@@ -58,7 +58,7 @@ const UserAirdropDetailKlassPrototype = {
         for (var i in userAddresses) {
           userAddressesMap[userAddresses[i].toLowerCase()] = userAddresses[i];
         }
-        logger.info("userAddressesMap ", userAddressesMap);
+        logger.debug("userAddressesMap ", userAddressesMap);
 
         for (var uadIndex in userAirdropDetailResultArray) {
           userAirdropDetail = userAirdropDetailResultArray[uadIndex];
@@ -73,8 +73,8 @@ const UserAirdropDetailKlassPrototype = {
             balanceAirdropAmount: balanceAirdropAmount.toString(10)
           };
         }
-        logger.info("========user_airdrop_detail.getByUserAddresses().result=========");
-        logger.info(result);
+        logger.debug("========user_airdrop_detail.getByUserAddresses().result=========");
+        logger.debug(result);
         return onResolve(responseHelper.successWithData(result));
       } catch (error) {
         return onResolve(responseHelper.error('a_m_uad_1', 'error:' + error));
