@@ -149,9 +149,9 @@ async function setBalance(token, address, amount) {
   */
 
 async function getAirdropIdFromAirdropAddress(airdropAddress) {
-  const airdropModelCacheObject = new AirdropModelCacheKlass({useObject: true})
+  const airdropModelCacheObject = new AirdropModelCacheKlass({useObject: true, contractAddress: airdropAddress})
     , airdropModelCacheResponse = await airdropModelCacheObject.fetch()
-    , airdropRecord = airdropModelCacheResponse.data[airdropAddress]
+    , airdropRecord = airdropModelCacheResponse.data[airdropAddress.toLowerCase()]
   ;
   if (airdropRecord) {
     return responseHelper.successWithData({airdropId: airdropRecord.id});
