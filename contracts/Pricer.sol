@@ -1,3 +1,4 @@
+/* solhint-disable-next-line compiler-fixed */
 pragma solidity ^0.4.17;
 
 // Copyright 2018 OpenST Ltd.
@@ -24,7 +25,7 @@ pragma solidity ^0.4.17;
 
 import "./openst-protocol/EIP20Interface.sol";
 import "./openst-protocol/UtilityTokenInterface.sol";
-import "./ost-price-oracle/PriceOracleInterface.sol";
+import "./PriceOracleInterface.sol";
 import "./OpsManaged.sol";
 import "./SafeMath.sol";
 import "./PricerInterface.sol";
@@ -51,8 +52,11 @@ contract Pricer is OpsManaged, PricerInterface {
     /// Pricer decimal
     uint8 private pricerDecimals;
 
-    /// conversionRate 
+    /// conversionRate
     uint256 private pricerConversionRate;
+
+    /// conversionRateDecimals
+    uint8 private pricerConversionRateDecimals;
 
     /*
      *  Public functions
@@ -60,8 +64,8 @@ contract Pricer is OpsManaged, PricerInterface {
     /// @dev    Takes _brandedToken, _baseCurrency; 
     ///         constructor;
     ///         public method;
-    /// @param _brandedToken _brandedToken
-    /// @param _baseCurrency _baseCurrency    
+    /// @param _brandedToken Branded Token
+    /// @param _baseCurrency Base Currency
     function Pricer(
         address _brandedToken,
         bytes3 _baseCurrency)
@@ -74,6 +78,19 @@ contract Pricer is OpsManaged, PricerInterface {
         pricerBaseCurrency = _baseCurrency;
         pricerDecimals = EIP20Interface(pricerBrandedToken).decimals();
         pricerConversionRate = UtilityTokenInterface(_brandedToken).conversionRate();
+        pricerConversionRateDecimals = UtilityTokenInterface(_brandedToken).conversionRateDecimals();
+    }
+
+    /*
+     *  External functions
+     */
+    /// clean up or revoke airdrop contract
+    function remove()
+        external
+        onlyAdminOrOps
+    {
+        Removed(msg.sender);
+        selfdestruct(msg.sender);
     }
 
     /// @dev    Returns address of the branded token;
@@ -122,9 +139,9 @@ contract Pricer is OpsManaged, PricerInterface {
         return pricerBaseCurrency;
     }
 
-    /// @dev    Returns pricer decimal;
+    /// @dev    Returns pricer decimal for branded token;
     ///         public method;
-    /// @return bytes3    
+    /// @return uint8    
     function decimals() 
         public
         returns (uint8)
@@ -132,14 +149,24 @@ contract Pricer is OpsManaged, PricerInterface {
         return pricerDecimals;
     }
 
-    /// @dev    Returns conversion rate;
+    /// @dev    Returns conversion rate for branded token;
     ///         public method;
-    /// @return bytes3    
+    /// @return uint256    
     function conversionRate() 
         public
         returns (uint256)
     {
         return pricerConversionRate;
+    }
+
+    /// @dev    Returns conversion rate decimals for branded token;
+    ///         public method;
+    /// @return uint8    
+    function conversionRateDecimals() 
+        public
+        returns (uint8)
+    {
+        return pricerConversionRateDecimals;
     }
 
     /// @dev    Takes _currency, _oracleAddress; 
@@ -153,8 +180,8 @@ contract Pricer is OpsManaged, PricerInterface {
     function setPriceOracle(
         bytes3 _currency,
         address _oracleAddress)
-        public
-        onlyOps        
+        public  
+        onlyOps     
         returns (bool /* success */)
     {
         require(_oracleAddress != address(0));
@@ -212,7 +239,7 @@ contract Pricer is OpsManaged, PricerInterface {
     }
 
     /// @dev    Takes _transferAmount, _commissionAmount, _currency;
-    ///         public method
+    ///         public view method
     /// @param _transferAmount transferAmount
     /// @param _commissionAmount commissionAmount    
     /// @param _currency currency
@@ -222,6 +249,7 @@ contract Pricer is OpsManaged, PricerInterface {
         uint256 _commissionAmount,      
         bytes3 _currency)
         public
+        view
         returns (
             uint256 pricePoint,
             uint256 tokenAmount, 
@@ -251,7 +279,7 @@ contract Pricer is OpsManaged, PricerInterface {
     /// @param _commissionAmount commissionAmount
     /// @param _currency currency
     /// @param _intendedPricePoint _intendedPricePoint
-    /// @return bool isSuccess
+    /// @return uint256 total paid
     function pay(       
         address _beneficiary,
         uint256 _transferAmount,        
@@ -260,36 +288,28 @@ contract Pricer is OpsManaged, PricerInterface {
         bytes3 _currency,
         uint256 _intendedPricePoint)
         public
-        returns (bool /* success */)
+        returns (uint256 /* total paid */)
     {
-        require(_beneficiary != address(0));
-        require(_transferAmount != 0);
-
-        if (_commissionAmount > 0) {
-            require(_commissionBeneficiary != address(0));
-        }
+        require(isValidBeneficiaryData(_beneficiary, _transferAmount,
+            _commissionBeneficiary, _commissionAmount));
 
         uint256 tokenAmount = _transferAmount;
         uint256 commissionTokenAmount = _commissionAmount;
         uint256 pricePoint = _intendedPricePoint;
-        if (_currency != 0) {
-            pricePoint = getPricePoint(_currency);
-            require(pricePoint > 0);
-            require(isPricePointInRange(_intendedPricePoint, pricePoint, pricerAcceptedMargins[_currency]));            
-            (tokenAmount, commissionTokenAmount) = getBTAmountFromCurrencyValue(pricePoint, 
-                _transferAmount, _commissionAmount);
+
+        // check Margin And Calculate BTAmount
+        if (_currency != "") {
+            (pricePoint, tokenAmount, commissionTokenAmount) = validateMarginAndCalculateBTAmount(_currency,
+                _intendedPricePoint, _transferAmount, _commissionAmount);
         }
-        
-        require(EIP20Interface(pricerBrandedToken).transferFrom(msg.sender, _beneficiary, tokenAmount));
-        if (_commissionBeneficiary != address(0)) {
-            require(EIP20Interface(pricerBrandedToken).transferFrom(msg.sender, 
-                _commissionBeneficiary, commissionTokenAmount));
-        }
-        
+
+        require(performTransfers(msg.sender, _beneficiary, tokenAmount,
+            _commissionBeneficiary, commissionTokenAmount));
+
         //Trigger Event for PaymentComplete
-        Payment(_beneficiary, _transferAmount, _commissionBeneficiary, 
-            _commissionAmount, _currency, _intendedPricePoint, pricePoint);      
-        return true;
+        Payment(_beneficiary, tokenAmount, _commissionBeneficiary,
+            commissionTokenAmount, _currency, _intendedPricePoint, pricePoint);
+        return (tokenAmount + commissionTokenAmount);
     }
 
     /// @dev    Takes _currency; 
@@ -299,17 +319,21 @@ contract Pricer is OpsManaged, PricerInterface {
     /// @return (pricePoint)
     function getPricePoint(
         bytes3 _currency)
-        public              
+        public
+        view
         returns (uint256) /* pricePoint */
     {
         PriceOracleInterface currentPriceOracle = pricerPriceOracles[_currency];
         require(currentPriceOracle != address(0));
         return (currentPriceOracle.getPrice()); 
     }
-    
+
+    /*
+     *  Internal functions
+     */
     /// @dev    Takes _intendedPricePoint, _currentPricePoint, _acceptedMargin;
     ///         checks if the current price point is in the acceptable range of intendedPricePoint; 
-    ///         private method;
+    ///         internal method;
     /// @param _intendedPricePoint intendedPricePoint
     /// @param _currentPricePoint currentPricePoint
     /// @param _acceptedMargin acceptedMargin   
@@ -318,23 +342,23 @@ contract Pricer is OpsManaged, PricerInterface {
         uint256 _intendedPricePoint,
         uint256 _currentPricePoint,
         uint256 _acceptedMargin)
-        private
+        internal
         pure
         returns (bool /*isValid*/)
     {
         bool isValid = true;
         if (_intendedPricePoint >= _acceptedMargin) {
-            isValid = SafeMath.sub(_intendedPricePoint, _acceptedMargin) <= _currentPricePoint;
+            isValid = _intendedPricePoint.sub(_acceptedMargin) <= _currentPricePoint;
         }
         if (isValid) {
-            isValid = _currentPricePoint <= SafeMath.add(_intendedPricePoint, _acceptedMargin);
+            isValid = _currentPricePoint <= _intendedPricePoint.add(_acceptedMargin);
         }
         return isValid;     
     }
     
     /// @dev    Takes _pricePoint, _transferAmount, _commissionAmount; 
     ///         calculates the number of branded token equivalant to the currency amount; 
-    ///         private method;
+    ///         internal method;
     /// @param _pricePoint pricePoint
     /// @param _transferAmount transferAmount
     /// @param _commissionAmount commissionAmount
@@ -343,13 +367,97 @@ contract Pricer is OpsManaged, PricerInterface {
         uint256 _pricePoint,
         uint256 _transferAmount,
         uint256 _commissionAmount)
-        private
+        internal
         view
         returns (uint256, uint256) /* number of BT ,number of commission BT */
     {
-        uint256 adjConversionRate = SafeMath.mul(pricerConversionRate, 10**uint256(pricerDecimals));
-        uint256 amountBT = SafeMath.div(SafeMath.mul(_transferAmount, adjConversionRate), _pricePoint);
-        uint256 commissionAmountBT = SafeMath.div(SafeMath.mul(_commissionAmount, adjConversionRate), _pricePoint);
+        uint256 conversionRatetoBTWei = pricerConversionRate.mul(10**uint256(pricerDecimals)).div(10**uint256(pricerConversionRateDecimals));
+        uint256 amountBT = _transferAmount.mul(conversionRatetoBTWei).div(_pricePoint);
+        uint256 commissionAmountBT = _commissionAmount.mul(conversionRatetoBTWei).div(_pricePoint);
         return (amountBT, commissionAmountBT);
     }
+
+    /// @dev    Takes _beneficiary, _transferAmount, _commissionBeneficiary, _commissionAmount;
+    ///         checks if the current price point is in the acceptable range of intendedPricePoint;
+    ///         internal method;
+    /// @param _beneficiary beneficiary
+    /// @param _transferAmount transferAmount
+    /// @param _commissionBeneficiary commissionBeneficiary
+    /// @param _commissionAmount commissionAmount
+    /// @return bool isValid
+    function isValidBeneficiaryData(
+        address _beneficiary,
+        uint256 _transferAmount,
+        address _commissionBeneficiary,
+        uint256 _commissionAmount)
+        internal
+        returns (bool /*isValid*/)
+    {
+        require(_beneficiary != address(0));
+        require(_transferAmount != 0);
+
+        if (_commissionAmount > 0) {
+            require(_commissionBeneficiary != address(0));
+        }
+        return true;
+    }
+
+    /// @dev    Takes _spender, _beneficiary, _tokenAmount, _commissionBeneficiary, _commissionTokenAmount;
+    ///         Perform tokenAmount transfer
+    ///         Perform commissionTokenAmount transfer
+    ///         internal method;
+    /// @param _spender spender
+    /// @param _beneficiary beneficiary
+    /// @param _tokenAmount tokenAmount
+    /// @param _commissionBeneficiary commissionBeneficiary
+    /// @param _commissionTokenAmount commissionTokenAmount
+    /// @return (bool)
+    function performTransfers(
+        address _spender,
+        address _beneficiary,
+        uint256 _tokenAmount,
+        address _commissionBeneficiary,
+        uint256 _commissionTokenAmount)
+        internal
+        returns (
+            bool /* boolean value */)
+    {
+        require(EIP20Interface(pricerBrandedToken).transferFrom(_spender, _beneficiary, _tokenAmount));
+
+        if (_commissionBeneficiary != address(0)) {
+            require(EIP20Interface(pricerBrandedToken).transferFrom(_spender,
+            _commissionBeneficiary, _commissionTokenAmount));
+        }
+        return true;
+    }
+
+    /// @dev    Takes _currency, _intendedPricePoint, _transferAmount, _commissionAmount;
+    ///         Validate accepted margin
+    ///         Calculates tokenAmount and commissionTokenAmount
+    ///         internal method
+    /// @param _currency currency
+    /// @param _intendedPricePoint intendedPricePoint
+    /// @param _transferAmount transferAmount
+    /// @param _commissionAmount commissionAmount
+    /// @return (pricePoint, tokenAmount, commissionTokenAmount)
+    function validateMarginAndCalculateBTAmount(
+        bytes3 _currency,
+        uint256 _intendedPricePoint,
+        uint256 _transferAmount,
+        uint256 _commissionAmount)
+        internal
+        returns (uint256, uint256, uint256) /* pricePoint, tokenAmount, commissionTokenAmount */
+    {
+        uint256 pricePoint = getPricePoint(_currency);
+        require(pricePoint > 0);
+        require(isPricePointInRange(_intendedPricePoint, pricePoint, acceptedMargins(_currency)));
+
+        uint256 tokenAmount;
+        uint256 commissionTokenAmount;
+        (tokenAmount, commissionTokenAmount) = getBTAmountFromCurrencyValue(pricePoint, _transferAmount,
+            _commissionAmount);
+
+        return (pricePoint, tokenAmount, commissionTokenAmount);
+    }
+
 }
