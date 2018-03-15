@@ -22,7 +22,7 @@ const workersContract = new workers(constants.workersContractAddress, constants.
 ;
 
 
-const airdropKlass = require(rootPrefix + '/app/models/airdrop')
+const AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
   , airdropManager = require(rootPrefix + '/lib/airdrop_management/base')
   , airdropAllocationProofDetailKlass = require(rootPrefix + '/app/models/airdrop_allocation_proof_detail')
   , UserAirdropDetailKlass = require(rootPrefix + '/app/models/user_airdrop_detail')
@@ -149,9 +149,10 @@ async function setBalance(token, address, amount) {
   */
 
 async function getAirdropIdFromAirdropAddress(airdropAddress) {
-  var airdropModel = new airdropKlass();
-  var result = await airdropModel.getByContractAddress(airdropAddress);
-  const airdropRecord = result[0];
+  const airdropModelCacheObject = new AirdropModelCacheKlass({useObject: true})
+    , airdropModelCacheResponse = await airdropModelCacheObject.fetch()
+    , airdropRecord = airdropModelCacheResponse.data[airdropAddress]
+  ;
   if (airdropRecord) {
     return responseHelper.successWithData({airdropId: airdropRecord.id});
   }
