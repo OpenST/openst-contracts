@@ -1,4 +1,9 @@
-## OpenST-platform v1.0.1
+## OpenST-Payments v1.0.2
+
+Changelog:
+- Airdrop table caching and integration
+
+## OpenST-Payments v1.0.1
 
 Changelog:
 - Fixed - Exception coming when converting Number to BigNumber  with high precision
