@@ -1,3 +1,9 @@
+## OpenST-Payments v1.0.3
+
+Changelog:
+- Added error code for insufficient gas fund
+- Added error code for transaction receipt with status 0  
+ 
 ## OpenST-Payments v1.0.2
 
 Changelog:
