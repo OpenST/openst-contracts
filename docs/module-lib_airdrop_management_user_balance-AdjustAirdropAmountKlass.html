@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>OpenST Payments Module: lib/contract_interact/helper</title>
+	<title>OpenST Payments Class: AdjustAirdropAmountKlass</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -86,10 +86,17 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Module: lib/contract_interact/helper</h1>
+	<h1 class="page-title">Class: AdjustAirdropAmountKlass</h1>
 <section>
 
 <header>
+    
+        <h2>
+            <span class="ancestors"><a href="module-lib_airdrop_management_user_balance.html">lib/airdrop_management/user_balance</a>~</span>
+        
+        AdjustAirdropAmountKlass
+        </h2>
+        
     
 </header>
 
@@ -98,10 +105,126 @@
     <div class="container-overview">
     
         
-            <div class="description">This is utility class for contract interacts<br><br></div>
+<hr>
+<dt>
+    <h4 class="name" id="AdjustAirdropAmountKlass"><span class="type-signature"></span>new AdjustAirdropAmountKlass(airdropContractAddress, userAddress, airdropAmountUsed)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Constructor to create object of userBalance
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
         
 
         
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropContractAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Hex</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">airdrop contract address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>userAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Array of user addressed</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropAmountUsed</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">used airdrop amount</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
 <dl class="details">
     
 
@@ -141,7 +264,41 @@
 </dl>
 
 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
         
+<span class="param-type">Object</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
     
     </div>
 
@@ -150,20 +307,383 @@
     
 
     
-        <h3 class="subsection-title">Classes</h3>
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
 
         <dl>
-            <dt><a href="module-lib_contract_interact_helper-ContractInteractHelper.html">ContractInteractHelper</a></dt>
-            <dd></dd>
+            
+<hr>
+<dt>
+    <h4 class="name" id="creditAirdropUsedAmount"><span class="type-signature"></span>creditAirdropUsedAmount()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Credit airdrop used amount. decreases airdrop_used_amount of user_airdrop_details table
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="debitAirdropUsedAmount"><span class="type-signature"></span>debitAirdropUsedAmount()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Debit airdrop used amount
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="rollbackCreditAirdropAdjustedAmount"><span class="type-signature"></span>rollbackCreditAirdropAdjustedAmount()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Rollback credit airdrop used amount
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="rollbackDebitAirdropAdjustedAmount"><span class="type-signature"></span>rollbackDebitAirdropAdjustedAmount()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Rollback debit airdrop used amount
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+
+        
+
+    
+</dd>
+
         </dl>
-    
-
-    
-
-    
-
-    
-
     
 
     
