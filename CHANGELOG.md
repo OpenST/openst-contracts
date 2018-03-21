@@ -1,3 +1,9 @@
+## OpenST-Payments v1.0.4
+
+Changelog:
+- Changed error message when insufficient balance
+- Changed error message when insufficient gas  
+
 ## OpenST-Payments v1.0.3
 
 Changelog:
