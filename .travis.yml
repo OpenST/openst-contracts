@@ -5,6 +5,7 @@ branches:
   only:
   - master
   - develop
+  - deepesh/geth_version_update
 notifications:
   email:
     recipients:
@@ -23,7 +24,7 @@ before_install:
   - sudo apt-get install software-properties-common
   - sudo add-apt-repository -y ppa:ethereum/ethereum
   - sudo apt-get update
-  - sudo bash mocha_test/scripts/install_geth_1_7_3.sh
+  - sudo apt-get install ethereum
   - sudo apt-get install solc
   - geth version
 install: 
