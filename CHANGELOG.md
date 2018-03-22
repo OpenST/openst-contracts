@@ -1,3 +1,8 @@
+## OpenST-Payments v1.0.5
+
+Changelog:
+- while transferring from reserve to airdrop budget holder validate if reserve has sufficient balance. 
+
 ## OpenST-Payments v1.0.4
 
 Changelog:
