@@ -1,3 +1,9 @@
+## OpenST-Payments 1.0.4.beta.2
+
+Changelog:
+- Upgrade Geth and Web3 version
+- while transferring from reserve to airdrop budget holder validate if reserve has sufficient balance. 
+
 ## OpenST-Payments v1.0.4
 
 Changelog:
