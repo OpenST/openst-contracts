@@ -7,7 +7,7 @@
  */
 
 const uuid = require('uuid')
-  , rootPrefix = '..'
+  , rootPrefix = '../..'
   , web3Provider = require(rootPrefix + '/lib/web3/providers/rpc')
   , coreConstants = require(rootPrefix + '/config/core_constants')
   , coreAddresses = require(rootPrefix + '/config/core_addresses')

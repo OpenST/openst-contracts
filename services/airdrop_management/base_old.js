@@ -6,11 +6,11 @@
  *
  */
 const rootPrefix = '../..'
-  , Register = require(rootPrefix + '/lib/airdrop_management/register')
-  , Transfer = require(rootPrefix + '/lib/airdrop_management/transfer')
-  , Approve = require(rootPrefix + '/lib/airdrop_management/approve')
-  , BatchAllocator = require(rootPrefix + '/lib/airdrop_management/batch_allocator')
-  , UserBalance = require(rootPrefix + '/lib/airdrop_management/user_balance')
+  , Register = require(rootPrefix + '/services/airdrop_management/register')
+  , Transfer = require(rootPrefix + '/services/airdrop_management/transfer')
+  , Approve = require(rootPrefix + '/services/airdrop_management/approve')
+  , BatchAllocator = require(rootPrefix + '/services/airdrop_management/batch_allocator')
+  , UserBalance = require(rootPrefix + '/services/airdrop_management/user_balance')
 ;
 
 /**
