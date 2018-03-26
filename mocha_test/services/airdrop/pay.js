@@ -23,7 +23,8 @@ const workersContract = new workers(constants.workersContractAddress, constants.
 
 
 const AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
-  , airdropManager = require(rootPrefix + '/lib/airdrop_management/base')
+  , airdropManagerKlass = require(rootPrefix + '/lib/airdrop_management/base')
+  , airdropManager = new airdropManagerKlass()
   , airdropAllocationProofDetailKlass = require(rootPrefix + '/app/models/airdrop_allocation_proof_detail')
   , UserAirdropDetailKlass = require(rootPrefix + '/app/models/user_airdrop_detail')
   , responseHelper = require(rootPrefix + '/lib/formatter/response')

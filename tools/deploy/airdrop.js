@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * This is script for deploying Pricer contract on any chain.<br><br>
  *
@@ -15,16 +17,17 @@
  * @module tools/deploy/pricer
  */
 
-const readline = require('readline');
-const rootPrefix = '../..';
-const web3Provider = require(rootPrefix + '/lib/web3/providers/rpc');
-const Deployer = require(rootPrefix + '/lib/deployer');
-const coreConstants = require(rootPrefix + '/config/core_constants');
-const coreAddresses = require(rootPrefix + '/config/core_addresses');
-const prompts = readline.createInterface(process.stdin, process.stdout);
-const logger = require(rootPrefix + '/helpers/custom_console_logger');
-const OpsManagedContract = require(rootPrefix + "/lib/contract_interact/ops_managed_contract");
-const returnTypes = require(rootPrefix + "/lib/global_constant/return_types");
+const readline = require('readline')
+  , rootPrefix = '../..'
+  , web3Provider = require(rootPrefix + '/lib/web3/providers/rpc')
+  , Deployer = require(rootPrefix + '/services/deployer')
+  , coreAddresses = require(rootPrefix + '/config/core_addresses')
+  , prompts = readline.createInterface(process.stdin, process.stdout)
+  , logger = require(rootPrefix + '/helpers/custom_console_logger')
+  , OpsManagedContract = require(rootPrefix + "/lib/contract_interact/ops_managed_contract")
+  , returnTypes = require(rootPrefix + "/lib/global_constant/return_types")
+  , helper = require(rootPrefix + "/tools/deploy/helper")
+;
 
 // Different addresses used for deployment
 const deployerName = "deployer"
@@ -123,27 +126,28 @@ async function performer(argv) {
   }
 
   const contractName = 'airdrop'
-    , deployerInstance = new Deployer()
+    , deployOptions = {returnType: returnTypes.transactionReceipt()}
   ;
-
   const constructorArgs = [
     brandedTokenAddress,
     web3Provider.utils.asciiToHex(baseCurrency),
     workerContractAddress,
     airdropBudgetHolder
   ];
-  const deployOptions = {returnType: returnTypes.transactionReceipt()};
-  const deployResult =  await deployerInstance.deploy(
-    contractName,
-    constructorArgs,
-    gasPrice,
-    deployOptions);
+
+  const deployerInstance = new Deployer({
+    contract_name: contractName,
+    constructor_args: constructorArgs,
+    gas_price: gasPrice,
+    options: deployOptions
+  });
+  const deployResult =  await deployerInstance.perform();
 
   if (deployResult.isSuccess()) {
     const contractAddress = deployResult.data.transaction_receipt.contractAddress;
     logger.win("contractAddress: " + contractAddress);
     if (fileForContractAddress !== '') {
-      deployerInstance.writeContractAddressToFile(fileForContractAddress, contractAddress);
+      helper.writeContractAddressToFile(fileForContractAddress, contractAddress);
     }
 
     logger.debug("Setting Ops Address to: " + opsAddress);

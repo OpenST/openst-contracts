@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * This is script for deploying Workers contract on any chain.<br><br>
  *
@@ -15,14 +17,15 @@
  * @module tools/deploy/workers
  */
 
-const readline = require('readline');
-const rootPrefix = '../..';
-const prompts = readline.createInterface(process.stdin, process.stdout);
-const logger = require(rootPrefix + '/helpers/custom_console_logger');
-const Deployer = require(rootPrefix + '/lib/deployer');
-const SetWorkerAndOpsKlass = require(rootPrefix + '/lib/set_worker_and_ops')
-  , setWorkerOps = new SetWorkerAndOpsKlass();
-
+const readline = require('readline')
+  , rootPrefix = '../..'
+  , prompts = readline.createInterface(process.stdin, process.stdout)
+  , logger = require(rootPrefix + '/helpers/custom_console_logger')
+  , Deployer = require(rootPrefix + '/services/deployer')
+  , helper = require(rootPrefix + "/tools/deploy/helper")
+  , SetWorkerAndOpsKlass = require(rootPrefix + '/lib/set_worker_and_ops')
+  , setWorkerOps = new SetWorkerAndOpsKlass()
+;
 
 /**
  * It is the main performer method of this deployment script
@@ -80,13 +83,12 @@ async function performer(argv) {
   var response = await setWorkerOps.perform({gasPrice: gasPrice, chainId: chainId});
   logger.debug("**** Deployment Response", response);
   if (response.isSuccess() && fileForContractAddress !== '') {
-    var deployerInstance = new Deployer();
-    deployerInstance.writeContractAddressToFile(fileForContractAddress, response.data.workerContractAddress);
+    helper.writeContractAddressToFile(fileForContractAddress, response.data.workerContractAddress);
   }
 
   process.exit(0);
 
 }
 
-// node tools/deploy/worker.js gasPrice chainId <travis> <fileToWrite>
+// node tools/deploy/workers.js gasPrice chainId <travis> <fileToWrite>
 performer(process.argv);
