@@ -21,7 +21,6 @@ const readline = require('readline')
   , rootPrefix = '../..'
   , prompts = readline.createInterface(process.stdin, process.stdout)
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , Deployer = require(rootPrefix + '/services/deployer')
   , helper = require(rootPrefix + "/tools/deploy/helper")
   , SetWorkerAndOpsKlass = require(rootPrefix + '/lib/set_worker_and_ops')
   , setWorkerOps = new SetWorkerAndOpsKlass()

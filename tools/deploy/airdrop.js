@@ -20,7 +20,7 @@
 const readline = require('readline')
   , rootPrefix = '../..'
   , web3Provider = require(rootPrefix + '/lib/web3/providers/rpc')
-  , Deployer = require(rootPrefix + '/services/deployer')
+  , Deployer = require(rootPrefix + '/services/deploy/deployer')
   , coreAddresses = require(rootPrefix + '/config/core_addresses')
   , prompts = readline.createInterface(process.stdin, process.stdout)
   , logger = require(rootPrefix + '/helpers/custom_console_logger')

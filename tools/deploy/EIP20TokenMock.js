@@ -16,7 +16,7 @@ const readline = require('readline')
   , rootPrefix = '../..'
   , prompts = readline.createInterface(process.stdin, process.stdout)
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , Deployer = require(rootPrefix + '/services/deployer')
+  , Deployer = require(rootPrefix + '/services/deploy/deployer')
   , BigNumber = require('bignumber.js')
   , helper = require(rootPrefix + "/tools/deploy/helper")
 ;
