@@ -21,9 +21,9 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {Number} chainId - chain Id
- * @param {Hex} airdropContractAddress - airdrop contract address
- * @param {Array} userAddresses - Array of user addressed
+ * @param {Number} chain_id - chain Id
+ * @param {Hex} airdrop_contract_address - airdrop contract address
+ * @param {Array} user_addresses - Array of user addressed
  *
  * @return {Object}
  *
@@ -32,9 +32,9 @@ const AirdropUserBalanceKlass = function(params) {
   logger.debug("=======user_balance.params=======");
   logger.debug(params);
   const oThis = this;
-  oThis.airdropContractAddress = params.airdropContractAddress;
-  oThis.chainId = params.chainId;
-  oThis.userAddresses = params.userAddresses;
+  oThis.airdropContractAddress = params.airdrop_contract_address;
+  oThis.chainId = params.chain_id;
+  oThis.userAddresses = params.user_addresses;
 
   oThis.airdropRecord = null;
 
@@ -81,11 +81,11 @@ AirdropUserBalanceKlass.prototype = {
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
-        return onResolve(responseHelper.error('l_am_ub_vp_1', 'airdrop contract address is invalid'));
+        return onResolve(responseHelper.error('s_am_ub_validateParams_1', 'airdrop contract address is invalid'));
       }
 
       if (!basicHelper.isValidChainId(oThis.chainId)) {
-        return onResolve(responseHelper.error('l_am_ub_vp_2', 'ChainId is invalid'));
+        return onResolve(responseHelper.error('s_am_ub_validateParams_2', 'ChainId is invalid'));
       }
 
       // if address already present
@@ -94,7 +94,7 @@ AirdropUserBalanceKlass.prototype = {
       ;
       oThis.airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
       if (!oThis.airdropRecord){
-        return onResolve(responseHelper.error('l_am_ub_vp_3', 'Given airdrop contract is not registered'));
+        return onResolve(responseHelper.error('s_am_ub_validateParams_3', 'Given airdrop contract is not registered'));
       }
 
       return onResolve(responseHelper.successWithData({}));

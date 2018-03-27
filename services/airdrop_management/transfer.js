@@ -25,12 +25,12 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {Hex} senderAddress - sender address
- * @param {String} senderPassphrase - sender Passphrase
- * @param {Hex} airdropContractAddress - airdrop contract address
+ * @param {Hex} sender_address - sender address
+ * @param {String} sender_passphrase - sender Passphrase
+ * @param {Hex} airdrop_contract_address - airdrop contract address
  * @param {String} amount - amount in wei
- * @param {String} gasPrice - gas price
- * @param {Number} chainId - chain Id
+ * @param {String} gas_price - gas price
+ * @param {Number} chain_id - chain Id
  * @param {Object} options - chain Id
  *
  * @return {Object}
@@ -39,14 +39,14 @@ const rootPrefix = '../..'
 const TransferKlass = function(params) {
   logger.debug("\n=========Transfer params=========");
   // Don't log passphrase
-  logger.debug(params.senderAddress, params.airdropContractAddress, params.amount, params.gasPrice, params.chainId, params.options);
+  logger.debug(params.sender_address, params.airdrop_contract_address, params.amount, params.gas_price, params.chain_id, params.options);
   const oThis = this;
-  oThis.senderAddress = params.senderAddress;
-  oThis.senderPassphrase = params.senderPassphrase;
-  oThis.airdropContractAddress = params.airdropContractAddress;
+  oThis.senderAddress = params.sender_address;
+  oThis.senderPassphrase = params.sender_passphrase;
+  oThis.airdropContractAddress = params.airdrop_contract_address;
   oThis.amount = params.amount;
-  oThis.gasPrice = params.gasPrice;
-  oThis.chainId = params.chainId;
+  oThis.gasPrice = params.gas_price;
+  oThis.chainId = params.chain_id;
   oThis.options = params.options;
 
   oThis.airdropBudgetHolder = null;

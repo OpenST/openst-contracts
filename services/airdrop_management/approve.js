@@ -23,10 +23,10 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {Hex} airdropContractAddress - airdrop contract address
- * @param {String} airdropBudgetHolderPassphrase - airdropBudgetHolder Passphrase
- * @param {String} gasPrice - gas price
- * @param {Number} chainId - chain Id
+ * @param {Hex} airdrop_contract_address - airdrop contract address
+ * @param {String} airdrop_budget_holder_passphrase - airdropBudgetHolder Passphrase
+ * @param {String} gas_price - gas price
+ * @param {Number} chain_id - chain Id
  * @param {Object} options - chain Id
  *
  * @return {Object}
@@ -34,12 +34,13 @@ const rootPrefix = '../..'
  */
 const ApproveKlass = function(params) {
   logger.debug("=========Approve.params=========");
-  logger.debug(params.airdropContractAddress, params.gasPrice, params.chainId, params.options);
+  // Don't log passphrase
+  logger.debug(params.airdrop_contract_address, params.gas_price, params.chain_id, params.options);
   const oThis = this;
-  oThis.airdropContractAddress = params.airdropContractAddress;
-  oThis.airdropBudgetHolderPassphrase = params.airdropBudgetHolderPassphrase;
-  oThis.gasPrice = params.gasPrice;
-  oThis.chainId = params.chainId;
+  oThis.airdropContractAddress = params.airdrop_contract_address;
+  oThis.airdropBudgetHolderPassphrase = params.airdrop_budget_holder_passphrase;
+  oThis.gasPrice = params.gas_price;
+  oThis.chainId = params.chain_id;
   oThis.options = params.options;
 
   oThis.airdropBudgetHolder = null;

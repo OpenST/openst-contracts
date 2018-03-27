@@ -22,8 +22,8 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {Hex} airdropContractAddress - airdrop contract address
- * @param {Number} chainId - chain Id
+ * @param {Hex} airdrop_contract_address - airdrop contract address
+ * @param {Number} chain_id - chain Id
  *
  * @return {Object}
  *
@@ -31,8 +31,8 @@ const rootPrefix = '../..'
 const RegisterKlass = function (params) {
   logger.debug("=======register.params=======");
   logger.debug(params);
-  this.airdropContractAddress = params.airdropContractAddress;
-  this.chainId = params.chainId;
+  this.airdropContractAddress = params.airdrop_contract_address;
+  this.chainId = params.chain_id;
 
 };
 

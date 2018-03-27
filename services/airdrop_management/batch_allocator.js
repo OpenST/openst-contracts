@@ -25,10 +25,10 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {Hex} airdropContractAddress - airdrop contract address
- * @param {Hex} transactionHash - airdrop transfer transactio hash
- * @param {Object} airdropUsers - {userAddress: {airdropAmount: inwei, expiryTimestamp: 0}}
- * @param {Number} chainId - chain ID
+ * @param {Hex} airdrop_contract_address - airdrop contract address
+ * @param {Hex} transaction_hash - airdrop transfer transactio hash
+ * @param {Object} airdrop_users - {userAddress: {airdropAmount: inwei, expiryTimestamp: 0}}
+ * @param {Number} chain_id - chain ID
  *
  * @return {Object}
  */
@@ -36,10 +36,10 @@ const BatchAllocatorKlass = function(params) {
   logger.debug("\n=========batchAllocator.params=========");
   logger.debug(params);
   const oThis = this;
-  oThis.airdropContractAddress = params.airdropContractAddress;
-  oThis.transactionHash = params.transactionHash;
-  oThis.airdropUsers = params.airdropUsers;
-  oThis.chainId = params.chainId;
+  oThis.airdropContractAddress = params.airdrop_contract_address;
+  oThis.transactionHash = params.transaction_hash;
+  oThis.airdropUsers = params.airdrop_users;
+  oThis.chainId = params.chain_id;
 
   // New Variables
   oThis.airdropRecord = null;
