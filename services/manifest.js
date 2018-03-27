@@ -12,6 +12,8 @@ const rootPrefix = ".."
   //, deployAirdrop = require(rootPrefix + '/services/deploy/airdrop')
 
   , register = require(rootPrefix + '/services/airdrop_management/register')
+  , setAcceptedMargin = require(rootPrefix + '/services/airdrop_management/set_accepted_margin')
+  , setPriceOracle = require(rootPrefix + '/services/airdrop_management/set_price_oracle')
   , transfer = require(rootPrefix + '/services/airdrop_management/transfer')
   , approve = require(rootPrefix + '/services/airdrop_management/approve')
   , batchAllocator = require(rootPrefix + '/services/airdrop_management/batch_allocator')
@@ -72,6 +74,8 @@ ServiceManifestKlass.prototype = {
    */
   airdropManager: {
     registerAirdrop: register,
+    setPriceOracle: setPriceOracle,
+    setAcceptedMargin: setAcceptedMargin,
     transfer: transfer,
     approve: approve,
     batchAllocator: batchAllocator,

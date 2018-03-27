@@ -29,6 +29,8 @@ const AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdr
   , BatchAllocatorKlass = require(rootPrefix + '/services/airdrop_management/batch_allocator')
   , UserBalanceKlass = require(rootPrefix + '/services/airdrop_management/user_balance')
   , PayKlass = require(rootPrefix + '/services/airdrop_management/pay')
+  , SetPriceOracleKlass = require(rootPrefix + '/services/airdrop_management/set_price_oracle')
+  , SetAcceptedMarginKlass = require(rootPrefix + '/services/airdrop_management/set_accepted_margin')
   , airdropAllocationProofDetailKlass = require(rootPrefix + '/app/models/airdrop_allocation_proof_detail')
   , UserAirdropDetailKlass = require(rootPrefix + '/app/models/user_airdrop_detail')
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
@@ -48,13 +50,17 @@ var transferToAirdropBudgetHolderTransactionHash = ''
 
 async function setAcceptedMargin(airdropObject, currency, margin) {
   // set accepted margin
-  const amResponse = await airdropObject.setAcceptedMargin(
-    constants.ops,
-    constants.opsPassphrase,
-    currency,
-    margin,
-    constants.gasUsed,
-    constants.optionsReceipt);
+  const SetAcceptedMarginObject = new SetAcceptedMarginKlass({
+    airdrop_contract_address: constants.airdropOstUsdAddress,
+    chain_id: constants.chainId,
+    sender_address: constants.ops,
+    sender_passphrase: constants.opsPassphrase,
+    currency: currency,
+    accepted_margin: margin,
+    gas_price: constants.gasUsed,
+    options: constants.optionsReceipt
+  });
+  const amResponse = await SetAcceptedMarginObject.perform();
   assert.equal(amResponse.isSuccess(), true);
   // verify if the transaction receipt is valid
   utils.verifyTransactionReceipt(amResponse);
@@ -77,13 +83,17 @@ async function setAcceptedMargin(airdropObject, currency, margin) {
   */
 async function setPriceOracle(airdropObject, currency, address) {
   // Set Price Oracle
-  const spoResponse = await airdropObject.setPriceOracle(
-    constants.ops,
-    constants.opsPassphrase,
-    currency,
-    address,
-    constants.gasUsed,
-    constants.optionsReceipt);
+  const SetPriceOracleObject = new SetPriceOracleKlass({
+    airdrop_contract_address: constants.airdropOstUsdAddress,
+    chain_id: constants.chainId,
+    sender_address: constants.ops,
+    sender_passphrase: constants.opsPassphrase,
+    currency: currency,
+    price_oracle_contract_address: address,
+    gas_price: constants.gasUsed,
+    options: constants.optionsReceipt
+  });
+  const spoResponse = await SetPriceOracleObject.perform();
   assert.equal(spoResponse.isSuccess(), true);
   // verify if the transaction receipt is valid
   utils.verifyTransactionReceipt(spoResponse);
