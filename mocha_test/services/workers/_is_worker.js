@@ -5,8 +5,7 @@ const chai = require('chai')
 
 const rootPrefix      = "../../.."
     , constants       = require(rootPrefix + '/mocha_test/lib/constants')
-    , workersModule   = require(rootPrefix + '/lib/contract_interact/workers')
-    , workers         = new workersModule(constants.workersContractAddress, constants.chainId)
+    , IsWorkerKlass = require(rootPrefix + '/services/workers/is_worker')
 ;
 
 describe('Is worker', function() {
@@ -17,8 +16,12 @@ describe('Is worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    // set worker
-    const response = await workers.isWorker(0);
+    const IsWorkerObject = new IsWorkerKlass({
+      workers_contract_address: constants.workersContractAddress,
+      worker_address: 0,
+      chain_id: constants.chainId
+    });
+    const response = await IsWorkerObject.perform();
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);

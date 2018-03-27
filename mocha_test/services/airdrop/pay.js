@@ -8,15 +8,15 @@ const rootPrefix = "../../.."
   , BigNumber = require('bignumber.js')
   , utils = require(rootPrefix+'/mocha_test/lib/utils')
   , airdrop = require(rootPrefix + '/lib/contract_interact/airdrop')
-  , workers = require(rootPrefix + '/lib/contract_interact/workers')
   , mockToken = require(rootPrefix + '/lib/contract_interact/EIP20TokenMock')
   , BrandedTokenKlass = require(rootPrefix + '/lib/contract_interact/branded_token')
   , web3RpcProvider = require(rootPrefix + '/lib/web3/providers/rpc')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
+  , SetWorkerKlass = require(rootPrefix + '/services/workers/set_worker')
+  , IsWorkerKlass = require(rootPrefix + '/services/workers/is_worker')
 ;
 
-const workersContract = new workers(constants.workersContractAddress, constants.chainId)
-  , airdropOstUsd = new airdrop(constants.airdropOstUsdAddress, constants.chainId)
+const airdropOstUsd = new airdrop(constants.airdropOstUsdAddress, constants.chainId)
   , TC5 = new mockToken(constants.TC5Address)
   , brandedTokenObject = new BrandedTokenKlass(constants.TC5Address, constants.chainId)
 ;
@@ -100,20 +100,29 @@ async function setPriceOracle(airdropObject, currency, address) {
   *
   */
 async function setWorker(workerAddress, deactivationHeight) {
-  const setWorkerResponse = await workersContract.setWorker(
-    constants.ops,
-    constants.opsPassphrase,
-    workerAddress,
-    deactivationHeight.toString(10),
-    constants.gasUsed,
-    constants.optionsReceipt);
+  const SetWorkerObject = new SetWorkerKlass({
+    workers_contract_address: constants.workersContractAddress,
+    sender_address: constants.ops,
+    sender_passphrase: constants.opsPassphrase,
+    worker_address: workerAddress,
+    deactivation_height: deactivationHeight.toString(10),
+    gas_price: constants.gasUsed,
+    chain_id: constants.chainId,
+    options: constants.optionsReceipt
+  });
+  const setWorkerResponse = await SetWorkerObject.perform();
 
   assert.equal(setWorkerResponse.isSuccess(), true);
   // verify if the transaction receipt is valid
   utils.verifyTransactionReceipt(setWorkerResponse);
 
   // confirm that worker is a set
-  const isWorkerResponse = await workersContract.isWorker(workerAddress);
+  const IsWorkerObject = new IsWorkerKlass({
+    workers_contract_address: constants.workersContractAddress,
+    worker_address: workerAddress,
+    chain_id: constants.chainId
+  });
+  const isWorkerResponse = await IsWorkerObject.perform();
   assert.equal(isWorkerResponse.isSuccess(), true);
   assert.equal(isWorkerResponse.data.isValid, true);
 }
