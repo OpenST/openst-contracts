@@ -28,6 +28,7 @@ const AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdr
   , ApproveKlass = require(rootPrefix + '/services/airdrop_management/approve')
   , BatchAllocatorKlass = require(rootPrefix + '/services/airdrop_management/batch_allocator')
   , UserBalanceKlass = require(rootPrefix + '/services/airdrop_management/user_balance')
+  , PayKlass = require(rootPrefix + '/services/airdrop_management/pay')
   , airdropAllocationProofDetailKlass = require(rootPrefix + '/app/models/airdrop_allocation_proof_detail')
   , UserAirdropDetailKlass = require(rootPrefix + '/app/models/user_airdrop_detail')
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
@@ -709,18 +710,22 @@ describe('Airdrop Pay', function() {
     var worker1Balance = await web3RpcProvider.eth.getBalance(constants.workerAccount1);
     logger.info("\nconstants.workerAccount1.balance: ", worker1Balance);
 
-    const payResponse = await airdropOstUsd.pay(
-      constants.ops,
-      constants.opsPassphrase,
-      beneficiary,
-      transferAmount.toString(10),
-      commissionBeneficiary,
-      commissionAmount.toString(10),
-      currency,
-      intendedPricePoint,
-      spenderAddress,
-      constants.gasUsed,
-      constants.optionsReceipt);
+    const PayObject = new PayKlass({
+      airdrop_contract_address: constants.airdropOstUsdAddress,
+      chain_id: constants.chainId,
+      sender_worker_address: constants.ops,
+      sender_worker_passphrase: constants.opsPassphrase,
+      beneficiary_address: beneficiary,
+      transfer_amount: transferAmount.toString(10),
+      commission_beneficiary_address: commissionBeneficiary,
+      commission_amount: commissionAmount.toString(10),
+      currency: currency,
+      intended_price_point: intendedPricePoint,
+      spender: spenderAddress,
+      gas_price: constants.gasUsed,
+      options: constants.optionsReceipt
+    });
+    const payResponse = await PayObject.perform();
 
     assert.equal(payResponse.isFailure(), true);
     logger.info("============airdrop.pay response=============");
@@ -821,18 +826,22 @@ describe('Airdrop Pay', function() {
     var worker1Balance = await web3RpcProvider.eth.getBalance(constants.workerAccount1);
     logger.info("\nconstants.workerAccount1.balance: ", worker1Balance);
 
-    const payResponse = await airdropOstUsd.pay(
-      constants.workerAccount1,
-      constants.workerAccountPassphrase1,
-      beneficiary,
-      transferAmount.toString(10),
-      commissionBeneficiary,
-      commissionAmount.toString(10),
-      currency,
-      intendedPricePoint,
-      spenderAddress,
-      constants.gasUsed,
-      constants.optionsReceipt);
+    const PayObject = new PayKlass({
+      airdrop_contract_address: constants.airdropOstUsdAddress,
+      chain_id: constants.chainId,
+      sender_worker_address: constants.workerAccount1,
+      sender_worker_passphrase: constants.workerAccountPassphrase1,
+      beneficiary_address: beneficiary,
+      transfer_amount: transferAmount.toString(10),
+      commission_beneficiary_address: commissionBeneficiary,
+      commission_amount: commissionAmount.toString(10),
+      currency: currency,
+      intended_price_point: intendedPricePoint,
+      spender: spenderAddress,
+      gas_price: constants.gasUsed,
+      options: constants.optionsReceipt
+    });
+    const payResponse = await PayObject.perform();
 
     assert.equal(payResponse.isSuccess(), true);
     logger.info("============airdrop.pay response=============");
@@ -954,19 +963,22 @@ describe('Airdrop Pay', function() {
     var worker1Balance = await web3RpcProvider.eth.getBalance(constants.workerAccount1);
     logger.info("\nconstants.workerAccount1.balance: ", worker1Balance);
 
-    const payResponse = await airdropOstUsd.pay(
-      constants.workerAccount1,
-      constants.workerAccountPassphrase1,
-      beneficiary,
-      transferAmount.toString(10),
-      commissionBeneficiary,
-      commissionAmount.toString(10),
-      currency,
-      intendedPricePoint,
-      spenderAddress,
-      constants.gasUsed,
-      constants.optionsReceipt);
-
+    const PayObject = new PayKlass({
+      airdrop_contract_address: constants.airdropOstUsdAddress,
+      chain_id: constants.chainId,
+      sender_worker_address: constants.workerAccount1,
+      sender_worker_passphrase: constants.workerAccountPassphrase1,
+      beneficiary_address: beneficiary,
+      transfer_amount: transferAmount.toString(10),
+      commission_beneficiary_address: commissionBeneficiary,
+      commission_amount: commissionAmount.toString(10),
+      currency: currency,
+      intended_price_point: intendedPricePoint,
+      spender: spenderAddress,
+      gas_price: constants.gasUsed,
+      options: constants.optionsReceipt
+    });
+    const payResponse = await PayObject.perform();
     assert.equal(payResponse.isSuccess(), true);
     logger.info("============airdrop.pay response=============");
     logger.info(payResponse);
@@ -1084,18 +1096,22 @@ describe('Airdrop Pay', function() {
     var worker1Balance = await web3RpcProvider.eth.getBalance(constants.workerAccount1);
     logger.info("\nconstants.workerAccount1.balance: ", worker1Balance);
 
-    const payResponse = await airdropOstUsd.pay(
-      constants.workerAccount1,
-      constants.workerAccountPassphrase1,
-      beneficiary,
-      transferAmount.toString(10),
-      commissionBeneficiary,
-      commissionAmount.toString(10),
-      currency,
-      intendedPricePoint,
-      spenderAddress,
-      constants.gasUsed,
-      constants.optionsReceipt);
+    const PayObject = new PayKlass({
+      airdrop_contract_address: constants.airdropOstUsdAddress,
+      chain_id: constants.chainId,
+      sender_worker_address: constants.workerAccount1,
+      sender_worker_passphrase: constants.workerAccountPassphrase1,
+      beneficiary_address: beneficiary,
+      transfer_amount: transferAmount.toString(10),
+      commission_beneficiary_address: commissionBeneficiary,
+      commission_amount: commissionAmount.toString(10),
+      currency: currency,
+      intended_price_point: intendedPricePoint,
+      spender: spenderAddress,
+      gas_price: constants.gasUsed,
+      options: constants.optionsReceipt
+    });
+    const payResponse = await PayObject.perform();
 
     assert.equal(payResponse.isSuccess(), true);
     logger.info("============airdrop.pay response=============");

@@ -168,7 +168,8 @@ async function performer(argv) {
       gas_price: gasPrice,
       chain_id: chainId
     });
-    var contractOpsAddress = await GetOpsObject.perform();
+    const getOpsResult = await GetOpsObject.perform();
+    const contractOpsAddress = getOpsResult.data.opsAddress;
     logger.debug("Ops Address Set to: " + contractOpsAddress);
 
   } else {

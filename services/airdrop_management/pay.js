@@ -38,7 +38,7 @@ const rootPrefix = '../..'
 const PayKlass = function (params) {
   logger.debug("=======PayKlass.params=======");
   logger.debug(params.airdrop_contract_address, params.chain_id, params.sender_worker_address, params.beneficiary_address,
-    params.transfer_amount, params.commission_beneficiary_address, params.commission_amount, params.intended_price_point,
+    params.transfer_amount, params.commission_beneficiary_address, params.commission_amount, params.currency, params.intended_price_point,
     params.spender, params.gas_price, params.options);
 
   const oThis = this
@@ -52,6 +52,7 @@ const PayKlass = function (params) {
   oThis.transferAmount = params.transfer_amount;
   oThis.commissionBeneficiaryAddress = params.commission_beneficiary_address;
   oThis.commissionAmount = params.commission_amount;
+  oThis.currency = params.currency;
   oThis.intendedPricePoint = params.intended_price_point;
   oThis.spender = params.spender;
   oThis.gasPrice = params.gas_price;
