@@ -26,6 +26,7 @@ sh start_test_chain.sh
 
 ```bash
 export OST_UTILITY_GETH_RPC_PROVIDER=''
+export OST_UTILITY_GETH_WS_PROVIDER=''
 export OST_UTILITY_DEPLOYER_ADDR=''
 export OST_UTILITY_DEPLOYER_PASSPHRASE=''
 export OST_UTILITY_OPS_ADDR=''

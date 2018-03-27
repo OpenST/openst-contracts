@@ -11,7 +11,7 @@ const rootPrefix = "../../.."
   , workers = require(rootPrefix + '/lib/contract_interact/workers')
   , mockToken = require(rootPrefix + '/lib/contract_interact/EIP20TokenMock')
   , BrandedTokenKlass = require(rootPrefix + '/lib/contract_interact/branded_token')
-  , web3RpcProvider = require(rootPrefix + '/lib/web3/providers/rpc')
+  , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
 ;
 
@@ -481,7 +481,7 @@ describe('Airdrop Pay', function() {
 
     // set worker
     logger.info("============= Set worker =============");
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber();
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber();
     await setWorker(constants.workerAccount1, new BigNumber(currentBlockNumber).plus(100000000000));
 
     // Set Price Oracle
@@ -687,7 +687,7 @@ describe('Airdrop Pay', function() {
 
     logger.info("============spender approving to contract=============");
     logger.info(accountApproveResponse);
-    var worker1Balance = await web3RpcProvider.eth.getBalance(constants.workerAccount1);
+    var worker1Balance = await web3Provider.eth.getBalance(constants.workerAccount1);
     logger.info("\nconstants.workerAccount1.balance: ", worker1Balance);
 
     const payResponse = await airdropOstUsd.pay(
@@ -798,7 +798,7 @@ describe('Airdrop Pay', function() {
 
     logger.info("============spender approving to contract=============");
     logger.info(accountApproveResponse);
-    var worker1Balance = await web3RpcProvider.eth.getBalance(constants.workerAccount1);
+    var worker1Balance = await web3Provider.eth.getBalance(constants.workerAccount1);
     logger.info("\nconstants.workerAccount1.balance: ", worker1Balance);
 
     const payResponse = await airdropOstUsd.pay(
@@ -930,7 +930,7 @@ describe('Airdrop Pay', function() {
 
     logger.info("============spender approving to contract=============");
     logger.info(accountApproveResponse);
-    var worker1Balance = await web3RpcProvider.eth.getBalance(constants.workerAccount1);
+    var worker1Balance = await web3Provider.eth.getBalance(constants.workerAccount1);
     logger.info("\nconstants.workerAccount1.balance: ", worker1Balance);
 
     const payResponse = await airdropOstUsd.pay(
@@ -1060,7 +1060,7 @@ describe('Airdrop Pay', function() {
 
     logger.info("============spender approving to contract=============");
     logger.info(accountApproveResponse);
-    var worker1Balance = await web3RpcProvider.eth.getBalance(constants.workerAccount1);
+    var worker1Balance = await web3Provider.eth.getBalance(constants.workerAccount1);
     logger.info("\nconstants.workerAccount1.balance: ", worker1Balance);
 
     const payResponse = await airdropOstUsd.pay(
@@ -1118,9 +1118,9 @@ describe('Airdrop Pay', function() {
   });
 
 
-  it('Airdrop.Pay: It exits', async function() {
-    process.exit(0);
-  });
+  // it('Airdrop.Pay: It exits', async function() {
+  //   process.exit(0);
+  // });
 
 
 });

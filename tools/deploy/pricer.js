@@ -17,7 +17,7 @@
 
 const readline = require('readline');
 const rootPrefix = '../..';
-const web3Provider = require(rootPrefix + '/lib/web3/providers/rpc');
+const web3Provider = require(rootPrefix + '/lib/web3/providers/ws');
 const prompts = readline.createInterface(process.stdin, process.stdout);
 const logger = require(rootPrefix + '/helpers/custom_console_logger');
 const OpsManagedContract = require(rootPrefix + "/lib/contract_interact/ops_managed_contract");
