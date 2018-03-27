@@ -164,6 +164,7 @@ async function performer(argv) {
     logger.error(deployResult);
   }
 
+  process.exit(0);
 }
 
 performer(process.argv);

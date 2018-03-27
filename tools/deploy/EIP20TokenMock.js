@@ -115,6 +115,7 @@ async function performer(argv) {
       deployerInstance.writeContractAddressToFile(fileForContractAddress, contractAddress);
     }
   }
+  process.exit(0);
 }
 
 

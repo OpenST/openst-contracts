@@ -166,7 +166,7 @@ async function performer(argv) {
     logger.error("Error deploying contract");
     logger.error(deployResult);
   }
-
+  process.exit(0);
 }
 
 // node tools/deploy/airdrop.js brandedTokenContractAddress baseCurrency workerContractAddress airdropBudgetHolder gasPrice chainId <travis> <fileToWrite>
