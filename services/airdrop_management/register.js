@@ -1,8 +1,10 @@
+"use strict";
+
 /**
  *
  * This class would be used for executing airdrop register.<br><br>
  *
- * @module lib/airdrop_management/register
+ * @module services/airdrop_management/register
  *
  */
 
@@ -46,18 +48,21 @@ RegisterKlass.prototype = {
 
     const oThis = this
     ;
+    try {
+      var r = null;
 
-    var r = null;
+      r = await oThis.validateParams();
+      logger.debug("=======register.validateParams.result=======");
+      logger.debug(r);
+      if (r.isFailure()) return r;
 
-    r = await oThis.validateParams();
-    logger.debug("=======register.validateParams.result=======");
-    logger.debug(r);
-    if (r.isFailure()) return r;
-
-    r = await oThis.runRegister();
-    logger.debug("=======register.runRegister.result=======");
-    logger.debug(r);
-    return r;
+      r = await oThis.runRegister();
+      logger.debug("=======register.runRegister.result=======");
+      logger.debug(r);
+      return r;
+    } catch(err) {
+      return responseHelper.error('s_am_r_perform_1', 'Something went wrong. ' + err.message);
+    }
 
   },
 

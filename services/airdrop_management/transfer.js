@@ -1,8 +1,10 @@
+"use strict";
+
 /**
  *
  * This is a utility file which would be used for executing transfer amount to airdrop budget holder.<br><br>
  *
- * @module lib/airdrop_management/transfer
+ * @module services/airdrop_management/transfer
  *
  */
 
@@ -36,7 +38,8 @@ const rootPrefix = '../..'
  */
 const TransferKlass = function(params) {
   logger.debug("\n=========Transfer params=========");
-  logger.debug(params);
+  // Don't log passphrase
+  logger.debug(params.senderAddress, params.airdropContractAddress, params.amount, params.gasPrice, params.chainId, params.options);
   const oThis = this;
   oThis.senderAddress = params.senderAddress;
   oThis.senderPassphrase = params.senderPassphrase;
@@ -63,17 +66,21 @@ TransferKlass.prototype = {
 
     const oThis = this;
 
-    var r = null;
+    try {
+      var r = null;
 
-    r = await oThis.validateParams();
-    logger.debug("\n=========Transfer.validateParams.result=========");
-    logger.debug(r);
-    if(r.isFailure()) return r;
+      r = await oThis.validateParams();
+      logger.debug("\n=========Transfer.validateParams.result=========");
+      logger.debug(r);
+      if(r.isFailure()) return r;
 
-    r = oThis.doTransfer();
-    logger.debug("\n=========Transfer.doTransfer.result=========");
-    logger.debug(r);
-    return r;
+      r = oThis.doTransfer();
+      logger.debug("\n=========Transfer.doTransfer.result=========");
+      logger.debug(r);
+      return r;
+    } catch(err) {
+      return responseHelper.error('s_am_t_perform_1', 'Something went wrong. ' + err.message);
+    }
 
   },
 

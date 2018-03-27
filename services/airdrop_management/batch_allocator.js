@@ -1,8 +1,10 @@
+"use strict";
+
 /**
  *
  * This is a utility file which would be used for allocating amount to airdrop users.<br><br>
  *
- * @module lib/airdrop_management/batch_allocator
+ * @module services/airdrop_management/batch_allocator
  *
  */
 
@@ -61,17 +63,23 @@ BatchAllocatorKlass.prototype = {
 
     const oThis = this;
 
-    var r = null;
+    try {
 
-    r = await oThis.validateParams();
-    logger.debug("\n=========batchAllocator.validateParams.result=========");
-    logger.debug(r);
-    if(r.isFailure()) return r;
+      var r = null;
 
-    r = await oThis.allocateAirdropAmountToUsers();
-    logger.debug("\n=========batchAllocator.allocateAirdropAmountToUsers.result=========");
-    logger.debug(r);
-    return r;
+      r = await oThis.validateParams();
+      logger.debug("\n=========batchAllocator.validateParams.result=========");
+      logger.debug(r);
+      if(r.isFailure()) return r;
+
+      r = await oThis.allocateAirdropAmountToUsers();
+      logger.debug("\n=========batchAllocator.allocateAirdropAmountToUsers.result=========");
+      logger.debug(r);
+      return r;
+
+    } catch(err){
+      return responseHelper.error('s_am_ba_perform_1', 'Something went wrong. ' + err.message)
+    }
   },
 
   /**
@@ -101,7 +109,7 @@ BatchAllocatorKlass.prototype = {
         return onResolve(responseHelper.error('l_am_ba_vp_3', 'given airdrop record is not present in DB'));
       }
       var airdropAllocationProofDetailModel = new airdropAllocationProofDetailKlass();
-      result = await airdropAllocationProofDetailModel.getByTransactionHash(oThis.transactionHash);
+      const result = await airdropAllocationProofDetailModel.getByTransactionHash(oThis.transactionHash);
       oThis.airdropAllocationProofDetailRecord = result[0];
       if (!oThis.airdropAllocationProofDetailRecord) {
         return onResolve(responseHelper.error('l_am_ba_vp_4', 'Invalid transactionHash. Given airdropAllocationProofDetailRecord is not present in DB'));

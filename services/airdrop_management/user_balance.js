@@ -1,8 +1,10 @@
+"use strict";
+
 /**
  *
  * This class would be used for calculating user airdrop balance.<br><br>
  *
- * @module lib/airdrop_management/user_balance
+ * @module services/airdrop_management/user_balance
  *
  */
 
@@ -50,17 +52,21 @@ AirdropUserBalanceKlass.prototype = {
 
     const oThis = this;
 
-    var r = null;
+    try {
+      var r = null;
 
-    r = await oThis.validateParams();
-    logger.debug("=======userBalance.validateParams.result=======");
-    logger.debug(r);
-    if(r.isFailure()) return r;
+      r = await oThis.validateParams();
+      logger.debug("=======userBalance.validateParams.result=======");
+      logger.debug(r);
+      if(r.isFailure()) return r;
 
-    r = await oThis.getUserAirdropBalance();
-    logger.debug("=======userBalance.getUserAirdropBalance.result=======");
-    logger.debug(r);
-    return r;
+      r = await oThis.getUserAirdropBalance();
+      logger.debug("=======userBalance.getUserAirdropBalance.result=======");
+      logger.debug(r);
+      return r;
+    } catch(err) {
+      return responseHelper.error('s_am_ub_perform_1', 'Something went wrong. ' + err.message);
+    }
 
   },
 

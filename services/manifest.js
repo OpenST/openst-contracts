@@ -8,7 +8,8 @@
 
 const rootPrefix = ".."
 
-  , deployer = require(rootPrefix + '/services/deploy/deployer')
+  //, deployWorkers = require(rootPrefix + '/services/deploy/workers')
+  //, deployAirdrop = require(rootPrefix + '/services/deploy/airdrop')
 
   , register = require(rootPrefix + '/services/airdrop_management/register')
   , transfer = require(rootPrefix + '/services/airdrop_management/transfer')
@@ -16,9 +17,13 @@ const rootPrefix = ".."
   , batchAllocator = require(rootPrefix + '/services/airdrop_management/batch_allocator')
   , userBalance = require(rootPrefix + '/services/airdrop_management/user_balance')
 
-  , workers = require(rootPrefix + '/lib/contract_interact/workers')
-  , airdrop = require(rootPrefix + '/lib/contract_interact/airdrop')
-  , opsManaged = require(rootPrefix + "/lib/contract_interact/ops_managed_contract")
+  , setWorker = require(rootPrefix + '/services/workers/set_worker')
+  , isWorker = require(rootPrefix + '/services/workers/is_worker')
+
+  , pay = require(rootPrefix + '/services/airdrop/pay')
+
+  , getOps = require(rootPrefix + "/services/ops_managed/get_ops")
+  , setOps = require(rootPrefix + "/services/ops_managed/set_ops")
 ;
 
 /**
@@ -29,13 +34,25 @@ const rootPrefix = ".."
 const ServiceManifestKlass = function() {};
 
 ServiceManifestKlass.prototype = {
+  
   /**
    * deploy any contract
    *
    * @constant {object}
    */
   deploy: {
-    deployer: deployer
+    //workers: deployWorkers,
+    //airdrop: deployAirdrop
+  },
+
+  /**
+   * Ops Managed related services
+   *
+   * @constant {object}
+   */
+  opsManaged: {
+    getOps: getOps,
+    setOps: setOps
   },
 
   /**
@@ -52,15 +69,23 @@ ServiceManifestKlass.prototype = {
   },
 
   /**
-   * Contract Interact related services
+   * workers
    *
    * @constant {object}
    */
-  contractInteract: {
-    workers: workers,
-    airdrop: airdrop,
-    opsManaged:opsManaged
+  workers: {
+    setWorker: setWorker,
+    isWorker: isWorker
   },
+
+  /**
+   * airdrop
+   *
+   * @constant {object}
+   */
+  airdrop: {
+    pay: pay
+  }
 
 };
 

@@ -1,8 +1,10 @@
+"use strict";
+
 /**
  *
  * This is a utility file which would be used for executing approve by airdrop budget holder.<br><br>
  *
- * @module lib/airdrop_management/approve
+ * @module services/airdrop_management/approve
  *
  */
 
@@ -58,17 +60,21 @@ ApproveKlass.prototype = {
 
     const oThis = this;
 
-    var r = null;
+    try {
+      var r = null;
 
-    r = await oThis.validateParams();
-    logger.debug("\n=========Approve.validateParams.result=========");
-    logger.debug(r);
-    if(r.isFailure()) return r;
+      r = await oThis.validateParams();
+      logger.debug("\n=========Approve.validateParams.result=========");
+      logger.debug(r);
+      if(r.isFailure()) return r;
 
-    r = oThis.doApprove();
-    logger.debug("\n=========Approve.doApprove.result=========");
-    logger.debug(r);
-    return r;
+      r = oThis.doApprove();
+      logger.debug("\n=========Approve.doApprove.result=========");
+      logger.debug(r);
+      return r;
+    } catch(err) {
+      return responseHelper.error('s_am_a_perform_1', 'Something went wrong. ' + err.message)
+    }
 
   },
 

@@ -24,9 +24,10 @@ const readline = require('readline')
   , coreAddresses = require(rootPrefix + '/config/core_addresses')
   , prompts = readline.createInterface(process.stdin, process.stdout)
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , OpsManagedContract = require(rootPrefix + "/lib/contract_interact/ops_managed_contract")
   , returnTypes = require(rootPrefix + "/lib/global_constant/return_types")
   , helper = require(rootPrefix + "/tools/deploy/helper")
+  , SetOpsKlass = require(rootPrefix + '/services/ops_managed/set_ops')
+  , GetOpsKlass = require(rootPrefix + '/services/ops_managed/get_ops')
 ;
 
 // Different addresses used for deployment
@@ -150,20 +151,29 @@ async function performer(argv) {
       helper.writeContractAddressToFile(fileForContractAddress, contractAddress);
     }
 
+    const setOpsOptions = {
+      returnType: returnTypes.transactionReceipt(),
+      tag: ''
+    };
     logger.debug("Setting Ops Address to: " + opsAddress);
-    const opsManaged = new OpsManagedContract(contractAddress, gasPrice, chainId)
-      , setOpsOptions = {
-          returnType: returnTypes.transactionReceipt(),
-          tag: ''
-        }
-    ;
-    var setOpsResult = await opsManaged.setOpsAddress(deployerAddress,
-      deployerPassphrase,
-      opsAddress,
-      setOpsOptions
-    );
+    const SetOpsObject = new SetOpsKlass({
+      contract_address: contractAddress,
+      gas_price: gasPrice,
+      chain_id: chainId,
+      deployer_address: deployerAddress,
+      deployer_passphrase: deployerPassphrase,
+      ops_address: opsAddress,
+      options: setOpsOptions
+    });
+    var setOpsResult = await SetOpsObject.perform();
     logger.debug(setOpsResult);
-    var contractOpsAddress = await opsManaged.getOpsAddress();
+
+    const GetOpsObject = new GetOpsKlass({
+      contract_address: contractAddress,
+      gas_price: gasPrice,
+      chain_id: chainId
+    });
+    var contractOpsAddress = await GetOpsObject.perform();
     logger.debug("Ops Address Set to: " + contractOpsAddress);
 
   } else {

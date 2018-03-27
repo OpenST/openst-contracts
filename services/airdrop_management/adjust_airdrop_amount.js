@@ -1,8 +1,10 @@
+"use strict";
+
 /**
  *
  * This class would be used for calculating user airdrop balance.<br><br>
  *
- * @module lib/airdrop_management/user_balance
+ * @module services/airdrop_management/adjust_airdrop_amount
  *
  */
 

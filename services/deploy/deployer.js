@@ -3,7 +3,7 @@
 /**
  * This is script for deploying any contract.<br><br>
  *
- * @module services/deployer
+ * @module services/deploy/deployer
  */
 
 const uuid = require('uuid')
@@ -51,17 +51,21 @@ DeployerKlass.prototype = {
 
     const oThis = this;
 
-    var r = null;
+    try {
+      var r = null;
 
-    r = await oThis.validateParams();
-    logger.debug("\n=========Deployer.validateParams.result=========");
-    logger.debug(r);
-    if(r.isFailure()) return r;
+      r = await oThis.validateParams();
+      logger.debug("\n=========Deployer.validateParams.result=========");
+      logger.debug(r);
+      if(r.isFailure()) return r;
 
-    r = oThis.deploy();
-    logger.debug("\n=========Deployer.deploy.result=========");
-    logger.debug(r);
-    return r;
+      r = oThis.deploy();
+      logger.debug("\n=========Deployer.deploy.result=========");
+      logger.debug(r);
+      return r;
+    } catch(err) {
+      return responseHelper.error('s_am_ub_perform_1', 'Something went wrong. ' + err.message);
+    }
 
   },
 
