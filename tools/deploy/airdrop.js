@@ -17,7 +17,7 @@
 
 const readline = require('readline');
 const rootPrefix = '../..';
-const web3Provider = require(rootPrefix + '/lib/web3/providers/rpc');
+const web3Provider = require(rootPrefix + '/lib/web3/providers/ws');
 const Deployer = require(rootPrefix + '/lib/deployer');
 const coreConstants = require(rootPrefix + '/config/core_constants');
 const coreAddresses = require(rootPrefix + '/config/core_addresses');
@@ -166,7 +166,7 @@ async function performer(argv) {
     logger.error("Error deploying contract");
     logger.error(deployResult);
   }
-
+  process.exit(0);
 }
 
 // node tools/deploy/airdrop.js brandedTokenContractAddress baseCurrency workerContractAddress airdropBudgetHolder gasPrice chainId <travis> <fileToWrite>
