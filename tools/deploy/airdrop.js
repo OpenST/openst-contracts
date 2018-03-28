@@ -19,7 +19,7 @@
 
 const readline = require('readline')
   , rootPrefix = '../..'
-  , web3Provider = require(rootPrefix + '/lib/web3/providers/rpc')
+  , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
   , Deployer = require(rootPrefix + '/services/deploy/deployer')
   , coreAddresses = require(rootPrefix + '/config/core_addresses')
   , prompts = readline.createInterface(process.stdin, process.stdout)
@@ -29,6 +29,7 @@ const readline = require('readline')
   , SetOpsKlass = require(rootPrefix + '/services/ops_managed/set_ops')
   , GetOpsKlass = require(rootPrefix + '/services/ops_managed/get_ops')
   , DeployAirdropKlass = require(rootPrefix + '/services/deploy/airdrop')
+  , coreConstants = require(rootPrefix + '/config/core_constants')
 ;
 
 // Different addresses used for deployment
@@ -176,7 +177,7 @@ async function performer(argv) {
     logger.error("Error deploying contract");
     logger.error(deployResult);
   }
-
+  process.exit(0);
 }
 
 // node tools/deploy/airdrop.js brandedTokenContractAddress baseCurrency workerContractAddress airdropBudgetHolder gasPrice chainId <travis> <fileToWrite>

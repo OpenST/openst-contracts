@@ -119,6 +119,7 @@ async function performer(argv) {
       await helper.writeContractAddressToFile(fileForContractAddress, contractAddress);
     }
   }
+  process.exit(0);
 }
 
 

@@ -17,7 +17,7 @@
 
 const readline = require('readline')
   , rootPrefix = '../..'
-  , web3Provider = require(rootPrefix + '/lib/web3/providers/rpc')
+  , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
   , prompts = readline.createInterface(process.stdin, process.stdout)
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , Deployer = require(rootPrefix + '/services/deploy/deployer')
@@ -177,6 +177,7 @@ async function performer(argv) {
     logger.error(deployResult);
   }
 
+  process.exit(0);
 }
 
 performer(process.argv);

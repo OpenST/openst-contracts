@@ -8,7 +8,7 @@ const rootPrefix      = "../../.."
     , utils           = require(rootPrefix+'/mocha_test/lib/utils')
     , workersModule   = require(rootPrefix + '/lib/contract_interact/workers')
     , workers         = new workersModule(constants.workersContractAddress, constants.chainId)
-    , web3RpcProvider = require(rootPrefix + '/lib/web3/providers/rpc')
+    , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
 ;
 
 describe('Remove', function() {
@@ -76,7 +76,7 @@ describe('Remove', function() {
     await utils.verifyIfMined(workers, response.data.transaction_hash);
 
     // confirm worker address has no code
-    const getCodeResult = await web3RpcProvider.eth.getCode(constants.workersContractAddress);
+    const getCodeResult = await web3Provider.eth.getCode(constants.workersContractAddress);
     assert.equal(getCodeResult, '0x');
 
   });

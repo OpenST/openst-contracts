@@ -8,7 +8,7 @@
 
 const uuid = require('uuid')
   , rootPrefix = '../..'
-  , web3Provider = require(rootPrefix + '/lib/web3/providers/rpc')
+  , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
   , coreConstants = require(rootPrefix + '/config/core_constants')
   , coreAddresses = require(rootPrefix + '/config/core_addresses')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
@@ -150,7 +150,7 @@ DeployerKlass.prototype = {
         );
 
         // this is needed since the contract object
-        contract.setProvider(web3Provider.currentProvider);
+        //contract.setProvider(web3Provider.currentProvider);
 
         // Unlock account
         web3Provider.eth.personal.unlockAccount(
@@ -201,6 +201,13 @@ DeployerKlass.prototype = {
                       return onResolve(responseHelper.error(errorCode, 'Contract deployment failed'));
                     }
                   });
+              })
+              .catch(function(reason) {
+                const errorCode = "l_d_8";
+                logger.error(`${errorCode}: Contract deployment failed`);
+                if (basicHelper.isReturnTypeTxReceipt(returnType)) {
+                  return onResolve(responseHelper.error(errorCode, 'Contract deployment failed'));
+                }
               });
           })
           .catch(function(reason) {

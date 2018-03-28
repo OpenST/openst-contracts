@@ -7,7 +7,7 @@ const rootPrefix      = "../../.."
     , constants       = require(rootPrefix + '/mocha_test/lib/constants')
     , BigNumber       = require('bignumber.js')
     , utils           = require(rootPrefix+'/mocha_test/lib/utils')
-    , web3RpcProvider = require(rootPrefix + '/lib/web3/providers/rpc')
+    , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
     , SetWorkerKlass = require(rootPrefix + '/services/workers/set_worker')
     , IsWorkerKlass = require(rootPrefix + '/services/workers/is_worker')
 ;
@@ -27,7 +27,7 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
@@ -55,7 +55,7 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
@@ -82,7 +82,7 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
@@ -192,7 +192,7 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
@@ -219,7 +219,7 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
@@ -266,7 +266,7 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
@@ -294,7 +294,7 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
@@ -321,7 +321,7 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
