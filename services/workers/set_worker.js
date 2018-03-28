@@ -110,6 +110,14 @@ SetWorkerKlass.prototype = {
       return responseHelper.error('s_w_sw_validateParams_6', 'deactivation height value is invalid');
     }
 
+    if (!oThis.gasPrice) {
+      return responseHelper.error('s_w_sw_validateParams_7', 'gas is mandatory');
+    }
+
+    if (!basicHelper.isValidChainId(oThis.chainId)) {
+      return responseHelper.error('s_w_sw_validateParams_8', 'ChainId is invalid');
+    }
+
     return responseHelper.successWithData({});
   },
 

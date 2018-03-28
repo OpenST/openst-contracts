@@ -106,6 +106,10 @@ SetPriceOracleKlass.prototype = {
       return responseHelper.error('s_am_spo_validateParams_4', 'address is invalid');
     }
 
+    if (!basicHelper.isValidChainId(oThis.chainId)) {
+      return responseHelper.error('s_am_spo_validateParams_5', 'ChainId is invalid');
+    }
+
     return responseHelper.successWithData({});
   },
 

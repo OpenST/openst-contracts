@@ -109,6 +109,14 @@ SetAcceptedMarginKlass.prototype = {
       return responseHelper.error('s_am_sam_validateParams_4', 'address is invalid');
     }
 
+    if (!oThis.gasPrice) {
+      return responseHelper.error('s_am_sam_validateParams_5', 'gas is mandatory');
+    }
+
+    if (!basicHelper.isValidChainId(oThis.chainId)) {
+      return responseHelper.error('s_am_sam_validateParams_6', 'ChainId is invalid');
+    }
+
     return responseHelper.successWithData({});
   },
 

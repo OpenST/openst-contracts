@@ -104,6 +104,14 @@ PayKlass.prototype = {
       return responseHelper.error('s_a_p_validateParams_1', 'airdrop contract address is invalid');
     }
 
+    if (!oThis.gasPrice) {
+      return responseHelper.error('s_a_p_validateParams_2', 'gas is mandatory');
+    }
+
+    if (!basicHelper.isValidChainId(oThis.chainId)) {
+      return responseHelper.error('s_a_p_validateParams_3', 'ChainId is invalid');
+    }
+
     return responseHelper.successWithData({});
   },
 

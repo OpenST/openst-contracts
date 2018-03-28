@@ -92,6 +92,14 @@ SetOpsKlass.prototype = {
       return responseHelper.error('s_om_go_validateParams_1', 'contract address is invalid');
     }
 
+    if (!oThis.gasPrice) {
+      return responseHelper.error('s_om_go_validateParams_2', 'gas is mandatory');
+    }
+
+    if (!basicHelper.isValidChainId(oThis.chainId)) {
+      return responseHelper.error('s_om_go_validateParams_3', 'ChainId is invalid');
+    }
+
     return responseHelper.successWithData({});
   },
 

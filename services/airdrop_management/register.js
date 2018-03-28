@@ -77,18 +77,18 @@ RegisterKlass.prototype = {
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
-        return onResolve(responseHelper.error('l_am_r_validateParams_1', 'airdrop contract address is invalid'));
+        return onResolve(responseHelper.error('s_am_r_validateParams_1', 'airdrop contract address is invalid'));
       }
 
       if (!basicHelper.isValidChainId(oThis.chainId)) {
-        return onResolve(responseHelper.error('l_am_r_validateParams_2', 'ChainId is invalid'));
+        return onResolve(responseHelper.error('s_am_r_validateParams_2', 'ChainId is invalid'));
       }
 
       const airdropContractInteractObject = new airdropContractInteract(oThis.airdropContractAddress, oThis.chainId);
       var result = await airdropContractInteractObject.airdropBudgetHolder();
       const airdropBudgetHolderAddress = result.data.airdropBudgetHolder;
       if (!basicHelper.isAddressValid(airdropBudgetHolderAddress)) {
-        return onResolve(responseHelper.error('l_am_r_validateParams_3', 'airdrop contract is invalid'));
+        return onResolve(responseHelper.error('s_am_r_validateParams_3', 'airdrop contract is invalid'));
       }
 
       // Check if airdropContractAddress is registered or not
@@ -97,7 +97,11 @@ RegisterKlass.prototype = {
         , airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
       ;
       if (airdropRecord) {
-        return onResolve(responseHelper.error('l_am_r_validateParams_4', 'airdrop contract address is already registered'));
+        return onResolve(responseHelper.error('s_am_r_validateParams_4', 'airdrop contract address is already registered'));
+      }
+
+      if (!basicHelper.isValidChainId(oThis.chainId)) {
+        return onResolve(responseHelper.error('s_am_r_validateParams_5', 'ChainId is invalid'));
       }
 
       return onResolve(responseHelper.successWithData({}));
@@ -129,7 +133,7 @@ RegisterKlass.prototype = {
         await airdropModelCacheObject.clear();
         return onResolve(responseHelper.successWithData({insertId: insertedRecord.insertId}));
       } catch (err) {
-        return onResolve(responseHelper.error('l_am_s_rs_1', 'Error creating airdrop record. ' + err));
+        return onResolve(responseHelper.error('s_am_r_runRegister_1', 'Error creating airdrop record. ' + err));
       }
     });
 

@@ -574,7 +574,7 @@ describe('Airdrop Pay', function() {
     const ApproveObject = new ApproveKlass({
       airdrop_contract_address: constants.airdropOstUsdAddress,
       airdrop_budget_holder_passphrase: constants.airdropBudgetHolderPassphrase,
-      gas_used: constants.gasUsed,
+      gas_price: constants.gasUsed,
       chain_id: constants.chainId,
       options: constants.optionsReceipt
     });

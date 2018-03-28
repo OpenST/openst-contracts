@@ -97,6 +97,10 @@ AirdropUserBalanceKlass.prototype = {
         return onResolve(responseHelper.error('s_am_ub_validateParams_3', 'Given airdrop contract is not registered'));
       }
 
+      if (!basicHelper.isValidChainId(oThis.chainId)) {
+        return onResolve(responseHelper.error('s_am_ub_validateParams_4', 'ChainId is invalid'));
+      }
+
       return onResolve(responseHelper.successWithData({}));
     });
 
@@ -119,7 +123,7 @@ AirdropUserBalanceKlass.prototype = {
         });
         return onResolve(await userAirdropDetailCacheKlassObject.fetch());
       } catch(err){
-        return onResolve(responseHelper.error('l_am_ub_vp_4', 'getUserAirdropBalance error: '+err));
+        return onResolve(responseHelper.error('l_am_ub_getUserAirdropBalance_4', 'getUserAirdropBalance error: '+err));
       }
     });
 

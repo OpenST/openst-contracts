@@ -93,11 +93,11 @@ BatchAllocatorKlass.prototype = {
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
-        return onResolve(responseHelper.error('l_am_ba_vp_1', 'airdrop contract address is invalid'));
+        return onResolve(responseHelper.error('s_am_ba_validateParams_1', 'airdrop contract address is invalid'));
       }
 
       if (!basicHelper.isTxHashValid(oThis.transactionHash)) {
-        return onResolve(responseHelper.error('l_am_ba_vp_2', 'transaction hash is invalid'));
+        return onResolve(responseHelper.error('s_am_ba_validateParams_2', 'transaction hash is invalid'));
       }
 
       // Check if airdropContractAddress is registered or not
@@ -106,26 +106,26 @@ BatchAllocatorKlass.prototype = {
       ;
       oThis.airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
       if (!oThis.airdropRecord) {
-        return onResolve(responseHelper.error('l_am_ba_vp_3', 'given airdrop record is not present in DB'));
+        return onResolve(responseHelper.error('s_am_ba_validateParams_3', 'given airdrop record is not present in DB'));
       }
       var airdropAllocationProofDetailModel = new airdropAllocationProofDetailKlass();
       const result = await airdropAllocationProofDetailModel.getByTransactionHash(oThis.transactionHash);
       oThis.airdropAllocationProofDetailRecord = result[0];
       if (!oThis.airdropAllocationProofDetailRecord) {
-        return onResolve(responseHelper.error('l_am_ba_vp_4', 'Invalid transactionHash. Given airdropAllocationProofDetailRecord is not present in DB'));
+        return onResolve(responseHelper.error('s_am_ba_validateParams_4', 'Invalid transactionHash. Given airdropAllocationProofDetailRecord is not present in DB'));
       }
 
       if (new BigNumber(oThis.airdropAllocationProofDetailRecord.airdrop_allocated_amount).gte(new BigNumber(oThis.airdropAllocationProofDetailRecord.airdrop_amount))) {
-        return onResolve(responseHelper.error('l_am_ba_vp_5', 'Allocated amount is greater or equal to airdrop amount'));
+        return onResolve(responseHelper.error('s_am_ba_validateParams_5', 'Allocated amount is greater or equal to airdrop amount'));
       }
 
       if(!oThis.airdropUsers || !(typeof oThis.airdropUsers === "object")) {
-        return onResolve(responseHelper.error('l_am_ba_vp_6', 'Invalid airdrop users object'));
+        return onResolve(responseHelper.error('s_am_ba_validateParams_6', 'Invalid airdrop users object'));
       }
 
       const batchSize = Object.keys(oThis.airdropUsers).length;
       if (batchSize > airdropConstants.batchSize()) {
-        return onResolve(responseHelper.error('l_am_ba_vp_7', 'airdrop Users Batch size should be: '+batchSize));
+        return onResolve(responseHelper.error('s_am_ba_validateParams_7', 'airdrop Users Batch size should be: '+batchSize));
       }
 
       var value = null
@@ -138,21 +138,21 @@ BatchAllocatorKlass.prototype = {
         value = oThis.airdropUsers[userAddress];
 
         if (!basicHelper.isAddressValid(userAddress)) {
-          return onResolve(responseHelper.error('l_am_ba_vp_8', 'userAddress'+ userAddress +' is invalid'));
+          return onResolve(responseHelper.error('s_am_ba_validateParams_8', 'userAddress'+ userAddress +' is invalid'));
         }
 
         userAirdropAmount = new BigNumber(value.airdropAmount);
         if (userAirdropAmount.isNaN() || !userAirdropAmount.isInteger()) {
-          return onResolve(responseHelper.error('l_am_ba_vp_9', 'userAddress'+ userAddress +' airdrop amount is invalid'));
+          return onResolve(responseHelper.error('s_am_ba_validateParams_9', 'userAddress'+ userAddress +' airdrop amount is invalid'));
         }
 
         if (userAirdropAmount.lte(0)) {
-          return onResolve(responseHelper.error('l_am_ba_vp_10', 'Airdrop amount 0 or less than 0 for user'+ userAddress +' is not allowed'));
+          return onResolve(responseHelper.error('s_am_ba_validateParams_10', 'Airdrop amount 0 or less than 0 for user'+ userAddress +' is not allowed'));
         }
 
         expiryTimestamp = new BigNumber(value.expiryTimestamp);
         if (expiryTimestamp.isNaN() || !expiryTimestamp.isInteger()) {
-          return onResolve(responseHelper.error('l_am_ba_vp_11', 'userAddress: '+ userAddress +' expiry Timestamp is invalid'));
+          return onResolve(responseHelper.error('s_am_ba_validateParams_11', 'userAddress: '+ userAddress +' expiry Timestamp is invalid'));
         }
 
         oThis.totalInputAirdropAmount = oThis.totalInputAirdropAmount.plus(userAirdropAmount);
@@ -171,8 +171,13 @@ BatchAllocatorKlass.prototype = {
         plus(oThis.totalInputAirdropAmount);
       const airdropAmountBigNumber = new BigNumber(oThis.airdropAllocationProofDetailRecord.airdrop_amount);      
       if (oThis.totalAmountAfterAllocatingInputAmount.gt(airdropAmountBigNumber)) {
-        return onResolve(responseHelper.error('l_am_ba_vp_12', 'totalAmountAfterAllocatingInputAmount is greater than transferred airdrop amount'));
+        return onResolve(responseHelper.error('s_am_ba_validateParams_12', 'totalAmountAfterAllocatingInputAmount is greater than transferred airdrop amount'));
       }
+
+      if (!basicHelper.isValidChainId(oThis.chainId)) {
+        return onResolve(responseHelper.error('s_am_ba_validateParams_14', 'ChainId is invalid'));
+      }
+
       return onResolve(responseHelper.successWithData({}));
 
     });

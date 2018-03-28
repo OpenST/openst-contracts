@@ -90,7 +90,7 @@ ApproveKlass.prototype = {
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
-        return onResolve(responseHelper.error('l_am_a_vp_1', 'airdrop contract address is invalid'));
+        return onResolve(responseHelper.error('s_am_a_validateParams_1', 'airdrop contract address is invalid'));
       }
 
       // Check if airdropContractAddress is registered or not
@@ -99,20 +99,20 @@ ApproveKlass.prototype = {
        ;
       oThis.airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
       if (!oThis.airdropRecord){
-        return onResolve(responseHelper.error('l_am_ub_vp_2', 'Given airdrop contract is not registered'));
+        return onResolve(responseHelper.error('s_am_a_validateParams_2', 'Given airdrop contract is not registered'));
       }
 
       var airdropContractInteractObject = new airdropContractInteract(oThis.airdropContractAddress, oThis.chainId);
       var result = await airdropContractInteractObject.brandedToken();
       oThis.brandedTokenContractAddress = result.data.brandedToken;
       if (!basicHelper.isAddressValid(oThis.brandedTokenContractAddress)) {
-        return onResolve(responseHelper.error('l_am_a_vp_2', 'brandedTokenContractAddress set in airdrop contract is invalid'));
+        return onResolve(responseHelper.error('s_am_a_validateParams_3', 'brandedTokenContractAddress set in airdrop contract is invalid'));
       }
 
       result = await airdropContractInteractObject.airdropBudgetHolder();
       oThis.airdropBudgetHolderAddress = result.data.airdropBudgetHolder;
       if (!basicHelper.isAddressValid(oThis.airdropBudgetHolderAddress)) {
-        return onResolve(responseHelper.error('l_am_a_vp_3', 'airdropBudgetHolderAddress set in airdrop contract is invalid'));
+        return onResolve(responseHelper.error('s_am_a_validateParams_4', 'airdropBudgetHolderAddress set in airdrop contract is invalid'));
       }
 
       oThis.brandedTokenObject = new brandedTokenContractInteract(oThis.brandedTokenContractAddress, oThis.chainId);
@@ -120,11 +120,15 @@ ApproveKlass.prototype = {
       oThis.amount = result.data.balance;
       const amountInBigNumber = new BigNumber(oThis.amount);
       if (amountInBigNumber.isNaN() || !amountInBigNumber.isInteger()){
-        return onResolve(responseHelper.error('l_am_v_vp_4', 'amount is invalid value'));
+        return onResolve(responseHelper.error('s_am_a_validateParams_5', 'amount is invalid value'));
       }
 
       if (!basicHelper.isValidChainId(oThis.chainId)) {
-        return onResolve(responseHelper.error('l_am_v_vp_5', 'ChainId is invalid'));
+        return onResolve(responseHelper.error('s_am_a_validateParams_6', 'ChainId is invalid'));
+      }
+
+      if (!oThis.gasPrice) {
+        return onResolve(responseHelper.error('s_am_a_validateParams_7', 'gas is mandatory'));
       }
 
       return onResolve(responseHelper.successWithData({}));

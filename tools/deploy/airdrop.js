@@ -28,6 +28,7 @@ const readline = require('readline')
   , helper = require(rootPrefix + "/tools/deploy/helper")
   , SetOpsKlass = require(rootPrefix + '/services/ops_managed/set_ops')
   , GetOpsKlass = require(rootPrefix + '/services/ops_managed/get_ops')
+  , DeployAirdropKlass = require(rootPrefix + '/services/deploy/airdrop')
 ;
 
 // Different addresses used for deployment
@@ -126,23 +127,17 @@ async function performer(argv) {
     prompts.close();
   }
 
-  const contractName = 'airdrop'
-    , deployOptions = {returnType: returnTypes.transactionReceipt()}
+  const deployOptions = {returnType: returnTypes.transactionReceipt()}
   ;
-  const constructorArgs = [
-    brandedTokenAddress,
-    web3Provider.utils.asciiToHex(baseCurrency),
-    workerContractAddress,
-    airdropBudgetHolder
-  ];
-
-  const deployerInstance = new Deployer({
-    contract_name: contractName,
-    constructor_args: constructorArgs,
+  const DeployAirdropObject = new DeployAirdropKlass({
+    branded_token_contract_address: brandedTokenAddress,
+    baseCurrency: baseCurrency,
+    worker_contract_address: workerContractAddress,
+    airdrop_budget_holder: airdropBudgetHolder,
     gas_price: gasPrice,
     options: deployOptions
   });
-  const deployResult =  await deployerInstance.perform();
+  const deployResult =  await DeployAirdropObject.perform();
 
   if (deployResult.isSuccess()) {
     const contractAddress = deployResult.data.transaction_receipt.contractAddress;

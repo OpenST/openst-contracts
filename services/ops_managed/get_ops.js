@@ -34,8 +34,8 @@ const GetOpsKlass = function (params) {
   const oThis = this
   ;
   oThis.contractAddress = params.contract_address;
-  oThis.gasPrice = params.gas_price;
   oThis.chainId = params.chain_id;
+  oThis.gasPrice = params.gas_price;
 
 };
 
@@ -81,6 +81,14 @@ GetOpsKlass.prototype = {
     ;
     if (!basicHelper.isAddressValid(oThis.contractAddress)) {
       return responseHelper.error('s_om_go_validateParams_1', 'contract address is invalid');
+    }
+
+    if (!oThis.gasPrice) {
+      return responseHelper.error('s_om_go_validateParams_2', 'gas is mandatory');
+    }
+
+    if (!basicHelper.isValidChainId(oThis.chainId)) {
+      return responseHelper.error('s_om_go_validateParams_3', 'ChainId is invalid');
     }
 
     return responseHelper.successWithData({});

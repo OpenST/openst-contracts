@@ -95,11 +95,11 @@ TransferKlass.prototype = {
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.senderAddress)) {
-        return onResolve(responseHelper.error('l_am_t_vp_1', 'sender address is invalid'));
+        return onResolve(responseHelper.error('s_am_t_validateParams_1', 'sender address is invalid'));
       }
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
-        return onResolve(responseHelper.error('l_am_v_vp_2', 'airdrop contract address is invalid'));
+        return onResolve(responseHelper.error('s_am_t_validateParams_2', 'airdrop contract address is invalid'));
       }
 
       // Check if airdropContractAddress is registered or not
@@ -109,7 +109,7 @@ TransferKlass.prototype = {
       ;
       oThis.airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
       if (!oThis.airdropRecord){
-        return onResolve(responseHelper.error('l_am_ub_vp_3', 'Given airdrop contract is not registered'));
+        return onResolve(responseHelper.error('s_am_t_validateParams_3', 'Given airdrop contract is not registered'));
       }
 
       const airdropContractInteractObject = new airdropContractInteract(oThis.airdropContractAddress, oThis.chainId);
@@ -118,35 +118,43 @@ TransferKlass.prototype = {
       logger.debug("\n==========transfer.validateParams.brandedToken===========");
       logger.debug("\nairdropContractInteractObject.brandedToken():", result,"\noThis.brandedTokenContractAddress:", oThis.brandedTokenContractAddress);
       if (!basicHelper.isAddressValid(oThis.brandedTokenContractAddress)) {
-        return onResolve(responseHelper.error('l_am_v_vp_4', 'brandedTokenContractAddress set in airdrop contract is invalid'));
+        return onResolve(responseHelper.error('s_am_t_validateParams_4', 'brandedTokenContractAddress set in airdrop contract is invalid'));
       }
 
       result = await airdropContractInteractObject.airdropBudgetHolder();
       oThis.airdropBudgetHolderAddress = result.data.airdropBudgetHolder;
       if (!basicHelper.isAddressValid(oThis.brandedTokenContractAddress)) {
-        return onResolve(responseHelper.error('l_am_v_vp_5', 'airdropBudgetHolderAddress set in airdrop contract is invalid'));
+        return onResolve(responseHelper.error('s_am_t_validateParams_5', 'airdropBudgetHolderAddress set in airdrop contract is invalid'));
       }
 
       const amountInBigNumber = new BigNumber(oThis.amount);
       if (amountInBigNumber.isNaN() || !amountInBigNumber.isInteger()){
-        return onResolve(responseHelper.error('l_am_v_vp_6', 'amount is invalid value'));
+        return onResolve(responseHelper.error('s_am_t_validateParams_6', 'amount is invalid value'));
       }
 
       if (!basicHelper.isValidChainId(oThis.chainId)) {
-        return onResolve(responseHelper.error('l_am_v_vp_7', 'ChainId is invalid'));
+        return onResolve(responseHelper.error('s_am_t_validateParams_7', 'ChainId is invalid'));
       }
 
       const brandedTokenObject = new BrandedTokenKlass(oThis.brandedTokenContractAddress, oThis.chainId);
       const senderBalanceResponse = await brandedTokenObject.getBalanceOf(oThis.senderAddress);
 
       if (senderBalanceResponse.isFailure()) {
-        return onResolve(responseHelper.error('l_am_v_vp_8', 'Error while getting sender balance'));
+        return onResolve(responseHelper.error('s_am_t_validateParams_8', 'Error while getting sender balance'));
       }
 
       const senderBalance = new BigNumber(senderBalanceResponse.data.balance);
       //logger.debug("senderBalance: "+senderBalance.toString(10), "amount to transfer: "+amountInBigNumber);
       if (senderBalance.lt(amountInBigNumber)){
-        return onResolve(responseHelper.error('l_am_v_vp_9', 'Sender balance: '+ senderBalance.toString(10) +' is not enough to transfer amount: '+amountInBigNumber.toString(10)));
+        return onResolve(responseHelper.error('s_am_t_validateParams_9', 'Sender balance: '+ senderBalance.toString(10) +' is not enough to transfer amount: '+amountInBigNumber.toString(10)));
+      }
+
+      if (!oThis.gasPrice) {
+        return onResolve(responseHelper.error('s_am_t_validateParams_10', 'gas is mandatory'));
+      }
+
+      if (!basicHelper.isValidChainId(oThis.chainId)) {
+        return onResolve(responseHelper.error('s_am_t_validateParams_11', 'ChainId is invalid'));
       }
 
       return onResolve(responseHelper.successWithData({}));

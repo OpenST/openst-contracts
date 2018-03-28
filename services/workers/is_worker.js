@@ -84,6 +84,10 @@ IsWorkerKlass.prototype = {
       return responseHelper.error('s_w_iw_validateParams_1', 'worker address is invalid');
     }
 
+    if (!basicHelper.isValidChainId(oThis.chainId)) {
+      return responseHelper.error('s_w_iw_validateParams_2', 'ChainId is invalid');
+    }
+
     return responseHelper.successWithData({});
   },
 

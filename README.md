@@ -73,19 +73,29 @@ export OP_MYSQL_CONNECTION_POOL_SIZE='5'
 node migrations/create_tables.js 
 ```
 
-# Deployer Service Examples:
+# Deploy Service Examples:
 ```js
 const OpenSTPayment = require('@openstfoundation/openst-payments')
   , Deploy = OpenSTPayment.services.deploy
 ;  
-  // Deploy Contract
-  const deployerObject = new Deploy.deployer({
-    contract_name: contractName,
-    constructor_args: constructorArgs,
+  // Deploy Workers
+  const deployWorkerObject = new Deploy.workers({
     gas_price: gasPrice,
-    options: deployOptions
+    options: {returnType: 'txHash'}
   });
-  deployerObject.perform();
+  deployWorkerObject.perform();
+  
+  // Deploy Airdrop
+  const deployAirdropObject = new Deploy.airdrop({
+    branded_token_contract_address: brandedTokenAddress,
+    baseCurrency: baseCurrency,
+    worker_contract_address: workerContractAddress,
+    airdrop_budget_holder: airdropBudgetHolder,
+    gas_price: gasPrice,
+    options: {returnType: 'txHash'}
+  });
+  deployAirdropObject.perform();
+  
 ```
 
 # OpsManaged Service Examples
@@ -101,7 +111,7 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
     deployer_address: deployerAddress,
     deployer_passphrase: deployerPassphrase,
     ops_address: opsAddress,
-    options: setOpsOptions
+    options: {returnType: 'txHash'}
   });
   setOpsObject.perform();
     
@@ -126,19 +136,19 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
       sender_passphrase: constants.opsPassphrase,
       worker_address: workerAddress,
       deactivation_height: deactivationHeight.toString(10),
-      gas_price: constants.gasUsed,
-      chain_id: constants.chainId,
-      options: constants.optionsReceipt
+      gas_price: gasPrice,
+      chain_id: chainId,
+      options: {returnType: 'txHash'}
   });
   setWorkerObject.perform();
   
   // Is Worker
-  const IsWorkerObject = new Workers.isWorker({
-      workers_contract_address: constants.workersContractAddress,
+  const isWorkerObject = new Workers.isWorker({
+      workers_contract_address: workersContractAddress,
       worker_address: workerAddress,
-      chain_id: constants.chainId
+      chain_id: chainId
   });
-  IsWorkerObject.perform();
+  isWorkerObject.perform();
 ```
 
 # Airdrop Management Service Examples:
@@ -161,7 +171,7 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
       sender_passphrase: senderPassphrase,
       currency: currency,
       price_oracle_contract_address: priceOracleContractAddress,
-      gas_price: gasUsed,
+      gas_price: gasPrice,
       options: {tag: 'airdrop.setPriceOracle', returnType: 'txHash'}
   });
   setPriceOracleObject.perform();
@@ -174,7 +184,7 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
     sender_passphrase: senderPassphrase,
     currency: currency,
     accepted_margin: acceptedMargin,
-    gas_price: gasUsed,
+    gas_price: gasPrice,
     options: {tag: 'airdrop.setAcceptedMargin', returnType: 'txHash'}
   });
   setAcceptedMarginObject.perform();
@@ -195,7 +205,7 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
   const approveObject = new AirdropManager.approve({
     airdrop_contract_address: airdropContractAddress,
     airdrop_budget_holder_passphrase: airdropBudgetHolderPassphrase,
-    gas_used: gasPrice,
+    gas_price: gasPrice,
     chain_id: chainId,
     options: {tag: 'airdrop.approve', returnType: 'txHash'}
   });
