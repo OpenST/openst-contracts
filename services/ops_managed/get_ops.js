@@ -20,19 +20,20 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {string} contract_address - contract address
- * @param {string} gas_price - gas price
- * @param {object} chain_id - chain id
+ * @param {object} params -
+ * @param {string} params.contract_address - contract address
+ * @param {string} params.gas_price - gas price
+ * @param {object} params.chain_id - chain id
  *
- * @return {Object}
+ * @return {object}
  *
  */
 const GetOpsKlass = function (params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("=======GetOpsKlass.params=======");
   logger.debug(params);
 
-  const oThis = this
-  ;
   oThis.contractAddress = params.contract_address;
   oThis.chainId = params.chain_id;
   oThis.gasPrice = params.gas_price;

@@ -23,20 +23,22 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {Hex} airdrop_contract_address - airdrop contract address
- * @param {String} airdrop_budget_holder_passphrase - airdropBudgetHolder Passphrase
- * @param {String} gas_price - gas price
- * @param {Number} chain_id - chain Id
- * @param {Object} options - chain Id
+ * @param {object} params -
+ * @param {string} params.airdrop_contract_address - airdrop contract address
+ * @param {string} params.airdrop_budget_holder_passphrase - airdropBudgetHolder Passphrase
+ * @param {string} params.gas_price - gas price
+ * @param {number} params.chain_id - chain Id
+ * @param {object} params.options - options
  *
- * @return {Object}
+ * @return {object}
  *
  */
 const ApproveKlass = function(params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("=========Approve.params=========");
   // Don't log passphrase
   logger.debug(params.airdrop_contract_address, params.gas_price, params.chain_id, params.options);
-  const oThis = this;
   oThis.airdropContractAddress = params.airdrop_contract_address;
   oThis.airdropBudgetHolderPassphrase = params.airdrop_budget_holder_passphrase;
   oThis.gasPrice = params.gas_price;
@@ -54,7 +56,7 @@ ApproveKlass.prototype = {
   /**
    * Perform approve by airdrop budget holder to contract
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   perform: async function () {
@@ -82,7 +84,7 @@ ApproveKlass.prototype = {
   /**
    * Validate params
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   validateParams: function(){
@@ -140,7 +142,7 @@ ApproveKlass.prototype = {
   /**
    * Perform Approve to airdrop budget holder
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   doApprove: async function(){

@@ -17,21 +17,21 @@ const rootPrefix = '../..'
 /**
  * Constructor to create object of worker
  *
- * @param {Hex} gas_price - gas price
- * @param {Number} chain_id - chain id
- * @param {Object} options - deployment options e.g. {returnType: 'txReceipt'}
+ * @param {object} params -
+ * @param {string} params.gas_price - gas price
+ * @param {number} params.chain_id - chain id
+ * @param {object} params.options - deployment options e.g. {returnType: 'txReceipt'}
  *
  * @constructor
  *
  */
-
 const DeployWorkerKlass = function (params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("=======DeployWorkerKlass.params=======");
   // Don't log passphrase
   logger.debug(params);
 
-  const oThis = this
-  ;
   oThis.contractName = 'workers';
   oThis.gasPrice = params.gas_price;
   oThis.options = params.options;
@@ -73,7 +73,7 @@ DeployWorkerKlass.prototype = {
   /**
    * Validation of params
    *
-   * @return {promise<result>}
+   * @return {result}
    *
    */
   validateParams: function () {

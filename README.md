@@ -89,7 +89,7 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
   // Deploy Airdrop
   const deployAirdropObject = new Deploy.airdrop({
     branded_token_contract_address: brandedTokenAddress,
-    baseCurrency: baseCurrency,
+    base_currency: baseCurrency,
     worker_contract_address: workerContractAddress,
     airdrop_budget_holder: airdropBudgetHolder,
     gas_price: gasPrice,

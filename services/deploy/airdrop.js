@@ -21,14 +21,23 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @return {Object}
+ * @param {object} params -
+ * @param {string} params.branded_token_contract_address - branded token contract address
+ * @param {string} params.base_currency - base currency
+ * @param {string} params.worker_contract_address - worker contract address
+ * @param {string} params.airdrop_budget_holder - airdrop budget holder address
+ * @param {string} params.gas_price - gas price
+ * @param {object} params.options - deployment options e.g. {returnType: 'txReceipt'}
+ *
+ * @return {object}
  *
  */
 const DeployAirdropKlass = function (params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("=======DeployAirdropKlass.params=======");
   logger.debug(params);
 
-  const oThis = this;
   oThis.contractName = 'airdrop';
   oThis.brandedTokenContractAddress = params.branded_token_contract_address;
   oThis.baseCurrency = params.baseCurrency;
@@ -74,7 +83,7 @@ DeployAirdropKlass.prototype = {
   /**
    * Validation of params
    *
-   * @return {promise<result>}
+   * @return {result}
    *
    */
   validateParams: function () {

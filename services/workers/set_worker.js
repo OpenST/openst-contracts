@@ -21,23 +21,25 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {string} workers_contract_address - contract address of workers
- * @param {string} sender_address - address of sender
- * @param {string} sender_passphrase - passphrase of sender
- * @param {string} worker_address - worker address
- * @param {number} deactivation_height - block number till which the worker is valid
- * @param {BigNumber} gas_price - gas price
- * @param {object} chain_id - chain id
- * @param {object} options - for params like returnType, tag.
+ * @param {object} params -
+ * @param {string} params.workers_contract_address - contract address of workers
+ * @param {string} params.sender_address - address of sender
+ * @param {string} params.sender_passphrase - passphrase of sender
+ * @param {string} params.worker_address - worker address
+ * @param {number} params.deactivation_height - block number till which the worker is valid
+ * @param {bignumber} params.gas_price - gas price
+ * @param {number} params.chain_id - chain id
+ * @param {object} params.options - for params like returnType, tag.
  *
- * @return {Object}
+ * @return {object}
  *
  */
 const SetWorkerKlass = function (params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("=======SetWorkerKlass.params=======");
   // Don't log passphrase
   logger.debug(params.workers_contract_address, params.sender_address, params.worker_address, params.deactivation_height, params.gas_price, params.chain_id, params.options);
-  const oThis = this;
 
   oThis.workersContractAddress = params.workers_contract_address;
   oThis.senderAddress = params.sender_address;
@@ -85,7 +87,7 @@ SetWorkerKlass.prototype = {
   /**
    * Validation of params
    *
-   * @return {promise<result>}
+   * @return {result}
    *
    */
   validateParams: function () {

@@ -22,17 +22,21 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {Hex} airdrop_contract_address - airdrop contract address
- * @param {Number} chain_id - chain Id
+ * @params {object} params -
+ * @param {string} params.airdrop_contract_address - airdrop contract address
+ * @param {number} params.chain_id - chain Id
  *
  * @return {Object}
  *
  */
 const RegisterKlass = function (params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("=======register.params=======");
   logger.debug(params);
-  this.airdropContractAddress = params.airdrop_contract_address;
-  this.chainId = params.chain_id;
+
+  oThis.airdropContractAddress = params.airdrop_contract_address;
+  oThis.chainId = params.chain_id;
 
 };
 
@@ -41,7 +45,7 @@ RegisterKlass.prototype = {
   /**
    * Perform method
    *
-   * @return {responseHelper}
+   * @return {promise<result>}
    *
    */
   perform: async function () {

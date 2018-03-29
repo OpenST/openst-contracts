@@ -20,24 +20,25 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {string} contract_address - contract address
- * @param {Hex} gas_price - gas price
- * @param {Number} chain_id - chain id
- * @param {string} deployer_address - deployer address
- * @param {string} deployer_passphrase - deployer passphrase
- * @param {string} ops_address - ops addresses
- * @param {object} options - options
+ * @params {object} params -
+ * @param {string} params.contract_address - contract address
+ * @param {string} params.gas_price - gas price
+ * @param {number} params.chain_id - chain id
+ * @param {string} params.deployer_address - deployer address
+ * @param {string} params.deployer_passphrase - deployer passphrase
+ * @param {string} params.ops_address - ops addresses
+ * @param {object} params.options - options
  *
- * @return {Object}
+ * @return {object}
  *
  */
 const SetOpsKlass = function (params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("=======GetOpsKlass.params=======");
   // Don't log passphrase
   logger.debug(params.contract_address, params.gas_price, params.chain_id, params.deployer_address, params.ops_address, params.options);
 
-  const oThis = this
-  ;
   oThis.contractAddress = params.contract_address;
   oThis.gasPrice = params.gas_price;
   oThis.chainId = params.chain_id;
@@ -82,7 +83,7 @@ SetOpsKlass.prototype = {
   /**
    * Validation of params
    *
-   * @return {promise<result>}
+   * @return {result}
    *
    */
   validateParams: function () {

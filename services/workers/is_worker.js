@@ -20,19 +20,19 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {string} workers_contract_address - contract address of workers
- * @param {string} worker_address - worker address
- * @param {object} chain_id - chain id
+ * @params {object} params -
+ * @param {string} params.workers_contract_address - contract address of workers
+ * @param {string} params.worker_address - worker address
+ * @param {object} params.chain_id - chain id
  *
  * @return {Object}
  *
  */
 const IsWorkerKlass = function (params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("=======IsWorkerKlass.params=======");
   logger.debug(params);
-
-  const oThis = this
-  ;
 
   oThis.workersContractAddress = params.workers_contract_address;
   oThis.workerAddress = params.worker_address;
@@ -74,7 +74,7 @@ IsWorkerKlass.prototype = {
   /**
    * Validation of params
    *
-   * @return {promise<result>}
+   * @return {result}
    *
    */
   validateParams: function () {

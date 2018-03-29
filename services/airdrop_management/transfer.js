@@ -25,22 +25,25 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {Hex} sender_address - sender address
- * @param {String} sender_passphrase - sender Passphrase
- * @param {Hex} airdrop_contract_address - airdrop contract address
- * @param {String} amount - amount in wei
- * @param {String} gas_price - gas price
- * @param {Number} chain_id - chain Id
- * @param {Object} options - chain Id
+ * @params {object} - params
+ * @param {string} sender_address - sender address
+ * @param {string} sender_passphrase - sender Passphrase
+ * @param {string} airdrop_contract_address - airdrop contract address
+ * @param {string} amount - amount in wei
+ * @param {string} gas_price - gas price
+ * @param {number} chain_id - chain Id
+ * @param {object} options - options
  *
- * @return {Object}
+ * @return {object}
  *
  */
 const TransferKlass = function(params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("\n=========Transfer params=========");
   // Don't log passphrase
   logger.debug(params.sender_address, params.airdrop_contract_address, params.amount, params.gas_price, params.chain_id, params.options);
-  const oThis = this;
+
   oThis.senderAddress = params.sender_address;
   oThis.senderPassphrase = params.sender_passphrase;
   oThis.airdropContractAddress = params.airdrop_contract_address;
@@ -48,7 +51,6 @@ const TransferKlass = function(params) {
   oThis.gasPrice = params.gas_price;
   oThis.chainId = params.chain_id;
   oThis.options = params.options;
-
   oThis.airdropBudgetHolder = null;
   oThis.brandedTokenContractAddress = null;
 
@@ -59,7 +61,7 @@ TransferKlass.prototype = {
   /**
    * Perform method
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   perform: async function () {
@@ -87,7 +89,7 @@ TransferKlass.prototype = {
   /**
    * validation of params
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   validateParams: function() {
@@ -166,7 +168,7 @@ TransferKlass.prototype = {
   /**
    * Transfer amount to airdrop budget holder
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   doTransfer: async function() {

@@ -20,26 +20,27 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {string} airdropContractAddress - airdrop contract address
- * @param {string} chainId - chain id
- * @param {string} senderAddress - address of sender
- * @param {string} senderPassphrase - passphrase of sender
- * @param {string} currency - quote currency
- * @param {string} address - address of price oracle
- * @param {BigNumber} gasPrice - gas price
- * @param {object} options - for params like returnType, tag.
+ * @param {object} - params
+ * @param {string} params.airdrop_contract_address - airdrop contract address
+ * @param {number} params.chain_id - chain id
+ * @param {string} params.sender_address - address of sender
+ * @param {string} params.sender_passphrase - passphrase of sender
+ * @param {string} params.currency - quote currency
+ * @param {string} params.address - address of price oracle
+ * @param {bignumber} params.gas_price - gas price
+ * @param {object} params.options - for params like returnType, tag.
  *
  * @return {Object}
  *
  */
 const SetPriceOracleKlass = function (params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("=======SetPriceOracleKlass.params=======");
   // Don't log passphrase
   logger.debug(params.airdrop_contract_address, params.chain_id, params.sender_address, params.currency,
     params.price_oracle_contract_address, params.gas_price, params.options);
 
-  const oThis = this
-  ;
   oThis.airdropContractAddress = params.airdrop_contract_address;
   oThis.chainId = params.chain_id;
   oThis.senderAddress = params.sender_address;
@@ -84,7 +85,7 @@ SetPriceOracleKlass.prototype = {
   /**
    * Validation of params
    *
-   * @return {promise<result>}
+   * @return {result}
    *
    */
   validateParams: function () {

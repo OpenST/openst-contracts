@@ -21,26 +21,27 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {string} airdrop_contract_address - airdrop contract address
- * @param {string} chain_id - chain id
- * @param {string} sender_address - address of sender
- * @param {string} sender_passphrase - passphrase of sender
- * @param {string} currency - quote currency
- * @param {BigNumber} accepted_margin - accepted margin for the given currency (in wei)
- * @param {BigNumber} gas_price - gas price
- * @param {object} options - for params like returnType, tag.
+ * @param {object} - params
+ * @param {string} params.airdrop_contract_address - airdrop contract address
+ * @param {number} params.chain_id - chain id
+ * @param {string} params.sender_address - address of sender
+ * @param {string} params.sender_passphrase - passphrase of sender
+ * @param {string} params.currency - quote currency
+ * @param {bignumber} params.accepted_margin - accepted margin for the given currency (in wei)
+ * @param {bignumber} params.gas_price - gas price
+ * @param {object} params.options - for params like returnType, tag.
  *
  * @return {Object}
  *
  */
 const SetAcceptedMarginKlass = function (params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("=======SetAcceptedMarginKlass.params=======");
   // Don't log passphrase
   logger.debug(params.airdrop_contract_address, params.chain_id, params.sender_address, params.currency,
     params.accepted_margin, params.gas_price, params.options);
 
-  const oThis = this
-  ;
   oThis.airdropContractAddress = params.airdrop_contract_address;
   oThis.chainId = params.chain_id;
   oThis.senderAddress = params.sender_address;
@@ -85,7 +86,7 @@ SetAcceptedMarginKlass.prototype = {
   /**
    * Validation of params
    *
-   * @return {promise<result>}
+   * @return {result}
    *
    */
   validateParams: function () {
@@ -121,7 +122,7 @@ SetAcceptedMarginKlass.prototype = {
   },
 
   /**
-   * set accepted margin value in airdrop contract
+   * Set accepted margin value in airdrop contract
    *
    * @return {promise<result>}
    *

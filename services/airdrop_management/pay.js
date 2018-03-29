@@ -18,31 +18,31 @@ const rootPrefix = '../..'
 /**
  * Constructor to create object of airdrop PayKlass
  *
- * @param {string} airdrop_contract_address - airdrop contract address
- * @param {string} chain_id - chain Id
- * @param {string} sender_worker_address - address of worker
- * @param {string} sender_worker_passphrase - passphrase of worker
- * @param {string} beneficiary_address - address of beneficiary account
- * @param {BigNumber} transfer_amount - transfer amount (in wei)
- * @param {string} commission_beneficiary_address - address of commision beneficiary account
- * @param {BigNumber} commission_amount - commission amount (in wei)
- * @param {string} currency - quote currency
- * @param {BigNumber} intended_price_point - price point at which the pay is intended (in wei)
- * @param {string} spender - User address
- * @param {Hex} gas_price - gas price
- * @param {object} options - for params like returnType, tag.
+ * @params {object} params -
+ * @param {string} params.airdrop_contract_address - airdrop contract address
+ * @param {number} params.chain_id - chain Id
+ * @param {string} params.sender_worker_address - address of worker
+ * @param {string} params.sender_worker_passphrase - passphrase of worker
+ * @param {string} params.beneficiary_address - address of beneficiary account
+ * @param {bignumber} params.transfer_amount - transfer amount (in wei)
+ * @param {string} params.commission_beneficiary_address - address of commision beneficiary account
+ * @param {bignumber} params.commission_amount - commission amount (in wei)
+ * @param {string} params.currency - quote currency
+ * @param {bignumber} params.intended_price_point - price point at which the pay is intended (in wei)
+ * @param {string} params.spender - User address
+ * @param {string} params.gas_price - gas price
+ * @param {object} params.options - for params like returnType, tag.
  *
  * @constructor
  *
  */
 const PayKlass = function (params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("=======PayKlass.params=======");
   logger.debug(params.airdrop_contract_address, params.chain_id, params.sender_worker_address, params.beneficiary_address,
     params.transfer_amount, params.commission_beneficiary_address, params.commission_amount, params.currency, params.intended_price_point,
     params.spender, params.gas_price, params.options);
-
-  const oThis = this
-  ;
 
   oThis.airdropContractAddress = params.airdrop_contract_address;
   oThis.chainId = params.chain_id;
@@ -94,7 +94,7 @@ PayKlass.prototype = {
   /**
    * Validation of params
    *
-   * @return {promise<result>}
+   * @return {result}
    *
    */
   validateParams: function () {
@@ -116,7 +116,7 @@ PayKlass.prototype = {
   },
 
   /**
-   * airdrop pay
+   * Airdrop pay
    *
    * @return {promise<result>}
    *

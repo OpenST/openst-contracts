@@ -21,17 +21,20 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {Number} chain_id - chain Id
- * @param {Hex} airdrop_contract_address - airdrop contract address
- * @param {Array} user_addresses - Array of user addressed
+ * @param {object} params -
+ * @param {number} chain_id - chain Id
+ * @param {string} airdrop_contract_address - airdrop contract address
+ * @param {array} user_addresses - Array of user addressed
  *
- * @return {Object}
+ * @return {object}
  *
  */
 const AirdropUserBalanceKlass = function(params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("=======user_balance.params=======");
   logger.debug(params);
-  const oThis = this;
+
   oThis.airdropContractAddress = params.airdrop_contract_address;
   oThis.chainId = params.chain_id;
   oThis.userAddresses = params.user_addresses;
@@ -45,7 +48,7 @@ AirdropUserBalanceKlass.prototype = {
   /**
    * Perform method
    *
-   * @return {responseHelper}
+   * @return {promise<result>}
    *
    */
   perform: async function () {
@@ -73,7 +76,7 @@ AirdropUserBalanceKlass.prototype = {
   /**
    * Validation of params
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   validateParams: function(){
@@ -109,7 +112,7 @@ AirdropUserBalanceKlass.prototype = {
   /**
    * Run the register
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   getUserAirdropBalance: function() {

@@ -132,7 +132,7 @@ async function performer(argv) {
   ;
   const DeployAirdropObject = new DeployAirdropKlass({
     branded_token_contract_address: brandedTokenAddress,
-    baseCurrency: baseCurrency,
+    base_currency: baseCurrency,
     worker_contract_address: workerContractAddress,
     airdrop_budget_holder: airdropBudgetHolder,
     gas_price: gasPrice,

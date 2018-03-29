@@ -20,18 +20,20 @@ const uuid = require('uuid')
 /**
  * Constructor to create object of deployer
  *
- * @param {String} contract_name - name of contract
- * @param {Object} constructor_args - contract deployment constructor arguments
- * @param {String} gas_price - gas price
- * @param {Object} options - deployment options
+ * @params {object} params -
+ * @param {string} params.contract_name - name of contract
+ * @param {object} params.constructor_args - contract deployment constructor arguments
+ * @param {string} params.gas_price - gas price
+ * @param {object} params.options - deployment options
  *
  * @constructor
  *
  */
 const DeployerKlass = function(params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("\n=========deployer params=========");
   logger.debug(params);
-  const oThis = this;
 
   oThis.contractName = params.contract_name;
   oThis.constructorArgs = params.constructor_args;

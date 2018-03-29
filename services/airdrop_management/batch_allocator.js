@@ -25,17 +25,19 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {Hex} airdrop_contract_address - airdrop contract address
- * @param {Hex} transaction_hash - airdrop transfer transactio hash
- * @param {Object} airdrop_users - {userAddress: {airdropAmount: inwei, expiryTimestamp: 0}}
- * @param {Number} chain_id - chain ID
+ * @param {object} params -
+ * @param {string} params.airdrop_contract_address - airdrop contract address
+ * @param {string} params.transaction_hash - airdrop transfer transactio hash
+ * @param {object} params.airdrop_users - {userAddress: {airdropAmount: amountInWei, expiryTimestamp: 0}}
+ * @param {number} params.chain_id - chain ID
  *
- * @return {Object}
+ * @return {object}
  */
 const BatchAllocatorKlass = function(params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("\n=========batchAllocator.params=========");
   logger.debug(params);
-  const oThis = this;
   oThis.airdropContractAddress = params.airdrop_contract_address;
   oThis.transactionHash = params.transaction_hash;
   oThis.airdropUsers = params.airdrop_users;
@@ -56,7 +58,7 @@ BatchAllocatorKlass.prototype = {
   /**
    * Perform batch allocation to airdrop users
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   perform: async function () {
@@ -85,7 +87,7 @@ BatchAllocatorKlass.prototype = {
   /**
    * Validate params
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   validateParams: function() {
@@ -187,7 +189,7 @@ BatchAllocatorKlass.prototype = {
   /**
    * Allocate airdrop amount to users
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   allocateAirdropAmountToUsers: async function() {
@@ -226,9 +228,8 @@ BatchAllocatorKlass.prototype = {
   },
 
   /**
-   * Clear all users cache
    *
-   * @return {nil}
+   * Clear all users cache
    *
    */
   clearCache: async function() {
