@@ -40,7 +40,7 @@ const DeployAirdropKlass = function (params) {
 
   oThis.contractName = 'airdrop';
   oThis.brandedTokenContractAddress = params.branded_token_contract_address;
-  oThis.baseCurrency = params.baseCurrency;
+  oThis.baseCurrency = params.base_currency;
   oThis.workerContractAddress = params.worker_contract_address;
   oThis.airdropBudgetHolder = params.airdrop_budget_holder;
   oThis.gasPrice = params.gas_price;
