@@ -1,8 +1,10 @@
+"use strict";
+
 /**
  *
  * This is a utility file which would be used for allocating amount to airdrop users.<br><br>
  *
- * @module lib/airdrop_management/batch_allocator
+ * @module services/airdrop_management/batch_allocator
  *
  */
 
@@ -23,21 +25,23 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {Hex} airdropContractAddress - airdrop contract address
- * @param {Hex} transactionHash - airdrop transfer transactio hash
- * @param {Object} airdropUsers - {userAddress: {airdropAmount: inwei, expiryTimestamp: 0}}
- * @param {Number} chainId - chain ID
+ * @param {object} params -
+ * @param {string} params.airdrop_contract_address - airdrop contract address
+ * @param {string} params.transaction_hash - airdrop transfer transactio hash
+ * @param {object} params.airdrop_users - {userAddress: {airdropAmount: amountInWei, expiryTimestamp: 0}}
+ * @param {number} params.chain_id - chain ID
  *
- * @return {Object}
+ * @return {object}
  */
-const batchAllocator = module.exports = function(params) {
+const BatchAllocatorKlass = function(params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("\n=========batchAllocator.params=========");
   logger.debug(params);
-  const oThis = this;
-  oThis.airdropContractAddress = params.airdropContractAddress;
-  oThis.transactionHash = params.transactionHash;
-  oThis.airdropUsers = params.airdropUsers;
-  oThis.chainId = params.chainId;
+  oThis.airdropContractAddress = params.airdrop_contract_address;
+  oThis.transactionHash = params.transaction_hash;
+  oThis.airdropUsers = params.airdrop_users;
+  oThis.chainId = params.chain_id;
 
   // New Variables
   oThis.airdropRecord = null;
@@ -49,35 +53,41 @@ const batchAllocator = module.exports = function(params) {
   oThis.userAddresses = [];
 };
 
-batchAllocator.prototype = {
+BatchAllocatorKlass.prototype = {
 
   /**
    * Perform batch allocation to airdrop users
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   perform: async function () {
 
     const oThis = this;
 
-    var r = null;
+    try {
 
-    r = await oThis.validateParams();
-    logger.debug("\n=========batchAllocator.validateParams.result=========");
-    logger.debug(r);
-    if(r.isFailure()) return r;
+      var r = null;
 
-    r = await oThis.allocateAirdropAmountToUsers();
-    logger.debug("\n=========batchAllocator.allocateAirdropAmountToUsers.result=========");
-    logger.debug(r);
-    return r;
+      r = await oThis.validateParams();
+      logger.debug("\n=========batchAllocator.validateParams.result=========");
+      logger.debug(r);
+      if(r.isFailure()) return r;
+
+      r = await oThis.allocateAirdropAmountToUsers();
+      logger.debug("\n=========batchAllocator.allocateAirdropAmountToUsers.result=========");
+      logger.debug(r);
+      return r;
+
+    } catch(err){
+      return responseHelper.error('s_am_ba_perform_1', 'Something went wrong. ' + err.message)
+    }
   },
 
   /**
    * Validate params
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   validateParams: function() {
@@ -85,11 +95,11 @@ batchAllocator.prototype = {
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
-        return onResolve(responseHelper.error('l_am_ba_vp_1', 'airdrop contract address is invalid'));
+        return onResolve(responseHelper.error('s_am_ba_validateParams_1', 'airdrop contract address is invalid'));
       }
 
       if (!basicHelper.isTxHashValid(oThis.transactionHash)) {
-        return onResolve(responseHelper.error('l_am_ba_vp_2', 'transaction hash is invalid'));
+        return onResolve(responseHelper.error('s_am_ba_validateParams_2', 'transaction hash is invalid'));
       }
 
       // Check if airdropContractAddress is registered or not
@@ -98,26 +108,26 @@ batchAllocator.prototype = {
       ;
       oThis.airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
       if (!oThis.airdropRecord) {
-        return onResolve(responseHelper.error('l_am_ba_vp_3', 'given airdrop record is not present in DB'));
+        return onResolve(responseHelper.error('s_am_ba_validateParams_3', 'given airdrop record is not present in DB'));
       }
       var airdropAllocationProofDetailModel = new airdropAllocationProofDetailKlass();
-      result = await airdropAllocationProofDetailModel.getByTransactionHash(oThis.transactionHash);
+      const result = await airdropAllocationProofDetailModel.getByTransactionHash(oThis.transactionHash);
       oThis.airdropAllocationProofDetailRecord = result[0];
       if (!oThis.airdropAllocationProofDetailRecord) {
-        return onResolve(responseHelper.error('l_am_ba_vp_4', 'Invalid transactionHash. Given airdropAllocationProofDetailRecord is not present in DB'));
+        return onResolve(responseHelper.error('s_am_ba_validateParams_4', 'Invalid transactionHash. Given airdropAllocationProofDetailRecord is not present in DB'));
       }
 
       if (new BigNumber(oThis.airdropAllocationProofDetailRecord.airdrop_allocated_amount).gte(new BigNumber(oThis.airdropAllocationProofDetailRecord.airdrop_amount))) {
-        return onResolve(responseHelper.error('l_am_ba_vp_5', 'Allocated amount is greater or equal to airdrop amount'));
+        return onResolve(responseHelper.error('s_am_ba_validateParams_5', 'Allocated amount is greater or equal to airdrop amount'));
       }
 
       if(!oThis.airdropUsers || !(typeof oThis.airdropUsers === "object")) {
-        return onResolve(responseHelper.error('l_am_ba_vp_6', 'Invalid airdrop users object'));
+        return onResolve(responseHelper.error('s_am_ba_validateParams_6', 'Invalid airdrop users object'));
       }
 
       const batchSize = Object.keys(oThis.airdropUsers).length;
       if (batchSize > airdropConstants.batchSize()) {
-        return onResolve(responseHelper.error('l_am_ba_vp_7', 'airdrop Users Batch size should be: '+batchSize));
+        return onResolve(responseHelper.error('s_am_ba_validateParams_7', 'airdrop Users Batch size should be: '+batchSize));
       }
 
       var value = null
@@ -130,21 +140,21 @@ batchAllocator.prototype = {
         value = oThis.airdropUsers[userAddress];
 
         if (!basicHelper.isAddressValid(userAddress)) {
-          return onResolve(responseHelper.error('l_am_ba_vp_8', 'userAddress'+ userAddress +' is invalid'));
+          return onResolve(responseHelper.error('s_am_ba_validateParams_8', 'userAddress'+ userAddress +' is invalid'));
         }
 
         userAirdropAmount = new BigNumber(value.airdropAmount);
         if (userAirdropAmount.isNaN() || !userAirdropAmount.isInteger()) {
-          return onResolve(responseHelper.error('l_am_ba_vp_9', 'userAddress'+ userAddress +' airdrop amount is invalid'));
+          return onResolve(responseHelper.error('s_am_ba_validateParams_9', 'userAddress'+ userAddress +' airdrop amount is invalid'));
         }
 
         if (userAirdropAmount.lte(0)) {
-          return onResolve(responseHelper.error('l_am_ba_vp_10', 'Airdrop amount 0 or less than 0 for user'+ userAddress +' is not allowed'));
+          return onResolve(responseHelper.error('s_am_ba_validateParams_10', 'Airdrop amount 0 or less than 0 for user'+ userAddress +' is not allowed'));
         }
 
         expiryTimestamp = new BigNumber(value.expiryTimestamp);
         if (expiryTimestamp.isNaN() || !expiryTimestamp.isInteger()) {
-          return onResolve(responseHelper.error('l_am_ba_vp_11', 'userAddress: '+ userAddress +' expiry Timestamp is invalid'));
+          return onResolve(responseHelper.error('s_am_ba_validateParams_11', 'userAddress: '+ userAddress +' expiry Timestamp is invalid'));
         }
 
         oThis.totalInputAirdropAmount = oThis.totalInputAirdropAmount.plus(userAirdropAmount);
@@ -163,8 +173,13 @@ batchAllocator.prototype = {
         plus(oThis.totalInputAirdropAmount);
       const airdropAmountBigNumber = new BigNumber(oThis.airdropAllocationProofDetailRecord.airdrop_amount);      
       if (oThis.totalAmountAfterAllocatingInputAmount.gt(airdropAmountBigNumber)) {
-        return onResolve(responseHelper.error('l_am_ba_vp_12', 'totalAmountAfterAllocatingInputAmount is greater than transferred airdrop amount'));
+        return onResolve(responseHelper.error('s_am_ba_validateParams_12', 'totalAmountAfterAllocatingInputAmount is greater than transferred airdrop amount'));
       }
+
+      if (!basicHelper.isValidChainId(oThis.chainId)) {
+        return onResolve(responseHelper.error('s_am_ba_validateParams_14', 'ChainId is invalid'));
+      }
+
       return onResolve(responseHelper.successWithData({}));
 
     });
@@ -174,7 +189,7 @@ batchAllocator.prototype = {
   /**
    * Allocate airdrop amount to users
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   allocateAirdropAmountToUsers: async function() {
@@ -213,9 +228,8 @@ batchAllocator.prototype = {
   },
 
   /**
-   * Clear all users cache
    *
-   * @return {nil}
+   * Clear all users cache
    *
    */
   clearCache: async function() {
@@ -230,4 +244,4 @@ batchAllocator.prototype = {
 
 };
 
-module.exports = batchAllocator;
+module.exports = BatchAllocatorKlass;

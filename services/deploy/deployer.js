@@ -1,58 +1,92 @@
+"use strict";
+
 /**
  * This is script for deploying any contract.<br><br>
  *
- *   Prerequisite:
- *    <ol>
- *       <li>Deployer Address</li>
- *     </ol>
- *
- *
- *
- *
- * @module lib/deployer
+ * @module services/deploy/deployer
  */
 
-const uuid = require('uuid');
-const fs = require('fs');
-const Path = require('path');
-
-const rootPrefix = '..';
-const web3Provider = require(rootPrefix + '/lib/web3/providers/ws');
-const coreConstants = require(rootPrefix + '/config/core_constants');
-const coreAddresses = require(rootPrefix + '/config/core_addresses');
-const logger = require(rootPrefix + '/helpers/custom_console_logger');
-const responseHelper = require(rootPrefix + '/lib/formatter/response');
-const basicHelper = require(rootPrefix + '/helpers/basic_helper');
-
-const deployerName = 'deployer';
+const uuid = require('uuid')
+  , rootPrefix = '../..'
+  , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
+  , coreConstants = require(rootPrefix + '/config/core_constants')
+  , coreAddresses = require(rootPrefix + '/config/core_addresses')
+  , logger = require(rootPrefix + '/helpers/custom_console_logger')
+  , responseHelper = require(rootPrefix + '/lib/formatter/response')
+  , basicHelper = require(rootPrefix + '/helpers/basic_helper')
+  , deployerName = 'deployer'
+;
 
 /**
+ * Constructor to create object of deployer
+ *
+ * @params {object} params -
+ * @param {string} params.contract_name - name of contract
+ * @param {object} params.constructor_args - contract deployment constructor arguments
+ * @param {string} params.gas_price - gas price
+ * @param {object} params.options - deployment options
+ *
  * @constructor
  *
  */
-const Deploy = module.exports = function () {};
+const DeployerKlass = function(params) {
+  const oThis = this;
+  params = params || {};
+  logger.debug("\n=========deployer params=========");
+  logger.debug(params);
 
-Deploy.prototype = {
+  oThis.contractName = params.contract_name;
+  oThis.constructorArgs = params.constructor_args;
+  oThis.gasPrice = params.gas_price;
+  oThis.options = params.options;
+};
+
+DeployerKlass.prototype = {
+
+  /**
+   * Perform method
+   *
+   * @return {promise<result>} - returns a promise which resolves to an object of kind Result
+   *
+   */
+  perform: async function () {
+
+    const oThis = this;
+
+    try {
+      var r = null;
+
+      r = await oThis.validateParams();
+      logger.debug("\n=========Deployer.validateParams.result=========");
+      logger.debug(r);
+      if(r.isFailure()) return r;
+
+      r = oThis.deploy();
+      logger.debug("\n=========Deployer.deploy.result=========");
+      logger.debug(r);
+      return r;
+    } catch(err) {
+      return responseHelper.error('s_am_ub_perform_1', 'Something went wrong. ' + err.message);
+    }
+
+  },
 
   /**
   * Validate deploy parameters
   *
-  * @param {string} contractName - Contract name
-  * @param {BigNumber} gasPrice - Gas price
-  *
-  * @return {response}
+  * @return {result} - returns object of kind Result
   *
   */
-  validateDeployParams: function(
-    contractName,
-    gasPrice) {
+  validateParams: function() {
 
-    if (!contractName) {
+    const oThis = this;
+
+    if (!oThis.contractName) {
       logger.error("Error: Contract name is mandatory");
       return responseHelper.error('l_d_1', 'Contract name is mandatory');
     }
 
-    if (!gasPrice) {
+    if (!oThis.gasPrice) {
       logger.error("Error: Gas price is mandatory");
       return responseHelper.error('l_d_2', 'Gas price is mandatory');
     }
@@ -76,56 +110,39 @@ Deploy.prototype = {
   /**
   * Deploy contract
   *
-  * @param {string} contractName - Contract name - pricer / airdrop / workers
-  * @param {Array} constructorArgs - Contract constructor params
-  * @param {BigNumber} gasPrice - Gas price
-  * @param {object} options - for params like returnType, tag.
-  *
-  * @return {response}
+  * @return {promise<result>} - returns a promise which resolves to an object of kind Result
   *
   */
-  deploy: function(
-    contractName,
-    constructorArgs,
-    gasPrice,
-    options) {
+  deploy: function() {
 
     const oThis = this;
 
     return new Promise(function (onResolve, onReject) {
 
-      logger.debug("Contract name: " + contractName);
-      logger.debug("Gas price: " + gasPrice);
-      logger.debug("Constructor arguments: " + constructorArgs);
-
-      const validationResult = oThis.validateDeployParams(
-        contractName,
-        gasPrice);
-
-      if (validationResult.isFailure()) {
-        return onResolve(validationResult);
-      }
+      logger.debug("Contract name: " + oThis.contractName);
+      logger.debug("Gas price: " + oThis.gasPrice);
+      logger.debug("Constructor arguments: " + oThis.constructorArgs);
 
       const txUUID = uuid.v4();
-      const returnType = basicHelper.getReturnType(options.returnType);
+      const returnType = basicHelper.getReturnType(oThis.options.returnType);
 
       const asyncPerform = function () {
 
         const deployerAddress = coreAddresses.getAddressForUser(deployerName);
         const deployerAddrPassphrase = coreAddresses.getPassphraseForUser(deployerName);
 
-        const contractAbi = coreAddresses.getAbiForContract(contractName);
-        const contractBin = coreAddresses.getBinForContract(contractName);
+        const contractAbi = coreAddresses.getAbiForContract(oThis.contractName);
+        const contractBin = coreAddresses.getBinForContract(oThis.contractName);
 
         const txParams = {
           from: deployerAddress,
           data: (web3Provider.utils.isHexStrict(contractBin) ? "" : "0x") + contractBin,
-          gasPrice: gasPrice,
+          gasPrice: oThis.gasPrice,
           gas: coreConstants.OST_GAS_LIMIT
         };
 
-        if (constructorArgs) {
-          txParams.arguments = constructorArgs;
+        if (oThis.constructorArgs) {
+          txParams.arguments = oThis.constructorArgs;
         }
 
         var contract = new web3Provider.eth.Contract(
@@ -216,21 +233,9 @@ Deploy.prototype = {
       }
 
     });
-  },
-
-  /**
-  * Write contract address to file based on parameter
-  *
-  * @param {String} fileName - file name
-  * @param {Hex} contractAddress - contract Address
-  *
-  * @return {}
-  */
-  writeContractAddressToFile: function(fileName, contractAddress) {
-    // Write contract address to file
-    if ( fileName !== '') {
-      fs.writeFileSync(Path.join(__dirname, '/' + fileName), contractAddress);
-    }
   }
+
 };
+
+module.exports = DeployerKlass;
 

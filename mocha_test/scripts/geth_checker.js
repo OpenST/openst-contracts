@@ -22,9 +22,9 @@ const performer = async function () {
         isInProcess = true;
         web3Provider.eth.getBlockNumber(function (err, blocknumber) {
           if (err || blocknumber < 1) {
-            logger.info("Unable to get blocknumber");
+            logger.debug("Unable to get blocknumber");
           } else {
-            logger.info("blocknumber", blocknumber);
+            logger.debug("blocknumber", blocknumber);
             process.exit(0);
           }
           isInProcess = false;

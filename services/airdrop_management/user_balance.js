@@ -1,8 +1,10 @@
+"use strict";
+
 /**
  *
  * This class would be used for calculating user airdrop balance.<br><br>
  *
- * @module lib/airdrop_management/user_balance
+ * @module services/airdrop_management/user_balance
  *
  */
 
@@ -19,20 +21,23 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {Number} chainId - chain Id
- * @param {Hex} airdropContractAddress - airdrop contract address
- * @param {Array} userAddresses - Array of user addressed
+ * @param {object} params -
+ * @param {number} chain_id - chain Id
+ * @param {string} airdrop_contract_address - airdrop contract address
+ * @param {array} user_addresses - Array of user addressed
  *
- * @return {Object}
+ * @return {object}
  *
  */
 const AirdropUserBalanceKlass = function(params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("=======user_balance.params=======");
   logger.debug(params);
-  const oThis = this;
-  oThis.airdropContractAddress = params.airdropContractAddress;
-  oThis.chainId = params.chainId;
-  oThis.userAddresses = params.userAddresses;
+
+  oThis.airdropContractAddress = params.airdrop_contract_address;
+  oThis.chainId = params.chain_id;
+  oThis.userAddresses = params.user_addresses;
 
   oThis.airdropRecord = null;
 
@@ -43,31 +48,35 @@ AirdropUserBalanceKlass.prototype = {
   /**
    * Perform method
    *
-   * @return {responseHelper}
+   * @return {promise<result>}
    *
    */
   perform: async function () {
 
     const oThis = this;
 
-    var r = null;
+    try {
+      var r = null;
 
-    r = await oThis.validateParams();
-    logger.debug("=======userBalance.validateParams.result=======");
-    logger.debug(r);
-    if(r.isFailure()) return r;
+      r = await oThis.validateParams();
+      logger.debug("=======userBalance.validateParams.result=======");
+      logger.debug(r);
+      if(r.isFailure()) return r;
 
-    r = await oThis.getUserAirdropBalance();
-    logger.debug("=======userBalance.getUserAirdropBalance.result=======");
-    logger.debug(r);
-    return r;
+      r = await oThis.getUserAirdropBalance();
+      logger.debug("=======userBalance.getUserAirdropBalance.result=======");
+      logger.debug(r);
+      return r;
+    } catch(err) {
+      return responseHelper.error('s_am_ub_perform_1', 'Something went wrong. ' + err.message);
+    }
 
   },
 
   /**
    * Validation of params
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   validateParams: function(){
@@ -75,11 +84,11 @@ AirdropUserBalanceKlass.prototype = {
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
-        return onResolve(responseHelper.error('l_am_ub_vp_1', 'airdrop contract address is invalid'));
+        return onResolve(responseHelper.error('s_am_ub_validateParams_1', 'airdrop contract address is invalid'));
       }
 
       if (!basicHelper.isValidChainId(oThis.chainId)) {
-        return onResolve(responseHelper.error('l_am_ub_vp_2', 'ChainId is invalid'));
+        return onResolve(responseHelper.error('s_am_ub_validateParams_2', 'ChainId is invalid'));
       }
 
       // if address already present
@@ -88,7 +97,11 @@ AirdropUserBalanceKlass.prototype = {
       ;
       oThis.airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
       if (!oThis.airdropRecord){
-        return onResolve(responseHelper.error('l_am_ub_vp_3', 'Given airdrop contract is not registered'));
+        return onResolve(responseHelper.error('s_am_ub_validateParams_3', 'Given airdrop contract is not registered'));
+      }
+
+      if (!basicHelper.isValidChainId(oThis.chainId)) {
+        return onResolve(responseHelper.error('s_am_ub_validateParams_4', 'ChainId is invalid'));
       }
 
       return onResolve(responseHelper.successWithData({}));
@@ -99,7 +112,7 @@ AirdropUserBalanceKlass.prototype = {
   /**
    * Run the register
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   getUserAirdropBalance: function() {
@@ -113,7 +126,7 @@ AirdropUserBalanceKlass.prototype = {
         });
         return onResolve(await userAirdropDetailCacheKlassObject.fetch());
       } catch(err){
-        return onResolve(responseHelper.error('l_am_ub_vp_4', 'getUserAirdropBalance error: '+err));
+        return onResolve(responseHelper.error('l_am_ub_getUserAirdropBalance_4', 'getUserAirdropBalance error: '+err));
       }
     });
 

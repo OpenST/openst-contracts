@@ -1,8 +1,10 @@
+"use strict";
+
 /**
  *
  * This is a utility file which would be used for executing approve by airdrop budget holder.<br><br>
  *
- * @module lib/airdrop_management/approve
+ * @module services/airdrop_management/approve
  *
  */
 
@@ -21,23 +23,26 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {Hex} airdropContractAddress - airdrop contract address
- * @param {String} airdropBudgetHolderPassphrase - airdropBudgetHolder Passphrase
- * @param {String} gasPrice - gas price
- * @param {Number} chainId - chain Id
- * @param {Object} options - chain Id
+ * @param {object} params -
+ * @param {string} params.airdrop_contract_address - airdrop contract address
+ * @param {string} params.airdrop_budget_holder_passphrase - airdropBudgetHolder Passphrase
+ * @param {string} params.gas_price - gas price
+ * @param {number} params.chain_id - chain Id
+ * @param {object} params.options - options
  *
- * @return {Object}
+ * @return {object}
  *
  */
-const approve = module.exports = function(params) {
-  logger.debug("=========Approve.params=========");
-  logger.debug(params.airdropContractAddress, params.gasPrice, params.chainId, params.options);
+const ApproveKlass = function(params) {
   const oThis = this;
-  oThis.airdropContractAddress = params.airdropContractAddress;
-  oThis.airdropBudgetHolderPassphrase = params.airdropBudgetHolderPassphrase;
-  oThis.gasPrice = params.gasPrice;
-  oThis.chainId = params.chainId;
+  params = params || {};
+  logger.debug("=========Approve.params=========");
+  // Don't log passphrase
+  logger.debug(params.airdrop_contract_address, params.gas_price, params.chain_id, params.options);
+  oThis.airdropContractAddress = params.airdrop_contract_address;
+  oThis.airdropBudgetHolderPassphrase = params.airdrop_budget_holder_passphrase;
+  oThis.gasPrice = params.gas_price;
+  oThis.chainId = params.chain_id;
   oThis.options = params.options;
 
   oThis.airdropBudgetHolder = null;
@@ -46,36 +51,40 @@ const approve = module.exports = function(params) {
   oThis.brandedTokenObject = null;
 };
 
-approve.prototype = {
+ApproveKlass.prototype = {
 
   /**
    * Perform approve by airdrop budget holder to contract
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   perform: async function () {
 
     const oThis = this;
 
-    var r = null;
+    try {
+      var r = null;
 
-    r = await oThis.validateParams();
-    logger.debug("\n=========Approve.validateParams.result=========");
-    logger.debug(r);
-    if(r.isFailure()) return r;
+      r = await oThis.validateParams();
+      logger.debug("\n=========Approve.validateParams.result=========");
+      logger.debug(r);
+      if(r.isFailure()) return r;
 
-    r = oThis.doApprove();
-    logger.debug("\n=========Approve.doApprove.result=========");
-    logger.debug(r);
-    return r;
+      r = oThis.doApprove();
+      logger.debug("\n=========Approve.doApprove.result=========");
+      logger.debug(r);
+      return r;
+    } catch(err) {
+      return responseHelper.error('s_am_a_perform_1', 'Something went wrong. ' + err.message)
+    }
 
   },
 
   /**
    * Validate params
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   validateParams: function(){
@@ -83,7 +92,7 @@ approve.prototype = {
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
-        return onResolve(responseHelper.error('l_am_a_vp_1', 'airdrop contract address is invalid'));
+        return onResolve(responseHelper.error('s_am_a_validateParams_1', 'airdrop contract address is invalid'));
       }
 
       // Check if airdropContractAddress is registered or not
@@ -92,20 +101,20 @@ approve.prototype = {
        ;
       oThis.airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
       if (!oThis.airdropRecord){
-        return onResolve(responseHelper.error('l_am_ub_vp_2', 'Given airdrop contract is not registered'));
+        return onResolve(responseHelper.error('s_am_a_validateParams_2', 'Given airdrop contract is not registered'));
       }
 
       var airdropContractInteractObject = new airdropContractInteract(oThis.airdropContractAddress, oThis.chainId);
       var result = await airdropContractInteractObject.brandedToken();
       oThis.brandedTokenContractAddress = result.data.brandedToken;
       if (!basicHelper.isAddressValid(oThis.brandedTokenContractAddress)) {
-        return onResolve(responseHelper.error('l_am_a_vp_2', 'brandedTokenContractAddress set in airdrop contract is invalid'));
+        return onResolve(responseHelper.error('s_am_a_validateParams_3', 'brandedTokenContractAddress set in airdrop contract is invalid'));
       }
 
       result = await airdropContractInteractObject.airdropBudgetHolder();
       oThis.airdropBudgetHolderAddress = result.data.airdropBudgetHolder;
       if (!basicHelper.isAddressValid(oThis.airdropBudgetHolderAddress)) {
-        return onResolve(responseHelper.error('l_am_a_vp_3', 'airdropBudgetHolderAddress set in airdrop contract is invalid'));
+        return onResolve(responseHelper.error('s_am_a_validateParams_4', 'airdropBudgetHolderAddress set in airdrop contract is invalid'));
       }
 
       oThis.brandedTokenObject = new brandedTokenContractInteract(oThis.brandedTokenContractAddress, oThis.chainId);
@@ -113,11 +122,15 @@ approve.prototype = {
       oThis.amount = result.data.balance;
       const amountInBigNumber = new BigNumber(oThis.amount);
       if (amountInBigNumber.isNaN() || !amountInBigNumber.isInteger()){
-        return onResolve(responseHelper.error('l_am_v_vp_4', 'amount is invalid value'));
+        return onResolve(responseHelper.error('s_am_a_validateParams_5', 'amount is invalid value'));
       }
 
       if (!basicHelper.isValidChainId(oThis.chainId)) {
-        return onResolve(responseHelper.error('l_am_v_vp_5', 'ChainId is invalid'));
+        return onResolve(responseHelper.error('s_am_a_validateParams_6', 'ChainId is invalid'));
+      }
+
+      if (!oThis.gasPrice) {
+        return onResolve(responseHelper.error('s_am_a_validateParams_7', 'gas is mandatory'));
       }
 
       return onResolve(responseHelper.successWithData({}));
@@ -129,7 +142,7 @@ approve.prototype = {
   /**
    * Perform Approve to airdrop budget holder
    *
-   * @return {Promise}
+   * @return {promise<result>}
    *
    */
   doApprove: async function(){
@@ -151,4 +164,4 @@ approve.prototype = {
 
 };
 
-module.exports = approve;
+module.exports = ApproveKlass;
