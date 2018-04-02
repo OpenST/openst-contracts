@@ -12,8 +12,6 @@ const rootPrefix = "../../.."
   , BrandedTokenKlass = require(rootPrefix + '/lib/contract_interact/branded_token')
   , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , SetWorkerKlass = require(rootPrefix + '/services/workers/set_worker')
-  , IsWorkerKlass = require(rootPrefix + '/services/workers/is_worker')
 ;
 
 const airdropOstUsd = new airdrop(constants.airdropOstUsdAddress, constants.chainId)
@@ -21,16 +19,18 @@ const airdropOstUsd = new airdrop(constants.airdropOstUsdAddress, constants.chai
   , brandedTokenObject = new BrandedTokenKlass(constants.TC5Address, constants.chainId)
 ;
 
-
 const AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
-  , RegisterKlass = require(rootPrefix + '/services/airdrop_management/register')
-  , TransferKlass = require(rootPrefix + '/services/airdrop_management/transfer')
-  , ApproveKlass = require(rootPrefix + '/services/airdrop_management/approve')
-  , BatchAllocatorKlass = require(rootPrefix + '/services/airdrop_management/batch_allocator')
-  , UserBalanceKlass = require(rootPrefix + '/services/airdrop_management/user_balance')
-  , PayKlass = require(rootPrefix + '/services/airdrop_management/pay')
-  , SetPriceOracleKlass = require(rootPrefix + '/services/airdrop_management/set_price_oracle')
-  , SetAcceptedMarginKlass = require(rootPrefix + '/services/airdrop_management/set_accepted_margin')
+  , openstPayment = require(rootPrefix + '/index')
+  , SetWorkerKlass = openstPayment.services.workers.setWorker
+  , IsWorkerKlass = openstPayment.services.workers.isWorker
+  , RegisterKlass = openstPayment.services.airdropManager.registerAirdrop
+  , TransferKlass = openstPayment.services.airdropManager.transfer
+  , ApproveKlass = openstPayment.services.airdropManager.approve
+  , BatchAllocatorKlass = openstPayment.services.airdropManager.batchAllocator
+  , UserBalanceKlass = openstPayment.services.airdropManager.userBalance
+  , PayKlass = openstPayment.services.airdropManager.pay
+  , SetPriceOracleKlass = openstPayment.services.airdropManager.setPriceOracle
+  , SetAcceptedMarginKlass = openstPayment.services.airdropManager.setAcceptedMargin
   , airdropAllocationProofDetailKlass = require(rootPrefix + '/app/models/airdrop_allocation_proof_detail')
   , UserAirdropDetailKlass = require(rootPrefix + '/app/models/user_airdrop_detail')
   , responseHelper = require(rootPrefix + '/lib/formatter/response')

@@ -19,17 +19,15 @@
 
 const readline = require('readline')
   , rootPrefix = '../..'
-  , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
-  , Deployer = require(rootPrefix + '/services/deploy/deployer')
   , coreAddresses = require(rootPrefix + '/config/core_addresses')
   , prompts = readline.createInterface(process.stdin, process.stdout)
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , returnTypes = require(rootPrefix + "/lib/global_constant/return_types")
   , helper = require(rootPrefix + "/tools/deploy/helper")
-  , SetOpsKlass = require(rootPrefix + '/services/ops_managed/set_ops')
-  , GetOpsKlass = require(rootPrefix + '/services/ops_managed/get_ops')
-  , DeployAirdropKlass = require(rootPrefix + '/services/deploy/airdrop')
-  , coreConstants = require(rootPrefix + '/config/core_constants')
+  , openstPayment = require(rootPrefix + '/index')
+  , SetOpsKlass = openstPayment.services.opsManaged.setOps
+  , GetOpsKlass = openstPayment.services.opsManaged.getOps
+  , DeployAirdropKlass = openstPayment.services.deploy.airdrop
 ;
 
 // Different addresses used for deployment
