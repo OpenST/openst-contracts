@@ -216,13 +216,13 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
   const batchAllocatorObject = new AirdropManager.batchAllocator({
     airdrop_contract_address: airdropContractAddress,
     transaction_hash: transactionHash,
-    airdrop_users: [user1, user2],
+    airdrop_users: {userAddress1: {airdropAmount: amountInWei, expiryTimestamp: 0}, userAddress2: {airdropAmount: amountInWei, expiryTimestamp: 0}},
     chain_id: chainId
   });
   batchAllocatorObject.perform();
   
   // Get Users Airdrop Balance
-  const userBalanceObject = new UserBalanceKlass({
+  const userBalanceObject = new AirdropManager.userBalance({
     airdrop_contract_address: airdropContractAddress,
     chain_id: chainId,
     user_addresses: [user1, user2]
@@ -230,7 +230,7 @@ const OpenSTPayment = require('@openstfoundation/openst-payments')
   userBalanceObject.perform();
   
   // Call Pay method
-  const payObject = new PayKlass({
+  const payObject = new AirdropManager.pay({
     airdrop_contract_address: airdropContractAddress,
     chain_id: chainId,
     sender_worker_address: workerAddress,
