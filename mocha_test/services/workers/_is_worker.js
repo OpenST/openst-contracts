@@ -5,7 +5,8 @@ const chai = require('chai')
 
 const rootPrefix      = "../../.."
     , constants       = require(rootPrefix + '/mocha_test/lib/constants')
-    , IsWorkerKlass = require(rootPrefix + '/services/workers/is_worker')
+    , openstPayment = require(rootPrefix + '/index')
+    , IsWorkerKlass = openstPayment.services.workers.isWorker
 ;
 
 describe('Is worker', function() {

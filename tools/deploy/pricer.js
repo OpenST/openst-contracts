@@ -24,8 +24,9 @@ const readline = require('readline')
   , coreAddresses = require(rootPrefix + '/config/core_addresses')
   , returnTypes = require(rootPrefix + "/lib/global_constant/return_types")
   , helper = require(rootPrefix + "/tools/deploy/helper")
-  , SetOpsKlass = require(rootPrefix + '/services/ops_managed/set_ops')
-  , GetOpsKlass = require(rootPrefix + '/services/ops_managed/get_ops')
+  , openstPayment = require(rootPrefix + '/index')
+  , SetOpsKlass = openstPayment.services.opsManaged.setOps
+  , GetOpsKlass = openstPayment.services.opsManaged.getOps
 ;
 
 // Different addresses used for deployment

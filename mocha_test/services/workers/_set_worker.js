@@ -8,8 +8,9 @@ const rootPrefix      = "../../.."
     , BigNumber       = require('bignumber.js')
     , utils           = require(rootPrefix+'/mocha_test/lib/utils')
     , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
-    , SetWorkerKlass = require(rootPrefix + '/services/workers/set_worker')
-    , IsWorkerKlass = require(rootPrefix + '/services/workers/is_worker')
+    , openstPayment = require(rootPrefix + '/index')
+    , SetWorkerKlass = openstPayment.services.workers.setWorker
+    , IsWorkerKlass = openstPayment.services.workers.isWorker
 ;
 
 describe('Set worker', function() {
