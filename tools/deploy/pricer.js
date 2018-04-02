@@ -15,16 +15,18 @@
  * @module tools/deploy/pricer
  */
 
-const readline = require('readline');
-const rootPrefix = '../..';
-const web3Provider = require(rootPrefix + '/lib/web3/providers/ws');
-const prompts = readline.createInterface(process.stdin, process.stdout);
-const logger = require(rootPrefix + '/helpers/custom_console_logger');
-const OpsManagedContract = require(rootPrefix + "/lib/contract_interact/ops_managed_contract");
-const Deployer = require(rootPrefix + '/lib/deployer');
-const coreAddresses = require(rootPrefix + '/config/core_addresses');
-const coreConstants = require(rootPrefix + '/config/core_constants');
-const returnTypes = require(rootPrefix + "/lib/global_constant/return_types");
+const readline = require('readline')
+  , rootPrefix = '../..'
+  , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
+  , prompts = readline.createInterface(process.stdin, process.stdout)
+  , logger = require(rootPrefix + '/helpers/custom_console_logger')
+  , Deployer = require(rootPrefix + '/services/deploy/deployer')
+  , coreAddresses = require(rootPrefix + '/config/core_addresses')
+  , returnTypes = require(rootPrefix + "/lib/global_constant/return_types")
+  , helper = require(rootPrefix + "/tools/deploy/helper")
+  , SetOpsKlass = require(rootPrefix + '/services/ops_managed/set_ops')
+  , GetOpsKlass = require(rootPrefix + '/services/ops_managed/get_ops')
+;
 
 // Different addresses used for deployment
 const deployerName = "deployer"
@@ -125,38 +127,49 @@ async function performer(argv) {
   ];
 
   const contractName = 'pricer'
-    , deployerInstance = new Deployer()
     , deployOptions = {returnType: returnTypes.transactionReceipt()};
   ;
 
-  const deployResult =  await deployerInstance.deploy(
-    contractName,
-    constructorArgs,
-    gasPrice,
-    deployOptions);
+  const deployerInstance = new Deployer({
+    contract_name: contractName,
+    constructor_args: constructorArgs,
+    gas_price: gasPrice,
+    options: deployOptions
+  });
+  const deployResult =  await deployerInstance.perform();
 
   if (deployResult.isSuccess()) {
 
     const contractAddress = deployResult.data.transaction_receipt.contractAddress;
     logger.win("contractAddress: " + contractAddress);
     if (fileForContractAddress !== '') {
-      deployerInstance.writeContractAddressToFile(fileForContractAddress, contractAddress);
+      helper.writeContractAddressToFile(fileForContractAddress, contractAddress);
     }
 
-    logger.debug("Setting Ops Address to: " + opsAddress);
     const setOpsOptions = {
-        returnType: returnTypes.transactionReceipt(),
-        tag: ''
-      }
-      ,  opsManaged = new OpsManagedContract(contractAddress, gasPrice, chainId)
-    ;
-    var setOpsResult = await opsManaged.setOpsAddress(
-      deployerAddress,
-      deployerPassphrase,
-      opsAddress,
-      setOpsOptions);
+      returnType: returnTypes.transactionReceipt(),
+      tag: ''
+    }
+    logger.debug("Setting Ops Address to: " + opsAddress);
+    const SetOpsObject = new SetOpsKlass({
+      contract_address: contractAddress,
+      gas_price: gasPrice,
+      chain_id: chainId,
+      deployer_address: deployerAddress,
+      deployer_passphrase: deployerPassphrase,
+      ops_address: opsAddress,
+      options: setOpsOptions
+    });
+    var setOpsResult = await SetOpsObject.perform();
     logger.debug(setOpsResult);
-    const contractOpsAddress = await opsManaged.getOpsAddress();
+
+    const GetOpsObject = new GetOpsKlass({
+      contract_address: contractAddress,
+      gas_price: gasPrice,
+      chain_id: chainId
+    });
+    const getOpsResult = await GetOpsObject.perform();
+    const contractOpsAddress = getOpsResult.data.opsAddress;
     logger.debug("Ops Address Set to: " + contractOpsAddress);
 
   } else {

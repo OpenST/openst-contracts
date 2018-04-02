@@ -1,8 +1,10 @@
+"use strict";
+
 /**
  *
  * This class would be used for executing airdrop register.<br><br>
  *
- * @module lib/airdrop_management/register
+ * @module services/airdrop_management/register
  *
  */
 
@@ -20,44 +22,51 @@ const rootPrefix = '../..'
  *
  * @constructor
  *
- * @param {Hex} airdropContractAddress - airdrop contract address
- * @param {Number} chainId - chain Id
+ * @params {object} params -
+ * @param {string} params.airdrop_contract_address - airdrop contract address
+ * @param {number} params.chain_id - chain Id
  *
  * @return {Object}
  *
  */
-const register = module.exports = function (params) {
+const RegisterKlass = function (params) {
+  const oThis = this;
+  params = params || {};
   logger.debug("=======register.params=======");
   logger.debug(params);
-  this.airdropContractAddress = params.airdropContractAddress;
-  this.chainId = params.chainId;
+
+  oThis.airdropContractAddress = params.airdrop_contract_address;
+  oThis.chainId = params.chain_id;
 
 };
 
-register.prototype = {
+RegisterKlass.prototype = {
 
   /**
    * Perform method
    *
-   * @return {responseHelper}
+   * @return {promise<result>}
    *
    */
   perform: async function () {
 
     const oThis = this
     ;
+    try {
+      var r = null;
 
-    var r = null;
+      r = await oThis.validateParams();
+      logger.debug("=======register.validateParams.result=======");
+      logger.debug(r);
+      if (r.isFailure()) return r;
 
-    r = await oThis.validateParams();
-    logger.debug("=======register.validateParams.result=======");
-    logger.debug(r);
-    if (r.isFailure()) return r;
-
-    r = await oThis.runRegister();
-    logger.debug("=======register.runRegister.result=======");
-    logger.debug(r);
-    return r;
+      r = await oThis.runRegister();
+      logger.debug("=======register.runRegister.result=======");
+      logger.debug(r);
+      return r;
+    } catch(err) {
+      return responseHelper.error('s_am_r_perform_1', 'Something went wrong. ' + err.message);
+    }
 
   },
 
@@ -72,18 +81,18 @@ register.prototype = {
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
-        return onResolve(responseHelper.error('l_am_r_validateParams_1', 'airdrop contract address is invalid'));
+        return onResolve(responseHelper.error('s_am_r_validateParams_1', 'airdrop contract address is invalid'));
       }
 
       if (!basicHelper.isValidChainId(oThis.chainId)) {
-        return onResolve(responseHelper.error('l_am_r_validateParams_2', 'ChainId is invalid'));
+        return onResolve(responseHelper.error('s_am_r_validateParams_2', 'ChainId is invalid'));
       }
 
       const airdropContractInteractObject = new airdropContractInteract(oThis.airdropContractAddress, oThis.chainId);
       var result = await airdropContractInteractObject.airdropBudgetHolder();
       const airdropBudgetHolderAddress = result.data.airdropBudgetHolder;
       if (!basicHelper.isAddressValid(airdropBudgetHolderAddress)) {
-        return onResolve(responseHelper.error('l_am_r_validateParams_3', 'airdrop contract is invalid'));
+        return onResolve(responseHelper.error('s_am_r_validateParams_3', 'airdrop contract is invalid'));
       }
 
       // Check if airdropContractAddress is registered or not
@@ -92,7 +101,11 @@ register.prototype = {
         , airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
       ;
       if (airdropRecord) {
-        return onResolve(responseHelper.error('l_am_r_validateParams_4', 'airdrop contract address is already registered'));
+        return onResolve(responseHelper.error('s_am_r_validateParams_4', 'airdrop contract address is already registered'));
+      }
+
+      if (!basicHelper.isValidChainId(oThis.chainId)) {
+        return onResolve(responseHelper.error('s_am_r_validateParams_5', 'ChainId is invalid'));
       }
 
       return onResolve(responseHelper.successWithData({}));
@@ -124,7 +137,7 @@ register.prototype = {
         await airdropModelCacheObject.clear();
         return onResolve(responseHelper.successWithData({insertId: insertedRecord.insertId}));
       } catch (err) {
-        return onResolve(responseHelper.error('l_am_s_rs_1', 'Error creating airdrop record. ' + err));
+        return onResolve(responseHelper.error('s_am_r_runRegister_1', 'Error creating airdrop record. ' + err));
       }
     });
 
@@ -132,5 +145,5 @@ register.prototype = {
 
 };
 
-module.exports = register;
+module.exports = RegisterKlass;
 

@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * This is script for deploying Pricer contract on any chain.<br><br>
  *
@@ -10,13 +12,14 @@
  * @module tools/deploy/EIP20TokenMock
  */
 
-const readline = require('readline');
-const rootPrefix = '../..';
-const prompts = readline.createInterface(process.stdin, process.stdout);
-const logger = require(rootPrefix + '/helpers/custom_console_logger');
-const Deployer = require(rootPrefix + '/lib/deployer');
-const coreConstants = require(rootPrefix + '/config/core_constants');
-const BigNumber = require('bignumber.js');
+const readline = require('readline')
+  , rootPrefix = '../..'
+  , prompts = readline.createInterface(process.stdin, process.stdout)
+  , logger = require(rootPrefix + '/helpers/custom_console_logger')
+  , Deployer = require(rootPrefix + '/services/deploy/deployer')
+  , BigNumber = require('bignumber.js')
+  , helper = require(rootPrefix + "/tools/deploy/helper")
+;
 
 /**
  * It is the main performer method of this deployment script
@@ -88,7 +91,9 @@ async function performer(argv) {
     prompts.close();
   }
 
-  const contractName = 'eip20tokenmock';
+  const contractName = 'eip20tokenmock'
+    , options = {returnType: "txReceipt"}
+  ;
 
   var constructorArgs = [
     conversionRate,
@@ -98,21 +103,20 @@ async function performer(argv) {
     decimals
   ];
 
-  const options = {returnType: "txReceipt"};
+  const deployerInstance = new Deployer({
+    contract_name: contractName,
+    constructor_args: constructorArgs,
+    gas_price: gasPrice,
+    options: options
+  });
 
-  const deployerInstance = new Deployer();
-
-  const deployResult =  await deployerInstance.deploy(
-    contractName,
-    constructorArgs,
-    gasPrice,
-    options);
+  const deployResult =  await deployerInstance.perform();
 
   if (deployResult.isSuccess()) {
     const contractAddress = deployResult.data.transaction_receipt.contractAddress;
     logger.win("contractAddress: " + contractAddress);
     if (fileForContractAddress !== '') {
-      deployerInstance.writeContractAddressToFile(fileForContractAddress, contractAddress);
+      await helper.writeContractAddressToFile(fileForContractAddress, contractAddress);
     }
   }
   process.exit(0);
