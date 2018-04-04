@@ -27,6 +27,7 @@ const readline = require('readline')
   , openstPayment = require(rootPrefix + '/index')
   , SetOpsKlass = openstPayment.services.opsManaged.setOps
   , GetOpsKlass = openstPayment.services.opsManaged.getOps
+  , gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit')
 ;
 
 // Different addresses used for deployment
@@ -135,6 +136,7 @@ async function performer(argv) {
     contract_name: contractName,
     constructor_args: constructorArgs,
     gas_price: gasPrice,
+    gas_limit: gasLimitGlobalConstant.default(),
     options: deployOptions
   });
   const deployResult =  await deployerInstance.perform();

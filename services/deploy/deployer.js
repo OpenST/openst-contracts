@@ -15,6 +15,7 @@ const uuid = require('uuid')
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , deployerName = 'deployer'
+  , gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit')
 ;
 
 /**
@@ -24,6 +25,7 @@ const uuid = require('uuid')
  * @param {string} params.contract_name - name of contract
  * @param {object} params.constructor_args - contract deployment constructor arguments
  * @param {string} params.gas_price - gas price
+ * @param {string} params.gas_limit - gas limit
  * @param {object} params.options - deployment options
  *
  * @constructor
@@ -38,6 +40,7 @@ const DeployerKlass = function(params) {
   oThis.contractName = params.contract_name;
   oThis.constructorArgs = params.constructor_args;
   oThis.gasPrice = params.gas_price;
+  oThis.gasLimit = params.gas_limit || gasLimitGlobalConstant.default();
   oThis.options = params.options;
 };
 
@@ -91,16 +94,21 @@ DeployerKlass.prototype = {
       return responseHelper.error('l_d_2', 'Gas price is mandatory');
     }
 
+    if (!oThis.gasLimit) {
+      logger.error("Error: Gas limit is mandatory");
+      return responseHelper.error('l_d_3', 'Gas limit is mandatory');
+    }
+
     const deployerAddress = coreAddresses.getAddressForUser(deployerName);
     if (!deployerAddress) {
       logger.error("Error: Deployer address is invalid");
-      return responseHelper.error('l_d_3', 'Deployer address is invalid');
+      return responseHelper.error('l_d_4', 'Deployer address is invalid');
     }
 
     const deployerAddrPassphrase = coreAddresses.getPassphraseForUser(deployerName);
     if (!deployerAddrPassphrase) {
       logger.error("Error: Deployer passphrase is invalid");
-      return responseHelper.error('l_d_4', 'Deployer passphrase is invalid');
+      return responseHelper.error('l_d_5', 'Deployer passphrase is invalid');
     }
 
     return responseHelper.successWithData({});
@@ -138,7 +146,7 @@ DeployerKlass.prototype = {
           from: deployerAddress,
           data: (web3Provider.utils.isHexStrict(contractBin) ? "" : "0x") + contractBin,
           gasPrice: oThis.gasPrice,
-          gas: coreConstants.OST_GAS_LIMIT
+          gas: oThis.gasLimit
         };
 
         if (oThis.constructorArgs) {

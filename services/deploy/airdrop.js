@@ -14,6 +14,7 @@ const rootPrefix = '../..'
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , DeployerKlass = require(rootPrefix + '/services/deploy/deployer')
   , web3Provider = require(rootPrefix + '/lib/web3/providers/rpc')
+  , gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit')
 ;
 
 /**
@@ -136,6 +137,7 @@ DeployAirdropKlass.prototype = {
       contract_name: oThis.contractName,
       constructor_args: oThis.constructorArgs,
       gas_price: oThis.gasPrice,
+      gas_limit: gasLimitGlobalConstant.deployAirdrop(),
       options: oThis.options
     });
     return DeployerObject.perform();
