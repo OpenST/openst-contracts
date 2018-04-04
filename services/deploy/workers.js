@@ -12,6 +12,7 @@ const rootPrefix = '../..'
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , DeployerKlass = require(rootPrefix + '/services/deploy/deployer')
+  , gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit')
 ;
 
 /**
@@ -104,6 +105,7 @@ DeployWorkerKlass.prototype = {
       contract_name: oThis.contractName,
       constructor_args: oThis.constructorArgs,
       gas_price: oThis.gasPrice,
+      gas_limit: gasLimitGlobalConstant.deployWorker(),
       options: oThis.options
     });
     return DeployerObject.perform();

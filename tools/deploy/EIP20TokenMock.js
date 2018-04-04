@@ -19,6 +19,7 @@ const readline = require('readline')
   , Deployer = require(rootPrefix + '/services/deploy/deployer')
   , BigNumber = require('bignumber.js')
   , helper = require(rootPrefix + "/tools/deploy/helper")
+  , gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit')
 ;
 
 /**
@@ -107,6 +108,7 @@ async function performer(argv) {
     contract_name: contractName,
     constructor_args: constructorArgs,
     gas_price: gasPrice,
+    gas_limit: gasLimitGlobalConstant.default(),
     options: options
   });
 
