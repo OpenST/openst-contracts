@@ -39,7 +39,7 @@ const _private = {
           clearInterval(txSetInterval);
           onResolve(response);
         } else {
-          console.log('Waiting for ' + transactionHash + ' to be included in block.');
+          logger.debug('Waiting for ' + transactionHash + ' to be included in block.');
         }
       };
 
@@ -121,14 +121,14 @@ const deployHelper = {
       });
     };
 
-    console.log("Unlocking address: " + deployerAddr);
-    console.log("Unlocking!!!");
+    logger.debug("Unlocking address: " + deployerAddr);
+    logger.debug("Unlocking!!!");
 
-    console.log("deployerAddr: "+deployerAddr);
+    logger.debug("deployerAddr: "+deployerAddr);
 
     await web3Provider.eth.personal.unlockAccount(deployerAddr, deployerAddrPassphrase);
 
-    console.log("Deploying contract " + contractName);
+    logger.debug("Deploying contract " + contractName);
 
     var deployFailedReason = null;
     const transactionReceipt = await deploy().then(
@@ -137,7 +137,7 @@ const deployHelper = {
       }
     ).catch(reason => {
       deployFailedReason = reason;
-      console.log( deployFailedReason );
+      logger.debug( deployFailedReason );
       return null;
     });
 
@@ -145,7 +145,7 @@ const deployHelper = {
       return Promise.reject( deployFailedReason );
     }
 
-    console.log("deploy transactionReceipt ::", transactionReceipt);
+    logger.debug("deploy transactionReceipt ::", transactionReceipt);
 
     const contractAddress = transactionReceipt.contractAddress;
 
@@ -156,8 +156,8 @@ const deployHelper = {
     }
 
     // Print summary
-    console.log("Contract Address: " + contractAddress);
-    console.log("Gas used: " + transactionReceipt.gasUsed);
+    logger.debug("Contract Address: " + contractAddress);
+    logger.debug("Gas used: " + transactionReceipt.gasUsed);
 
     return Promise.resolve({
       receipt: transactionReceipt,
