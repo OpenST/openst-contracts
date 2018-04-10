@@ -22,6 +22,8 @@
 const Assert = require('assert');
 
 const NullAddress = "0x0000000000000000000000000000000000000000";
+const rootPrefix = '../..'
+  , logger = require(rootPrefix + '/helpers/custom_console_logger');
 
 /*
  *  Tracking Gas Usage
@@ -35,7 +37,7 @@ module.exports.logResponse = (response, description) => {
     description: description,
     response: response
   });
-}
+};
 
 module.exports.logReceipt = (receipt, description) => {
   receipts.push({
@@ -43,34 +45,34 @@ module.exports.logReceipt = (receipt, description) => {
     description: description,
     response: null
   })
-}
+};
 
 module.exports.logTransaction = async (hash, description) => {
   const receipt = await web3.eth.getTransactionReceipt(hash)
   await this.logReceipt(receipt, description)
-}
+};
 
 module.exports.printGasStatistics = () => {
-  var totalGasUsed = 0
+  var totalGasUsed = 0;
 
-  console.log("      -----------------------------------------------------");
-  console.log("      Report gas usage\n");
+  logger.debug("      -----------------------------------------------------");
+  logger.debug("      Report gas usage\n");
 
   for (i = 0; i < receipts.length; i++) {
-    const entry = receipts[i]
+    const entry = receipts[i];
 
-    totalGasUsed += entry.receipt.gasUsed
+    totalGasUsed += entry.receipt.gasUsed;
 
-    console.log("      " + entry.description.padEnd(45) + entry.receipt.gasUsed)
+    logger.debug("      " + entry.description.padEnd(45) + entry.receipt.gasUsed)
   }
 
-  console.log("      -----------------------------------------------------")
-  console.log("      " + "Total gas logged: ".padEnd(45) + totalGasUsed + "\n")
-}
+  logger.debug("      -----------------------------------------------------");
+  logger.debug("      " + "Total gas logged: ".padEnd(45) + totalGasUsed + "\n")
+};
 
 module.exports.clearReceipts = () => {
   receipts.splice(0, receipts.length);
-}
+};
 
 
 /*
@@ -78,7 +80,7 @@ module.exports.clearReceipts = () => {
  */
 module.exports.expectNoEvents = (result) => {
   Assert.equal(result.receipt.logs.length, 0, "expected empty array of logs")
-}
+};
 
 /*
  *  Basic Ethereum checks
@@ -88,7 +90,7 @@ module.exports.expectNoEvents = (result) => {
 module.exports.isNullAddress = function (address) {
   Assert.strictEqual(typeof address, 'string', `address must be of type 'string'`);
   return (address == NullAddress);
-}
+};
 
 /// @dev Expect failure from invalid opcode or out of gas,
 ///      but returns error instead
