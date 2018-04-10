@@ -73,8 +73,8 @@ const UserAirdropDetailKlassPrototype = {
             balanceAirdropAmount: balanceAirdropAmount.toString(10)
           };
         }
-        logger.info("========user_airdrop_detail.getByUserAddresses().result=========");
-        logger.info(result);
+        logger.debug("========user_airdrop_detail.getByUserAddresses().result=========");
+        logger.debug(result);
         return onResolve(responseHelper.successWithData(result));
       } catch (error) {
         return onResolve(responseHelper.error('a_m_uad_1', 'error:' + error));

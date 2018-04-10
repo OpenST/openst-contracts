@@ -5,5 +5,6 @@ cat set_env_vars.sh>env_vars.sh
 sh init_keys.sh
 sh init_chain.sh
 nohup sh run_chain.sh </dev/null >/dev/null 2>&1 &
+sleep 10
 node ./geth_checker.js
 

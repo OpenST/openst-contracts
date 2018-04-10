@@ -16,13 +16,11 @@ function define(name, value) {
   });
 }
 //Cache engine
-define('CACHING_ENGINE', process.env.OST_CACHING_ENGINE),
+define('CACHING_ENGINE', process.env.OST_CACHING_ENGINE);
 
 // Geth
 define('OST_UTILITY_GETH_RPC_PROVIDER', process.env.OST_UTILITY_GETH_RPC_PROVIDER);
-// Gas limit
-define('OST_GAS_LIMIT', 9000000);
-define('OST_PAY_GAS_LIMIT', 150000);
+define('OST_UTILITY_GETH_WS_PROVIDER', process.env.OST_UTILITY_GETH_WS_PROVIDER);
 
 // MySQL details
 define("MYSQL_HOST", process.env.OP_MYSQL_HOST);

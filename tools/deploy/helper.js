@@ -108,7 +108,7 @@ const deployHelper = {
       options
     );    
     // this is needed since the contract object
-    contract.setProvider(web3Provider.currentProvider);
+    //contract.setProvider(web3Provider.currentProvider);
 
     const deploy = function () {
       const encodeABI = contract.deploy(options).encodeABI();
@@ -206,6 +206,7 @@ const deployHelper = {
   writeContractAddressToFile: function(fileName, contractAddress) {
     // Write contract address to file
     if ( fileName !== '') {
+      logger.debug("Writing to file: ", fileName, "contract address: ", contractAddress);
       fs.writeFileSync(Path.join(__dirname, '/' + fileName), contractAddress);
     }
   }
