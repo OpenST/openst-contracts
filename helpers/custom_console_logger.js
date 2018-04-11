@@ -60,12 +60,12 @@ module.exports = {
   },
 
   debug: function () {
-    //if (coreConstants.DEBUG_ENABLED == 1) {
+    if (coreConstants.DEBUG_ENABLED == 1) {
       var args = [this.INFO_PRE];
       args = args.concat(Array.prototype.slice.call(arguments));
       args.push(this.CONSOLE_RESET);
       console.log.apply(console, args);
-    //}
+    }
   },
 
   //Method to Log Success/Win.
