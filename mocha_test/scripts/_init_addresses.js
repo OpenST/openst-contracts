@@ -14,6 +14,7 @@ const _addresses = {
 
 const rootPrefix = "../.."
   , coreConstants = require( rootPrefix + '/config/core_constants' )
+  , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , populateEnvVars = require( rootPrefix + "/mocha_test/lib/populate_env_vars.js")
   , poaGenesis = require( rootPrefix + "/mocha_test/scripts/poa-genesis.json")
 ;
@@ -96,7 +97,7 @@ function writeJsonToFile( jsObject, relativeFilePath, tab_space ) {
     jsonFilePath = Path.join(__dirname, '/' + relativeFilePath );
   }
 
-  console.log("writeJsonToFile :: jsonFilePath :: ", jsonFilePath);
+  logger.debug("writeJsonToFile :: jsonFilePath :: ", jsonFilePath);
 
   fs.writeFileSync(jsonFilePath, json );
 }

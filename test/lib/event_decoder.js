@@ -29,9 +29,9 @@ web3EventsDecoder.prototype = {
 
   // decode logs from a transaction receipt
   perform: function(txReceipt, contractAddr, contractAbi) {
-    //console.log(txReceipt);
-    //console.log(contractAddr);
-    //console.log(contractAbi);
+    //logger.debug(txReceipt);
+    //logger.debug(contractAddr);
+    //logger.debug(contractAbi);
     var decodedEvents = [];
 
     // Transaction receipt not found
