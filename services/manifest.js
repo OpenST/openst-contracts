@@ -19,6 +19,7 @@ const rootPrefix = ".."
   , batchAllocator = require(rootPrefix + '/services/airdrop_management/batch_allocator')
   , userBalance = require(rootPrefix + '/services/airdrop_management/user_balance')
   , pay = require(rootPrefix + '/services/airdrop_management/pay')
+  , postAirdropPay =  require(rootPrefix + '/services/airdrop_management/post_airdrop_pay')
 
   , setWorker = require(rootPrefix + '/services/workers/set_worker')
   , isWorker = require(rootPrefix + '/services/workers/is_worker')
@@ -79,7 +80,8 @@ ServiceManifestKlass.prototype = {
     approve: approve,
     batchAllocator: batchAllocator,
     userBalance: userBalance,
-    pay: pay
+    pay: pay,
+    postAirdropPay: postAirdropPay
   },
 
 };
