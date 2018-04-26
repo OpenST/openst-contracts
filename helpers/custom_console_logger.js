@@ -4,8 +4,8 @@
  * Custom Console log methods.
  *
  */
-const OSTCore = require('@openstfoundation/openst-core')
-  , Logger  = OSTCore.Logger
+const OSTBase = require('@openstfoundation/openst-base')
+  , Logger  = OSTBase.Logger
 ;
 
 const rootPrefix = '..'
