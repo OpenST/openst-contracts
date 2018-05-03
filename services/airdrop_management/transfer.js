@@ -18,7 +18,14 @@ const rootPrefix = '../..'
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
   , BrandedTokenKlass = require(rootPrefix + '/lib/contract_interact/branded_token')
+  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
+  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+const errorConfig = {
+  param_error_config: paramErrorConfig,
+  api_error_config: apiErrorConfig
+};
 
 /**
  * Constructor to create object of transfer
@@ -81,7 +88,14 @@ TransferKlass.prototype = {
       logger.debug(r);
       return r;
     } catch(err) {
-      return responseHelper.error('s_am_t_perform_1', 'Something went wrong. ' + err.message);
+      let errorParams = {
+        internal_error_identifier: 's_am_t_perform_1',
+        api_error_identifier: 'unhandled_api_error',
+        error_config: errorConfig,
+        debug_options: {}
+      };
+      logger.error(err.message);
+      return responseHelper.error(errorParams);
     }
 
   },
@@ -97,11 +111,25 @@ TransferKlass.prototype = {
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.senderAddress)) {
-        return onResolve(responseHelper.error('s_am_t_validateParams_1', 'sender address is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_t_validateParams_1',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['invalid_sender_address'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
-        return onResolve(responseHelper.error('s_am_t_validateParams_2', 'airdrop contract address is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_t_validateParams_2',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['airdrop_contract_address_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       // Check if airdropContractAddress is registered or not
@@ -111,7 +139,14 @@ TransferKlass.prototype = {
       ;
       oThis.airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
       if (!oThis.airdropRecord){
-        return onResolve(responseHelper.error('s_am_t_validateParams_3', 'Given airdrop contract is not registered'));
+        let errorParams = {
+          internal_error_identifier: 's_am_t_validateParams_3',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['airdrop_contract_address_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       const airdropContractInteractObject = new airdropContractInteract(oThis.airdropContractAddress, oThis.chainId);
@@ -120,43 +155,97 @@ TransferKlass.prototype = {
       logger.debug("\n==========transfer.validateParams.brandedToken===========");
       logger.debug("\nairdropContractInteractObject.brandedToken():", result,"\noThis.brandedTokenContractAddress:", oThis.brandedTokenContractAddress);
       if (!basicHelper.isAddressValid(oThis.brandedTokenContractAddress)) {
-        return onResolve(responseHelper.error('s_am_t_validateParams_4', 'brandedTokenContractAddress set in airdrop contract is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_t_validateParams_4',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['branded_token_address_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       result = await airdropContractInteractObject.airdropBudgetHolder();
       oThis.airdropBudgetHolderAddress = result.data.airdropBudgetHolder;
       if (!basicHelper.isAddressValid(oThis.brandedTokenContractAddress)) {
-        return onResolve(responseHelper.error('s_am_t_validateParams_5', 'airdropBudgetHolderAddress set in airdrop contract is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_t_validateParams_5',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['airdrop_budget_holder_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       const amountInBigNumber = new BigNumber(oThis.amount);
       if (amountInBigNumber.isNaN() || !amountInBigNumber.isInteger()){
-        return onResolve(responseHelper.error('s_am_t_validateParams_6', 'amount is invalid value'));
+        let errorParams = {
+          internal_error_identifier: 's_am_t_validateParams_6',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['invalid_amount'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       if (!basicHelper.isValidChainId(oThis.chainId)) {
-        return onResolve(responseHelper.error('s_am_t_validateParams_7', 'ChainId is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_t_validateParams_7',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['chain_id_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       const brandedTokenObject = new BrandedTokenKlass(oThis.brandedTokenContractAddress, oThis.chainId);
       const senderBalanceResponse = await brandedTokenObject.getBalanceOf(oThis.senderAddress);
 
       if (senderBalanceResponse.isFailure()) {
-        return onResolve(responseHelper.error('s_am_t_validateParams_8', 'Error while getting sender balance'));
+        let errorParams = {
+          internal_error_identifier: 's_am_t_validateParams_8',
+          api_error_identifier: 'get_balance_failed',
+          error_config: errorConfig,
+          debug_options: {}
+        };
+        return onResolve(responseHelper.error(errorParams));
       }
 
       const senderBalance = new BigNumber(senderBalanceResponse.data.balance);
       //logger.debug("senderBalance: "+senderBalance.toString(10), "amount to transfer: "+amountInBigNumber);
       if (senderBalance.lt(amountInBigNumber)){
-        return onResolve(responseHelper.error('s_am_t_validateParams_9', 'Sender balance: '+ senderBalance.toString(10) +' is not enough to transfer amount: '+amountInBigNumber.toString(10)));
+        let errorParams = {
+          internal_error_identifier: 's_am_t_validateParams_9',
+          api_error_identifier: 'insufficient_funds',
+          error_config: errorConfig,
+          debug_options: {}
+        };
+        return onResolve(responseHelper.error(errorParams));
       }
 
       if (!oThis.gasPrice) {
-        return onResolve(responseHelper.error('s_am_t_validateParams_10', 'gas is mandatory'));
+        let errorParams = {
+          internal_error_identifier: 's_am_t_validateParams_10',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['gas_price_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       if (!basicHelper.isValidChainId(oThis.chainId)) {
-        return onResolve(responseHelper.error('s_am_t_validateParams_11', 'ChainId is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_t_validateParams_11',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['chain_id_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       return onResolve(responseHelper.successWithData({}));

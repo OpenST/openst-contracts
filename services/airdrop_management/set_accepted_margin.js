@@ -14,7 +14,14 @@ const rootPrefix = '../..'
   , helper = require(rootPrefix + '/lib/contract_interact/helper')
   , AirdropContractInteractKlass = require(rootPrefix + '/lib/contract_interact/airdrop')
   , BigNumber = require('bignumber.js')
+  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
+  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+const errorConfig = {
+  param_error_config: paramErrorConfig,
+  api_error_config: apiErrorConfig
+};
 
 /**
  * Constructor to create object of SetAcceptedMarginKlass
@@ -78,7 +85,13 @@ SetAcceptedMarginKlass.prototype = {
       return r;
 
     } catch (err) {
-      return responseHelper.error('s_w_sam_perform_1', 'Something went wrong. ' + err.message);
+      let errorParams = {
+        internal_error_identifier: 's_w_sam_perform_1',
+        api_error_identifier: 'unhandled_api_error',
+        error_config: errorConfig,
+        debug_options: {}
+      };
+      return responseHelper.error(errorParams);
     }
 
   },
@@ -93,29 +106,71 @@ SetAcceptedMarginKlass.prototype = {
     const oThis = this
     ;
     if (!helper.isValidCurrency(oThis.currency, false)) {
-      return responseHelper.error('s_am_sam_validateParams_1', 'currency is mandatory');
+      let errorParams = {
+        internal_error_identifier: 's_am_sam_validateParams_1',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['invalid_currency'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!oThis.gasPrice) {
-      return responseHelper.error('s_am_sam_validateParams_2', 'gas price is mandatory');
+      let errorParams = {
+        internal_error_identifier: 's_am_sam_validateParams_2',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['gas_price_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     const acceptedMargin = new BigNumber(oThis.acceptedMargin);
 
     if (acceptedMargin.isNaN() || !acceptedMargin.isInteger() || acceptedMargin.lt(0)) {
-      return responseHelper.error('s_am_sam_validateParams_3', 'accepted margin cannot be negative');
+      let errorParams = {
+        internal_error_identifier: 's_am_sam_validateParams_3',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['accepted_margin_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!basicHelper.isAddressValid(oThis.senderAddress)) {
-      return responseHelper.error('s_am_sam_validateParams_4', 'address is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_am_sam_validateParams_4',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['invalid_sender_address'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!oThis.gasPrice) {
-      return responseHelper.error('s_am_sam_validateParams_5', 'gas is mandatory');
+      let errorParams = {
+        internal_error_identifier: 's_am_sam_validateParams_5',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['gas_price_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!basicHelper.isValidChainId(oThis.chainId)) {
-      return responseHelper.error('s_am_sam_validateParams_6', 'ChainId is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_am_sam_validateParams_6',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['chain_id_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     return responseHelper.successWithData({});

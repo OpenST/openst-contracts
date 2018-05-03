@@ -12,7 +12,14 @@ const rootPrefix = "../../.."
   , BrandedTokenKlass = require(rootPrefix + '/lib/contract_interact/branded_token')
   , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
+  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
+  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+const errorConfig = {
+  param_error_config: paramErrorConfig,
+  api_error_config: apiErrorConfig
+};
 
 const airdropOstUsd = new airdrop(constants.airdropOstUsdAddress, constants.chainId)
   , TC5 = new mockToken(constants.TC5Address)
@@ -180,7 +187,13 @@ async function getAirdropIdFromAirdropAddress(airdropAddress) {
   if (airdropRecord) {
     return responseHelper.successWithData({airdropId: airdropRecord.id});
   }
-  return responseHelper.error("gaidfad", "No data found");
+  let errorParams = {
+    internal_error_identifier: 'gaidfad',
+    api_error_identifier: 'data_not_found',
+    error_config: errorConfig,
+    debug_options: {}
+  };
+  return responseHelper.error(errorParams);
 }
 
 /**

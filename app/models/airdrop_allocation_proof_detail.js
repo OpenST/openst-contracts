@@ -11,7 +11,15 @@ const rootPrefix = '../..'
   , QueryDBKlass = require(rootPrefix + '/app/models/queryDb')
   , ModelBaseKlass = require(rootPrefix + '/app/models/base')
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
+  , logger = require(rootPrefix + '/helpers/custom_console_logger')
+  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
+  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+const errorConfig = {
+  param_error_config: paramErrorConfig,
+  api_error_config: apiErrorConfig
+};
 
 const dbName = coreConstants.MYSQL_DATABASE
   , QueryDBObj = new QueryDBKlass(dbName)
@@ -62,7 +70,14 @@ const AirdropAllocationProofDetailKlassPrototype = {
         });
         return responseHelper.successWithData({response: insertedRecord});
       } catch(err){
-        return responseHelper.error('l_aapd_cr_1', 'Error creating airdrop_allocation_proof_details record:'+err);
+        let errorParams = {
+          internal_error_identifier: 'l_aapd_cr_1',
+          api_error_identifier: 'entry_creation_failed',
+          error_config: errorConfig,
+          debug_options: {}
+        };
+        logger.error(err);
+        return responseHelper.error(errorParams);
       }
 
   },
@@ -84,7 +99,14 @@ const AirdropAllocationProofDetailKlassPrototype = {
       await oThis.update({airdrop_allocated_amount: allocatedAmount}).where(["id=?", id]).fire();
       return responseHelper.successWithData({});
     } catch(err){
-      return responseHelper.error('l_a_m_aapd_1', 'Something went wrong while updating record id:'+id+" err: "+err);
+      let errorParams = {
+        internal_error_identifier: 'l_a_m_aapd_1',
+        api_error_identifier: 'entry_updation_failed',
+        error_config: errorConfig,
+        debug_options: {}
+      };
+      logger.error(err);
+      return responseHelper.error(errorParams);
     }
   },
 

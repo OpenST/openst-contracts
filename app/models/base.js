@@ -4,7 +4,6 @@ const rootPrefix = '../..'
   , utils = require(rootPrefix + '/lib/utils')
   , MysqlQueryKlass = require(rootPrefix + '/lib/query_builders/mysql')
   , mysqlWrapper = require(rootPrefix + "/lib/mysql_wrapper")
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
 ;
 

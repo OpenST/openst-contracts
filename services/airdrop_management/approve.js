@@ -16,7 +16,14 @@ const rootPrefix = '../..'
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
+  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
+  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+const errorConfig = {
+  param_error_config: paramErrorConfig,
+  api_error_config: apiErrorConfig
+};
 
 /**
  * Constructor to create object of approve
@@ -76,7 +83,14 @@ ApproveKlass.prototype = {
       logger.debug(r);
       return r;
     } catch(err) {
-      return responseHelper.error('s_am_a_perform_1', 'Something went wrong. ' + err.message)
+      let errorParams = {
+        internal_error_identifier: 's_am_a_perform_1',
+        api_error_identifier: 'unhandled_api_error',
+        error_config: errorConfig,
+        debug_options: {}
+      };
+      logger.error(err.message);
+      return responseHelper.error(errorParams)
     }
 
   },
@@ -92,7 +106,14 @@ ApproveKlass.prototype = {
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
-        return onResolve(responseHelper.error('s_am_a_validateParams_1', 'airdrop contract address is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_a_validateParams_1',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['airdrop_contract_address_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       // Check if airdropContractAddress is registered or not
@@ -101,20 +122,41 @@ ApproveKlass.prototype = {
        ;
       oThis.airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
       if (!oThis.airdropRecord){
-        return onResolve(responseHelper.error('s_am_a_validateParams_2', 'Given airdrop contract is not registered'));
+        let errorParams = {
+          internal_error_identifier: 's_am_a_validateParams_2',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['unregistered_airdrop_contract'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       var airdropContractInteractObject = new airdropContractInteract(oThis.airdropContractAddress, oThis.chainId);
       var result = await airdropContractInteractObject.brandedToken();
       oThis.brandedTokenContractAddress = result.data.brandedToken;
       if (!basicHelper.isAddressValid(oThis.brandedTokenContractAddress)) {
-        return onResolve(responseHelper.error('s_am_a_validateParams_3', 'brandedTokenContractAddress set in airdrop contract is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_a_validateParams_3',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['branded_token_address_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       result = await airdropContractInteractObject.airdropBudgetHolder();
       oThis.airdropBudgetHolderAddress = result.data.airdropBudgetHolder;
       if (!basicHelper.isAddressValid(oThis.airdropBudgetHolderAddress)) {
-        return onResolve(responseHelper.error('s_am_a_validateParams_4', 'airdropBudgetHolderAddress set in airdrop contract is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_a_validateParams_4',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['airdrop_budget_holder_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       oThis.brandedTokenObject = new brandedTokenContractInteract(oThis.brandedTokenContractAddress, oThis.chainId);
@@ -122,15 +164,36 @@ ApproveKlass.prototype = {
       oThis.amount = result.data.balance;
       const amountInBigNumber = new BigNumber(oThis.amount);
       if (amountInBigNumber.isNaN() || !amountInBigNumber.isInteger()){
-        return onResolve(responseHelper.error('s_am_a_validateParams_5', 'amount is invalid value'));
+        let errorParams = {
+          internal_error_identifier: 's_am_a_validateParams_5',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['invalid_amount'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       if (!basicHelper.isValidChainId(oThis.chainId)) {
-        return onResolve(responseHelper.error('s_am_a_validateParams_6', 'ChainId is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_a_validateParams_6',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['invalid_chain_id'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       if (!oThis.gasPrice) {
-        return onResolve(responseHelper.error('s_am_a_validateParams_7', 'gas is mandatory'));
+        let errorParams = {
+          internal_error_identifier: 's_am_a_validateParams_7',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['gas_price_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       return onResolve(responseHelper.successWithData({}));

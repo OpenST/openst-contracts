@@ -13,7 +13,14 @@ const rootPrefix = '../..'
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , AirdropContractInteractKlass = require(rootPrefix + '/lib/contract_interact/airdrop')
+  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
+  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+const errorConfig = {
+  param_error_config: paramErrorConfig,
+  api_error_config: apiErrorConfig
+};
 
 /**
  * Constructor to create object of airdrop PayKlass
@@ -86,7 +93,14 @@ PayKlass.prototype = {
       return r;
 
     } catch (err) {
-      return responseHelper.error('s_a_p_perform_1', 'Something went wrong. ' + err.message);
+      let errorParams = {
+        internal_error_identifier: 's_a_p_perform_1',
+        api_error_identifier: 'unhandled_api_error',
+        error_config: errorConfig,
+        debug_options: {}
+      };
+      logger.error(err.message);
+      return responseHelper.error(errorParams);
     }
 
   },
@@ -101,15 +115,36 @@ PayKlass.prototype = {
     const oThis = this
     ;
     if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
-      return responseHelper.error('s_a_p_validateParams_1', 'airdrop contract address is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_a_p_validateParams_1',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['airdrop_contract_address_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!oThis.gasPrice) {
-      return responseHelper.error('s_a_p_validateParams_2', 'gas is mandatory');
+      let errorParams = {
+        internal_error_identifier: 's_a_p_validateParams_2',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['gas_price_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!basicHelper.isValidChainId(oThis.chainId)) {
-      return responseHelper.error('s_a_p_validateParams_3', 'ChainId is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_a_p_validateParams_3',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['chain_id_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.error(errorParams);
     }
 
     return responseHelper.successWithData({});

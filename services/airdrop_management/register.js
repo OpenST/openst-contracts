@@ -15,7 +15,14 @@ const rootPrefix = '../..'
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
+  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
+  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+const errorConfig = {
+  param_error_config: paramErrorConfig,
+  api_error_config: apiErrorConfig
+};
 
 /**
  * Constructor to create object of register
@@ -65,7 +72,13 @@ RegisterKlass.prototype = {
       logger.debug(r);
       return r;
     } catch(err) {
-      return responseHelper.error('s_am_r_perform_1', 'Something went wrong. ' + err.message);
+      let errorParams = {
+        internal_error_identifier: 's_am_r_perform_1',
+        api_error_identifier: 'unhandled_api_error',
+        error_config: errorConfig,
+        debug_options: {}
+      };
+      return responseHelper.error(errorParams);
     }
 
   },
@@ -81,18 +94,39 @@ RegisterKlass.prototype = {
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
-        return onResolve(responseHelper.error('s_am_r_validateParams_1', 'airdrop contract address is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_r_validateParams_1',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['airdrop_contract_address_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       if (!basicHelper.isValidChainId(oThis.chainId)) {
-        return onResolve(responseHelper.error('s_am_r_validateParams_2', 'ChainId is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_r_validateParams_2',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['chain_id_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       const airdropContractInteractObject = new airdropContractInteract(oThis.airdropContractAddress, oThis.chainId);
       var result = await airdropContractInteractObject.airdropBudgetHolder();
       const airdropBudgetHolderAddress = result.data.airdropBudgetHolder;
       if (!basicHelper.isAddressValid(airdropBudgetHolderAddress)) {
-        return onResolve(responseHelper.error('s_am_r_validateParams_3', 'airdrop contract is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_r_validateParams_3',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['airdrop_contract_address_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       // Check if airdropContractAddress is registered or not
@@ -101,11 +135,25 @@ RegisterKlass.prototype = {
         , airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
       ;
       if (airdropRecord) {
-        return onResolve(responseHelper.error('s_am_r_validateParams_4', 'airdrop contract address is already registered'));
+        let errorParams = {
+          internal_error_identifier: 's_am_r_validateParams_4',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['airdrop_contract_already_registered'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       if (!basicHelper.isValidChainId(oThis.chainId)) {
-        return onResolve(responseHelper.error('s_am_r_validateParams_5', 'ChainId is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_r_validateParams_5',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['chain_id_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       return onResolve(responseHelper.successWithData({}));
@@ -137,7 +185,13 @@ RegisterKlass.prototype = {
         await airdropModelCacheObject.clear();
         return onResolve(responseHelper.successWithData({insertId: insertedRecord.insertId}));
       } catch (err) {
-        return onResolve(responseHelper.error('s_am_r_runRegister_1', 'Error creating airdrop record. ' + err));
+        let errorParams = {
+          internal_error_identifier: 's_am_r_runRegister_1',
+          api_error_identifier: 'unhandled_api_error',
+          error_config: errorConfig,
+          debug_options: {}
+        };
+        return onResolve(responseHelper.error(errorParams));
       }
     });
 

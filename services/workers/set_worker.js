@@ -14,7 +14,14 @@ const rootPrefix = '../..'
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , BigNumber = require('bignumber.js')
   , WorkersContractInteractKlass = require(rootPrefix + '/lib/contract_interact/workers')
+  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
+  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+const errorConfig = {
+  param_error_config: paramErrorConfig,
+  api_error_config: apiErrorConfig
+};
 
 /**
  * Constructor to create object of register
@@ -79,7 +86,14 @@ SetWorkerKlass.prototype = {
       return r;
 
     } catch (err) {
-      return responseHelper.error('s_w_sw_perform_1', 'Something went wrong. ' + err.message);
+      let errorParams = {
+        internal_error_identifier: 's_w_sw_perform_1',
+        api_error_identifier: 'unhandled_api_error',
+        error_config: errorConfig,
+        debug_options: {}
+      };
+      logger.error(err.message);
+      return responseHelper.error(errorParams);
     }
 
   },
@@ -93,31 +107,87 @@ SetWorkerKlass.prototype = {
   validateParams: function () {
     const oThis = this;
     if (!basicHelper.isAddressValid(oThis.workersContractAddress)) {
-      return responseHelper.error('s_w_sw_validateParams_1', 'workers contract address is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_w_sw_validateParams_1',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['invalid_worker_address'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
     if (!oThis.gasPrice) {
-      return responseHelper.error('s_w_sw_validateParams_2', 'gas is mandatory');
+      let errorParams = {
+        internal_error_identifier: 's_w_sw_validateParams_2',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['gas_price_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
     if (!basicHelper.isAddressValid(oThis.senderAddress)) {
-      return responseHelper.error('s_w_sw_validateParams_3', 'sender address is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_w_sw_validateParams_3',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['invalid_sender_address'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
     if (!basicHelper.isAddressValid(oThis.workerAddress)) {
-      return responseHelper.error('s_w_sw_validateParams_4', 'worker address is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_w_sw_validateParams_4',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['invalid_worker_address'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
     if (!oThis.deactivationHeight) {
-      return responseHelper.error('s_w_sw_validateParams_5', 'deactivation height is mandatory');
+      let errorParams = {
+        internal_error_identifier: 's_w_sw_validateParams_5',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['deactivation_height_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
     const deactivationHeight = new BigNumber(oThis.deactivationHeight);
     if (deactivationHeight.isNaN() || deactivationHeight.lt(0) || !deactivationHeight.isInteger()) {
-      return responseHelper.error('s_w_sw_validateParams_6', 'deactivation height value is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_w_sw_validateParams_6',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['deactivation_height_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!oThis.gasPrice) {
-      return responseHelper.error('s_w_sw_validateParams_7', 'gas is mandatory');
+      let errorParams = {
+        internal_error_identifier: 's_w_sw_validateParams_7',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['gas_price_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!basicHelper.isValidChainId(oThis.chainId)) {
-      return responseHelper.error('s_w_sw_validateParams_8', 'ChainId is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_w_sw_validateParams_8',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['chain_id_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     return responseHelper.successWithData({});

@@ -13,7 +13,14 @@ const rootPrefix = '../..'
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , OpsManagedContractInteractKlass = require(rootPrefix + '/lib/contract_interact/ops_managed_contract')
+  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
+  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+const errorConfig = {
+  param_error_config: paramErrorConfig,
+  api_error_config: apiErrorConfig
+};
 
 /**
  * Constructor to create object of set_ops
@@ -75,7 +82,14 @@ SetOpsKlass.prototype = {
       return r;
 
     } catch (err) {
-      return responseHelper.error('s_om_go_perform_1', 'Something went wrong. ' + err.message);
+      let errorParams = {
+        internal_error_identifier: 's_om_go_perform_1',
+        api_error_identifier: 'unhandled_api_error',
+        error_config: errorConfig,
+        debug_options: {}
+      };
+      logger.error(err.message);
+      return responseHelper.error(errorParams);
     }
 
   },
@@ -90,15 +104,36 @@ SetOpsKlass.prototype = {
     const oThis = this
     ;
     if (!basicHelper.isAddressValid(oThis.contractAddress)) {
-      return responseHelper.error('s_om_go_validateParams_1', 'contract address is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_om_go_validateParams_1',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['invalid_contract_address'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!oThis.gasPrice) {
-      return responseHelper.error('s_om_go_validateParams_2', 'gas is mandatory');
+      let errorParams = {
+        internal_error_identifier: 's_om_go_validateParams_2',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['gas_price_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!basicHelper.isValidChainId(oThis.chainId)) {
-      return responseHelper.error('s_om_go_validateParams_3', 'ChainId is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_om_go_validateParams_3',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['chain_id_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     return responseHelper.successWithData({});

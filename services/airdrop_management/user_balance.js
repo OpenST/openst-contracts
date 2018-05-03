@@ -14,7 +14,14 @@ const rootPrefix = '../..'
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , userAirdropDetailCacheKlass = require(rootPrefix + '/lib/cache_multi_management/user_airdrop_detail')
   , AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
+  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
+  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+const errorConfig = {
+  param_error_config: paramErrorConfig,
+  api_error_config: apiErrorConfig
+};
 
 /**
  * Constructor to create object of userBalance
@@ -68,7 +75,14 @@ AirdropUserBalanceKlass.prototype = {
       logger.debug(r);
       return r;
     } catch(err) {
-      return responseHelper.error('s_am_ub_perform_1', 'Something went wrong. ' + err.message);
+      let errorParams = {
+        internal_error_identifier: 's_am_ub_perform_1',
+        api_error_identifier: 'unhandled_api_error',
+        error_config: errorConfig,
+        debug_options: {}
+      };
+      logger.error(err.message);
+      return responseHelper.error(errorParams);
     }
 
   },
@@ -84,11 +98,25 @@ AirdropUserBalanceKlass.prototype = {
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
-        return onResolve(responseHelper.error('s_am_ub_validateParams_1', 'airdrop contract address is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_ub_validateParams_1',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['airdrop_contract_address_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       if (!basicHelper.isValidChainId(oThis.chainId)) {
-        return onResolve(responseHelper.error('s_am_ub_validateParams_2', 'ChainId is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_ub_validateParams_2',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['chain_id_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       // if address already present
@@ -97,11 +125,25 @@ AirdropUserBalanceKlass.prototype = {
       ;
       oThis.airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
       if (!oThis.airdropRecord){
-        return onResolve(responseHelper.error('s_am_ub_validateParams_3', 'Given airdrop contract is not registered'));
+        let errorParams = {
+          internal_error_identifier: 's_am_ub_validateParams_3',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['airdrop_contract_address_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       if (!basicHelper.isValidChainId(oThis.chainId)) {
-        return onResolve(responseHelper.error('s_am_ub_validateParams_4', 'ChainId is invalid'));
+        let errorParams = {
+          internal_error_identifier: 's_am_ub_validateParams_4',
+          api_error_identifier: 'invalid_api_params',
+          error_config: errorConfig,
+          params_error_identifiers: ['chain_id_invalid'],
+          debug_options: {}
+        };
+        return onResolve(responseHelper.paramValidationError(errorParams));
       }
 
       return onResolve(responseHelper.successWithData({}));
@@ -126,7 +168,14 @@ AirdropUserBalanceKlass.prototype = {
         });
         return onResolve(await userAirdropDetailCacheKlassObject.fetch());
       } catch(err){
-        return onResolve(responseHelper.error('l_am_ub_getUserAirdropBalance_4', 'getUserAirdropBalance error: '+err));
+        let errorParams = {
+          internal_error_identifier: 'l_am_ub_getUserAirdropBalance_4',
+          api_error_identifier: 'get_balance_failed',
+          error_config: errorConfig,
+          debug_options: {}
+        };
+        logger.error(err.message);
+        return onResolve(responseHelper.error(errorParams));
       }
     });
 
