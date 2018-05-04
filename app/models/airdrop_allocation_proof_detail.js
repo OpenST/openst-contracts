@@ -74,9 +74,8 @@ const AirdropAllocationProofDetailKlassPrototype = {
           internal_error_identifier: 'l_aapd_cr_1',
           api_error_identifier: 'entry_creation_failed',
           error_config: errorConfig,
-          debug_options: {}
+          debug_options: { err: err }
         };
-        logger.error(err);
         return responseHelper.error(errorParams);
       }
 
@@ -103,9 +102,8 @@ const AirdropAllocationProofDetailKlassPrototype = {
         internal_error_identifier: 'l_a_m_aapd_1',
         api_error_identifier: 'entry_updation_failed',
         error_config: errorConfig,
-        debug_options: {}
+        debug_options: { err: err }
       };
-      logger.error(err);
       return responseHelper.error(errorParams);
     }
   },

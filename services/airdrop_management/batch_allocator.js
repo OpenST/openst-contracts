@@ -91,7 +91,7 @@ BatchAllocatorKlass.prototype = {
         internal_error_identifier: 's_am_ba_perform_1',
         api_error_identifier: 'unhandled_api_error',
         error_config: errorConfig,
-        debug_options: {}
+        debug_options: { err: err }
       };
       logger.error(err.message);
       return responseHelper.error(errorParams)
@@ -184,7 +184,7 @@ BatchAllocatorKlass.prototype = {
           internal_error_identifier: 's_am_ba_validateParams_7',
           api_error_identifier: 'airdrop_batch_size_exceeded',
           error_config: errorConfig,
-          debug_options: {}
+          debug_options: { batchSize: batchSize }
         };
         return onResolve(responseHelper.error(errorParams));
       }
@@ -204,7 +204,7 @@ BatchAllocatorKlass.prototype = {
             api_error_identifier: 'invalid_api_params',
             error_config: errorConfig,
             params_error_identifiers: ['invalid_user_address'],
-            debug_options: {}
+            debug_options: { userAddress: userAddress }
           };
           return onResolve(responseHelper.paramValidationError(errorParams));
         }
@@ -216,7 +216,7 @@ BatchAllocatorKlass.prototype = {
             api_error_identifier: 'invalid_api_params',
             error_config: errorConfig,
             params_error_identifiers: ['airdrop_amount_invalid'],
-            debug_options: {}
+            debug_options: { userAddress: userAddress }
           };
           return onResolve(responseHelper.paramValidationError(errorParams));
         }
@@ -227,7 +227,7 @@ BatchAllocatorKlass.prototype = {
             api_error_identifier: 'invalid_api_params',
             error_config: errorConfig,
             params_error_identifiers: ['airdrop_amount_invalid'],
-            debug_options: {}
+            debug_options: { userAddress: userAddress }
           };
           return onResolve(responseHelper.paramValidationError(errorParams));
         }
@@ -238,7 +238,7 @@ BatchAllocatorKlass.prototype = {
             internal_error_identifier: 's_am_ba_validateParams_11',
             api_error_identifier: 'timestamp_invalid',
             error_config: errorConfig,
-            debug_options: {}
+            debug_options: { userAddress: userAddress }
           };
           return onResolve(responseHelper.error(errorParams));
         }
@@ -324,7 +324,7 @@ BatchAllocatorKlass.prototype = {
           internal_error_identifier: 'l_am_ba_vp_13',
           api_error_identifier: 'unhandled_api_error',
           error_config: errorConfig,
-          debug_options: {}
+          debug_options: { err: err, transactionHash: oThis.transactionHash }
         };
         return onResolve(responseHelper.error(errorParams));
       }

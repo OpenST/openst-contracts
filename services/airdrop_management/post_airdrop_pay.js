@@ -87,7 +87,7 @@ PostPayKlass.prototype = {
         internal_error_identifier: 's_a_pap_perform_2',
         api_error_identifier: 'unhandled_api_error',
         error_config: errorConfig,
-        debug_options: {}
+        debug_options: { err: err }
       };
       logger.error("services/airdrop_management/post_airdrop_pay.js:perform inside catch ", err);
       return Promise.resolve(responseHelper.error(errorParams));
@@ -117,7 +117,7 @@ PostPayKlass.prototype = {
         internal_error_identifier: 's_a_pap_postAirdropPay_1',
         api_error_identifier: 'unhandled_api_error',
         error_config: errorConfig,
-        debug_options: {}
+        debug_options: { err: err }
       };
       logger.error("services/airdrop_management/postAirdropPay.js:perform inside catch ", err);
       return Promise.resolve(responseHelper.error(errorParams));

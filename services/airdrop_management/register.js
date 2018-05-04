@@ -76,7 +76,7 @@ RegisterKlass.prototype = {
         internal_error_identifier: 's_am_r_perform_1',
         api_error_identifier: 'unhandled_api_error',
         error_config: errorConfig,
-        debug_options: {}
+        debug_options: { err: err }
       };
       return responseHelper.error(errorParams);
     }
@@ -189,7 +189,7 @@ RegisterKlass.prototype = {
           internal_error_identifier: 's_am_r_runRegister_1',
           api_error_identifier: 'unhandled_api_error',
           error_config: errorConfig,
-          debug_options: {}
+          debug_options: { err: err }
         };
         return onResolve(responseHelper.error(errorParams));
       }
