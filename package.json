@@ -24,7 +24,7 @@
   "dependencies": {
     "@openstfoundation/openst-cache": "1.0.3-beta.1",
     "@openstfoundation/openst-base": "0.9.0-beta.15",
-    "@openstfoundation/openst-notification": "1.0.1-beta.1",
+    "@openstfoundation/openst-notification": "1.0.1-beta.2",
     "bignumber.js": "4.1.0",
     "mustache": "2.3.0",
     "mysql": "2.14.1",
