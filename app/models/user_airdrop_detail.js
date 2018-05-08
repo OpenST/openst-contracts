@@ -82,7 +82,7 @@ const UserAirdropDetailKlassPrototype = {
         }
         logger.debug("========user_airdrop_detail.getByUserAddresses().result=========");
         logger.debug(result);
-        return onResolve(responseHelper.successWithData({ result: result }));
+        return onResolve(responseHelper.successWithData(result));
       } catch (error) {
         let errorParams = {
           internal_error_identifier: 'a_m_uad_1',

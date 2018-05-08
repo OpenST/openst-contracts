@@ -7,6 +7,7 @@ const rootPrefix      = "../../.."
     , constants       = require(rootPrefix + '/mocha_test/lib/constants')
     , openstPayment = require(rootPrefix + '/index')
     , IsWorkerKlass = openstPayment.services.workers.isWorker
+    , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
 
 describe('Is worker', function() {
@@ -26,7 +27,7 @@ describe('Is worker', function() {
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'worker address is invalid');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 });
