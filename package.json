@@ -1,6 +1,6 @@
 {
   "name": "@openstfoundation/openst-payments",
-  "version": "1.0.5-beta.16",
+  "version": "1.0.5-beta.17",
   "description": "Payment infrastructure on top of the OpenST network.",
   "keywords": [
     "openst",
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@openstfoundation/openst-base": "0.9.0-beta.15",
-    "@openstfoundation/openst-cache": "1.0.3-beta.1",
+    "@openstfoundation/openst-cache": "1.0.3-beta.3",
     "@openstfoundation/openst-notification": "1.0.1-beta.2",
     "@ostdotcom/ost-price-oracle": "^1.0.1-beta.3",
     "bignumber.js": "4.1.0",
