@@ -23,8 +23,10 @@ const Assert = require('assert');
 
 const NullAddress = "0x0000000000000000000000000000000000000000";
 const rootPrefix = '../..'
-  , logger = require(rootPrefix + '/helpers/custom_console_logger');
-
+  , logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  Web3 = require('web3'),
+  web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+;
 /*
  *  Tracking Gas Usage
  */

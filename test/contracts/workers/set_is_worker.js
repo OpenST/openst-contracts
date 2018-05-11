@@ -19,9 +19,11 @@
 //
 // ----------------------------------------------------------------------------
 
-const workersUtils   = require('./workers_utils.js'),
-      Workers        = artifacts.require('./Workers.sol')
-      ;
+const workersUtils = require('./workers_utils.js'),
+  Workers = artifacts.require('./Workers.sol'),
+  Web3 = require('web3'),
+  web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+;
 
 ///
 /// Test stories
@@ -37,17 +39,17 @@ const workersUtils   = require('./workers_utils.js'),
 /// validate expiry
 
 module.exports.perform = (accounts) => {
-  const opsAddress            = accounts[1],
-        worker1Address        =  accounts[2],
-        worker2Address        =  accounts[3],
-        worker3Address        =  accounts[4],
-        height1               = new workersUtils.bigNumber(500),
-        height2               = new workersUtils.bigNumber(1000)
-        ;
+  const opsAddress = accounts[1],
+    worker1Address = accounts[2],
+    worker2Address = accounts[3],
+    worker3Address = accounts[4],
+    height1 = new workersUtils.bigNumber(500),
+    height2 = new workersUtils.bigNumber(1000)
+  ;
 
-  var workers            = null,
-      deactivationHeight = null
-      ;
+  var workers = null,
+    deactivationHeight = null
+  ;
 
   before(async () => {
 
@@ -59,19 +61,20 @@ module.exports.perform = (accounts) => {
 
   it('fails to set worker if worker address is 0', async () => {
 
-    await workersUtils.utils.expectThrow(workers.setWorker.call(0, height1, { from: opsAddress }));
+    await workersUtils.utils.expectThrow(workers.setWorker.call(0, height1, {from: opsAddress}));
 
   });
 
 
   it('fails to set worker if deactivation height is equal to current block number', async () => {
 
-    deactivationHeight = web3.eth.blockNumber;
+    let blockNumber = await web3.eth.getBlockNumber();
+    deactivationHeight = blockNumber;
     // calling this will not throw any execption
-    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
+    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
 
     // Executing this will throw exception
-    await workersUtils.utils.expectThrow(workers.setWorker(worker1Address, web3.eth.blockNumber, { from: opsAddress }));
+    await workersUtils.utils.expectThrow(workers.setWorker(worker1Address, blockNumber, {from: opsAddress}));
 
     // Verify if the worker1 is not active
     assert.equal(await workers.isWorker.call(worker1Address), false);
@@ -81,8 +84,9 @@ module.exports.perform = (accounts) => {
 
   it('fails to set worker if deactivation height is less than current block number', async () => {
 
-    await workersUtils.utils.expectThrow(workers.setWorker.call(worker1Address, web3.eth.blockNumber-1, { from: opsAddress }));
-    await workersUtils.utils.expectThrow(workers.setWorker(worker1Address, web3.eth.blockNumber-1, { from: opsAddress }));
+    let blockNumber = await web3.eth.getBlockNumber();
+    await workersUtils.utils.expectThrow(workers.setWorker.call(worker1Address, blockNumber - 1, {from: opsAddress}));
+    await workersUtils.utils.expectThrow(workers.setWorker(worker1Address, blockNumber - 1, {from: opsAddress}));
     // Verify if the worker1 is not active
     assert.equal(await workers.isWorker.call(worker1Address), false);
 
@@ -91,9 +95,10 @@ module.exports.perform = (accounts) => {
 
   it('pass to set worker if deactivation height is equal to current block number + 1', async () => {
 
-    deactivationHeight = web3.eth.blockNumber + 1;
-    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
-    response = await workers.setWorker(worker1Address, deactivationHeight, { from: opsAddress });
+    let blockNumber = await web3.eth.getBlockNumber();
+    deactivationHeight = blockNumber + 1;
+    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
+    response = await workers.setWorker(worker1Address, deactivationHeight, {from: opsAddress});
     assert.equal(await workers.isWorker.call(worker1Address), true);
     workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, 0);
     workersUtils.utils.logResponse(response, 'Workers.setWorker: w1, blockNumber + 1');
@@ -103,26 +108,28 @@ module.exports.perform = (accounts) => {
 
   it('fails to set worker if sender is not opsAddress', async () => {
 
-    deactivationHeight = web3.eth.blockNumber + height1.toNumber();
-    await workersUtils.utils.expectThrow(workers.setWorker.call(worker1Address, deactivationHeight, { from: accounts[5] }));
+    let blockNumber = await web3.eth.getBlockNumber();
+    deactivationHeight = blockNumber + height1.toNumber();
+    await workersUtils.utils.expectThrow(workers.setWorker.call(worker1Address, deactivationHeight, {from: accounts[5]}));
 
   });
 
 
   it('pass to set worker if worker is not already set', async () => {
 
-    deactivationHeight = web3.eth.blockNumber + height1.toNumber();
-    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
-    response = await workers.setWorker(worker1Address, deactivationHeight, { from: opsAddress });
+    let blockNumber = await web3.eth.getBlockNumber();
+    deactivationHeight = blockNumber + height1.toNumber();
+    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
+    response = await workers.setWorker(worker1Address, deactivationHeight, {from: opsAddress});
     assert.equal(await workers.isWorker.call(worker1Address), true);
-    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, height1.toNumber()-1);
+    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, height1.toNumber() - 1);
     workersUtils.utils.logResponse(response, 'Workers.setWorker: w1, ' + deactivationHeight);
-
-    deactivationHeight = web3.eth.blockNumber + height2.toNumber();
-    assert.ok(await workers.setWorker.call(worker2Address, deactivationHeight, { from: opsAddress }));
-    response = await workers.setWorker(worker2Address, deactivationHeight, { from: opsAddress });
+    blockNumber = await web3.eth.getBlockNumber();
+    deactivationHeight = blockNumber + height2.toNumber();
+    assert.ok(await workers.setWorker.call(worker2Address, deactivationHeight, {from: opsAddress}));
+    response = await workers.setWorker(worker2Address, deactivationHeight, {from: opsAddress});
     assert.equal(await workers.isWorker.call(worker2Address), true);
-    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, height2.toNumber()-1);
+    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, height2.toNumber() - 1);
     workersUtils.utils.logResponse(response, 'Workers.setWorker: w2, ' + deactivationHeight);
 
   });
@@ -130,11 +137,12 @@ module.exports.perform = (accounts) => {
 
   it('pass to set worker if worker was already set', async () => {
 
-    deactivationHeight = web3.eth.blockNumber + height2.toNumber();
-    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
-    response = await workers.setWorker(worker1Address, deactivationHeight, { from: opsAddress });
+    let blockNumber = await web3.eth.getBlockNumber();
+    deactivationHeight = blockNumber + height2.toNumber();
+    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
+    response = await workers.setWorker(worker1Address, deactivationHeight, {from: opsAddress});
     assert.equal(await workers.isWorker.call(worker1Address), true);
-    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, height2.toNumber()-1);
+    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, height2.toNumber() - 1);
     workersUtils.utils.logResponse(response, 'Workers.setWorker: w1, ' + deactivationHeight);
 
   });
@@ -143,11 +151,12 @@ module.exports.perform = (accounts) => {
   it('pass to set worker at lower deactivation height if worker was already set to a higher deactivation height', async () => {
 
     // update worker with lower deactivation height
-    deactivationHeight = web3.eth.blockNumber + height1.toNumber();
-    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, { from: opsAddress }));
-    response = await workers.setWorker(worker1Address, deactivationHeight, { from: opsAddress });
+    let blockNumber = await web3.eth.getBlockNumber();
+    deactivationHeight = blockNumber + height1.toNumber();
+    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
+    response = await workers.setWorker(worker1Address, deactivationHeight, {from: opsAddress});
     assert.equal(await workers.isWorker.call(worker1Address), true);
-    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, height1.toNumber()-1);
+    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, height1.toNumber() - 1);
     workersUtils.utils.logResponse(response, 'Workers.setWorker: w1, ' + deactivationHeight);
 
   });
@@ -157,17 +166,18 @@ module.exports.perform = (accounts) => {
 
     // set a worker with expiration height of 30
     var height = 30;
-    deactivationHeight = web3.eth.blockNumber + height;
-    assert.ok(await workers.setWorker.call(worker3Address, deactivationHeight, { from: opsAddress }));
-    response = await workers.setWorker(worker3Address, deactivationHeight, { from: opsAddress });
+    let blockNumber = await web3.eth.getBlockNumber();
+    deactivationHeight = blockNumber + height;
+    assert.ok(await workers.setWorker.call(worker3Address, deactivationHeight, {from: opsAddress}));
+    response = await workers.setWorker(worker3Address, deactivationHeight, {from: opsAddress});
     assert.equal(await workers.isWorker.call(worker3Address), true);
-    for (var i = height-1; i >= 0; i--) {
-        // Perform random transaction to increase block number. In this case using removeWorker for worker1Address
-        response = await workers.removeWorker(worker1Address, { from: opsAddress });
-        assert.equal(await workers.isWorker.call(worker3Address), i>0);
+    for (var i = height - 1; i >= 0; i--) {
+      // Perform random transaction to increase block number. In this case using removeWorker for worker1Address
+      response = await workers.removeWorker(worker1Address, {from: opsAddress});
+      assert.equal(await workers.isWorker.call(worker3Address), i > 0);
     }
     //Do one more time to confirm.
-    response = await workers.removeWorker(worker1Address, { from: opsAddress });
+    response = await workers.removeWorker(worker1Address, {from: opsAddress});
     assert.equal(await workers.isWorker.call(worker3Address), false);
 
   });

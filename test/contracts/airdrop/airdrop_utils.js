@@ -24,8 +24,9 @@ const Utils          = require('../../lib/utils.js'),
       Workers        = artifacts.require('./Workers.sol'),
       Airdrop        = artifacts.require('./Airdrop.sol'),
       EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol'),
-      PriceOracle    = artifacts.require('./PriceOracleMock.sol')
-      ;
+      PriceOracle    = artifacts.require('./PriceOracleMock.sol'),
+      Web3 = require('web3'),
+      web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 
 const ost = 'OST',
       abc = 'ABC'
@@ -59,8 +60,8 @@ module.exports.deployAirdrop = async (artifacts, accounts) => {
 
   assert.ok(await workers.setOpsAddress(opsAddress));
   assert.ok(await airdrop.setOpsAddress(opsAddress));
-
-  assert.ok(await workers.setWorker(worker, web3.eth.blockNumber + 1000, { from: opsAddress }));
+  let blockNumber = await web3.eth.getBlockNumber();
+  assert.ok(await workers.setWorker(worker, blockNumber + 1000, { from: opsAddress }));
   assert.ok(await airdrop.setPriceOracle(abc, abcPriceOracle.address, { from: opsAddress }));
 
   return {
