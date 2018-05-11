@@ -59,7 +59,7 @@ contract Airdrop is Pricer {
     /// @param _baseCurrency Base Currency
     /// @param _workers  Workers contract address
     /// @param _airdropBudgetHolder Airdrop Budget Holder Address
-    function Airdrop(
+    constructor(
         address _brandedToken,
         bytes3 _baseCurrency,
         Workers _workers,
@@ -124,7 +124,7 @@ contract Airdrop is Pricer {
             _commissionBeneficiary, commissionTokenAmount));
 
         /// Emit AirdropPayment Event
-        AirdropPayment(_beneficiary, tokenAmount, _commissionBeneficiary,
+        emit AirdropPayment(_beneficiary, tokenAmount, _commissionBeneficiary,
             commissionTokenAmount, _currency, pricePoint, _spender, airdropUsed);
 
         return ((tokenAmount + commissionTokenAmount), airdropUsed);

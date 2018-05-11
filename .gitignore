@@ -17,3 +17,4 @@ mocha_test/scripts/pw
 mocha_test/scripts/st-poa/
 
 package-lock.json
+build/

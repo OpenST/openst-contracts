@@ -36,7 +36,7 @@ contract EIP20TokenMock is EIP20Token {
     /// @param _symbol symbol
     /// @param _name name
     /// @param _decimals decimals
-    function EIP20TokenMock(
+    constructor(
         uint256 _conversionRate,
         uint8 _conversionRateDecimals,
         string _symbol,
