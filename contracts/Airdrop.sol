@@ -66,7 +66,6 @@ contract Airdrop is Pricer {
         address _airdropBudgetHolder)
         public
         Pricer(_brandedToken, _baseCurrency)
-        OpsManaged()
     {
         require(_workers != address(0));
         require(_airdropBudgetHolder != address(0));
