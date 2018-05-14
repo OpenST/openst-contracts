@@ -13,7 +13,14 @@ const rootPrefix = '../..'
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , WorkersContractInteractKlass = require(rootPrefix + '/lib/contract_interact/workers')
+  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
+  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+const errorConfig = {
+  param_error_config: paramErrorConfig,
+  api_error_config: apiErrorConfig
+};
 
 /**
  * Constructor to create object of register
@@ -66,7 +73,13 @@ IsWorkerKlass.prototype = {
       return r;
 
     } catch (err) {
-      return responseHelper.error('s_w_iw_perform_1', 'Something went wrong. ' + err.message);
+      let errorParams = {
+        internal_error_identifier: 's_w_iw_perform_1',
+        api_error_identifier: 'unhandled_api_error',
+        error_config: errorConfig,
+        debug_options: { err: err }
+      };
+      return responseHelper.error(errorParams);
     }
 
   },
@@ -81,11 +94,25 @@ IsWorkerKlass.prototype = {
     const oThis = this
     ;
     if (!basicHelper.isAddressValid(oThis.workerAddress)) {
-      return responseHelper.error('s_w_iw_validateParams_1', 'worker address is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_w_iw_validateParams_1',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['invalid_worker_address'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!basicHelper.isValidChainId(oThis.chainId)) {
-      return responseHelper.error('s_w_iw_validateParams_2', 'ChainId is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_w_iw_validateParams_2',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['chain_id_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     return responseHelper.successWithData({});

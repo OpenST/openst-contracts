@@ -11,6 +11,7 @@ const rootPrefix      = "../../.."
     , openstPayment = require(rootPrefix + '/index')
     , SetWorkerKlass = openstPayment.services.workers.setWorker
     , IsWorkerKlass = openstPayment.services.workers.isWorker
+    , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
 
 describe('Set worker', function() {
@@ -47,7 +48,7 @@ describe('Set worker', function() {
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'gas is mandatory');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 
@@ -74,7 +75,7 @@ describe('Set worker', function() {
     const response = await SetWorkerObject.perform();
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'sender address is invalid');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 
@@ -102,7 +103,7 @@ describe('Set worker', function() {
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'worker address is invalid');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 
@@ -130,7 +131,7 @@ describe('Set worker', function() {
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'deactivation height is mandatory');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 
@@ -157,7 +158,7 @@ describe('Set worker', function() {
     const response = await SetWorkerObject.perform();
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'deactivation height value is invalid');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 
@@ -184,7 +185,7 @@ describe('Set worker', function() {
     const response = await SetWorkerObject.perform();
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'deactivation height value is invalid');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 
@@ -211,7 +212,7 @@ describe('Set worker', function() {
     const response = await SetWorkerObject.perform();
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'deactivation height value is invalid');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 

@@ -13,7 +13,14 @@ const rootPrefix = '../..'
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , DeployerKlass = require(rootPrefix + '/services/deploy/deployer')
   , gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit')
+  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
+  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+const errorConfig = {
+  param_error_config: paramErrorConfig,
+  api_error_config: apiErrorConfig
+};
 
 /**
  * Constructor to create object of worker
@@ -66,7 +73,13 @@ DeployWorkerKlass.prototype = {
       return r;
 
     } catch (err) {
-      return responseHelper.error('s_d_w_perform_1', 'Something went wrong. ' + err.message);
+      let errorParams = {
+        internal_error_identifier: 's_d_w_perform_1',
+        api_error_identifier: 'unhandled_api_error',
+        error_config: errorConfig,
+        debug_options: { err: err }
+      };
+      return responseHelper.error(errorParams);
     }
 
   },
@@ -82,11 +95,25 @@ DeployWorkerKlass.prototype = {
     ;
 
     if (!oThis.gasPrice) {
-      return responseHelper.error('s_d_w_validateParams_1', 'gas is mandatory');
+      let errorParams = {
+        internal_error_identifier: 's_d_w_validateParams_1',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['gas_price_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!oThis.options) {
-      return responseHelper.error('s_d_w_validateParams_2', 'options for txHash/txReceipt is mandatory');
+      let errorParams = {
+        internal_error_identifier: 's_d_w_validateParams_2',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['invalid_options'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     return responseHelper.successWithData({});

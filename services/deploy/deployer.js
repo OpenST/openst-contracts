@@ -16,7 +16,14 @@ const uuid = require('uuid')
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , deployerName = 'deployer'
   , gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit')
+  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
+  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+const errorConfig = {
+  param_error_config: paramErrorConfig,
+  api_error_config: apiErrorConfig
+};
 
 /**
  * Constructor to create object of deployer
@@ -69,7 +76,13 @@ DeployerKlass.prototype = {
       logger.debug(r);
       return r;
     } catch(err) {
-      return responseHelper.error('s_am_ub_perform_1', 'Something went wrong. ' + err.message);
+      let errorParams = {
+        internal_error_identifier: 's_am_ub_perform_1',
+        api_error_identifier: 'unhandled_api_error',
+        error_config: errorConfig,
+        debug_options: { err: err }
+      };
+      return responseHelper.error(errorParams);
     }
 
   },
@@ -86,29 +99,63 @@ DeployerKlass.prototype = {
 
     if (!oThis.contractName) {
       logger.error("Error: Contract name is mandatory");
-      return responseHelper.error('l_d_1', 'Contract name is mandatory');
+      let errorParams = {
+        internal_error_identifier: 'l_d_1',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['contract_name_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!oThis.gasPrice) {
-      logger.error("Error: Gas price is mandatory");
-      return responseHelper.error('l_d_2', 'Gas price is mandatory');
+      let errorParams = {
+        internal_error_identifier: 'l_d_2',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['gas_price_invalid'],
+        debug_options: {}
+      };
+      logger.error("%Error - Gas price is mandatory");
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!oThis.gasLimit) {
-      logger.error("Error: Gas limit is mandatory");
-      return responseHelper.error('l_d_3', 'Gas limit is mandatory');
+      let errorParams = {
+        internal_error_identifier: 'l_d_3',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['gas_limit_invalid'],
+        debug_options: {}
+      };
+      logger.error("%Error - Gas limit is mandatory");
+      return responseHelper.paramValidationError(errorParams);
     }
 
     const deployerAddress = coreAddresses.getAddressForUser(deployerName);
     if (!deployerAddress) {
-      logger.error("Error: Deployer address is invalid");
-      return responseHelper.error('l_d_4', 'Deployer address is invalid');
+      let errorParams = {
+        internal_error_identifier: 'l_d_4',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['deployer_invalid'],
+        debug_options: {}
+      };
+      logger.error("%Error - Deployer address is invalid");
+      return responseHelper.paramValidationError(errorParams);
     }
 
     const deployerAddrPassphrase = coreAddresses.getPassphraseForUser(deployerName);
     if (!deployerAddrPassphrase) {
+      let errorParams = {
+        internal_error_identifier: 'l_d_5',
+        api_error_identifier: 'invalid_deployer_passphrase',
+        error_config: errorConfig,
+        debug_options: {}
+      };
       logger.error("Error: Deployer passphrase is invalid");
-      return responseHelper.error('l_d_5', 'Deployer passphrase is invalid');
+      return responseHelper.error(errorParams);
     }
 
     return responseHelper.successWithData({});
@@ -188,10 +235,14 @@ DeployerKlass.prototype = {
                 const contractAddress = receipt.contractAddress;
                 web3Provider.eth.getCode(contractAddress).then(function(code) {
                   if (code.length <= 2) {
-                    const errorCode = "l_d_6";
-                    logger.error(`${errorCode}: Contract deployment failed`);
                     if (basicHelper.isReturnTypeTxReceipt(returnType)) {
-                      return onResolve(responseHelper.error(errorCode, 'Contract deployment failed'));
+                      let errorParams = {
+                        internal_error_identifier: 'l_d_6',
+                        api_error_identifier: 'contract_deploy_failed',
+                        error_config: errorConfig,
+                        debug_options: {}
+                      };
+                      return onResolve(responseHelper.error(errorParams));
                     }
                   } else if (basicHelper.isReturnTypeTxReceipt(returnType)) {
                     logger.debug(`Contract deployment success: ${txUUID}`);
@@ -205,25 +256,40 @@ DeployerKlass.prototype = {
                   }
                 })
                   .catch(function(reason) {
-                    const errorCode = "l_d_7";
-                    logger.error(`${errorCode}: Contract deployment failed`);
+                    logger.error("%Error - Contract deployment failed");
                     if (basicHelper.isReturnTypeTxReceipt(returnType)) {
-                      return onResolve(responseHelper.error(errorCode, 'Contract deployment failed'));
+                      let errorParams = {
+                        internal_error_identifier: 'l_d_7',
+                        api_error_identifier: 'unhandled_api_error',
+                        error_config: errorConfig,
+                        debug_options: {}
+                      };
+                      return onResolve(responseHelper.error(errorParams));
                     }
                   });
               })
               .catch(function(reason) {
-                const errorCode = "l_d_8";
-                logger.error(`${errorCode}: Contract deployment failed`);
                 if (basicHelper.isReturnTypeTxReceipt(returnType)) {
-                  return onResolve(responseHelper.error(errorCode, 'Contract deployment failed'));
+                  logger.error("%Error - Contract deployment failed");
+                  let errorParams = {
+                    internal_error_identifier: 'l_d_8',
+                    api_error_identifier: 'unhandled_api_error',
+                    error_config: errorConfig,
+                    debug_options: {}
+                  };
+                  return onResolve(responseHelper.error(errorParams));
                 }
               });
           })
           .catch(function(reason) {
-            const errorCode = "l_d_5";
-            logger.error(`${errorCode}: Contract deployment failed`);
-            return onResolve(responseHelper.error(errorCode, 'transaction failed'));
+            let errorParams = {
+              internal_error_identifier: 'l_d_5',
+              api_error_identifier: 'unhandled_api_error',
+              error_config: errorConfig,
+              debug_options: {}
+            };
+            logger.error('%Error - Transaction failed')
+            return onResolve(responseHelper.error(errorParams));
           });
 
       };

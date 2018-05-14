@@ -15,7 +15,14 @@ const rootPrefix = '../..'
   , DeployerKlass = require(rootPrefix + '/services/deploy/deployer')
   , web3Provider = require(rootPrefix + '/lib/web3/providers/rpc')
   , gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit')
+  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
+  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+const errorConfig = {
+  param_error_config: paramErrorConfig,
+  api_error_config: apiErrorConfig
+};
 
 /**
  * Constructor to create object of airdrop
@@ -76,7 +83,13 @@ DeployAirdropKlass.prototype = {
       return r;
 
     } catch (err) {
-      return responseHelper.error('s_d_a_perform_1', 'Something went wrong. ' + err.message);
+      let errorParams = {
+        internal_error_identifier: 's_d_a_perform_1',
+        api_error_identifier: 'unhandled_api_error',
+        error_config: errorConfig,
+        debug_options: { err: err }
+      };
+      return responseHelper.error(errorParams);
     }
 
   },
@@ -92,27 +105,69 @@ DeployAirdropKlass.prototype = {
     ;
 
     if (!oThis.gasPrice) {
-      return responseHelper.error('s_d_a_validateParams_1', 'gas is mandatory');
+      let errorParams = {
+        internal_error_identifier: 's_d_a_validateParams_1',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['gas_price_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!oThis.options) {
-      return responseHelper.error('s_d_a_validateParams_2', 'options for txHash/txReceipt is mandatory');
+      let errorParams = {
+        internal_error_identifier: 's_d_a_validateParams_2',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['invalid_options'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!basicHelper.isAddressValid(oThis.brandedTokenContractAddress)) {
-      return responseHelper.error('s_d_a_validateParams_3', 'branded contract address is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_d_a_validateParams_3',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['branded_token_address_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!basicHelper.isAddressValid(oThis.workerContractAddress)) {
-      return responseHelper.error('s_d_a_validateParams_4', 'worker contract address is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_d_a_validateParams_4',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['invalid_worker_address'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!oThis.baseCurrency) {
-      return responseHelper.error('s_d_a_validateParams_5', 'base currency is mandatory');
+      let errorParams = {
+        internal_error_identifier: 's_d_a_validateParams_5',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['base_currency_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!basicHelper.isAddressValid(oThis.airdropBudgetHolder)) {
-      return responseHelper.error('s_d_a_validateParams_6', 'airdropBudgetHolder address is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_d_a_validateParams_6',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['airdrop_budget_holder_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     return responseHelper.successWithData({});

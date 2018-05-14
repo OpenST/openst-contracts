@@ -1,0 +1,127 @@
+{
+  "invalid_api_params": {
+    "http_code": "400",
+    "code": "invalid_request",
+    "message": "At least one parameter is invalid or missing. See err.error_data for more details."
+  },
+  "entry_creation_failed": {
+    "http_code": "200",
+    "code": "entry_creation_failed",
+    "message": "There seems to be an error with entry creation"
+  },
+  "entry_updation_failed": {
+    "http_code": "200",
+    "code": "entry_updation_failed",
+    "message": "There seems to be an error with entry updation"
+  },
+  "select_airdrop_users_failed": {
+    "http_code": "200",
+    "code": "select_airdrop_users_failed",
+    "message": "Technical error in getting airdrop users"
+  },
+  "unhandled_api_error": {
+    "http_code": "500",
+    "code": "unhandled_api_error",
+    "message": "Can't proceed due to unhandled error"
+  },
+  "no_events_in_receipt": {
+    "http_code": "200",
+    "code": "no_events_in_receipt",
+    "message": "No events found in the transaction receipt"
+  },
+  "amount_invalid": {
+    "http_code": "422",
+    "code": "amount_invalid",
+    "message": "One or more of the amounts used are invalid"
+  },
+  "user_address_invalid": {
+    "http_code": "422",
+    "code": "user_address_invalid",
+    "message": "One or more of the amounts used are invalid"
+  },
+  "record_not_found": {
+    "http_code": "422",
+    "code": "record_not_found",
+    "message": "There is no record for processing"
+  },
+  "amount_update_failed": {
+    "http_code": "500",
+    "code": "amount_update_failed",
+    "message": "Could not adjust the amount due to technical failure"
+  },
+  "data_not_found": {
+    "http_code": "204",
+    "code": "data_not_found",
+    "message": "Could not find the data in DB"
+  },
+  "db_get_failed": {
+    "http_code": "422",
+    "code": "db_get_failed",
+    "message": "Technical error in getting the data"
+  },
+  "insufficient_funds": {
+    "http_code": "422",
+    "code": "insufficient_funds",
+    "message": "Can't proceed due to insufficient funds"
+  },
+  "something_went_wrong": {
+    "http_code": "500",
+    "code": "something_went_wrong",
+    "message": ""
+  },
+  "could_not_process": {
+    "http_code": "422",
+    "code": "unprocessable_entity",
+    "message": "Cannot process due to error"
+  },
+  "get_receipt_failed": {
+    "http_code": "422",
+    "code": "get_receipt_failed",
+    "message": "Get receipt failed due to timeout or other error"
+  },
+  "invalid_receipt": {
+    "http_code": "422",
+    "code": "invalid_receipt",
+    "message": "Obtained receipt is invalid"
+  },
+  "contract_address_invalid": {
+    "http_code": "422",
+    "code": "invalid_contract_address",
+    "message": "Contract address is invalid"
+  },
+  "get_balance_failed": {
+    "http_code": "422",
+    "code": "get_balance_failed",
+    "message": "Get balance failed due to timeout or error"
+  },
+  "invalid_amount": {
+    "http_code": "422",
+    "code": "invalid_amount",
+    "message": "Amount is not appropriate for the action"
+  },
+  "invalid_object": {
+    "http_code": "422",
+    "code": "invalid_object",
+    "message": "Object is invalid"
+  },
+  "batch_size_exceeded": {
+    "http_code": "422",
+    "code": "airdrop_batch_size_exceeded",
+    "message": "Airdrop batch size exceeded"
+  },
+  "timestamp_invalid": {
+    "http_code": "422",
+    "code": "timestamp_invalid",
+    "message": "Timestamp is not valid"
+  },
+  "invalid_deployer_passphrase": {
+    "http_code": "422",
+    "code": "invalid_deployer_passphrase",
+    "message": "Deployer passphrase is invalid"
+  },
+  "contract_deploy_failed": {
+    "http_code": "422",
+    "code": "contract_deploy_failed",
+    "message": "Contract deployment failed"
+  }
+}

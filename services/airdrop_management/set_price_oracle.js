@@ -13,7 +13,14 @@ const rootPrefix = '../..'
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , helper = require(rootPrefix + '/lib/contract_interact/helper')
   , AirdropContractInteractKlass = require(rootPrefix + '/lib/contract_interact/airdrop')
+  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
+  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+const errorConfig = {
+  param_error_config: paramErrorConfig,
+  api_error_config: apiErrorConfig
+};
 
 /**
  * Constructor to create object of register
@@ -77,7 +84,14 @@ SetPriceOracleKlass.prototype = {
       return r;
 
     } catch (err) {
-      return responseHelper.error('s_w_spo_perform_1', 'Something went wrong. ' + err.message);
+      let errorParams = {
+        internal_error_identifier: 's_w_spo_perform_1',
+        api_error_identifier: 'unhandled_api_error',
+        error_config: errorConfig,
+        debug_options: { err: err }
+      };
+      logger.error(err.message);
+      return responseHelper.error(errorParams);
     }
 
   },
@@ -92,23 +106,58 @@ SetPriceOracleKlass.prototype = {
     const oThis = this
     ;
     if (!helper.isValidCurrency(oThis.currency, false)) {
-      return responseHelper.error('s_am_spo_validateParams_1', 'currency is mandatory');
+      let errorParams = {
+        internal_error_identifier: 's_am_spo_validateParams_1',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['currency_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!oThis.gasPrice) {
-      return responseHelper.error('s_am_spo_validateParams_2', 'gas is mandatory');
+      let errorParams = {
+        internal_error_identifier: 's_am_spo_validateParams_2',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['gas_price_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!basicHelper.isAddressValid(oThis.priceOracleContractAddress)) {
-      return responseHelper.error('s_am_spo_validateParams_3', 'priceOracleContractAddress is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_am_spo_validateParams_3',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['price_oracle_address_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!basicHelper.isAddressValid(oThis.senderAddress)) {
-      return responseHelper.error('s_am_spo_validateParams_4', 'address is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_am_spo_validateParams_4',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['invalid_sender_address'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     if (!basicHelper.isValidChainId(oThis.chainId)) {
-      return responseHelper.error('s_am_spo_validateParams_5', 'ChainId is invalid');
+      let errorParams = {
+        internal_error_identifier: 's_am_spo_validateParams_5',
+        api_error_identifier: 'invalid_api_params',
+        error_config: errorConfig,
+        params_error_identifiers: ['chain_id_invalid'],
+        debug_options: {}
+      };
+      return responseHelper.paramValidationError(errorParams);
     }
 
     return responseHelper.successWithData({});
