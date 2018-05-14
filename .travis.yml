@@ -28,7 +28,9 @@ before_install:
   - geth version
 install: 
   - npm install 
-before_script:  
+before_script:
+  - mkdir -p ~/.ethash
+  - geth makedag 0 ~/.ethash
   - nohup sh tools/runTestRpc.sh </dev/null >/dev/null 2>&1 &
   - bash contracts/compile.sh
 script:  
