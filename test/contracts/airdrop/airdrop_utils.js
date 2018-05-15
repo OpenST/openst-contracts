@@ -25,8 +25,7 @@ const Utils          = require('../../lib/utils.js'),
       Airdrop        = artifacts.require('./Airdrop.sol'),
       EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol'),
       PriceOracle    = artifacts.require('./PriceOracleMock.sol'),
-      Web3 = require('web3'),
-      web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+      web3 = require('../../lib/web3') ;
 
 const ost = 'OST',
       abc = 'ABC'
