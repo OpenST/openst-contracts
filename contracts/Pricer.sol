@@ -1,5 +1,5 @@
 /* solhint-disable-next-line compiler-fixed */
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.23;
 
 // Copyright 2018 OpenST Ltd.
 //
@@ -66,7 +66,7 @@ contract Pricer is OpsManaged, PricerInterface {
     ///         public method;
     /// @param _brandedToken Branded Token
     /// @param _baseCurrency Base Currency
-    function Pricer(
+    constructor(
         address _brandedToken,
         bytes3 _baseCurrency)
         public
@@ -89,7 +89,7 @@ contract Pricer is OpsManaged, PricerInterface {
         external
         onlyAdminOrOps
     {
-        Removed(msg.sender);
+        emit Removed(msg.sender);
         selfdestruct(msg.sender);
     }
 
@@ -192,7 +192,7 @@ contract Pricer is OpsManaged, PricerInterface {
         pricerPriceOracles[_currency] = PriceOracleInterface(_oracleAddress);
 
         //Trigger PriceOracleSet event
-        PriceOracleSet(_currency, _oracleAddress);
+        emit PriceOracleSet(_currency, _oracleAddress);
         return true;
     }
 
@@ -213,7 +213,7 @@ contract Pricer is OpsManaged, PricerInterface {
         delete pricerPriceOracles[_currency];
 
         //Trigger PriceOracleUnset event
-        PriceOracleUnset(_currency);
+        emit PriceOracleUnset(_currency);
         return true;
     }
 
@@ -234,7 +234,7 @@ contract Pricer is OpsManaged, PricerInterface {
     {
         pricerAcceptedMargins[_currency] = _acceptedMargin;
         // Trigger AcceptedMarginSet event 
-        AcceptedMarginSet(_currency, _acceptedMargin);
+        emit AcceptedMarginSet(_currency, _acceptedMargin);
         return true;
     }
 
@@ -307,7 +307,7 @@ contract Pricer is OpsManaged, PricerInterface {
             _commissionBeneficiary, commissionTokenAmount));
 
         //Trigger Event for PaymentComplete
-        Payment(_beneficiary, tokenAmount, _commissionBeneficiary,
+        emit Payment(_beneficiary, tokenAmount, _commissionBeneficiary,
             commissionTokenAmount, _currency, _intendedPricePoint, pricePoint);
         return (tokenAmount + commissionTokenAmount);
     }

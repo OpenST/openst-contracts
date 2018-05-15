@@ -1,5 +1,5 @@
 /* solhint-disable-next-line compiler-fixed */
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.23;
 
 // Copyright 2018 OpenST Ltd.
 //
@@ -36,7 +36,7 @@ contract EIP20TokenMock is EIP20Token {
     /// @param _symbol symbol
     /// @param _name name
     /// @param _decimals decimals
-    function EIP20TokenMock(
+    constructor(
         uint256 _conversionRate,
         uint8 _conversionRateDecimals,
         string _symbol,

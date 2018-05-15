@@ -1,5 +1,5 @@
 /* solhint-disable-next-line compiler-fixed */
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.23;
 
 // Copyright 2018 OpenST Ltd.
 //
@@ -48,7 +48,7 @@ contract PriceOracleMock is PriceOracleInterface {
     /// @dev constructor function
     /// @param _baseCurrency baseCurrency
     /// @param _quoteCurrency quoteCurrency
-    function PriceOracleMock(
+    constructor(
         bytes3 _baseCurrency,
         bytes3 _quoteCurrency,
         uint256 _price
