@@ -1,4 +1,4 @@
-## OpenST-Payments 1.0.5.beta.1
+## OpenST-Payments 1.0.5
 
 Changelog:
 - Added new services and services refactoring
