@@ -5,7 +5,6 @@ branches:
   only:
   - master
   - develop
-  - contract_deployment_fx
 notifications:
   email:
     recipients:
