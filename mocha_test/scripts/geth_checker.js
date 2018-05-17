@@ -2,7 +2,7 @@
 
 const rootPrefix = '../..'
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , web3RpcProvider = require(rootPrefix + '/lib/web3/providers/rpc')
+  , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
 ;
 
 const performer = async function () {
@@ -20,11 +20,11 @@ const performer = async function () {
     if (totalTime <= timeoutValue) {
       if (isInProcess == false) {
         isInProcess = true;
-        web3RpcProvider.eth.getBlockNumber(function (err, blocknumber) {
+        web3Provider.eth.getBlockNumber(function (err, blocknumber) {
           if (err || blocknumber < 1) {
-            logger.info("Unable to get blocknumber");
+            logger.debug("Unable to get blocknumber");
           } else {
-            logger.info("blocknumber", blocknumber);
+            logger.debug("blocknumber", blocknumber);
             process.exit(0);
           }
           isInProcess = false;

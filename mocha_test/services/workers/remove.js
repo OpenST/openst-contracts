@@ -8,7 +8,8 @@ const rootPrefix      = "../../.."
     , utils           = require(rootPrefix+'/mocha_test/lib/utils')
     , workersModule   = require(rootPrefix + '/lib/contract_interact/workers')
     , workers         = new workersModule(constants.workersContractAddress, constants.chainId)
-    , web3RpcProvider = require(rootPrefix + '/lib/web3/providers/rpc')
+    , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
+    , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
 
 describe('Remove', function() {
@@ -35,7 +36,7 @@ describe('Remove', function() {
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'gas is mandatory');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 
@@ -53,7 +54,7 @@ describe('Remove', function() {
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'sender address is invalid');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 
@@ -76,7 +77,7 @@ describe('Remove', function() {
     await utils.verifyIfMined(workers, response.data.transaction_hash);
 
     // confirm worker address has no code
-    const getCodeResult = await web3RpcProvider.eth.getCode(constants.workersContractAddress);
+    const getCodeResult = await web3Provider.eth.getCode(constants.workersContractAddress);
     assert.equal(getCodeResult, '0x');
 
   });

@@ -48,6 +48,19 @@ const AirdropKlassPrototype = {
   tableName: 'airdrops',
 
   /**
+   * Select all airdrop contracts
+   *
+   * @return {Promise}
+   *
+   */
+  getAll: function() {
+    const oThis = this
+    ;
+
+    return oThis.select().fire();
+  },
+
+  /**
    * get airdrop AR by contract Address
    *
    * @param {Hex} airdropContractAddress - airdrop contract address
@@ -62,6 +75,7 @@ const AirdropKlassPrototype = {
     return oThis.select().where(["contract_address=?", airdropContractAddress]).
       limit(1).fire();
   }
+
 };
 
 Object.assign(AirdropKlass.prototype, AirdropKlassPrototype);

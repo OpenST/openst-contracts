@@ -46,8 +46,8 @@ const populateEnvVars = {
       }
       var existingSourceFileData = fs.readFileSync(Path.join(__dirname, '/' + envVarsSourceFile));
       var dataToWrite = existingSourceFileData.toString() + "\n\n" + renderData;
-      //console.log("ENV Constants to Write");
-      //console.log(dataToWrite);
+      //logger.debug("ENV Constants to Write");
+      //logger.debug(dataToWrite);
       fs.writeFileSync(Path.join(__dirname, '/' + envVarsSourceFile), dataToWrite);
     } catch (e) {
       console.error("Error Reading and Populating Source File");

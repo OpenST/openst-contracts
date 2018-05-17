@@ -4,7 +4,6 @@ const rootPrefix = '../..'
   , utils = require(rootPrefix + '/lib/utils')
   , MysqlQueryKlass = require(rootPrefix + '/lib/query_builders/mysql')
   , mysqlWrapper = require(rootPrefix + "/lib/mysql_wrapper")
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
 ;
 
@@ -57,12 +56,12 @@ const ModelBaseKlassPrototype = {
 
         const queryGenerator = oThis.generate();
         if(queryGenerator.isSuccess()){
-          //console.log(queryGenerator.data.query, queryGenerator.data.queryData);
+          //logger.debug(queryGenerator.data.query, queryGenerator.data.queryData);
         }
 
         var pre_query = Date.now();
         var qry = oThis.onWriteConnection().query(queryGenerator.data.query, queryGenerator.data.queryData, function (err, result, fields) {
-          logger.info("(", (Date.now() - pre_query), "ms)", qry.sql);
+          logger.debug("(", (Date.now() - pre_query), "ms)", qry.sql);
           if (err) {
             onReject(err);
           } else {

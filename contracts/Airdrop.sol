@@ -1,5 +1,5 @@
 /* solhint-disable-next-line compiler-fixed */
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.23;
 
 // Copyright 2018 OpenST Ltd.
 //
@@ -59,14 +59,13 @@ contract Airdrop is Pricer {
     /// @param _baseCurrency Base Currency
     /// @param _workers  Workers contract address
     /// @param _airdropBudgetHolder Airdrop Budget Holder Address
-    function Airdrop(
+    constructor(
         address _brandedToken,
         bytes3 _baseCurrency,
         Workers _workers,
         address _airdropBudgetHolder)
         public
         Pricer(_brandedToken, _baseCurrency)
-        OpsManaged()
     {
         require(_workers != address(0));
         require(_airdropBudgetHolder != address(0));
@@ -124,7 +123,7 @@ contract Airdrop is Pricer {
             _commissionBeneficiary, commissionTokenAmount));
 
         /// Emit AirdropPayment Event
-        AirdropPayment(_beneficiary, tokenAmount, _commissionBeneficiary,
+        emit AirdropPayment(_beneficiary, tokenAmount, _commissionBeneficiary,
             commissionTokenAmount, _currency, pricePoint, _spender, airdropUsed);
 
         return ((tokenAmount + commissionTokenAmount), airdropUsed);
