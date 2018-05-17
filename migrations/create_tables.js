@@ -30,10 +30,10 @@ const createTables = {
     for(var i in allQueries){
       query = allQueries[i];
       logger.win("\nRunning Query");
-      logger.info(query);
+      logger.debug(query);
       var response = await QueryDB.migrate(query);
       logger.win("\nQuery Response");
-      logger.info(response);
+      logger.debug(response);
     }
 
     logger.win("\nCompleted Table Creation");

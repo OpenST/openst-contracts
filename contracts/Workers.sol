@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.23;
 
 // Copyright 2018 OpenST Ltd.
 //
@@ -51,7 +51,7 @@ contract Workers is OpsManaged {
 
     /// @dev    Constructor;
     ///         public method;    
-    function Workers()
+    constructor()
         public
         OpsManaged()
     {
@@ -76,7 +76,7 @@ contract Workers is OpsManaged {
         workers[_worker] = _deactivationHeight;
         uint256 remainingHeight = _deactivationHeight - block.number;
         //Event for worker set
-        WorkerSet(_worker, _deactivationHeight, remainingHeight);
+        emit WorkerSet(_worker, _deactivationHeight, remainingHeight);
 
         return (remainingHeight);
     }
@@ -96,7 +96,7 @@ contract Workers is OpsManaged {
 
         delete workers[_worker];
         //Event for worker removed
-        WorkerRemoved(_worker, existed);
+        emit WorkerRemoved(_worker, existed);
 
         return existed;
     }

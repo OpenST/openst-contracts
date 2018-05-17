@@ -7,9 +7,11 @@ const rootPrefix      = "../../.."
     , constants       = require(rootPrefix + '/mocha_test/lib/constants')
     , BigNumber       = require('bignumber.js')
     , utils           = require(rootPrefix+'/mocha_test/lib/utils')
-    , workersModule   = require(rootPrefix + '/lib/contract_interact/workers')
-    , workers         = new workersModule(constants.workersContractAddress, constants.chainId)
-    , web3RpcProvider = require(rootPrefix + '/lib/web3/providers/rpc')
+    , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
+    , openstPayment = require(rootPrefix + '/index')
+    , SetWorkerKlass = openstPayment.services.workers.setWorker
+    , IsWorkerKlass = openstPayment.services.workers.isWorker
+    , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
 
 describe('Set worker', function() {
@@ -27,22 +29,26 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
     // set worker
-    const response = await workers.setWorker(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.workerAccount1,
-      deactivationHeight.toNumber(),
-      0,
-      constants.optionsReceipt);
+    var SetWorkerObject = new SetWorkerKlass({
+      workers_contract_address: constants.workersContractAddress,
+      sender_address: constants.ops,
+      sender_passphrase: constants.opsPassphrase,
+      worker_address: constants.workerAccount1,
+      deactivation_height: deactivationHeight.toString(10),
+      gas_price: 0,
+      chain_id: constants.chainId,
+      options: constants.optionsReceipt
+    });
+    const response = await SetWorkerObject.perform();
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'gas is mandatory');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 
@@ -51,22 +57,25 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
     // set worker
-    const response = await workers.setWorker(
-      0,
-      constants.opsPassphrase,
-      constants.workerAccount1,
-      deactivationHeight.toNumber(),
-      constants.gasUsed,
-      constants.optionsReceipt);
-
+    var SetWorkerObject = new SetWorkerKlass({
+      workers_contract_address: constants.workersContractAddress,
+      sender_address: 0,
+      sender_passphrase: constants.opsPassphrase,
+      worker_address: constants.workerAccount1,
+      deactivation_height: deactivationHeight.toString(10),
+      gas_price: constants.gasUsed,
+      chain_id: constants.chainId,
+      options: constants.optionsReceipt
+    });
+    const response = await SetWorkerObject.perform();
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'sender address is invalid');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 
@@ -75,22 +84,26 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
     // set worker
-    const response = await workers.setWorker(
-      constants.ops,
-      constants.opsPassphrase,
-      0,
-      deactivationHeight.toNumber(),
-      constants.gasUsed,
-      constants.optionsReceipt);
+    var SetWorkerObject = new SetWorkerKlass({
+      workers_contract_address: constants.workersContractAddress,
+      sender_address: constants.ops,
+      sender_passphrase: constants.opsPassphrase,
+      worker_address: 0,
+      deactivation_height: deactivationHeight.toString(10),
+      gas_price: constants.gasUsed,
+      chain_id: constants.chainId,
+      options: constants.optionsReceipt
+    });
+    const response = await SetWorkerObject.perform();
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'worker address is invalid');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 
@@ -99,22 +112,26 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
     // set worker
-    const response = await workers.setWorker(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.workerAccount1,
-      null,
-      constants.gasUsed,
-      constants.optionsReceipt);
+    var SetWorkerObject = new SetWorkerKlass({
+      workers_contract_address: constants.workersContractAddress,
+      sender_address: constants.ops,
+      sender_passphrase: constants.opsPassphrase,
+      worker_address: constants.workerAccount1,
+      deactivation_height: null,
+      gas_price: constants.gasUsed,
+      chain_id: constants.chainId,
+      options: constants.optionsReceipt
+    });
+    const response = await SetWorkerObject.perform();
 
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'deactivation height is mandatory');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 
@@ -123,22 +140,25 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
     // set worker
-    const response = await workers.setWorker(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.workerAccount1,
-      'NaN',
-      constants.gasUsed,
-      constants.optionsReceipt);
-
+    var SetWorkerObject = new SetWorkerKlass({
+      workers_contract_address: constants.workersContractAddress,
+      sender_address: constants.ops,
+      sender_passphrase: constants.opsPassphrase,
+      worker_address: constants.workerAccount1,
+      deactivation_height: 'NaN',
+      gas_price: constants.gasUsed,
+      chain_id: constants.chainId,
+      options: constants.optionsReceipt
+    });
+    const response = await SetWorkerObject.perform();
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'deactivation height value is invalid');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 
@@ -147,22 +167,25 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
     // set worker
-    const response = await workers.setWorker(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.workerAccount1,
-      -1,
-      constants.gasUsed,
-      constants.optionsReceipt);
-
+    var SetWorkerObject = new SetWorkerKlass({
+      workers_contract_address: constants.workersContractAddress,
+      sender_address: constants.ops,
+      sender_passphrase: constants.opsPassphrase,
+      worker_address: constants.workerAccount1,
+      deactivation_height: -1,
+      gas_price: constants.gasUsed,
+      chain_id: constants.chainId,
+      options: constants.optionsReceipt
+    });
+    const response = await SetWorkerObject.perform();
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'deactivation height value is invalid');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 
@@ -171,22 +194,25 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
     // set worker
-    const response = await workers.setWorker(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.workerAccount1,
-      0.1,
-      constants.gasUsed,
-      constants.optionsReceipt);
-
+    var SetWorkerObject = new SetWorkerKlass({
+      workers_contract_address: constants.workersContractAddress,
+      sender_address: constants.ops,
+      sender_passphrase: constants.opsPassphrase,
+      worker_address: constants.workerAccount1,
+      deactivation_height: 0.1,
+      gas_price: constants.gasUsed,
+      chain_id: constants.chainId,
+      options: constants.optionsReceipt
+    });
+    const response = await SetWorkerObject.perform();
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
-    assert.equal(response.err.msg, 'deactivation height value is invalid');
+    assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
 
   });
 
@@ -195,32 +221,43 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
     // confirm that worker is not a worker
-    const isWorkerBefore = await workers.isWorker(constants.workerAccount1);
+    var IsWorkerObject = new IsWorkerKlass({
+      workers_contract_address: constants.workersContractAddress,
+      worker_address: constants.workerAccount1,
+      chain_id: constants.chainId
+    });
+    const isWorkerBefore = await IsWorkerObject.perform();
     assert.equal(isWorkerBefore.isSuccess(), true);
     assert.equal(isWorkerBefore.data.isValid, false);
 
     // set worker
-    const response = await workers.setWorker(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.workerAccount1,
-      deactivationHeight.toNumber(),
-      constants.gasUsed,
-      constants.optionsReceipt);
+    var SetWorkerObject = new SetWorkerKlass({
+      workers_contract_address: constants.workersContractAddress,
+      sender_address: constants.ops,
+      sender_passphrase: constants.opsPassphrase,
+      worker_address: constants.workerAccount1,
+      deactivation_height: deactivationHeight.toString(10),
+      gas_price: constants.gasUsed,
+      chain_id: constants.chainId,
+      options: constants.optionsReceipt
+    });
+    const response = await SetWorkerObject.perform();
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response);
 
-    // verify if the transaction has was actually mined
-    await utils.verifyIfMined(workers, response.data.transaction_hash);
-
     // confirm that worker is a worker
-    const isWorkerAfter = await workers.isWorker(constants.workerAccount1);
+    var IsWorkerObject = new IsWorkerKlass({
+      workers_contract_address: constants.workersContractAddress,
+      worker_address: constants.workerAccount1,
+      chain_id: constants.chainId
+    });
+    const isWorkerAfter = await IsWorkerObject.perform();
     assert.equal(isWorkerAfter.isSuccess(), true);
     assert.equal(isWorkerAfter.data.isValid, true);
 
@@ -231,18 +268,22 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
     // set worker
-    const response = await workers.setWorker(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.workerAccount1,
-      deactivationHeight.toNumber(),
-      constants.gasUsed,
-      constants.optionsUUID);
+    var SetWorkerObject = new SetWorkerKlass({
+      workers_contract_address: constants.workersContractAddress,
+      sender_address: constants.ops,
+      sender_passphrase: constants.opsPassphrase,
+      worker_address: constants.workerAccount1,
+      deactivation_height: deactivationHeight.toString(10),
+      gas_price: constants.gasUsed,
+      chain_id: constants.chainId,
+      options: constants.optionsUUID
+    });
+    const response = await SetWorkerObject.perform();
 
     // verify transaction UUID
     // we will not verify if it got mined as its just interaction layer testing
@@ -255,18 +296,22 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
     // set worker
-    const response = await workers.setWorker(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.workerAccount1,
-      deactivationHeight.toNumber(),
-      constants.gasUsed,
-      constants.optionsHash);
+    var SetWorkerObject = new SetWorkerKlass({
+      workers_contract_address: constants.workersContractAddress,
+      sender_address: constants.ops,
+      sender_passphrase: constants.opsPassphrase,
+      worker_address: constants.workerAccount1,
+      deactivation_height: deactivationHeight.toString(10),
+      gas_price: constants.gasUsed,
+      chain_id: constants.chainId,
+      options: constants.optionsHash
+    });
+    const response = await SetWorkerObject.perform();
 
     // verify transaction hash
     utils.verifyTransactionHash(response);
@@ -278,18 +323,22 @@ describe('Set worker', function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const currentBlockNumber = await web3RpcProvider.eth.getBlockNumber()
+    const currentBlockNumber = await web3Provider.eth.getBlockNumber()
         , deactivationHeight = new BigNumber(currentBlockNumber).plus(10000)
     ;
 
     // set worker
-    const response = await workers.setWorker(
-      constants.ops,
-      constants.opsPassphrase,
-      constants.workerAccount1,
-      deactivationHeight.toNumber(),
-      constants.gasUsed,
-      constants.optionsReceipt);
+    var SetWorkerObject = new SetWorkerKlass({
+      workers_contract_address: constants.workersContractAddress,
+      sender_address: constants.ops,
+      sender_passphrase: constants.opsPassphrase,
+      worker_address: constants.workerAccount1,
+      deactivation_height: deactivationHeight.toString(10),
+      gas_price: constants.gasUsed,
+      chain_id: constants.chainId,
+      options: constants.optionsReceipt
+    });
+    const response = await SetWorkerObject.perform();
 
     // verify transaction receipt
     utils.verifyTransactionReceipt(response);
