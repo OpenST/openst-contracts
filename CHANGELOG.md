@@ -1,4 +1,4 @@
-## OpenST-Payments v1.0.5 (17 May 2018)
+## OpenST-Payments v1.0.6 (17 May 2018)
 
 Changelog:
 
