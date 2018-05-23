@@ -1,3 +1,10 @@
+## OpenST-Payments v1.0.7 (23 May 2018)
+
+Changelog:
+
+- Airdrop contract gas limit is increased because of contract changes.
+- Reason is added in logs when transaction fails.
+
 ## OpenST-Payments v1.0.6 (17 May 2018)
 
 Changelog:
