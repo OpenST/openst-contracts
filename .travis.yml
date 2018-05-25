@@ -20,10 +20,12 @@ matrix:
   include:
     - if: branch =~ ^develop
       env:
-        - GETH_VERSION=1.8.8
-    - if: branch =~ ^develop
-      env:
+        - GETH_VERSION=1.7.2
         - GETH_VERSION=1.8.3
+        - GETH_VERSION=1.8.8
+    - if: branch =~ ^deepesh/multiple_env_travis
+      env:
+        - GETH_VERSION=1.7.2
 services:
   - mysql
 before_install:
