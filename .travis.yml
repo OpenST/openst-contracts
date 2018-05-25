@@ -14,12 +14,11 @@ notifications:
     on_failure: always
 node_js:
   - "8"
-  - "10"
 env:
-  - GETH_VERSION=1.7.3
+  - GETH_VERSION=1.7.2
 matrix:
   include:
-    - if: branch =~ ^deepesh/multiple_env_travis
+    - if: branch =~ ^develop
       env:
         - GETH_VERSION=1.8.8
     - if: branch =~ ^develop
