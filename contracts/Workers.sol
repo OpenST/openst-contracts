@@ -74,7 +74,7 @@ contract Workers is OpsManaged {
         require(_deactivationHeight >= block.number);
 
         workers[_worker] = _deactivationHeight;
-        uint256 remainingHeight = _deactivationHeight - block.number;
+        uint256 remainingHeight = _deactivationHeight.sub(block.number);
         //Event for worker set
         emit WorkerSet(_worker, _deactivationHeight, remainingHeight);
 
