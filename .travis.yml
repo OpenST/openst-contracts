@@ -14,11 +14,15 @@ notifications:
     on_failure: always
 node_js:
   - "8"
-  - "10.2.1"
+  - "10"
 env:
-  - GETH_VERSION=1.8.8
-  - GETH_VERSION=1.8.3
   - GETH_VERSION=1.7.3
+matrix:
+  include:
+    - branches: deepesh/multiple_env_travis
+      env:
+        - GETH_VERSION=1.8.8
+        - GETH_VERSION=1.8.3
 services:
   - mysql
 before_install:
