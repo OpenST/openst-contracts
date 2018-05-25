@@ -18,11 +18,19 @@ env:
   - GETH_VERSION=1.7.2
 matrix:
   include:
-    - if: branch =~ ^deepesh/multiple_env_travis
+    - if: branch =~ ^master
       env: GETH_VERSION=1.7.2
-    - if: branch =~ ^deepesh/multiple_env_travis
+    - if: branch =~ ^master
+      env: GETH_VERSION=1.8.3
+    - if: branch =~ ^master
       env: GETH_VERSION=1.8.8
     - if: branch =~ ^develop
+      env: GETH_VERSION=1.7.2
+    - if: branch =~ ^develop
+      env: GETH_VERSION=1.8.3
+    - if: branch =~ ^develop
+      env: GETH_VERSION=1.8.8
+    - if: branch =~ ^deepesh/multiple_env_travis
       env: GETH_VERSION=1.7.2
 services:
   - mysql
