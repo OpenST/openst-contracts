@@ -19,10 +19,10 @@ env:
   - GETH_VERSION=1.7.3
 matrix:
   include:
-    - branches: deepesh/multiple_env_travis
+    - if: branch =~ ^deepesh/multiple_env_travis
       env:
         - GETH_VERSION=1.8.8
-    - branches: deepesh/multiple_env_travis
+    - if: branch =~ ^develop
       env:
         - GETH_VERSION=1.8.3
 services:
