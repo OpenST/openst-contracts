@@ -5,6 +5,7 @@ branches:
   only:
   - master
   - develop
+  - deepesh/multiple_env_travis
 notifications:
   email:
     recipients:
@@ -13,6 +14,9 @@ notifications:
     on_failure: always
 node_js:
   - "8"
+env:
+  - GETH_VERSION=1.8.3
+  - GETH_VERSION=1.7.3
 services:
   - mysql
 before_install:
@@ -23,7 +27,7 @@ before_install:
   - sudo apt-get install software-properties-common
   - sudo add-apt-repository -y ppa:ethereum/ethereum
   - sudo apt-get update
-  - sudo bash mocha_test/scripts/install_geth_1_8_3.sh
+  - sudo bash mocha_test/scripts/install_geth_$GETH_VERSION.sh
   - sudo apt-get install solc
   - geth version
 install: 
