@@ -5,6 +5,7 @@ branches:
   only:
   - master
   - develop
+  - gulshan/MOSA-49	
 notifications:
   email:
     recipients:
