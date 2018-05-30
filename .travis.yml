@@ -54,8 +54,9 @@ matrix:
     - if: branch =~ ^develop
       env: GETH_VERSION=1.8.8
       node_js: "9"
-    - if: branch =~ ^deepesh/multiple_env_travis
+    - if: branch =~ ^v0.9.3/develop
       env: GETH_VERSION=1.7.2
+      node_js: "8"
 services:
   - mysql
 before_install:
