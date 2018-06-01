@@ -12,13 +12,14 @@ const rootPrefix = "../../.."
   , pricerOstEur = new pricer(constants.pricerOstEurAddress, constants.chainId)
   , mockToken = require(rootPrefix + '/lib/contract_interact/EIP20TokenMock')
   , TC5 = new mockToken(constants.TC5Address)
-  , BalanceCacheKlass = require(rootPrefix + '/lib/cache_management/balance')
-  , balanceCache = new BalanceCacheKlass(constants.chainId, constants.TC5Address)
-  , BrandedTokenKlass = require(rootPrefix + '/lib/contract_interact/branded_token');
+  , BrandedTokenKlass = require(rootPrefix + '/lib/contract_interact/branded_token')
+  , brandedTokenObj = new BrandedTokenKlass(constants.TC5Address, constants.chainId)
 ;
 
 async function getAmountFromCache(address) {
-  const resp = await balanceCache.getBalance(address);
+
+  const resp = await brandedTokenObj.getBalanceOf(address);
+
   return new BigNumber(resp.data.response);
 }
 
