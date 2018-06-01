@@ -14,6 +14,7 @@ const rootPrefix = "../../.."
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
   , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
+  , BalanceCacheKlass = require(rootPrefix + '/lib/cache_management/balance')
 ;
 
 const errorConfig = {
@@ -493,6 +494,15 @@ function validateTransferSuccess(
   *
   */
 async function populateCache() {
+
+  // Clear the previous cache
+  const cacheObject = new BalanceCacheKlass(constants.chainId, constants.TC5Address);
+  await cacheObject.clearBalance(constants.account1);
+  await cacheObject.clearBalance(constants.account2);
+  await cacheObject.clearBalance(constants.account3);
+  await cacheObject.clearBalance(constants.account4);
+  await cacheObject.clearBalance(constants.account5);
+
   // Populate Cache
   await brandedTokenObject.getBalanceOf(constants.account1);
   await brandedTokenObject.getBalanceOf(constants.account2);
@@ -555,6 +565,9 @@ describe('Airdrop Pay', function() {
     // Do Airdrop Setup if setup was not done
     logger.debug("============= Do Airdrop Setup if setup was not done =============");
     await registerAirdrop(constants.airdropOstUsdAddress);
+
+    // Populate Cache
+    populateCache();
 
   });
 
