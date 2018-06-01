@@ -1,8 +1,5 @@
 "use strict";
 
-const rootPrefix = '..'
-    , coreConstants = require(rootPrefix + '/config/core_constants');
-
 // Dynamo DB connection config details
 const ddbConnectionConfig = {
   'apiVersion': process.env.OS_DYNAMODB_API_VERSION,

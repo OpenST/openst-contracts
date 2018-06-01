@@ -12,6 +12,8 @@
  * @module tools/deploy/EIP20TokenMock
  */
 
+const openSTStorage = require('@openstfoundation/openst-storage');
+
 const readline = require('readline')
   , rootPrefix = '../..'
   , prompts = readline.createInterface(process.stdin, process.stdout)
@@ -20,6 +22,8 @@ const readline = require('readline')
   , BigNumber = require('bignumber.js')
   , helper = require(rootPrefix + "/tools/deploy/helper")
   , gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit')
+  , dynamodbConnectionParams = require(rootPrefix + '/config/dynamoDB')
+  , ddbServiceObj = new openSTStorage.Dynamodb(dynamodbConnectionParams)
 ;
 
 /**
@@ -117,6 +121,14 @@ async function performer(argv) {
   if (deployResult.isSuccess()) {
     const contractAddress = deployResult.data.transaction_receipt.contractAddress;
     logger.win("contractAddress: " + contractAddress);
+
+    logger.debug('*** Allocating shard for Token balance');
+
+    await new openSTStorage.TokenBalanceModel({
+      ddb_service: ddbServiceObj,
+      erc20_contract_address: contractAddress
+    }).allocate();
+
     if (fileForContractAddress !== '') {
       await helper.writeContractAddressToFile(fileForContractAddress, contractAddress);
     }
