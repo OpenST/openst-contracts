@@ -44,7 +44,7 @@ before_script:
   - export OS_DYNAMODB_REGION='localhost'
   - export OS_DYNAMODB_ENDPOINT='http://localhost:8000'
   - node tools/dynamo_db_init.js
-script:  
+script:
   - truffle test  
   - cd mocha_test/scripts/  
   - bash travis_test.sh  

@@ -20,7 +20,7 @@ async function getAmountFromCache(address) {
 
   const resp = await brandedTokenObj.getBalanceOf(address);
 
-  return new BigNumber(resp.data.response);
+  return new BigNumber(resp.data.balance);
 }
 
 describe('Pay', function() {
@@ -75,8 +75,7 @@ describe('Pay', function() {
     const poResult = await pricerOstUsd.priceOracles(constants.currencyUSD);
     assert.equal(poResult.isSuccess(), true);
     assert.equal(constants.priceOracles.OST.USD, poResult.data.priceOracles);
-
-    await TC5.setBalance(
+    const setBalResp = await TC5.setBalance(
       constants.ops,
       constants.opsPassphrase,
       constants.account1,
