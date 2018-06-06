@@ -1,3 +1,8 @@
+## OpenST-Payments v1.0.8-beta.1 ()
+DynamoDB integration for token balance - Now the balances (settled and unsettled debits) are being stored in DynamoDB.
+Openst-Storage takes care of implementing the model class for DynamoDB tables and is integrated in OpenST-Payments in this release.
+Cache for token balances is now responsibility of the OpenST-Storage module and is removed from OpenST-Payments module.
+
 ## OpenST-Payments v1.0.7 (23 May 2018)
 
 Changelog:
