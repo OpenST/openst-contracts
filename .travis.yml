@@ -4,8 +4,7 @@ sudo: required
 branches:
   only:
   - master
-  - develop
-  - gulshan/MOSA-49	
+  - develop	
 notifications:
   email:
     recipients:
