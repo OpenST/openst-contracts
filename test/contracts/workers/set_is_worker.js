@@ -94,11 +94,11 @@ module.exports.perform = (accounts) => {
   it('pass to set worker if deactivation height is equal to current block number + 1', async () => {
 
     let blockNumber = await web3.eth.getBlockNumber();
-    deactivationHeight = blockNumber + 2; //-- Need to be discussed
+    deactivationHeight = blockNumber + 2; //It is incremented by 2 becoz when u make an smart contract method call using web3's call,it increments by 1 as it simulates what sendTransaction is performing.
     assert.ok(difference = await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
     response = await workers.setWorker(worker1Address, deactivationHeight, {from: opsAddress});
-    assert.equal(await workers.isWorker.call(worker1Address), true);  //-- Need to be discussed
-    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, 1);//-- Need to be discussed.
+    assert.equal(await workers.isWorker.call(worker1Address), true);
+    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, 1);
     workersUtils.utils.logResponse(response, 'Workers.setWorker: w1, blockNumber + 1');
 
   });
