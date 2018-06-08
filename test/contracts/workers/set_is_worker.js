@@ -67,7 +67,7 @@ module.exports.perform = (accounts) => {
   it('fails to set worker if deactivation height is equal to current block number', async () => {
 
     let blockNumber = await web3.eth.getBlockNumber();
-    deactivationHeight = blockNumber;
+    deactivationHeight = blockNumber + 1;
     // calling this will not throw any execption
     assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
 
@@ -94,11 +94,11 @@ module.exports.perform = (accounts) => {
   it('pass to set worker if deactivation height is equal to current block number + 1', async () => {
 
     let blockNumber = await web3.eth.getBlockNumber();
-    deactivationHeight = blockNumber + 1;
-    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
+    deactivationHeight = blockNumber + 2; //-- Need to be discussed
+    assert.ok(difference = await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
     response = await workers.setWorker(worker1Address, deactivationHeight, {from: opsAddress});
-    assert.equal(await workers.isWorker.call(worker1Address), true);
-    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, 0);
+    assert.equal(await workers.isWorker.call(worker1Address), true);  //-- Need to be discussed
+    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, 1);//-- Need to be discussed.
     workersUtils.utils.logResponse(response, 'Workers.setWorker: w1, blockNumber + 1');
 
   });
@@ -165,7 +165,7 @@ module.exports.perform = (accounts) => {
     // set a worker with expiration height of 30
     var height = 30;
     let blockNumber = await web3.eth.getBlockNumber();
-    deactivationHeight = blockNumber + height;
+    deactivationHeight = blockNumber + height + 1;
     assert.ok(await workers.setWorker.call(worker3Address, deactivationHeight, {from: opsAddress}));
     response = await workers.setWorker(worker3Address, deactivationHeight, {from: opsAddress});
     assert.equal(await workers.isWorker.call(worker3Address), true);
