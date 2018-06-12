@@ -24,6 +24,7 @@ const readline = require('readline')
   , gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit')
   , dynamodbConnectionParams = require(rootPrefix + '/config/dynamoDB')
   , ddbServiceObj = new openSTStorage.Dynamodb(dynamodbConnectionParams)
+  , autoScalingServiceObj = require(rootPrefix + '/lib/auto_scaling_service')
 ;
 
 /**
@@ -126,6 +127,7 @@ async function performer(argv) {
 
     await new openSTStorage.TokenBalanceModel({
       ddb_service: ddbServiceObj,
+      auto_scaling: autoScalingServiceObj,
       erc20_contract_address: contractAddress
     }).allocate();
 
