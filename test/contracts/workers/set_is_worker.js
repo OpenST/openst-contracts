@@ -94,11 +94,11 @@ module.exports.perform = (accounts) => {
   it('pass to set worker if deactivation height is equal to current block number + 1', async () => {
 
     let blockNumber = await web3.eth.getBlockNumber();
-    deactivationHeight = blockNumber + 2; //It is incremented by 2 becoz when u make an smart contract method call using web3's call,it increments by 1 as it simulates what sendTransaction is performing.
+    deactivationHeight = blockNumber + 2; //It is incremented by 2 becoz :- a. block.number returns the pending block number (which is 1 more than the latest block number, which is what is returned by getBlockNumber) and (b) the conditions of the setWorker function that we are testing here.
     assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
     response = await workers.setWorker(worker1Address, deactivationHeight, {from: opsAddress});
     assert.equal(await workers.isWorker.call(worker1Address), true);
-    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, 1);
+    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, 1); // Changed to equate the value of deactivationHeight.
     workersUtils.utils.logResponse(response, 'Workers.setWorker: w1, blockNumber + 1');
 
   });
@@ -165,7 +165,7 @@ module.exports.perform = (accounts) => {
     // set a worker with expiration height of 30
     var height = 30;
     let blockNumber = await web3.eth.getBlockNumber();
-    deactivationHeight = blockNumber + height + 1;
+    deactivationHeight = blockNumber + height + 1; //Incremented by 1 so that require(_deactivationHeight >= block.number) condition in the contract doesnt fail.It fails due to change in behavior of when web's call is used on contract method.
     assert.ok(await workers.setWorker.call(worker3Address, deactivationHeight, {from: opsAddress}));
     response = await workers.setWorker(worker3Address, deactivationHeight, {from: opsAddress});
     assert.equal(await workers.isWorker.call(worker3Address), true);
