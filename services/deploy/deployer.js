@@ -256,7 +256,7 @@ DeployerKlass.prototype = {
                   }
                 })
                   .catch(function(reason) {
-                    logger.error("%Error - Contract deployment failed");
+                    logger.error("%Error - Contract deployment failed. Reason", reason);
                     if (basicHelper.isReturnTypeTxReceipt(returnType)) {
                       let errorParams = {
                         internal_error_identifier: 'l_d_7',
@@ -270,7 +270,7 @@ DeployerKlass.prototype = {
               })
               .catch(function(reason) {
                 if (basicHelper.isReturnTypeTxReceipt(returnType)) {
-                  logger.error("%Error - Contract deployment failed");
+                  logger.error("%Error - Contract deployment failed. Reason: ", reason);
                   let errorParams = {
                     internal_error_identifier: 'l_d_8',
                     api_error_identifier: 'unhandled_api_error',
@@ -288,7 +288,7 @@ DeployerKlass.prototype = {
               error_config: errorConfig,
               debug_options: {}
             };
-            logger.error('%Error - Transaction failed')
+            logger.error('%Error - Transaction failed. Reason:', reason);
             return onResolve(responseHelper.error(errorParams));
           });
 
