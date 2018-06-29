@@ -12,14 +12,15 @@ const rootPrefix = "../../.."
   , pricerOstEur = new pricer(constants.pricerOstEurAddress, constants.chainId)
   , mockToken = require(rootPrefix + '/lib/contract_interact/EIP20TokenMock')
   , TC5 = new mockToken(constants.TC5Address)
-  , BalanceCacheKlass = require(rootPrefix + '/lib/cache_management/balance')
-  , balanceCache = new BalanceCacheKlass(constants.chainId, constants.TC5Address)
-  , BrandedTokenKlass = require(rootPrefix + '/lib/contract_interact/branded_token');
+  , BrandedTokenKlass = require(rootPrefix + '/lib/contract_interact/branded_token')
+  , brandedTokenObj = new BrandedTokenKlass(constants.TC5Address, constants.chainId)
 ;
 
 async function getAmountFromCache(address) {
-  const resp = await balanceCache.getBalance(address);
-  return new BigNumber(resp.data.response);
+
+  const resp = await brandedTokenObj.getBalanceOf(address);
+
+  return new BigNumber(resp.data.balance);
 }
 
 describe('Pay', function() {
@@ -74,8 +75,7 @@ describe('Pay', function() {
     const poResult = await pricerOstUsd.priceOracles(constants.currencyUSD);
     assert.equal(poResult.isSuccess(), true);
     assert.equal(constants.priceOracles.OST.USD, poResult.data.priceOracles);
-
-    await TC5.setBalance(
+    const setBalResp = await TC5.setBalance(
       constants.ops,
       constants.opsPassphrase,
       constants.account1,
