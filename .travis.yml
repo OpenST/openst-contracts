@@ -5,6 +5,8 @@ branches:
   only:
   - master
   - develop
+  - release-1.0
+  - pre-release-v1.0.8
 notifications:
   email:
     recipients:
