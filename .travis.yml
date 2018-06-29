@@ -5,6 +5,8 @@ branches:
   only:
   - master
   - develop
+  - release-1.0
+  - pre-release-v1.0.8
 notifications:
   email:
     recipients:
@@ -74,10 +76,19 @@ before_script:
   - geth makedag 0 ~/.ethash
   - nohup sh tools/runTestRpc.sh </dev/null >/dev/null 2>&1 &
   - bash contracts/compile.sh
-script:  
+  - mkdir -p dynamodb
+  - wget https://s3.ap-south-1.amazonaws.com/dynamodb-local-mumbai/dynamodb_local_latest.zip -O ./dynamodb/dynamodb_local_latest.zip
+  - unzip ./dynamodb/dynamodb_local_latest.zip
+  - nohup java -Djava.library.path=./dynamodb/DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb &
+  - sleep 30
+  - . ./mocha_test/scripts/set_env_vars.sh
+  - node tools/dynamo_db_init.js
+script:
   - truffle test  
   - cd mocha_test/scripts/  
   - bash travis_test.sh  
 after_script:
   - kill $(ps aux | grep 'testrpc' | awk '{print $2}')
   - kill $(ps aux | grep 'geth' | awk '{print $2}')
+  - kill $(ps aux | grep 'DynamoDBLocal.jar' | awk '{print $2}')
+  - rm -rf dynamodb

@@ -1,0 +1,3873 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>OpenST Payments Class: TransactionHelper</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.lumen.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">OpenST Payments</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-lib_web3_events_formatter-web3EventsDecoder.html">lib/web3/events/formatter~web3EventsDecoder</a></li><li><a href="module-lib_web3_events_formatter-web3EventsFormatter.html">lib/web3/events/formatter~web3EventsFormatter</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-helpers_basic_helper.html">helpers/basic_helper</a></li><li><a href="module-lib_airdrop_management_adjust_airdrop_amount.html">lib/airdrop_management/adjust_airdrop_amount</a></li><li><a href="module-lib_cache_management_airdrop_cache.html">lib/cache_management/airdrop_cache</a></li><li><a href="module-lib_cache_management_pricer_cache.html">lib/cache_management/pricer_cache</a></li><li><a href="module-lib_contract_interact_airdrop.html">lib/contract_interact/airdrop</a></li><li><a href="module-lib_contract_interact_branded_token.html">lib/contract_interact/branded_token</a></li><li><a href="module-lib_contract_interact_helper.html">lib/contract_interact/helper</a></li><li><a href="module-lib_contract_interact_ops_managed_contract.html">lib/contract_interact/ops_managed_contract</a></li><li><a href="module-lib_contract_interact_owned_contract.html">lib/contract_interact/owned_contract</a></li><li><a href="module-lib_contract_interact_pricer.html">lib/contract_interact/pricer</a></li><li><a href="module-lib_contract_interact_workers.html">lib/contract_interact/workers</a></li><li><a href="module-lib_query_builder_mysql.html">lib/query_builder/mysql</a></li><li><a href="module-lib_set_worker_and_ops.html">lib/set_worker_and_ops</a></li><li><a href="module-lib_transaction_helper.html">lib/transaction_helper</a></li><li><a href="module-lib_web3_events_formatter.html">lib/web3/events/formatter</a></li><li><a href="module-tools_deploy_DeployHelper.html">tools/deploy/DeployHelper</a></li><li><a href="module-tools_deploy_EIP20TokenMock.html">tools/deploy/EIP20TokenMock</a></li><li><a href="module-tools_deploy_helper.html">tools/deploy/helper</a></li><li><a href="module-tools_deploy_pricer.html">tools/deploy/pricer</a></li><li><a href="module-tools_deploy_workers.html">tools/deploy/workers</a></li><li><a href="module-tools_dynamo_db_init.html">tools/dynamo_db_init</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="AirdropModelCacheKlass.html">AirdropModelCacheKlass</a></li><li><a href="baseCacheManagementKlass.html">baseCacheManagementKlass</a></li><li><a href="baseCacheMultiManagementKlass.html">baseCacheMultiManagementKlass</a></li><li><a href="module-helpers_basic_helper-BasicHelperKlass.html">helpers/basic_helper~BasicHelperKlass</a></li><li><a href="module-lib_airdrop_management_adjust_airdrop_amount-AdjustAirdropAmountKlass.html">lib/airdrop_management/adjust_airdrop_amount~AdjustAirdropAmountKlass</a></li><li><a href="module-lib_cache_management_airdrop_cache-AirdropBalanceCache.html">lib/cache_management/airdrop_cache~AirdropBalanceCache</a></li><li><a href="module-lib_cache_management_pricer_cache-PricerCache.html">lib/cache_management/pricer_cache~PricerCache</a></li><li><a href="module-lib_contract_interact_airdrop-Airdrop.html">lib/contract_interact/airdrop~Airdrop</a></li><li><a href="module-lib_contract_interact_branded_token-BrandedToken.html">lib/contract_interact/branded_token~BrandedToken</a></li><li><a href="module-lib_contract_interact_helper-ContractInteractHelper.html">lib/contract_interact/helper~ContractInteractHelper</a></li><li><a href="module-lib_contract_interact_ops_managed_contract-OpsManagedContract.html">lib/contract_interact/ops_managed_contract~OpsManagedContract</a></li><li><a href="module-lib_contract_interact_owned_contract-OwnedContract.html">lib/contract_interact/owned_contract~OwnedContract</a></li><li><a href="module-lib_contract_interact_pricer-MockToken.html">lib/contract_interact/pricer~MockToken</a></li><li><a href="module-lib_contract_interact_pricer-Pricer.html">lib/contract_interact/pricer~Pricer</a></li><li><a href="module-lib_contract_interact_workers-Workers.html">lib/contract_interact/workers~Workers</a></li><li><a href="module-lib_query_builder_mysql-MySQLQueryBuilderKlass.html">lib/query_builder/mysql~MySQLQueryBuilderKlass</a></li><li><a href="module-lib_set_worker_and_ops-SetWorkerOps.html">lib/set_worker_and_ops~SetWorkerOps</a></li><li><a href="module-lib_transaction_helper-TransactionHelper.html">lib/transaction_helper~TransactionHelper</a></li><li><a href="module-tools_dynamo_db_init-DynamoDBInit.html">tools/dynamo_db_init~DynamoDBInit</a></li><li><a href="userAirdropDetailCache.html">userAirdropDetailCache</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#rootPrefix">rootPrefix</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-8">
+	
+		<div id="main">
+			
+
+	<h1 class="page-title">Class: TransactionHelper</h1>
+<section>
+
+<header>
+    
+        <h2>
+            <span class="ancestors"><a href="module-lib_transaction_helper.html">lib/transaction_helper</a>~</span>
+        
+        TransactionHelper
+        </h2>
+        
+    
+</header>
+
+
+<article>
+    <div class="container-overview">
+    
+        
+<hr>
+<dt>
+    <h4 class="name" id="TransactionHelper"><span class="type-signature"></span>new TransactionHelper(chainId)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        constructor
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>chainId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">chain id</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<hr>
+<dt>
+    <h4 class="name" id="afterAirdropPayFailure"><span class="type-signature"></span>afterAirdropPayFailure(brandedTokenAddress, airdropAddress, spenderAddress, estimatedPayAmount, estimatedAirdropAmount, airdropBugdetAddress)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        After airdrop pay function, this is called after the pay is failed
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>brandedTokenAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">branded token address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">airdrop contract address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>spenderAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">spender address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>estimatedPayAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">estimated pay amount in weis</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>estimatedAirdropAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">estimated airdrop amount</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropBugdetAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">airdrop budget holder address</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="afterAirdropPaySuccess"><span class="type-signature"></span>afterAirdropPaySuccess(brandedTokenAddress, airdropAddress, spenderAddress, estimatedPayAmount, estimatedAirdropAmount, beneficiaryAddress, actualBeneficiaryAmount, commissionBeneficiaryAddress, actualCommissionBeneficiaryAmount, actualAirdropAmount, airdropBugdetAddress)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        After airdrop pay function, this is called after the pay is successfull
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>brandedTokenAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">branded token address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">airdrop contract address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>spenderAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">spender address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>estimatedPayAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">estimated pay amount in weis</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>estimatedAirdropAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">estimated airdrop amount</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>beneficiaryAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">beneficiary address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>actualBeneficiaryAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">actual beneficiary amount in weis</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>commissionBeneficiaryAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">commission beneficiary address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>actualCommissionBeneficiaryAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">actual commission beneficiary amount</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>actualAirdropAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">actual airdrop amount</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropBugdetAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">airdrop budget holder address</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="afterPayFailure"><span class="type-signature"></span>afterPayFailure(brandedTokenAddress, spenderAddress, estimatedPayAmount)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        After pay function, this is called after the pay is failed
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>brandedTokenAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">branded token address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>spenderAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">spender address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>estimatedPayAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">estimated pay amount in weis</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="afterPaySuccess"><span class="type-signature"></span>afterPaySuccess(brandedTokenAddress, spenderAddress, estimatedPayAmount, beneficiaryAddress, actualBeneficiaryAmount, commissionBeneficiaryAddress, actualCommissionBeneficiaryAmount)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        After pay function, this is called after the pay is successfull
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>brandedTokenAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">branded token address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>spenderAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">spender address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>estimatedPayAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">estimated pay amount in weis</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>beneficiaryAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">beneficiary address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>actualBeneficiaryAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">actual beneficiary amount in weis</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>commissionBeneficiaryAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">commission beneficiary address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>actualCommissionBeneficiaryAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">actual commission beneficiary amount</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="beforeAirdropPay"><span class="type-signature"></span>beforeAirdropPay(brandedTokenAddress, airdropAddress, spenderAddress, totalTransferAmount, airdropBalanceToUse, airdropBugdetAddress)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Before airdrop pay function, this is called before the pay is called
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>brandedTokenAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">branded token address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">airdrop contract address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>spenderAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">spender address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>totalTransferAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">estimated pay amount in weis</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropBalanceToUse</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">estimated airdrop amount</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropBugdetAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">airdrop budget holder address</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;array.&lt;result>></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="beforePay"><span class="type-signature"></span>beforePay(brandedTokenAddress, spenderAddress, estimatedPayAmount)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Before pay function, this is called before the pay is called
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>brandedTokenAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">branded token address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>spenderAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">spender address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>estimatedPayAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">estimated pay amount in weis</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="clearUserDetailCache"><span class="type-signature"></span>clearUserDetailCache(airdropContractAddress, owner)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Clear user detail cache for the user addressess
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropContractAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">airdrop contract address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>owner</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Account address</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="creditAirdropBalance"><span class="type-signature"></span>creditAirdropBalance(airdropContractAddress, owner, bigAmount)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Credit airdrop balance in db and clear cache
+It decreases airdrop_used_amount for user in user_airdrop_details table
+Clears the cache
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropContractAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">airdrop contract address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>owner</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Account address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>bigAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">amount to be credited</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="creditBalance"><span class="type-signature"></span>creditBalance(brandedTokenAddress, owner, bigAmount)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Credit balance in cache
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>brandedTokenAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">branded token address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>owner</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Account address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>bigAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">amount to be credited</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="debitAirdropBalance"><span class="type-signature"></span>debitAirdropBalance(airdropContractAddress, owner, bigAmount)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Debit airdrop balance in db and clear cache
+It increases airdrop_used_amount for user in user_airdrop_details table
+Clears the cache
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropContractAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">airdrop contract address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>owner</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Account address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>bigAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">amount to be debited</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="debitBalance"><span class="type-signature"></span>debitBalance(brandedTokenAddress, owner, bigAmount)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Debit balance in cache
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>brandedTokenAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">branded token address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>owner</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Account address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>bigAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">amount to be debited</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getActualAmountsFromDecodedEvents"><span class="type-signature"></span>getActualAmountsFromDecodedEvents(decodedEvent, eventName)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Get actual beneficiary amount, actual commission amount and actual airdrop amount from decoded events
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>decodedEvent</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Decoded event from receipt</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>eventName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Event name</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">result</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getActualAmountsFromReceipt"><span class="type-signature"></span>getActualAmountsFromReceipt(transactionReceipt, addressToNameMap, eventName)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Get actual beneficiary amount, actual commission amount and actual airdrop amount from transaction receipt
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>transactionReceipt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">transaction receipt</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>addressToNameMap</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">address to name map object</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>eventName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Event name</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">result</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="isAllResponseSuccessful"><span class="type-signature"></span>isAllResponseSuccessful(results)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Check if all response is success
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>results</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">response array</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="updateAirdropBalance"><span class="type-signature"></span>updateAirdropBalance(airdropContractAddress, owner, toCreditBigAmount)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Update airdrop balance
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>airdropContractAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">airdrop contract address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>owner</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Account address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>toCreditBigAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">to credit amount - this can be negative also</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="updateBalance"><span class="type-signature"></span>updateBalance(brandedTokenAddress, owner, toCreditBigAmount)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Update balance to cache
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>brandedTokenAddress</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">branded token address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>owner</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Account address</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>toCreditBigAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigNumber</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">to credit amount - this can be negative also</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">promise.&lt;result></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        </dl>
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+	<style>.copyright, .jsdoc-message, footer { color: #555555;} footer { border-color:#eeeeee;} }</style>
+
+
+	<span class="copyright">
+	OpenST Foundation Ltd.
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>
