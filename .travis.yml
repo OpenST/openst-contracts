@@ -13,6 +13,47 @@ notifications:
     on_failure: always
 node_js:
   - "8"
+env:
+  - GETH_VERSION=1.7.2
+matrix:
+  include:
+    - if: branch =~ ^master
+      env: GETH_VERSION=1.7.2
+      node_js: "8"
+    - if: branch =~ ^master
+      env: GETH_VERSION=1.8.3
+      node_js: "8"
+    - if: branch =~ ^master
+      env: GETH_VERSION=1.8.8
+      node_js: "8"
+    - if: branch =~ ^develop
+      env: GETH_VERSION=1.7.2
+      node_js: "8"
+    - if: branch =~ ^develop
+      env: GETH_VERSION=1.8.3
+      node_js: "8"
+    - if: branch =~ ^develop
+      env: GETH_VERSION=1.8.8
+      node_js: "8"
+    - if: branch =~ ^master
+      env: GETH_VERSION=1.7.2
+      node_js: "9"
+    - if: branch =~ ^master
+      env: GETH_VERSION=1.8.3
+      node_js: "9"
+    - if: branch =~ ^master
+      env: GETH_VERSION=1.8.8
+      node_js: "9"
+    - if: branch =~ ^develop
+      env: GETH_VERSION=1.7.2
+      node_js: "9"
+    - if: branch =~ ^develop
+      env: GETH_VERSION=1.8.3
+      node_js: "9"
+    - if: branch =~ ^develop
+      env: GETH_VERSION=1.8.8
+      node_js: "9"
+
 services:
   - mysql
 before_install:
@@ -23,9 +64,9 @@ before_install:
   - sudo apt-get install software-properties-common
   - sudo add-apt-repository -y ppa:ethereum/ethereum
   - sudo apt-get update
-  - sudo bash mocha_test/scripts/install_geth_1_8_3.sh
-  - sudo apt-get install solc
+  - sudo bash mocha_test/scripts/install_geth_$GETH_VERSION.sh
   - geth version
+  - sudo apt-get install solc
 install: 
   - npm install 
 before_script:
@@ -33,10 +74,19 @@ before_script:
   - geth makedag 0 ~/.ethash
   - nohup sh tools/runTestRpc.sh </dev/null >/dev/null 2>&1 &
   - bash contracts/compile.sh
-script:  
+  - mkdir -p dynamodb
+  - wget https://s3.ap-south-1.amazonaws.com/dynamodb-local-mumbai/dynamodb_local_latest.zip -O ./dynamodb/dynamodb_local_latest.zip
+  - unzip ./dynamodb/dynamodb_local_latest.zip
+  - nohup java -Djava.library.path=./dynamodb/DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb &
+  - sleep 30
+  - . ./mocha_test/scripts/set_env_vars.sh
+  - node tools/dynamo_db_init.js
+script:
   - truffle test  
   - cd mocha_test/scripts/  
   - bash travis_test.sh  
 after_script:
   - kill $(ps aux | grep 'testrpc' | awk '{print $2}')
   - kill $(ps aux | grep 'geth' | awk '{print $2}')
+  - kill $(ps aux | grep 'DynamoDBLocal.jar' | awk '{print $2}')
+  - rm -rf dynamodb

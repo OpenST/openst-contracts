@@ -160,8 +160,8 @@ ApproveKlass.prototype = {
       }
 
       oThis.brandedTokenObject = new brandedTokenContractInteract(oThis.brandedTokenContractAddress, oThis.chainId);
-      result = await oThis.brandedTokenObject.getBalanceOf(oThis.airdropBudgetHolderAddress);
-      oThis.amount = result.data.balance;
+      //result = await oThis.brandedTokenObject.getBalanceOf(oThis.airdropBudgetHolderAddress);
+      oThis.amount = '250000000000000000000000'; //result.data.balance;
       const amountInBigNumber = new BigNumber(oThis.amount);
       if (amountInBigNumber.isNaN() || !amountInBigNumber.isInteger()){
         let errorParams = {

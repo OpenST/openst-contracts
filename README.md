@@ -13,6 +13,15 @@ While OpenST 0.9 is available as-is for anyone to use, we caution that this is e
 npm install @openstfoundation/openst-payments --save
 ```
 
+# Init DynamoDB
+Following commands need to be run once, only for the first time. DynamoDB initial migrations for shard management are 
+run in it and one shard is created and registered for storing token balance.
+
+```bash
+. ./mocha_test/scripts/set_env_vars.sh
+node tools/dynamo_db_init.js
+```
+
 # Run Test Chain
 
 ```bash
