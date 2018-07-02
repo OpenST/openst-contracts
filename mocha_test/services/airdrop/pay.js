@@ -556,6 +556,9 @@ describe('Airdrop Pay', function() {
     logger.debug("============= Do Airdrop Setup if setup was not done =============");
     await registerAirdrop(constants.airdropOstUsdAddress);
 
+    // Populate Cache
+    populateCache();
+
   });
 
   it('AirdropManager: transfer branded token from reserve to airdropBudgetHolder and approve airdrop contract', async function() {
