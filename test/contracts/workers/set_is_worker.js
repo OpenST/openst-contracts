@@ -94,11 +94,14 @@ module.exports.perform = (accounts) => {
   it('pass to set worker if deactivation height is equal to current block number + 1', async () => {
 
     let blockNumber = await web3.eth.getBlockNumber();
-    deactivationHeight = blockNumber + 2; //It is incremented by 2 becoz :- a. block.number returns the pending block number (which is 1 more than the latest block number, which is what is returned by getBlockNumber) and (b) the conditions of the setWorker function that we are testing here.
-    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
+    deactivationHeight = blockNumber + 1;
+    console.log(deactivationHeight);
+    let fromcontract;
+    assert.ok(fromcontract = await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
+    console.log("height from contract",fromcontract);
     response = await workers.setWorker(worker1Address, deactivationHeight, {from: opsAddress});
-    assert.equal(await workers.isWorker.call(worker1Address), true);
-    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, 1); // Changed to equate the value of remainingheight.
+    assert.equal(await workers.isWorker.call(worker1Address), false);
+    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, 0);
     workersUtils.utils.logResponse(response, 'Workers.setWorker: w1, blockNumber + 1');
 
   });
@@ -165,7 +168,7 @@ module.exports.perform = (accounts) => {
     // set a worker with expiration height of 30
     var height = 30;
     let blockNumber = await web3.eth.getBlockNumber();
-    deactivationHeight = blockNumber + height + 1; //Incremented by 1 so that require(_deactivationHeight >= block.number) condition in the contract doesnt fail.It fails due to change in behavior of when web's call is used on contract method.
+    deactivationHeight = blockNumber + height + 1; //It is incremented by 1 because block.number or web3.eth.getBlockNumber() returns the pending block number which is 1 more than the latest block number.
     assert.ok(await workers.setWorker.call(worker3Address, deactivationHeight, {from: opsAddress}));
     response = await workers.setWorker(worker3Address, deactivationHeight, {from: opsAddress});
     assert.equal(await workers.isWorker.call(worker3Address), true);
