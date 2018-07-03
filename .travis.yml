@@ -67,7 +67,7 @@ before_install:
   - sudo apt-get update
   - sudo bash mocha_test/scripts/install_geth_$GETH_VERSION.sh
   - geth version
-  - sudo apt-get install solc -y
+  - sudo apt-get install solc 
 install: 
   - npm install 
 before_script:
