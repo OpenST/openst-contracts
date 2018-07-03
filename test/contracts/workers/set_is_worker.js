@@ -98,7 +98,7 @@ module.exports.perform = (accounts) => {
     assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
     response = await workers.setWorker(worker1Address, deactivationHeight, {from: opsAddress});
     assert.equal(await workers.isWorker.call(worker1Address), true);
-    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, 1); // Changed to equate the value of deactivationHeight.
+    workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, 1); // Changed to equate the value of remainingheight.
     workersUtils.utils.logResponse(response, 'Workers.setWorker: w1, blockNumber + 1');
 
   });
