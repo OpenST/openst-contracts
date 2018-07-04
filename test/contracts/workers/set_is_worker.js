@@ -95,10 +95,7 @@ module.exports.perform = (accounts) => {
 
     let blockNumber = await web3.eth.getBlockNumber();
     deactivationHeight = blockNumber + 1;
-    console.log(deactivationHeight);
-    let fromcontract;
-    assert.ok(fromcontract = await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
-    console.log("height from contract",fromcontract);
+    assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
     response = await workers.setWorker(worker1Address, deactivationHeight, {from: opsAddress});
     assert.equal(await workers.isWorker.call(worker1Address), false);
     workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, 0);
