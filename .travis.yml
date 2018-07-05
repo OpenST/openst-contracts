@@ -64,11 +64,10 @@ before_install:
   - sudo apt-get install npm  
   - sudo apt-get install software-properties-common
   - sudo add-apt-repository -y ppa:ethereum/ethereum
-  - sudo apt-get clean
   - sudo apt-get update
+  - sudo apt-get install solc
   - sudo bash mocha_test/scripts/install_geth_$GETH_VERSION.sh
   - geth version
-  - sudo npm install -g solc 
 install: 
   - npm install 
 before_script:
