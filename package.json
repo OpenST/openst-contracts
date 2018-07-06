@@ -1,6 +1,6 @@
 {
   "name": "@openstfoundation/openst-payments",
-  "version": "1.0.9-beta.3",
+  "version": "1.0.9-beta.4",
   "description": "Payment infrastructure on top of the OpenST network.",
   "keywords": [
     "openst",
