@@ -1,6 +1,6 @@
 {
   "name": "@openstfoundation/openst-payments",
-  "version": "1.0.9-beta.2",
+  "version": "1.0.9-beta.3",
   "description": "Payment infrastructure on top of the OpenST network.",
   "keywords": [
     "openst",
@@ -30,7 +30,7 @@
     "mustache": "2.3.0",
     "mysql": "2.14.1",
     "shortid": "2.2.8",
-    "web3": "1.0.0-beta.33"
+    "web3": "1.0.0-beta.34"
   },
   "devDependencies": {
     "abi-decoder": "1.0.9",
