@@ -230,7 +230,7 @@ DeployerKlass.prototype = {
                       }));
                 }
               })
-              .on('receipt', function(receipt) {
+              .once('receipt', function(receipt) {
 
                 const contractAddress = receipt.contractAddress;
                 web3Provider.eth.getCode(contractAddress).then(function(code) {
