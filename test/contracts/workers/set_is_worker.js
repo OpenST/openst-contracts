@@ -67,7 +67,7 @@ module.exports.perform = (accounts) => {
   it('fails to set worker if deactivation height is equal to current block number', async () => {
 
     let blockNumber = await web3.eth.getBlockNumber();
-    deactivationHeight = blockNumber;
+    deactivationHeight = blockNumber + 1;
     // calling this will not throw any execption
     assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
 
@@ -97,7 +97,7 @@ module.exports.perform = (accounts) => {
     deactivationHeight = blockNumber + 1;
     assert.ok(await workers.setWorker.call(worker1Address, deactivationHeight, {from: opsAddress}));
     response = await workers.setWorker(worker1Address, deactivationHeight, {from: opsAddress});
-    assert.equal(await workers.isWorker.call(worker1Address), true);
+    assert.equal(await workers.isWorker.call(worker1Address), false);
     workersUtils.checkWorkerSetEvent(response.logs[0], deactivationHeight, 0);
     workersUtils.utils.logResponse(response, 'Workers.setWorker: w1, blockNumber + 1');
 
@@ -165,7 +165,7 @@ module.exports.perform = (accounts) => {
     // set a worker with expiration height of 30
     var height = 30;
     let blockNumber = await web3.eth.getBlockNumber();
-    deactivationHeight = blockNumber + height;
+    deactivationHeight = blockNumber + height + 1; //It is incremented by 1 because block.number or web3.eth.getBlockNumber() returns the pending block number which is 1 more than the latest block number.
     assert.ok(await workers.setWorker.call(worker3Address, deactivationHeight, {from: opsAddress}));
     response = await workers.setWorker(worker3Address, deactivationHeight, {from: opsAddress});
     assert.equal(await workers.isWorker.call(worker3Address), true);
