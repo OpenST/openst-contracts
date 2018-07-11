@@ -1296,7 +1296,7 @@ describe('Pay', function() {
 
   it('should fail when sender has insufficient balance (BT Transfer)', async function() {
     // eslint-disable-next-line no-invalid-this
-    this.timeout(100000);
+    this.timeout(150000);
 
     const initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , initialAccount3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
