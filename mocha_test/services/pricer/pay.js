@@ -1291,6 +1291,11 @@ describe('Pay', function() {
     // We will not check here if the value is really set as its just interaction layer testing.
     utils.verifyTransactionReceipt(payResponse);
 
+    return new Promise(function(onResolve, onReject) {
+      setTimeout(function() {
+        return onResolve();
+      }, 10000);
+    })
   });
 
 
