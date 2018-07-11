@@ -1183,14 +1183,16 @@ describe('Pay', function() {
     // we will not verify if it got mined as its just interaction layer testing
     utils.verifyTransactionUUID(payResponse);
 
-    const initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
+    var initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , finalAccount1BalanceCache = await getAmountFromCache(constants.account1)
     ;
 
-    while(initialAccount1Balance !== finalAccount1BalanceCache) {
+    while(!initialAccount1Balance.equals(finalAccount1BalanceCache)) {
       await function() {
         return new Promise(function(onResolve, onReject) {
-          setTimeout(function() {
+          setTimeout(async function() {
+            initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1));
+            finalAccount1BalanceCache = await getAmountFromCache(constants.account1);
             console.log("Waiting for 5 seconds.");
             return onResolve();
           }, 5000);
@@ -1252,14 +1254,16 @@ describe('Pay', function() {
     // we will not verify if it got mined as its just interaction layer testing
     utils.verifyTransactionHash(payResponse);
 
-    const initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
+    var initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , finalAccount1BalanceCache = await getAmountFromCache(constants.account1)
     ;
 
-    while(initialAccount1Balance !== finalAccount1BalanceCache) {
+    while(!initialAccount1Balance.equals(finalAccount1BalanceCache)) {
       await function() {
         return new Promise(function(onResolve, onReject) {
-          setTimeout(function() {
+          setTimeout(async function() {
+            initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1));
+            finalAccount1BalanceCache = await getAmountFromCache(constants.account1);
             console.log("Waiting for 5 seconds.");
             return onResolve();
           }, 5000);
@@ -1321,14 +1325,16 @@ describe('Pay', function() {
     // We will not check here if the value is really set as its just interaction layer testing.
     utils.verifyTransactionReceipt(payResponse);
 
-    const initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
+    var initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , finalAccount1BalanceCache = await getAmountFromCache(constants.account1)
     ;
 
-    while(initialAccount1Balance !== finalAccount1BalanceCache) {
+    while(!initialAccount1Balance.equals(finalAccount1BalanceCache)) {
       await function() {
         return new Promise(function(onResolve, onReject) {
-          setTimeout(function() {
+          setTimeout(async function() {
+            initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1));
+            finalAccount1BalanceCache = await getAmountFromCache(constants.account1);
             console.log("Waiting for 5 seconds.");
             return onResolve();
           }, 5000);
@@ -1385,7 +1391,7 @@ describe('Pay', function() {
       constants.gasUsed,
       constants.optionsReceipt);
 
-    assert.equal(payResponse.isFailure(), true, "insufficient balance cheek");
+    assert.equal(payResponse.isFailure(), true, "insufficient balance check");
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
