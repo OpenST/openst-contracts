@@ -31,11 +31,11 @@ const errorConfig = {
  * @param {string} params.sender_worker_address - address of worker
  * @param {string} params.sender_worker_passphrase - passphrase of worker
  * @param {string} params.beneficiary_address - address of beneficiary account
- * @param {bignumber} params.transfer_amount - transfer amount (in wei)
+ * @param {Bignumber} params.transfer_amount - transfer amount (in wei)
  * @param {string} params.commission_beneficiary_address - address of commision beneficiary account
- * @param {bignumber} params.commission_amount - commission amount (in wei)
+ * @param {Bignumber} params.commission_amount - commission amount (in wei)
  * @param {string} params.currency - quote currency
- * @param {bignumber} params.intended_price_point - price point at which the pay is intended (in wei)
+ * @param {Bignumber} params.intended_price_point - price point at which the pay is intended (in wei)
  * @param {string} params.spender - User address
  * @param {string} params.gas_price - gas price
  * @param {object} params.options - for params like returnType, tag.
@@ -64,6 +64,8 @@ const PayKlass = function (params) {
   oThis.spender = params.spender;
   oThis.gasPrice = params.gas_price;
   oThis.options = params.options;
+  oThis.brandedTokenAddress = params.branded_token_address;
+  oThis.airdropBudgetHolder = params.airdrop_budget_holder_address;
 };
 
 PayKlass.prototype = {
@@ -78,31 +80,18 @@ PayKlass.prototype = {
     const oThis = this
     ;
 
-    try {
-      var r = null;
+    var r = null;
 
-      r = await oThis.validateParams();
-      logger.debug("=======PayKlass.validateParams.result=======");
-      logger.debug(r);
-      if (r.isFailure()) return r;
+    r = await oThis.validateParams();
+    logger.debug("=======PayKlass.validateParams.result=======");
+    logger.debug(r);
+    if (r.isFailure()) return r;
 
-      r = await oThis.pay();
-      logger.debug("=======PayKlass.pay.result=======");
-      logger.debug(r);
+    r = await oThis.pay();
+    logger.debug("=======PayKlass.pay.result=======");
+    logger.debug(r);
 
-      return r;
-
-    } catch (err) {
-      let errorParams = {
-        internal_error_identifier: 's_a_p_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      logger.error(err.message);
-      return responseHelper.error(errorParams);
-    }
-
+    return r;
   },
 
   /**
@@ -174,7 +163,9 @@ PayKlass.prototype = {
       oThis.intendedPricePoint,
       oThis.spender,
       oThis.gasPrice,
-      oThis.options
+      oThis.options,
+      oThis.brandedTokenAddress,
+      oThis.airdropBudgetHolder
     );
   }
 

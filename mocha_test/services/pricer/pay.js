@@ -1134,7 +1134,7 @@ describe('Pay', function() {
   it('should pass for interaction layer test when return type is uuid', async function() {
 
     // eslint-disable-next-line no-invalid-this
-    this.timeout(100000);
+    this.timeout(150000);
 
     const beneficiary = constants.account3
       , commissionAmount = new BigNumber(pricerOstUsd.toWei('2'))
@@ -1183,12 +1183,29 @@ describe('Pay', function() {
     // we will not verify if it got mined as its just interaction layer testing
     utils.verifyTransactionUUID(payResponse);
 
+    var initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
+      , finalAccount1BalanceCache = await getAmountFromCache(constants.account1)
+    ;
+
+    while(!initialAccount1Balance.equals(finalAccount1BalanceCache)) {
+      await function() {
+        return new Promise(function(onResolve, onReject) {
+          setTimeout(async function() {
+            initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1));
+            finalAccount1BalanceCache = await getAmountFromCache(constants.account1);
+            console.log("Waiting for 5 seconds.");
+            return onResolve();
+          }, 5000);
+        })
+      }();
+    }
+
   });
 
   it('should pass for interaction layer test when return type is txHash', async function() {
 
     // eslint-disable-next-line no-invalid-this
-    this.timeout(100000);
+    this.timeout(150000);
 
     const beneficiary = constants.account3
       , commissionAmount = new BigNumber(pricerOstUsd.toWei('2'))
@@ -1237,12 +1254,29 @@ describe('Pay', function() {
     // we will not verify if it got mined as its just interaction layer testing
     utils.verifyTransactionHash(payResponse);
 
+    var initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
+      , finalAccount1BalanceCache = await getAmountFromCache(constants.account1)
+    ;
+
+    while(!initialAccount1Balance.equals(finalAccount1BalanceCache)) {
+      await function() {
+        return new Promise(function(onResolve, onReject) {
+          setTimeout(async function() {
+            initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1));
+            finalAccount1BalanceCache = await getAmountFromCache(constants.account1);
+            console.log("Waiting for 5 seconds.");
+            return onResolve();
+          }, 5000);
+        })
+      }();
+    }
+
   });
 
   it('should pass for interaction layer test when return type is txReceipt', async function() {
 
     // eslint-disable-next-line no-invalid-this
-    this.timeout(100000);
+    this.timeout(150000);
 
     const beneficiary = constants.account3
       , commissionAmount = new BigNumber(pricerOstUsd.toWei('2'))
@@ -1291,6 +1325,22 @@ describe('Pay', function() {
     // We will not check here if the value is really set as its just interaction layer testing.
     utils.verifyTransactionReceipt(payResponse);
 
+    var initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
+      , finalAccount1BalanceCache = await getAmountFromCache(constants.account1)
+    ;
+
+    while(!initialAccount1Balance.equals(finalAccount1BalanceCache)) {
+      await function() {
+        return new Promise(function(onResolve, onReject) {
+          setTimeout(async function() {
+            initialAccount1Balance = new BigNumber(await TC5.balanceOf(constants.account1));
+            finalAccount1BalanceCache = await getAmountFromCache(constants.account1);
+            console.log("Waiting for 5 seconds.");
+            return onResolve();
+          }, 5000);
+        })
+      }();
+    }
   });
 
 
@@ -1341,7 +1391,7 @@ describe('Pay', function() {
       constants.gasUsed,
       constants.optionsReceipt);
 
-    assert.equal(payResponse.isFailure(), true, "insufficient balance cheek");
+    assert.equal(payResponse.isFailure(), true, "insufficient balance check");
 
     const account1Balance = new BigNumber(await TC5.balanceOf(constants.account1))
       , account3Balance = new BigNumber(await TC5.balanceOf(constants.account3))
@@ -1362,5 +1412,3 @@ describe('Pay', function() {
   });
 
 });
-
-

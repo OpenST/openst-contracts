@@ -19,7 +19,7 @@ export OP_MYSQL_PASSWORD=''
 export OP_MYSQL_DATABASE='payment_development'
 export OP_MYSQL_CONNECTION_POOL_SIZE='5'
 
-export OST_CACHING_ENGINE='none'
+export OST_CACHING_ENGINE='memcached'
 export OST_DEBUG_ENABLED=1
 
 
@@ -38,4 +38,4 @@ export OS_AUTOSCALING_SSL_ENABLED='0'
 export OS_AUTOSCALING_LOGGING_ENABLED='0'
 
 export OST_STANDALONE_MODE=1
-export RUNNING_TESTS_IN='travis'
+export AUTO_SCALE_DYNAMO=0

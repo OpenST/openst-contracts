@@ -35,4 +35,4 @@ define("STANDALONE_MODE", process.env.OST_STANDALONE_MODE);
 define('DEBUG_ENABLED', process.env.OST_DEBUG_ENABLED || false);
 
 //Environment
-define("RUNNING_TESTS_IN", process.env.RUNNING_TESTS_IN);
+define("AUTO_SCALE_DYNAMO", process.env.AUTO_SCALE_DYNAMO);

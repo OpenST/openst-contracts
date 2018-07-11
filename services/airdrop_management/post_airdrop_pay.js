@@ -64,34 +64,21 @@ PostPayKlass.prototype = {
     const oThis = this
     ;
 
-    try {
-
-      if (!oThis.decodedEvents) {
-        let errorParams = {
-          internal_error_identifier: 's_a_pap_perform_1',
-          api_error_identifier: 'invalid_api_params',
-          error_config: errorConfig,
-          params_error_identifiers: ['invalid_decoded_events'],
-          debug_options: {}
-        };
-        return Promise.resolve(responseHelper.paramValidationError(errorParams));
-      }
-
-      const validationResponse = helper.validatePostAirdropPayParams(oThis.postAirdropPayParams);
-      if (validationResponse.isFailure()) return Promise.resolve(validationResponse);
-
-      return Promise.resolve(await oThis.postAirdropPay());
-
-    } catch (err) {
+    if (!oThis.decodedEvents) {
       let errorParams = {
-        internal_error_identifier: 's_a_pap_perform_2',
-        api_error_identifier: 'unhandled_api_error',
+        internal_error_identifier: 's_a_pap_perform_1',
+        api_error_identifier: 'invalid_api_params',
         error_config: errorConfig,
-        debug_options: { err: err }
+        params_error_identifiers: ['invalid_decoded_events'],
+        debug_options: {}
       };
-      logger.error("services/airdrop_management/post_airdrop_pay.js:perform inside catch ", err);
-      return Promise.resolve(responseHelper.error(errorParams));
+      return Promise.resolve(responseHelper.paramValidationError(errorParams));
     }
+
+    const validationResponse = helper.validatePostAirdropPayParams(oThis.postAirdropPayParams);
+    if (validationResponse.isFailure()) return Promise.resolve(validationResponse);
+
+    return oThis.postAirdropPay();
 
   },
 
@@ -106,22 +93,11 @@ PostPayKlass.prototype = {
     const oThis = this
     ;
 
-    try {
-      const AirdropContractInteractObject = new AirdropContractInteractKlass(
-        oThis.postAirdropPayParams.contractAddress,
-        oThis.postAirdropPayParams.chainId
-      );
-      return AirdropContractInteractObject.postAirdropPay(oThis.postAirdropPayParams, oThis.decodedEvents, oThis.status);
-    } catch (err) {
-      let errorParams = {
-        internal_error_identifier: 's_a_pap_postAirdropPay_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      logger.error("services/airdrop_management/postAirdropPay.js:perform inside catch ", err);
-      return Promise.resolve(responseHelper.error(errorParams));
-    }
+    const AirdropContractInteractObject = new AirdropContractInteractKlass(
+      oThis.postAirdropPayParams.contractAddress,
+      oThis.postAirdropPayParams.chainId
+    );
+    return AirdropContractInteractObject.postAirdropPay(oThis.postAirdropPayParams, oThis.decodedEvents, oThis.status);
   }
 
 };
