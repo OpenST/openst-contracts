@@ -1,3 +1,6 @@
+## OpenST-Payments v1.0.9-beta.7
+Handled boolean status for transaction receipt in web3 version 1.0.0-beta.34
+
 ## OpenST-Payments v1.0.8 
 #####OpenST-storage and dynamoDB integration for token balances ([openst-payments#124](https://github.com/OpenSTFoundation/openst-payments/issues/124))
 DynamoDB integration for token balance - Now the balances (settled and unsettled debits) are being stored in DynamoDB.
