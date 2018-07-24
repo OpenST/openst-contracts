@@ -1,22 +1,38 @@
 "use strict";
 
-// Dynamo DB connection config details
-const ddbConnectionConfig = {
-  'apiVersion': process.env.OS_DYNAMODB_API_VERSION,
-  'accessKeyId': process.env.OS_DYNAMODB_ACCESS_KEY_ID,
-  'secretAccessKey': process.env.OS_DYNAMODB_SECRET_ACCESS_KEY,
-  'region': process.env.OS_DYNAMODB_REGION,
-  'endpoint': process.env.OS_DYNAMODB_ENDPOINT
+/**
+ * Load all the DynamoDB related constants from from config strategy OR define them as literals here and export them.
+ *
+ * @module config/dynamoDB
+ *
+ */
+
+const rootPrefix = '..'
+  , InstanceComposer = require(rootPrefix + "/instance_composer")
+;
+
+const DynamoDbConfig = function (configStrategy, instanceComposer) {
+
+  const oThis = this;
+
+  oThis.apiVersion = configStrategy.OS_DYNAMODB_API_VERSION;
+  oThis.accessKeyId = configStrategy.OS_DYNAMODB_ACCESS_KEY_ID;
+  oThis.secretAccessKey = configStrategy.OS_DYNAMODB_SECRET_ACCESS_KEY;
+  oThis.region = configStrategy.OS_DYNAMODB_REGION;
+  oThis.endpoint = configStrategy.OS_DYNAMODB_ENDPOINT;
+
+  if (configStrategy.OS_DYNAMODB_SSL_ENABLED == 1) {
+    oThis.sslEnabled = true;
+  } else {
+    oThis.sslEnabled = false;
+  }
+
+  if (configStrategy.OS_DYNAMODB_LOGGING_ENABLED == 1) {
+    oThis.logger = console;
+  }
+
 };
 
-if (process.env.OS_DYNAMODB_SSL_ENABLED == 1) {
-  ddbConnectionConfig['sslEnabled'] = true;
-} else {
-  ddbConnectionConfig['sslEnabled'] = false;
-}
+InstanceComposer.register(DynamoDbConfig, "getDynamoDbConfig", true);
 
-if (process.env.OS_DYNAMODB_LOGGING_ENABLED == 1) {
-  ddbConnectionConfig['logger'] = console;
-}
-
-module.exports = ddbConnectionConfig;
+module.exports = DynamoDbConfig;
