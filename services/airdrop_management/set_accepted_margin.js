@@ -60,39 +60,53 @@ const SetAcceptedMarginKlass = function (params) {
 };
 
 SetAcceptedMarginKlass.prototype = {
-
   /**
-   * Perform method
+   * Perform Set Accepted margins
+   *
+   * @return {promise}
+   */
+  perform: function () {
+    const oThis = this;
+    
+    return oThis.asyncPerform()
+      .catch(function (error) {
+        if (responseHelper.isCustomResult(error)) {
+          return error;
+        } else {
+          logger.error('openst-platform::services/airdrop_management/set_accepted_margin.js::perform::catch');
+          logger.error(error);
+    
+          return responseHelper.error({
+            internal_error_identifier: 's_am_sam_perform_1',
+            api_error_identifier: 'unhandled_api_error',
+            error_config: basicHelper.fetchErrorConfig(),
+            debug_options: {err: error}
+          });
+        }
+      });
+  },
+  
+  /**
+   * Async Perform
    *
    * @return {promise<result>}
-   *
    */
-  perform: async function () {
+  asyncPerform: async function () {
     const oThis = this
     ;
-    try {
-      var r = null;
-
-      r = await oThis.validateParams();
-      logger.debug("=======SetAcceptedMarginKlass.validateParams.result=======");
-      logger.debug(r);
-      if (r.isFailure()) return r;
-
-      r = await oThis.setAcceptedMargin();
-      logger.debug("=======SetAcceptedMarginKlass.setAcceptedMargin.result=======");
-      logger.debug(r);
-
-      return r;
-
-    } catch (err) {
-      let errorParams = {
-        internal_error_identifier: 's_w_sam_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      return responseHelper.error(errorParams);
-    }
+    
+    var r = null;
+  
+    r = await oThis.validateParams();
+    logger.debug("=======SetAcceptedMarginKlass.validateParams.result=======");
+    logger.debug(r);
+    if (r.isFailure()) return r;
+  
+    r = await oThis.setAcceptedMargin();
+    logger.debug("=======SetAcceptedMarginKlass.setAcceptedMargin.result=======");
+    logger.debug(r);
+  
+    return r;
 
   },
 

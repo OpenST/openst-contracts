@@ -52,39 +52,53 @@ const DeployerKlass = function(params) {
 };
 
 DeployerKlass.prototype = {
-
+  
   /**
-   * Perform method
+   * Perform
    *
-   * @return {promise<result>} - returns a promise which resolves to an object of kind Result
-   *
+   * @return {promise}
    */
-  perform: async function () {
+  perform: function () {
+    const oThis = this
+    ;
+    return oThis.asyncPerform()
+      .catch(function (error) {
+        if (responseHelper.isCustomResult(error)) {
+          return error;
+        } else {
+          logger.error('openst-platform::services/deploy/deployer.js::perform::catch');
+          logger.error(error);
+          
+          return responseHelper.error({
+            internal_error_identifier: 's_d_d_perform_1',
+            api_error_identifier: 'unhandled_api_error',
+            error_config: basicHelper.fetchErrorConfig(),
+            debug_options: {err: error}
+          });
+        }
+      });
+  },
+  
+  /**
+   * Async Perform
+   *
+   * @return {promise<result>}
+   */
+  asyncPerform: async function () {
 
     const oThis = this;
-
-    try {
-      var r = null;
-
-      r = await oThis.validateParams();
-      logger.debug("\n=========Deployer.validateParams.result=========");
-      logger.debug(r);
-      if(r.isFailure()) return r;
-
-      r = oThis.deploy();
-      logger.debug("\n=========Deployer.deploy.result=========");
-      logger.debug(r);
-      return r;
-    } catch(err) {
-      let errorParams = {
-        internal_error_identifier: 's_am_ub_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      return responseHelper.error(errorParams);
-    }
-
+  
+    var r = null;
+  
+    r = await oThis.validateParams();
+    logger.debug("\n=========Deployer.validateParams.result=========");
+    logger.debug(r);
+    if(r.isFailure()) return r;
+  
+    r = oThis.deploy();
+    logger.debug("\n=========Deployer.deploy.result=========");
+    logger.debug(r);
+    return r;
   },
 
   /**
@@ -100,7 +114,7 @@ DeployerKlass.prototype = {
     if (!oThis.contractName) {
       logger.error("Error: Contract name is mandatory");
       let errorParams = {
-        internal_error_identifier: 'l_d_1',
+        internal_error_identifier: 's_d_d_validateParams_1',
         api_error_identifier: 'invalid_api_params',
         error_config: errorConfig,
         params_error_identifiers: ['contract_name_invalid'],
@@ -111,7 +125,7 @@ DeployerKlass.prototype = {
 
     if (!oThis.gasPrice) {
       let errorParams = {
-        internal_error_identifier: 'l_d_2',
+        internal_error_identifier: 's_d_d_validateParams_2',
         api_error_identifier: 'invalid_api_params',
         error_config: errorConfig,
         params_error_identifiers: ['gas_price_invalid'],
@@ -123,7 +137,7 @@ DeployerKlass.prototype = {
 
     if (!oThis.gasLimit) {
       let errorParams = {
-        internal_error_identifier: 'l_d_3',
+        internal_error_identifier: 's_d_d_validateParams_3',
         api_error_identifier: 'invalid_api_params',
         error_config: errorConfig,
         params_error_identifiers: ['gas_limit_invalid'],
@@ -136,7 +150,7 @@ DeployerKlass.prototype = {
     const deployerAddress = coreAddresses.getAddressForUser(deployerName);
     if (!deployerAddress) {
       let errorParams = {
-        internal_error_identifier: 'l_d_4',
+        internal_error_identifier: 's_d_d_validateParams_4',
         api_error_identifier: 'invalid_api_params',
         error_config: errorConfig,
         params_error_identifiers: ['deployer_invalid'],
@@ -149,7 +163,7 @@ DeployerKlass.prototype = {
     const deployerAddrPassphrase = coreAddresses.getPassphraseForUser(deployerName);
     if (!deployerAddrPassphrase) {
       let errorParams = {
-        internal_error_identifier: 'l_d_5',
+        internal_error_identifier: 's_d_d_validateParams_5',
         api_error_identifier: 'invalid_deployer_passphrase',
         error_config: errorConfig,
         debug_options: {}
@@ -237,7 +251,7 @@ DeployerKlass.prototype = {
                   if (code.length <= 2) {
                     if (basicHelper.isReturnTypeTxReceipt(returnType)) {
                       let errorParams = {
-                        internal_error_identifier: 'l_d_6',
+                        internal_error_identifier: 's_d_d_deploy_1',
                         api_error_identifier: 'contract_deploy_failed',
                         error_config: errorConfig,
                         debug_options: {}
@@ -259,7 +273,7 @@ DeployerKlass.prototype = {
                     logger.error("%Error - Contract deployment failed. Reason", reason);
                     if (basicHelper.isReturnTypeTxReceipt(returnType)) {
                       let errorParams = {
-                        internal_error_identifier: 'l_d_7',
+                        internal_error_identifier: 's_d_d_deploy_2',
                         api_error_identifier: 'unhandled_api_error',
                         error_config: errorConfig,
                         debug_options: {}
@@ -272,7 +286,7 @@ DeployerKlass.prototype = {
                 if (basicHelper.isReturnTypeTxReceipt(returnType)) {
                   logger.error("%Error - Contract deployment failed. Reason: ", reason);
                   let errorParams = {
-                    internal_error_identifier: 'l_d_8',
+                    internal_error_identifier: 's_d_d_deploy_3',
                     api_error_identifier: 'unhandled_api_error',
                     error_config: errorConfig,
                     debug_options: {}
@@ -283,7 +297,7 @@ DeployerKlass.prototype = {
           })
           .catch(function(reason) {
             let errorParams = {
-              internal_error_identifier: 'l_d_5',
+              internal_error_identifier: 's_d_d_deploy_4',
               api_error_identifier: 'unhandled_api_error',
               error_config: errorConfig,
               debug_options: {}

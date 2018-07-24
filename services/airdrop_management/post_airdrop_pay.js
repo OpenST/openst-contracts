@@ -53,14 +53,38 @@ const PostPayKlass = function (params, decodedEvents, status) {
 };
 
 PostPayKlass.prototype = {
-
   /**
-   * Perform method
+   * Perform post airdrop pay
+   *
+   * @return {promise}
+   */
+  perform: function () {
+    const oThis = this
+    ;
+    return oThis.asyncPerform()
+      .catch(function (error) {
+        if (responseHelper.isCustomResult(error)) {
+          return error;
+        } else {
+          logger.error('openst-platform::services/airdrop_management/post_airdrop_pay.js::perform::catch');
+          logger.error(error);
+    
+          return responseHelper.error({
+            internal_error_identifier: 's_am_pap_perform_2',
+            api_error_identifier: 'unhandled_api_error',
+            error_config: basicHelper.fetchErrorConfig(),
+            debug_options: {err: error}
+          });
+        }
+      });
+  },
+  
+  /**
+   * Async Perform
    *
    * @return {promise<result>}
-   *
    */
-  perform: async function () {
+  asyncPerform: async function () {
     const oThis = this
     ;
 

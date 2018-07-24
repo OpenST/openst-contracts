@@ -59,40 +59,54 @@ const ApproveKlass = function(params) {
 };
 
 ApproveKlass.prototype = {
-
+  
   /**
    * Perform approve by airdrop budget holder to contract
    *
-   * @return {promise<result>}
+   * @return {promise}
    *
    */
-  perform: async function () {
+  perform: function () {
+    const oThis = this;
+    
+    return oThis.asyncPerform()
+      .catch(function (error) {
+        if (responseHelper.isCustomResult(error)) {
+          return error;
+        } else {
+          logger.error('openst-platform::services/airdrop_management/approve.js::perform::catch');
+          logger.error(error);
+    
+          return responseHelper.error({
+            internal_error_identifier: 's_am_a_perform_1',
+            api_error_identifier: 'unhandled_api_error',
+            error_config: basicHelper.fetchErrorConfig(),
+            debug_options: {err: error}
+          });
+        }
+      });
+  },
+  
+  /**
+   * Async Perform
+   *
+   * @return {promise<result>}
+   */
+  asyncPerform: async function () {
 
     const oThis = this;
-
-    try {
-      var r = null;
-
-      r = await oThis.validateParams();
-      logger.debug("\n=========Approve.validateParams.result=========");
-      logger.debug(r);
-      if(r.isFailure()) return r;
-
-      r = oThis.doApprove();
-      logger.debug("\n=========Approve.doApprove.result=========");
-      logger.debug(r);
-      return r;
-    } catch(err) {
-      let errorParams = {
-        internal_error_identifier: 's_am_a_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      logger.error(err.message);
-      return responseHelper.error(errorParams)
-    }
-
+  
+    var r = null;
+    r = await oThis.validateParams();
+    logger.debug("\n=========Approve.validateParams.result=========");
+    logger.debug(r);
+    if(r.isFailure()) return r;
+  
+    r = oThis.doApprove();
+    logger.debug("\n=========Approve.doApprove.result=========");
+    logger.debug(r);
+    return r;
+    
   },
 
   /**

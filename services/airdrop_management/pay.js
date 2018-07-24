@@ -69,14 +69,39 @@ const PayKlass = function (params) {
 };
 
 PayKlass.prototype = {
-
   /**
-   * Perform method
+   * Perform airdrop pay
    *
-   * @return {promise<result>}
+   * @return {promise}
    *
    */
-  perform: async function () {
+  perform: function () {
+    const oThis = this;
+    
+    return oThis.asyncPerform()
+      .catch(function (error) {
+        if (responseHelper.isCustomResult(error)) {
+          return error;
+        } else {
+          logger.error('openst-platform::services/airdrop_management/pay.js::perform::catch');
+          logger.error(error);
+    
+          return responseHelper.error({
+            internal_error_identifier: 's_am_p_perform_1',
+            api_error_identifier: 'unhandled_api_error',
+            error_config: basicHelper.fetchErrorConfig(),
+            debug_options: {err: error}
+          });
+        }
+      });
+  },
+  
+  /**
+   * Async Perform
+   *
+   * @return {promise<result>}
+   */
+  asyncPerform: async function () {
     const oThis = this
     ;
 

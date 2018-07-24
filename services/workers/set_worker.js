@@ -60,41 +60,54 @@ const SetWorkerKlass = function (params) {
 };
 
 SetWorkerKlass.prototype = {
-
+  
   /**
-   * Perform method
+   * Perform
    *
-   * @return {promise<result>}
-   *
+   * @return {promise}
    */
-  perform: async function () {
+  perform: function () {
     const oThis = this
     ;
-
-    try {
-      var r = null;
-
-      r = await oThis.validateParams();
-      logger.debug("=======SetWorkerKlass.validateParams.result=======");
-      logger.debug(r);
-      if (r.isFailure()) return r;
-
-      r = await oThis.setWorker();
-      logger.debug("=======SetWorkerKlass.setWorker.result=======");
-      logger.debug(r);
-
-      return r;
-
-    } catch (err) {
-      let errorParams = {
-        internal_error_identifier: 's_w_sw_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      return responseHelper.error(errorParams);
-    }
-
+    return oThis.asyncPerform()
+      .catch(function (error) {
+        if (responseHelper.isCustomResult(error)) {
+          return error;
+        } else {
+          logger.error('openst-platform::services/workers/set_worker.js::perform::catch');
+          logger.error(error);
+          
+          return responseHelper.error({
+            internal_error_identifier: 's_w_sw_perform_1',
+            api_error_identifier: 'unhandled_api_error',
+            error_config: basicHelper.fetchErrorConfig(),
+            debug_options: {err: error}
+          });
+        }
+      });
+  },
+  
+  /**
+   * Async Perform
+   *
+   * @return {promise<result>}
+   */
+  asyncPerform: async function () {
+    const oThis = this
+    ;
+  
+    var r = null;
+  
+    r = await oThis.validateParams();
+    logger.debug("=======SetWorkerKlass.validateParams.result=======");
+    logger.debug(r);
+    if (r.isFailure()) return r;
+  
+    r = await oThis.setWorker();
+    logger.debug("=======SetWorkerKlass.setWorker.result=======");
+    logger.debug(r);
+  
+    return r;
   },
 
   /**

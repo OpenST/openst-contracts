@@ -57,39 +57,53 @@ const SetOpsKlass = function (params) {
 };
 
 SetOpsKlass.prototype = {
-
   /**
-   * Perform method
+   * Perform
    *
-   * @return {promise<result>}
-   *
+   * @return {promise}
    */
-  perform: async function () {
+  perform: function () {
     const oThis = this
     ;
-    try {
-      var r = null;
-
-      r = await oThis.validateParams();
-      logger.debug("=======SetOpsKlass.validateParams.result=======");
-      logger.debug(r);
-      if (r.isFailure()) return r;
-
-      r = await oThis.setOps();
-      logger.debug("=======SetOpsKlass.setOps.result=======");
-      logger.debug(r);
-
-      return r;
-
-    } catch (err) {
-      let errorParams = {
-        internal_error_identifier: 's_om_go_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      return responseHelper.error(errorParams);
-    }
+    return oThis.asyncPerform()
+      .catch(function (error) {
+        if (responseHelper.isCustomResult(error)) {
+          return error;
+        } else {
+          logger.error('openst-platform::services/ops_managed/set_ops.js::perform::catch');
+          logger.error(error);
+          
+          return responseHelper.error({
+            internal_error_identifier: 's_om_so_perform_1',
+            api_error_identifier: 'unhandled_api_error',
+            error_config: basicHelper.fetchErrorConfig(),
+            debug_options: {err: error}
+          });
+        }
+      });
+  },
+  
+  /**
+   * Async Perform
+   *
+   * @return {promise<result>}
+   */
+  asyncPerform: async function () {
+    const oThis = this
+    ;
+  
+    var r = null;
+  
+    r = await oThis.validateParams();
+    logger.debug("=======SetOpsKlass.validateParams.result=======");
+    logger.debug(r);
+    if (r.isFailure()) return r;
+  
+    r = await oThis.setOps();
+    logger.debug("=======SetOpsKlass.setOps.result=======");
+    logger.debug(r);
+  
+    return r;
 
   },
 
@@ -104,7 +118,7 @@ SetOpsKlass.prototype = {
     ;
     if (!basicHelper.isAddressValid(oThis.contractAddress)) {
       let errorParams = {
-        internal_error_identifier: 's_om_go_validateParams_1',
+        internal_error_identifier: 's_om_so_validateParams_1',
         api_error_identifier: 'invalid_api_params',
         error_config: errorConfig,
         params_error_identifiers: ['invalid_contract_address'],
@@ -115,7 +129,7 @@ SetOpsKlass.prototype = {
 
     if (!oThis.gasPrice) {
       let errorParams = {
-        internal_error_identifier: 's_om_go_validateParams_2',
+        internal_error_identifier: 's_om_so_validateParams_2',
         api_error_identifier: 'invalid_api_params',
         error_config: errorConfig,
         params_error_identifiers: ['gas_price_invalid'],
@@ -126,7 +140,7 @@ SetOpsKlass.prototype = {
 
     if (!basicHelper.isValidChainId(oThis.chainId)) {
       let errorParams = {
-        internal_error_identifier: 's_om_go_validateParams_3',
+        internal_error_identifier: 's_om_so_validateParams_3',
         api_error_identifier: 'invalid_api_params',
         error_config: errorConfig,
         params_error_identifiers: ['chain_id_invalid'],

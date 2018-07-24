@@ -64,39 +64,53 @@ const TransferKlass = function(params) {
 };
 
 TransferKlass.prototype = {
-
+  
   /**
-   * Perform method
+   * Perform
+   *
+   * @return {promise}
+   */
+  perform: function () {
+    const oThis = this
+    ;
+    return oThis.asyncPerform()
+      .catch(function (error) {
+        if (responseHelper.isCustomResult(error)) {
+          return error;
+        } else {
+          logger.error('openst-platform::services/airdrop_management/transfer.js::perform::catch');
+          logger.error(error);
+          
+          return responseHelper.error({
+            internal_error_identifier: 's_am_t_perform_1',
+            api_error_identifier: 'unhandled_api_error',
+            error_config: basicHelper.fetchErrorConfig(),
+            debug_options: {err: error}
+          });
+        }
+      });
+  },
+  
+  /**
+   * Async Perform
    *
    * @return {promise<result>}
-   *
    */
-  perform: async function () {
+  asyncPerform: async function () {
 
     const oThis = this;
-
-    try {
-      var r = null;
-
-      r = await oThis.validateParams();
-      logger.debug("\n=========Transfer.validateParams.result=========");
-      logger.debug(r);
-      if(r.isFailure()) return r;
-
-      r = oThis.doTransfer();
-      logger.debug("\n=========Transfer.doTransfer.result=========");
-      logger.debug(r);
-      return r;
-    } catch(err) {
-      let errorParams = {
-        internal_error_identifier: 's_am_t_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      logger.error(err.message);
-      return responseHelper.error(errorParams);
-    }
+    
+    var r = null;
+  
+    r = await oThis.validateParams();
+    logger.debug("\n=========Transfer.validateParams.result=========");
+    logger.debug(r);
+    if(r.isFailure()) return r;
+  
+    r = oThis.doTransfer();
+    logger.debug("\n=========Transfer.doTransfer.result=========");
+    logger.debug(r);
+    return r;
 
   },
 
