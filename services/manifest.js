@@ -10,10 +10,17 @@ const rootPrefix = ".."
   , InstanceComposer = require( rootPrefix + "/instance_composer")
 ;
 
+// deploy related services
 require(rootPrefix + '/services/deploy/workers');
 require(rootPrefix + '/services/deploy/airdrop');
+
+// ops_managed related services
 require(rootPrefix + "/services/ops_managed/get_ops");
 require(rootPrefix + "/services/ops_managed/set_ops");
+
+// Workers related services
+require(rootPrefix + '/services/workers/set_worker');
+require(rootPrefix + '/services/workers/is_worker');
 
   //
   // , register = require(rootPrefix + '/services/airdrop_management/register')
@@ -26,8 +33,6 @@ require(rootPrefix + "/services/ops_managed/set_ops");
   // , pay = require(rootPrefix + '/services/airdrop_management/pay')
   // , postAirdropPay =  require(rootPrefix + '/services/airdrop_management/post_airdrop_pay')
   //
-  // , setWorker = require(rootPrefix + '/services/workers/set_worker')
-  // , isWorker = require(rootPrefix + '/services/workers/is_worker')
   
 
 /**
@@ -52,7 +57,14 @@ const ServiceManifestKlass = function (configStrategy, instanceComposer) {
   let opsManaged = (oThis.opsManaged = {});
   opsManaged.setOps = instanceComposer.getSetOpsClass();
   opsManaged.getOps = instanceComposer.getOpsClass();
-  
+
+  /**
+   * workers services
+   **/
+  let workers = (oThis.workers = {});
+  workers.setWorker = instanceComposer.getSetWorkerClass();
+  workers.isWorker = instanceComposer.getIsWorkerClass();
+
 };
 
 ServiceManifestKlass.prototype = {

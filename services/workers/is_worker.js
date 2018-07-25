@@ -9,10 +9,10 @@
  */
 
 const rootPrefix = '../..'
+  , InstanceComposer = require( rootPrefix + "/instance_composer")
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , WorkersContractInteractKlass = require(rootPrefix + '/lib/contract_interact/workers')
   , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
   , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
@@ -21,6 +21,8 @@ const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/lib/contract_interact/workers');
 
 /**
  * Constructor to create object of register
@@ -138,15 +140,22 @@ IsWorkerKlass.prototype = {
    *
    */
   isWorker: function () {
+
     const oThis = this
+      , WorkersContractInteractKlass = oThis.ic().getWorkersInteractClass()
     ;
+
     const workersContractInteractObject = new WorkersContractInteractKlass(
       oThis.workersContractAddress,
       oThis.chainId
     );
+
     return workersContractInteractObject.isWorker(oThis.workerAddress);
+
   }
 
 };
+
+InstanceComposer.registerShadowableClass(IsWorkerKlass, 'getIsWorkerClass');
 
 module.exports = IsWorkerKlass;
