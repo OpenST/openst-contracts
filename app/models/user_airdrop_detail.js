@@ -1,12 +1,13 @@
 "use strict";
 
+const BigNumber = require('bignumber.js')
+;
+
 const rootPrefix = '../..'
-  , coreConstants = require(rootPrefix + '/config/core_constants')
-  , QueryDBKlass = require(rootPrefix + '/app/models/queryDb')
+  , InstanceComposer = require(rootPrefix + "/instance_composer")
   , ModelBaseKlass = require(rootPrefix + '/app/models/base')
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , BigNumber = require('bignumber.js')
   , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
   , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
@@ -16,19 +17,21 @@ const errorConfig = {
   api_error_config: apiErrorConfig
 };
 
-const dbName = coreConstants.MYSQL_DATABASE
-  , QueryDBObj = new QueryDBKlass(dbName)
-;
+require(rootPrefix + '/config/core_constants');
 
 const UserAirdropDetailKlass = function () {
-  ModelBaseKlass.call(this, {dbName: dbName});
+
+  const oThis = this
+    , coreConstants = oThis.ic().getCoreConstants()
+  ;
+
+  ModelBaseKlass.call(this, {dbName: coreConstants.MYSQL_DATABASE});
+
 };
 
 UserAirdropDetailKlass.prototype = Object.create(ModelBaseKlass.prototype);
 
 const UserAirdropDetailKlassPrototype = {
-
-  QueryDB: QueryDBObj,
 
   tableName: 'user_airdrop_details',
 
@@ -101,5 +104,7 @@ const UserAirdropDetailKlassPrototype = {
 };
 
 Object.assign(UserAirdropDetailKlass.prototype, UserAirdropDetailKlassPrototype);
+
+InstanceComposer.registerShadowableClass(UserAirdropDetailKlass, "getUserAirdropDetailModelKlass");
 
 module.exports = UserAirdropDetailKlass;

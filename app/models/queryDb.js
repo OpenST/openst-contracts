@@ -1,12 +1,11 @@
 "use strict";
 
 var rootPrefix = '../..'
-  , mysqlWrapper = require(rootPrefix + "/lib/mysql_wrapper")
-  , utils = require(rootPrefix + '/lib/utils')
+  , InstanceComposer = require(rootPrefix + "/instance_composer")
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
 ;
 
-const QueryDB = function(dbName){
+const QueryDB = function (dbName) {
 
   this.dbName = dbName
 
@@ -17,178 +16,33 @@ QueryDB.prototype = {
   constructor: QueryDB,
 
   // get read connection
-  onReadConnection: function() {
-    return mysqlWrapper.getPoolFor(this.dbName, 'master');
+  onReadConnection: function () {
+    const oThis = this
+      , mysqlWrapper = oThis.ic().getMySqlPoolProvider()
+    ;
+    return mysqlWrapper.getPoolFor(this.dbName, 'master', oThis.ic());
   },
 
   // get read connection
-  onWriteConnection: function() {
-    return mysqlWrapper.getPoolFor(this.dbName, 'master');
-  },
-
-  read: function(tableName, fields, whereClause, whereClauseValues, orderByClause, paginationClause) {
-    var oThis = this
-      , selectFields = ((!fields || fields.length==0) ? '*' : fields.join(','))
-      , selectWhereClause = ((!whereClause || whereClause.length==0) ? '' : ' where '+whereClause)
-      , whereClauseValues = (!whereClauseValues) ? [] : whereClauseValues
-      , q = 'SELECT '+selectFields+' FROM '+tableName+' '+selectWhereClause;
-
-    if(options && options.order){
-      q = q + ' ORDER BY ' + options.order + ' ';
-    }
-
-    if(options && options.limit){
-      q = q + ' LIMIT ? ';
-      whereClauseValues.push(options.limit);
-    }
-
-    if(options && options.offset){
-      q = q + ' OFFSET ? ';
-      whereClauseValues.push(options.offset);
-    }
-
-    return new Promise(
-      function (onResolve, onReject) {
-        // get a timestamp before running the query
-        var pre_query = Date.now();
-        var qry = oThis.onReadConnection().query(q, whereClauseValues, function (err, result, fields) {
-          logger.debug("(%s ms) %s", (Date.now() - pre_query), qry.sql);
-          if (err) {
-            onReject(err);
-          } else {
-            onResolve(result);
-          }
-        });
-
-      }
-    );
-  },
-
-  readByInQuery: function(tableName, fields, ids, columnName) {
-    var oThis = this
-      , selectFields = ((!fields || fields.length==0) ? '*' : fields.join(','))
-      , q = "SELECT "+selectFields+" FROM "+tableName+" WHERE "+columnName+" IN ('"+ ids.join("','")+"')";
-
-    return new Promise(
-      function (onResolve, onReject) {
-        // get a timestamp before running the query
-        var pre_query = Date.now();
-        var qry = oThis.onReadConnection().query(q, function (err, result, fields) {
-          logger.debug("(%s ms) %s", (Date.now() - pre_query), qry.sql);
-          if (err) {
-            onReject(err);
-          } else {
-            onResolve(result);
-          }
-        });
-
-      }
-    );
-  },
-
-  insert: function(tableName, fields, queryArgs) {
-
-    var oThis = this
-      , currentDateTime = utils.formatDbDate(new Date())
-      , fields = fields.concat(['created_at', 'updated_at'])
-      , queryArgs = queryArgs.concat([currentDateTime, currentDateTime])
-      , q = 'INSERT INTO '+tableName+' ('+fields+') VALUES (?)'
+  onWriteConnection: function () {
+    const oThis = this
+      , mysqlWrapper = oThis.ic().getMySqlPoolProvider()
     ;
-
-    return new Promise(
-      function (onResolve, onReject) {
-        // get a timestamp before running the query
-        var pre_query = Date.now();
-        var qry = oThis.onWriteConnection().query(q, [queryArgs], function (err, result, fields) {
-          logger.debug("(%s ms) %s", (Date.now() - pre_query), qry.sql);
-          if (err) {
-            onReject(err);
-          } else {
-            onResolve({
-              fieldCount: result.fieldCount,
-              affectedRows: result.affectedRows,
-              insertId: result.insertId
-            });
-          }
-        });
-
-      }
-    );
+    return mysqlWrapper.getPoolFor(this.dbName, 'master', oThis.ic());
   },
 
-  bulkInsert: function(tableName, fields, queryArgs, options) {
-
-    var oThis = this
-      , q = 'INSERT INTO '+tableName+' ('+fields+') VALUES ?'
-    ;
-
-    return new Promise(
-      function (onResolve, onReject) {
-        // get a timestamp before running the query
-        var pre_query = Date.now();
-        var qry = oThis.onWriteConnection().query(q, [queryArgs], function (err, result, fields) {
-          logger.debug("=======Insert Query=======");
-          logger.debug("(%s ms) %s", (Date.now() - pre_query), qry.sql);
-          if (err) {
-            onReject(err);
-          } else {
-            onResolve({
-              fieldCount: result.fieldCount,
-              affectedRows: result.affectedRows,
-              insertId: result.insertId
-            });
-          }
-        });
-
-      }
-    );
-  },
-
-  edit: function (tableName, fields, fieldValues, whereClause, whereClauseValues) {
-    var oThis = this
-      , currentDateTime = utils.formatDbDate(new Date())
-      , fieldValues = (!fieldValues) ? [] : fieldValues
-      , whereClauseValues = (!whereClauseValues) ? [] : whereClauseValues
-      , queryArgs = fieldValues.concat(whereClauseValues)
-    ;
-
-    return new Promise(
-      function (onResolve, onReject) {
-        if((!fields || fields.length==0) || (!whereClause || whereClause.length==0)){
-          return onReject('Both update fields and where condition is mendatory.');
-        }
-
-        fields = fields + ', updated_at="'+currentDateTime+'"';
-
-        // get a timestamp before running the query
-        var pre_query = Date.now()
-          , q = 'UPDATE '+tableName+' set '+fields+' where '+whereClause;
-
-        var qry = oThis.onWriteConnection().query(q, queryArgs, function (err, result, fields) {
-          logger.debug("(%s ms) %s", (Date.now() - pre_query), qry.sql);
-          if (err) {
-            onReject(err);
-          } else {
-            onResolve(result);
-          }
-        });
-
-      }
-    );
-  },
-
-  migrate: function(query){
+  migrate: function (query) {
     var oThis = this;
     return new Promise(
       function (onResolve, onReject) {
-        if(!query){
+        if (!query) {
           return onReject('Invalid query');
         }
         // Only Whitelisted Migration Queries Allowed
         var allowed_queries = ['CREATE', 'ALTER', 'create', 'alter'];
         var querySubstring = query.substring(0, 6);
-        if (allowed_queries.indexOf(querySubstring) < 0){
-          return onReject('Wrong Migration. Allowed Queries: '+allowed_queries);
+        if (allowed_queries.indexOf(querySubstring) < 0) {
+          return onReject('Wrong Migration. Allowed Queries: ' + allowed_queries);
         }
 
         var pre_query = Date.now();
@@ -205,5 +59,7 @@ QueryDB.prototype = {
   }
 
 };
+
+InstanceComposer.registerShadowableClass(QueryDB, "getQueryDBKlass");
 
 module.exports = QueryDB;

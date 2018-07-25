@@ -7,14 +7,11 @@
  *
  */
 const rootPrefix = '../..'
-  , coreConstants = require(rootPrefix + '/config/core_constants')
-  , QueryDBKlass = require(rootPrefix + '/app/models/queryDb')
+  , InstanceComposer = require(rootPrefix + "/instance_composer")
   , ModelBaseKlass = require(rootPrefix + '/app/models/base')
 ;
 
-const dbName = coreConstants.MYSQL_DATABASE
-  , QueryDBObj = new QueryDBKlass(dbName)
-;
+require(rootPrefix + '/config/core_constants');
 
 /**
  * Constructor for class airdrop
@@ -24,20 +21,18 @@ const dbName = coreConstants.MYSQL_DATABASE
  *
  */
 const AirdropKlass = function () {
-  ModelBaseKlass.call(this, {dbName: dbName});
+
+  const oThis = this
+    , coreConstants = oThis.ic().getCoreConstants()
+  ;
+
+  ModelBaseKlass.call(this, {dbName: coreConstants.MYSQL_DATABASE});
+
 };
 
 AirdropKlass.prototype = Object.create(ModelBaseKlass.prototype);
 
 const AirdropKlassPrototype = {
-
-  /**
-   * Query DB Object
-   *
-   * @return {object}
-   *
-   */
-  QueryDB: QueryDBObj,
 
   /**
    * Table name
@@ -79,5 +74,7 @@ const AirdropKlassPrototype = {
 };
 
 Object.assign(AirdropKlass.prototype, AirdropKlassPrototype);
+
+InstanceComposer.registerShadowableClass(AirdropKlass, "getAirdropModelKlass");
 
 module.exports = AirdropKlass;
