@@ -8,19 +8,23 @@
  *
  */
 
+const BigNumber = require('bignumber.js')
+;
+
 const rootPrefix = '../..'
+  , InstanceComposer = require( rootPrefix + "/instance_composer")
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , airdropAllocationProofDetailKlass = require(rootPrefix + '/app/models/airdrop_allocation_proof_detail')
-  , airdropContractInteract = require(rootPrefix + '/lib/contract_interact/airdrop')
-  , brandedTokenContractInteract = require(rootPrefix + '/lib/contract_interact/branded_token')
-  , BigNumber = require('bignumber.js')
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
-  , BrandedTokenKlass = require(rootPrefix + '/lib/contract_interact/branded_token')
   , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
   , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+require(rootPrefix + '/app/models/airdrop_allocation_proof_detail');
+require(rootPrefix + '/lib/contract_interact/airdrop');
+require(rootPrefix + '/lib/contract_interact/branded_token');
+require(rootPrefix + '/lib/cache_management/airdrop_model');
+require(rootPrefix + '/lib/contract_interact/branded_token');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
@@ -121,7 +125,13 @@ TransferKlass.prototype = {
    *
    */
   validateParams: function() {
-    const oThis = this;
+
+    const oThis = this
+      , airdropContractInteract = oThis.ic().getAirdropInteractClass()
+      , AirdropModelCacheKlass = oThis.ic().getCacheManagementAirdropModelClass()
+      , BrandedTokenKlass = oThis.ic().getBrandedTokenInteractClass()
+    ;
+
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.senderAddress)) {
@@ -275,7 +285,11 @@ TransferKlass.prototype = {
    *
    */
   doTransfer: async function() {
-    const oThis = this;
+
+    const oThis = this
+      , airdropAllocationProofDetailKlass = oThis.ic().getAirdropAllocationProofDetailModelKlass()
+      , brandedTokenContractInteract = oThis.ic().getBrandedTokenInteractClass()
+    ;
 
     return new Promise(async function (onResolve, onReject) {
       // BrandedToken transfer
@@ -300,6 +314,8 @@ TransferKlass.prototype = {
   }
 
 };
+
+InstanceComposer.registerShadowableClass(TransferKlass, 'getTransferClass');
 
 module.exports = TransferKlass;
 

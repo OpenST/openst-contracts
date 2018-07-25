@@ -9,10 +9,9 @@
  */
 
 const rootPrefix = '../..'
+  , InstanceComposer = require( rootPrefix + "/instance_composer")
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , helper = require(rootPrefix + '/lib/contract_interact/helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , AirdropContractInteractKlass = require(rootPrefix + '/lib/contract_interact/airdrop')
   , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
   , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
@@ -21,6 +20,9 @@ const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/lib/contract_interact/airdrop');
+require(rootPrefix + '/lib/contract_interact/helper');
 
 /**
  * Constructor to create object of airdrop PostPayKlass
@@ -85,7 +87,9 @@ PostPayKlass.prototype = {
    * @return {promise<result>}
    */
   asyncPerform: async function () {
+
     const oThis = this
+      , helper = oThis.ic().getContractInteractHelper()
     ;
 
     if (!oThis.decodedEvents) {
@@ -114,7 +118,9 @@ PostPayKlass.prototype = {
    *
    */
   postAirdropPay: function () {
+
     const oThis = this
+      , AirdropContractInteractKlass = oThis.ic().getAirdropInteractClass()
     ;
 
     const AirdropContractInteractObject = new AirdropContractInteractKlass(
@@ -125,5 +131,7 @@ PostPayKlass.prototype = {
   }
 
 };
+
+InstanceComposer.registerShadowableClass(PostPayKlass, 'getPostPayClass');
 
 module.exports = PostPayKlass;

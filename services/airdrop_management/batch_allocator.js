@@ -8,16 +8,15 @@
  *
  */
 
+const BigNumber = require('bignumber.js')
+;
+
 const rootPrefix = '../..'
+  , InstanceComposer = require( rootPrefix + "/instance_composer")
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , userAirdropDetailKlass = require(rootPrefix + '/app/models/user_airdrop_detail')
-  , airdropAllocationProofDetailKlass = require(rootPrefix + '/app/models/airdrop_allocation_proof_detail')
   , airdropConstants = require(rootPrefix + '/lib/global_constant/airdrop')
-  , BigNumber = require('bignumber.js')
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , userAirdropDetailCacheKlass = require(rootPrefix + '/lib/cache_multi_management/user_airdrop_detail')
-  , AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
   , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
   , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
@@ -26,6 +25,11 @@ const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/app/models/user_airdrop_detail');
+require(rootPrefix + '/app/models/airdrop_allocation_proof_detail');
+require(rootPrefix + '/lib/cache_multi_management/user_airdrop_detail');
+require(rootPrefix + '/lib/cache_management/airdrop_model');
 
 /**
  * Constructor to create object of batch allocator
@@ -114,7 +118,12 @@ BatchAllocatorKlass.prototype = {
    *
    */
   validateParams: function() {
-    const oThis = this;
+
+    const oThis = this
+      , airdropAllocationProofDetailKlass = oThis.ic().getAirdropAllocationProofDetailModelKlass()
+      , AirdropModelCacheKlass = oThis.ic().getCacheManagementAirdropModelClass()
+    ;
+
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
@@ -301,7 +310,11 @@ BatchAllocatorKlass.prototype = {
    *
    */
   allocateAirdropAmountToUsers: async function() {
-    const oThis = this;
+
+    const oThis = this
+      , userAirdropDetailKlass = oThis.ic().getUserAirdropDetailModelClass()
+      , airdropAllocationProofDetailKlass = oThis.ic().getAirdropAllocationProofDetailModelKlass()
+    ;
 
     return new Promise(async function (onResolve, onReject) {
       try {
@@ -348,7 +361,11 @@ BatchAllocatorKlass.prototype = {
    *
    */
   clearCache: async function() {
-    const oThis = this;
+
+    const oThis = this
+      , userAirdropDetailCacheKlass = oThis.ic().getMultiCacheManagementUserAirdropDetailKlass()
+    ;
+
     const userAirdropDetailCacheKlassObject = new userAirdropDetailCacheKlass({
       chainId: oThis.chainId,
       airdropId: oThis.airdropRecord.id,
@@ -358,5 +375,7 @@ BatchAllocatorKlass.prototype = {
   }
 
 };
+
+InstanceComposer.registerShadowableClass(BatchAllocatorKlass, 'getAirdropBatchAllocatorClass');
 
 module.exports = BatchAllocatorKlass;

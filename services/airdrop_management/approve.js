@@ -8,17 +8,21 @@
  *
  */
 
+const BigNumber = require('bignumber.js')
+;
+
 const rootPrefix = '../..'
+  , InstanceComposer = require( rootPrefix + "/instance_composer")
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , airdropContractInteract = require(rootPrefix + '/lib/contract_interact/airdrop')
-  , brandedTokenContractInteract = require(rootPrefix + '/lib/contract_interact/branded_token')
-  , BigNumber = require('bignumber.js')
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
   , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
   , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
+
+require(rootPrefix + '/lib/contract_interact/airdrop');
+require(rootPrefix + '/lib/contract_interact/branded_token');
+require(rootPrefix + '/lib/cache_management/airdrop_model');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
@@ -116,7 +120,13 @@ ApproveKlass.prototype = {
    *
    */
   validateParams: function(){
-    const oThis = this;
+
+    const oThis = this
+      , airdropContractInteract = oThis.ic().getAirdropInteractClass()
+      , brandedTokenContractInteract = oThis.ic().getBrandedTokenInteractClass()
+      , AirdropModelCacheKlass = oThis.ic().getCacheManagementAirdropModelClass()
+    ;
+
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
@@ -240,5 +250,7 @@ ApproveKlass.prototype = {
   }
 
 };
+
+InstanceComposer.registerShadowableClass(ApproveKlass, 'getApproveForAirdropClass');
 
 module.exports = ApproveKlass;

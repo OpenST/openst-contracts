@@ -9,12 +9,10 @@
  */
 
 const rootPrefix = '../..'
+  , InstanceComposer = require( rootPrefix + "/instance_composer")
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , airdropKlass = require(rootPrefix + '/app/models/airdrop')
-  , airdropContractInteract = require(rootPrefix + '/lib/contract_interact/airdrop')
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
   , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
   , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
@@ -23,6 +21,10 @@ const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/lib/contract_interact/airdrop');
+require(rootPrefix + '/app/models/airdrop');
+require(rootPrefix + '/lib/cache_management/airdrop_model');
 
 /**
  * Constructor to create object of register
@@ -104,7 +106,12 @@ RegisterKlass.prototype = {
    *
    */
   validateParams: function () {
-    const oThis = this;
+
+    const oThis = this
+      , airdropContractInteract = oThis.ic().getAirdropInteractClass()
+      , AirdropModelCacheKlass = oThis.ic().getCacheManagementAirdropModelClass()
+    ;
+
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
@@ -181,7 +188,10 @@ RegisterKlass.prototype = {
    *
    */
   runRegister: function () {
+
     const oThis = this
+      , airdropKlass = oThis.ic().getAirdropModelKlass()
+      , AirdropModelCacheKlass = oThis.ic().getCacheManagementAirdropModelClass()
     ;
 
     return new Promise(async function (onResolve, onReject) {
@@ -212,6 +222,8 @@ RegisterKlass.prototype = {
   }
 
 };
+
+InstanceComposer.registerShadowableClass(RegisterKlass, 'getRegisterAirdropClass');
 
 module.exports = RegisterKlass;
 

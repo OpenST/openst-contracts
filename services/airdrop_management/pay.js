@@ -9,10 +9,10 @@
  */
 
 const rootPrefix = '../..'
+  , InstanceComposer = require( rootPrefix + "/instance_composer")
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , AirdropContractInteractKlass = require(rootPrefix + '/lib/contract_interact/airdrop')
   , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
   , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
@@ -21,6 +21,8 @@ const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/lib/contract_interact/airdrop');
 
 /**
  * Constructor to create object of airdrop PayKlass
@@ -171,12 +173,16 @@ PayKlass.prototype = {
    *
    */
   pay: function () {
+
     const oThis = this
+      , AirdropContractInteractKlass = oThis.ic().getAirdropInteractClass()
     ;
+
     const AirdropContractInteractObject = new AirdropContractInteractKlass(
       oThis.airdropContractAddress,
       oThis.chainId
     );
+
     return AirdropContractInteractObject.pay(
       oThis.senderWorkerAddress,
       oThis.senderWorkerPassphrase,
@@ -195,5 +201,7 @@ PayKlass.prototype = {
   }
 
 };
+
+InstanceComposer.registerShadowableClass(PayKlass, 'getPayClass');
 
 module.exports = PayKlass;

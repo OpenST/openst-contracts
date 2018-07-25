@@ -22,18 +22,17 @@ require(rootPrefix + "/services/ops_managed/set_ops");
 require(rootPrefix + '/services/workers/set_worker');
 require(rootPrefix + '/services/workers/is_worker');
 
-  //
-  // , register = require(rootPrefix + '/services/airdrop_management/register')
-  // , setAcceptedMargin = require(rootPrefix + '/services/airdrop_management/set_accepted_margin')
-  // , setPriceOracle = require(rootPrefix + '/services/airdrop_management/set_price_oracle')
-  // , transfer = require(rootPrefix + '/services/airdrop_management/transfer')
-  // , approve = require(rootPrefix + '/services/airdrop_management/approve')
-  // , batchAllocator = require(rootPrefix + '/services/airdrop_management/batch_allocator')
-  // , userBalance = require(rootPrefix + '/services/airdrop_management/user_balance')
-  // , pay = require(rootPrefix + '/services/airdrop_management/pay')
-  // , postAirdropPay =  require(rootPrefix + '/services/airdrop_management/post_airdrop_pay')
-  //
-  
+// airdropManager related services
+require(rootPrefix + '/services/airdrop_management/approve');
+require(rootPrefix + '/services/airdrop_management/batch_allocator');
+require(rootPrefix + '/services/airdrop_management/pay');
+require(rootPrefix + '/services/airdrop_management/post_airdrop_pay');
+require(rootPrefix + '/services/airdrop_management/register');
+require(rootPrefix + '/services/airdrop_management/set_accepted_margin');
+require(rootPrefix + '/services/airdrop_management/set_price_oracle');
+require(rootPrefix + '/services/airdrop_management/transfer');
+require(rootPrefix + '/services/airdrop_management/user_balance');
+
 
 /**
  * Service Manifest Constructor
@@ -64,6 +63,20 @@ const ServiceManifestKlass = function (configStrategy, instanceComposer) {
   let workers = (oThis.workers = {});
   workers.setWorker = instanceComposer.getSetWorkerClass();
   workers.isWorker = instanceComposer.getIsWorkerClass();
+
+  /**
+   * airdropManager services
+   **/
+  let airdropManager = (oThis.airdropManager = {});
+  airdropManager.approve = instanceComposer.getApproveForAirdropClass();
+  airdropManager.batchAllocator = instanceComposer.getAirdropBatchAllocatorClass();
+  airdropManager.pay = instanceComposer.getPayClass();
+  airdropManager.postAirdropPay = instanceComposer.getPostPayClass();
+  airdropManager.registerAirdrop = instanceComposer.getRegisterAirdropClass();
+  airdropManager.setAcceptedMargin = instanceComposer.getSetAcceptedMarginClass();
+  airdropManager.setPriceOracle = instanceComposer.getSetPriceOracleClass();
+  airdropManager.transfer = instanceComposer.getTransferClass();
+  airdropManager.userBalance = instanceComposer.getAirdropUserBalanceClass();
 
 };
 

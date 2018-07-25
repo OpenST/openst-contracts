@@ -8,11 +8,10 @@
  *
  */
 const rootPrefix = '../..'
+  , InstanceComposer = require( rootPrefix + "/instance_composer")
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , helper = require(rootPrefix + '/lib/contract_interact/helper')
-  , AirdropContractInteractKlass = require(rootPrefix + '/lib/contract_interact/airdrop')
   , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
   , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
@@ -21,6 +20,9 @@ const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/lib/contract_interact/airdrop');
+require(rootPrefix + '/lib/contract_interact/helper');
 
 /**
  * Constructor to create object of register
@@ -116,8 +118,11 @@ SetPriceOracleKlass.prototype = {
    *
    */
   validateParams: function () {
+
     const oThis = this
+      , helper = oThis.ic().getContractInteractHelper()
     ;
+
     if (!helper.isValidCurrency(oThis.currency, false)) {
       let errorParams = {
         internal_error_identifier: 's_am_spo_validateParams_1',
@@ -183,12 +188,16 @@ SetPriceOracleKlass.prototype = {
    *
    */
   setPriceOracle: function () {
+
     const oThis = this
+      , AirdropContractInteractKlass = oThis.ic().getAirdropInteractClass()
     ;
+
     const AirdropContractInteractObject = new AirdropContractInteractKlass(
       oThis.airdropContractAddress,
       oThis.chainId
     );
+
     return AirdropContractInteractObject.setPriceOracle(
       oThis.senderAddress,
       oThis.senderPassphrase,
@@ -200,5 +209,7 @@ SetPriceOracleKlass.prototype = {
   }
 
 };
+
+InstanceComposer.registerShadowableClass(SetPriceOracleKlass, 'getSetPriceOracleClass');
 
 module.exports = SetPriceOracleKlass;
