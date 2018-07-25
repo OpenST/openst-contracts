@@ -192,7 +192,7 @@ RegisterKlass.prototype = {
         logger.debug("========register.runRegister.airdropModelObject=======");
         logger.debug(airdropModelObject);
         var airdropModel = new airdropKlass();
-        const insertedRecord = await airdropModel.create(airdropModelObject);
+        const insertedRecord = await airdropModel.insert(airdropModelObject).fire();
         logger.debug("========register.runRegister.insertedRecord=======");
         logger.debug(insertedRecord);
         const airdropModelCacheObject = new AirdropModelCacheKlass({useObject: true, contractAddress: oThis.airdropContractAddress});
