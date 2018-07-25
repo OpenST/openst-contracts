@@ -9,10 +9,10 @@
  */
 
 const rootPrefix = '../..'
+  , InstanceComposer = require( rootPrefix + "/instance_composer")
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , OpsManagedContractInteractKlass = require(rootPrefix + '/lib/contract_interact/ops_managed_contract')
   , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
   , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
@@ -21,6 +21,8 @@ const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/lib/contract_interact/ops_managed_contract');
 
 /**
  * Constructor to create object of set_ops
@@ -159,7 +161,9 @@ SetOpsKlass.prototype = {
    *
    */
   setOps: function () {
+    
     const oThis = this
+      , OpsManagedContractInteractKlass = oThis.ic().getOpsManagedInteractClass()
     ;
 
     const OpsManagedContractInteractObject = new OpsManagedContractInteractKlass(
@@ -176,5 +180,7 @@ SetOpsKlass.prototype = {
   }
 
 };
+
+InstanceComposer.registerShadowableClass(SetOpsKlass, 'getSetOpsClass');
 
 module.exports = SetOpsKlass;

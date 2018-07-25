@@ -7,10 +7,10 @@
  */
 
 const uuid = require('uuid')
-  , rootPrefix = '../..'
-  , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
-  , coreConstants = require(rootPrefix + '/config/core_constants')
-  , coreAddresses = require(rootPrefix + '/config/core_addresses')
+;
+
+const rootPrefix = '../..'
+  , InstanceComposer = require( rootPrefix + "/instance_composer")
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
@@ -24,6 +24,9 @@ const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/lib/providers/web3_factory');
+require(rootPrefix + '/config/core_addresses');
 
 /**
  * Constructor to create object of deployer
@@ -109,7 +112,9 @@ DeployerKlass.prototype = {
   */
   validateParams: function() {
 
-    const oThis = this;
+    const oThis = this
+      , coreAddresses = oThis.ic().getCoreAddresses()
+    ;
 
     if (!oThis.contractName) {
       logger.error("Error: Contract name is mandatory");
@@ -184,7 +189,11 @@ DeployerKlass.prototype = {
   */
   deploy: function() {
 
-    const oThis = this;
+    const oThis = this
+      , web3ProviderFactory = oThis.ic().getWeb3ProviderFactory()
+      , coreAddresses = oThis.ic().getCoreAddresses()
+      , web3Provider = web3ProviderFactory.getProvider(web3ProviderFactory.typeWS)
+    ;
 
     return new Promise(function (onResolve, onReject) {
 
@@ -324,6 +333,8 @@ DeployerKlass.prototype = {
   }
 
 };
+
+InstanceComposer.registerShadowableClass(DeployerKlass, 'getDeployerClass');
 
 module.exports = DeployerKlass;
 

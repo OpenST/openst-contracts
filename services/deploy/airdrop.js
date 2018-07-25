@@ -9,11 +9,10 @@
  */
 
 const rootPrefix = '../..'
+  , InstanceComposer = require( rootPrefix + "/instance_composer")
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , DeployerKlass = require(rootPrefix + '/services/deploy/deployer')
-  , web3Provider = require(rootPrefix + '/lib/web3/providers/rpc')
   , gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit')
   , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
   , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
@@ -23,6 +22,9 @@ const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/lib/providers/web3_factory');
+require(rootPrefix + '/services/deploy/deployer');
 
 /**
  * Constructor to create object of airdrop
@@ -194,8 +196,13 @@ DeployAirdropKlass.prototype = {
    *
    */
   deploy: function () {
+    
     const oThis = this
+      , DeployerKlass = oThis.ic().getDeployerClass()
+      , web3ProviderFactory = oThis.ic().getWeb3ProviderFactory()
+      , web3Provider = web3ProviderFactory.getProvider(web3ProviderFactory.typeRPC)
     ;
+    
     oThis.constructorArgs = [
       oThis.brandedTokenContractAddress,
       web3Provider.utils.asciiToHex(oThis.baseCurrency),
@@ -213,5 +220,7 @@ DeployAirdropKlass.prototype = {
   }
 
 };
+
+InstanceComposer.registerShadowableClass(DeployAirdropKlass, 'getAirdropDeployerClass');
 
 module.exports = DeployAirdropKlass;

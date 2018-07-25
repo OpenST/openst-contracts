@@ -9,9 +9,9 @@
  */
 
 const rootPrefix = '../..'
+  , InstanceComposer = require( rootPrefix + "/instance_composer")
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , DeployerKlass = require(rootPrefix + '/services/deploy/deployer')
   , gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit')
   , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
   , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
@@ -21,6 +21,8 @@ const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/services/deploy/deployer');
 
 /**
  * Constructor to create object of worker
@@ -140,8 +142,11 @@ DeployWorkerKlass.prototype = {
    *
    */
   deploy: function () {
+    
     const oThis = this
+      , DeployerKlass = oThis.ic().getDeployerClass()
     ;
+    
     const DeployerObject = new DeployerKlass({
       contract_name: oThis.contractName,
       constructor_args: oThis.constructorArgs,
@@ -153,5 +158,7 @@ DeployWorkerKlass.prototype = {
   }
 
 };
+
+InstanceComposer.registerShadowableClass(DeployWorkerKlass, 'getWorkerDeployerClass');
 
 module.exports = DeployWorkerKlass;

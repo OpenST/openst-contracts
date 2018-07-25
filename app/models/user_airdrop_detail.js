@@ -105,6 +105,6 @@ const UserAirdropDetailKlassPrototype = {
 
 Object.assign(UserAirdropDetailKlass.prototype, UserAirdropDetailKlassPrototype);
 
-InstanceComposer.registerShadowableClass(UserAirdropDetailKlass, "getUserAirdropDetailModelKlass");
+InstanceComposer.registerShadowableClass(UserAirdropDetailKlass, "getUserAirdropDetailModelClass");
 
 module.exports = UserAirdropDetailKlass;

@@ -10,8 +10,11 @@ const rootPrefix = ".."
   , InstanceComposer = require( rootPrefix + "/instance_composer")
 ;
 
-  // , deployWorkers = require(rootPrefix + '/services/deploy/workers')
-  // , deployAirdrop = require(rootPrefix + '/services/deploy/airdrop')
+require(rootPrefix + '/services/deploy/workers');
+require(rootPrefix + '/services/deploy/airdrop');
+require(rootPrefix + "/services/ops_managed/get_ops");
+require(rootPrefix + "/services/ops_managed/set_ops");
+
   //
   // , register = require(rootPrefix + '/services/airdrop_management/register')
   // , setAcceptedMargin = require(rootPrefix + '/services/airdrop_management/set_accepted_margin')
@@ -25,9 +28,7 @@ const rootPrefix = ".."
   //
   // , setWorker = require(rootPrefix + '/services/workers/set_worker')
   // , isWorker = require(rootPrefix + '/services/workers/is_worker')
-  //
-  // , getOps = require(rootPrefix + "/services/ops_managed/get_ops")
-  // , setOps = require(rootPrefix + "/services/ops_managed/set_ops")
+  
 
 /**
  * Service Manifest Constructor
@@ -37,7 +38,21 @@ const rootPrefix = ".."
 const ServiceManifestKlass = function (configStrategy, instanceComposer) {
 
   const oThis = this;
-
+  
+  /**
+   * deploy services
+   **/
+  let deploy = (oThis.deploy = {});
+  deploy.workers = instanceComposer.getWorkerDeployerClass();
+  deploy.airdrop = instanceComposer.getAirdropDeployerClass();
+  
+  /**
+   * opsManaged services
+   **/
+  let opsManaged = (oThis.opsManaged = {});
+  opsManaged.setOps = instanceComposer.getSetOpsClass();
+  opsManaged.getOps = instanceComposer.getOpsClass();
+  
 };
 
 ServiceManifestKlass.prototype = {

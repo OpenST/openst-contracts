@@ -9,11 +9,10 @@
  */
 
 const rootPrefix = '../..'
+  , InstanceComposer = require( rootPrefix + "/instance_composer")
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , userAirdropDetailCacheKlass = require(rootPrefix + '/lib/cache_multi_management/user_airdrop_detail')
-  , AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
   , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
   , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
@@ -22,6 +21,9 @@ const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/lib/cache_multi_management/user_airdrop_detail');
+require(rootPrefix + '/lib/cache_management/airdrop_model');
 
 /**
  * Constructor to create object of userBalance
@@ -107,7 +109,11 @@ AirdropUserBalanceKlass.prototype = {
    *
    */
   validateParams: function(){
-    const oThis = this;
+    
+    const oThis = this
+      , AirdropModelCacheKlass = oThis.ic().getCacheManagementAirdropModelClass()
+    ;
+    
     return new Promise(async function (onResolve, onReject) {
 
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
@@ -171,7 +177,11 @@ AirdropUserBalanceKlass.prototype = {
    *
    */
   getUserAirdropBalance: function() {
-    const oThis = this;
+    
+    const oThis = this
+      , userAirdropDetailCacheKlass = oThis.ic().getMultiCacheManagementUserAirdropDetailKlass()
+    ;
+    
     return new Promise(async function (onResolve, onReject) {
       try {
         const userAirdropDetailCacheKlassObject =  new userAirdropDetailCacheKlass({
@@ -194,6 +204,8 @@ AirdropUserBalanceKlass.prototype = {
   }
 
 };
+
+InstanceComposer.registerShadowableClass(AirdropUserBalanceKlass, 'getAirdropUserBalanceClass');
 
 module.exports = AirdropUserBalanceKlass;
 
