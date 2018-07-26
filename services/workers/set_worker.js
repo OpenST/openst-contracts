@@ -8,12 +8,14 @@
  *
  */
 
+const BigNumber = require('bignumber.js')
+;
+
 const rootPrefix = '../..'
   , InstanceComposer = require( rootPrefix + "/instance_composer")
   , responseHelper = require(rootPrefix + '/lib/formatter/response')
   , basicHelper = require(rootPrefix + '/helpers/basic_helper')
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , BigNumber = require('bignumber.js')
   , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
   , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
 ;
