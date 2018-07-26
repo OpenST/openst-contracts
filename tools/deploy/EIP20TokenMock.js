@@ -112,8 +112,6 @@ async function performer(argv) {
     logger.debug('*** Allocating shard for Token balance');
 
     await new openSTStorage.TokenBalanceModel({
-      ddb_service: ddbServiceObj,
-      auto_scaling: autoScalingServiceObj,
       erc20_contract_address: contractAddress
     }).allocate();
 
