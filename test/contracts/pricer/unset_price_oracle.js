@@ -23,7 +23,7 @@ const pricerUtils = require('./pricer_utils.js');
 
 ///
 /// Test stories
-/// 
+///
 /// fails to unset priceOracle by non-ops
 /// fails to unset priceOracle if not already set
 /// successfully unsets priceOracle
@@ -31,18 +31,17 @@ const pricerUtils = require('./pricer_utils.js');
 module.exports.perform = (accounts) => {
   const opsAddress = accounts[1];
 
-  var contracts      = null,
-      pricer         = null,
-      abcPriceOracle = null,
-      xyzPriceOracle = null,
-      response       = null
-      ;
+  var contracts = null,
+    pricer = null,
+    abcPriceOracle = null,
+    xyzPriceOracle = null,
+    response = null;
 
   before(async () => {
-    contracts      = await pricerUtils.deployPricer(artifacts, accounts);
-    pricer         = contracts.pricer;
+    contracts = await pricerUtils.deployPricer(artifacts, accounts);
+    pricer = contracts.pricer;
     abcPriceOracle = contracts.abcPriceOracle;
-    xyzPriceOracle = contracts.xyzPriceOracle;     
+    xyzPriceOracle = contracts.xyzPriceOracle;
     await pricer.setPriceOracle(pricerUtils.currencies.abc, abcPriceOracle.address, { from: opsAddress });
     await pricer.setPriceOracle(pricerUtils.currencies.xyz, xyzPriceOracle.address, { from: opsAddress });
   });
@@ -65,7 +64,7 @@ module.exports.perform = (accounts) => {
   it('fails to unset priceOracle if not already set', async () => {
     await pricerUtils.utils.expectThrow(pricer.unsetPriceOracle.call(pricerUtils.currencies.abc, { from: opsAddress }));
   });
-}
+};
 
 function checkPriceOracleUnsetEvent(event, _currency) {
   assert.equal(event.event, 'PriceOracleUnset');

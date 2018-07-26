@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * Load all the core constants from config strategy OR define them as literals here and export them.
@@ -7,17 +7,15 @@
  *
  */
 
-const rootPrefix = ".."
-  , InstanceComposer = require(rootPrefix + "/instance_composer")
-;
+const rootPrefix = '..',
+  InstanceComposer = require(rootPrefix + '/instance_composer');
 
 /**
  * Constructor for core constants
  *
  * @constructor
  */
-const CoreConstants = function (configStrategy, instanceComposer) {
-
+const CoreConstants = function(configStrategy, instanceComposer) {
   const oThis = this;
 
   // Geth
@@ -37,11 +35,9 @@ const CoreConstants = function (configStrategy, instanceComposer) {
 
   //Environment
   oThis.AUTO_SCALE_DYNAMO = configStrategy.AUTO_SCALE_DYNAMO;
-
 };
 
 CoreConstants.prototype = {
-
   /**
    * utility geth rpc endpoint.<br><br>
    *
@@ -105,9 +101,8 @@ CoreConstants.prototype = {
    *
    */
   AUTO_SCALE_DYNAMO: null
-
 };
 
-InstanceComposer.register(CoreConstants, "getCoreConstants", true);
+InstanceComposer.register(CoreConstants, 'getCoreConstants', true);
 
 module.exports = CoreConstants;

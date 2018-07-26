@@ -23,26 +23,24 @@ const pricerUtils = require('./pricer_utils.js');
 
 ///
 /// Test stories
-/// 
+///
 /// fails if priceOracle is not set
 /// successfully returns price from priceOracle
 
 module.exports.perform = (accounts) => {
   const opsAddress = accounts[1],
-        abcPrice   = new pricerUtils.bigNumber(20 * 10**18),
-        xyzPrice   = new pricerUtils.bigNumber(10 * 10**18)
-        ;
+    abcPrice = new pricerUtils.bigNumber(20 * 10 ** 18),
+    xyzPrice = new pricerUtils.bigNumber(10 * 10 ** 18);
 
-  var contracts      = null,
-      pricer         = null,
-      abcPriceOracle = null,
-      xyzPriceOracle = null,
-      response       = null
-      ;
+  var contracts = null,
+    pricer = null,
+    abcPriceOracle = null,
+    xyzPriceOracle = null,
+    response = null;
 
   before(async () => {
-    contracts      = await pricerUtils.deployPricer(artifacts, accounts);
-    pricer         = contracts.pricer;
+    contracts = await pricerUtils.deployPricer(artifacts, accounts);
+    pricer = contracts.pricer;
     abcPriceOracle = contracts.abcPriceOracle;
     xyzPriceOracle = contracts.xyzPriceOracle;
     await pricer.setPriceOracle(pricerUtils.currencies.abc, abcPriceOracle.address, { from: opsAddress });
@@ -57,4 +55,4 @@ module.exports.perform = (accounts) => {
     assert.equal((await pricer.getPricePoint.call(pricerUtils.currencies.abc)).toNumber(), abcPrice);
     assert.equal((await pricer.getPricePoint.call(pricerUtils.currencies.xyz)).toNumber(), xyzPrice);
   });
-}
+};

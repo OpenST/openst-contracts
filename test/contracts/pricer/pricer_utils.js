@@ -19,49 +19,46 @@
 //
 // ----------------------------------------------------------------------------
 
-const Utils          = require('../../lib/utils.js'),
-      BigNumber      = require('bignumber.js'),
-      Pricer         = artifacts.require('./Pricer.sol'),
-      EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol'),
-    	PriceOracle    = artifacts.require('./PriceOracleMock.sol')
-      ;
+const Utils = require('../../lib/utils.js'),
+  BigNumber = require('bignumber.js'),
+  Pricer = artifacts.require('./Pricer.sol'),
+  EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol'),
+  PriceOracle = artifacts.require('./PriceOracleMock.sol');
 
 const ost = 'OST',
-      abc = 'ABC',
-      xyz = 'XYZ'
-      ;
+  abc = 'ABC',
+  xyz = 'XYZ';
 
 /// @dev Export common requires
-module.exports.utils     = Utils;
+module.exports.utils = Utils;
 module.exports.bigNumber = BigNumber;
 
 /// @dev Export constants
 module.exports.currencies = {
-  ost : ost,
-  abc : abc,
-  xyz : xyz
-}
+  ost: ost,
+  abc: abc,
+  xyz: xyz
+};
 
 /// @dev Deploy
 module.exports.deployPricer = async (artifacts, accounts) => {
-  const conversionRate         = 101,
-        conversionRateDecimals = 1,
-        token                  = await EIP20TokenMock.new(conversionRate, conversionRateDecimals, ost, 'name', 18),
-        TOKEN_DECIMALS         = 18,
-        opsAddress             = accounts[1],
-        pricer                 = await Pricer.new(token.address, ost),
-        abcPrice               = new BigNumber(20 * 10**18),
-        xyzPrice               = new BigNumber(10 * 10**18),
-        abcPriceOracle         = await PriceOracle.new(ost, abc, abcPrice),
-        xyzPriceOracle         = await PriceOracle.new(ost, xyz, xyzPrice)
-        ;
+  const conversionRate = 101,
+    conversionRateDecimals = 1,
+    token = await EIP20TokenMock.new(conversionRate, conversionRateDecimals, ost, 'name', 18),
+    TOKEN_DECIMALS = 18,
+    opsAddress = accounts[1],
+    pricer = await Pricer.new(token.address, ost),
+    abcPrice = new BigNumber(20 * 10 ** 18),
+    xyzPrice = new BigNumber(10 * 10 ** 18),
+    abcPriceOracle = await PriceOracle.new(ost, abc, abcPrice),
+    xyzPriceOracle = await PriceOracle.new(ost, xyz, xyzPrice);
 
   assert.ok(await pricer.setOpsAddress(opsAddress));
 
-	return {
-    token          : token,
-    pricer         : pricer,
-    abcPriceOracle : abcPriceOracle,
-    xyzPriceOracle : xyzPriceOracle
-	};
+  return {
+    token: token,
+    pricer: pricer,
+    abcPriceOracle: abcPriceOracle,
+    xyzPriceOracle: xyzPriceOracle
+  };
 };

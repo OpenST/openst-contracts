@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  *
@@ -8,14 +8,13 @@
  *
  */
 
-const rootPrefix = '../..'
-  , InstanceComposer = require( rootPrefix + "/instance_composer")
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , basicHelper = require(rootPrefix + '/helpers/basic_helper')
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
-  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+const rootPrefix = '../..',
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  basicHelper = require(rootPrefix + '/helpers/basic_helper'),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
@@ -37,16 +36,15 @@ require(rootPrefix + '/lib/contract_interact/workers');
  * @return {Object}
  *
  */
-const IsWorkerKlass = function (params) {
+const IsWorkerKlass = function(params) {
   const oThis = this;
   params = params || {};
-  logger.debug("=======IsWorkerKlass.params=======");
+  logger.debug('=======IsWorkerKlass.params=======');
   logger.debug(params);
 
   oThis.workersContractAddress = params.workers_contract_address;
   oThis.workerAddress = params.worker_address;
   oThis.chainId = params.chain_id;
-
 };
 
 IsWorkerKlass.prototype = {
@@ -55,48 +53,44 @@ IsWorkerKlass.prototype = {
    *
    * @return {promise}
    */
-  perform: function () {
-    const oThis = this
-    ;
-    return oThis.asyncPerform()
-      .catch(function (error) {
-        if (responseHelper.isCustomResult(error)) {
-          return error;
-        } else {
-          logger.error('openst-platform::services/workers/is_worker.js::perform::catch');
-          logger.error(error);
-          
-          return responseHelper.error({
-            internal_error_identifier: 's_w_iw_perform_1',
-            api_error_identifier: 'unhandled_api_error',
-            error_config: basicHelper.fetchErrorConfig(),
-            debug_options: {err: error}
-          });
-        }
-      });
+  perform: function() {
+    const oThis = this;
+    return oThis.asyncPerform().catch(function(error) {
+      if (responseHelper.isCustomResult(error)) {
+        return error;
+      } else {
+        logger.error('openst-platform::services/workers/is_worker.js::perform::catch');
+        logger.error(error);
+
+        return responseHelper.error({
+          internal_error_identifier: 's_w_iw_perform_1',
+          api_error_identifier: 'unhandled_api_error',
+          error_config: basicHelper.fetchErrorConfig(),
+          debug_options: { err: error }
+        });
+      }
+    });
   },
-  
+
   /**
    * Async Perform
    *
    * @return {promise<result>}
    */
-  asyncPerform: async function () {
-    const oThis = this
-    ;
+  asyncPerform: async function() {
+    const oThis = this;
     var r = null;
-  
+
     r = await oThis.validateParams();
-    logger.debug("=======IsWorkerKlass.validateParams.result=======");
+    logger.debug('=======IsWorkerKlass.validateParams.result=======');
     logger.debug(r);
     if (r.isFailure()) return r;
-  
-    r = await oThis.isWorker();
-    logger.debug("=======IsWorkerKlass.setWorker.result=======");
-    logger.debug(r);
-  
-    return r;
 
+    r = await oThis.isWorker();
+    logger.debug('=======IsWorkerKlass.setWorker.result=======');
+    logger.debug(r);
+
+    return r;
   },
 
   /**
@@ -105,9 +99,8 @@ IsWorkerKlass.prototype = {
    * @return {result}
    *
    */
-  validateParams: function () {
-    const oThis = this
-    ;
+  validateParams: function() {
+    const oThis = this;
     if (!basicHelper.isAddressValid(oThis.workerAddress)) {
       let errorParams = {
         internal_error_identifier: 's_w_iw_validateParams_1',
@@ -139,21 +132,14 @@ IsWorkerKlass.prototype = {
    * @return {promise<result>}
    *
    */
-  isWorker: function () {
+  isWorker: function() {
+    const oThis = this,
+      WorkersContractInteractKlass = oThis.ic().getWorkersInteractClass();
 
-    const oThis = this
-      , WorkersContractInteractKlass = oThis.ic().getWorkersInteractClass()
-    ;
-
-    const workersContractInteractObject = new WorkersContractInteractKlass(
-      oThis.workersContractAddress,
-      oThis.chainId
-    );
+    const workersContractInteractObject = new WorkersContractInteractKlass(oThis.workersContractAddress, oThis.chainId);
 
     return workersContractInteractObject.isWorker(oThis.workerAddress);
-
   }
-
 };
 
 InstanceComposer.registerShadowableClass(IsWorkerKlass, 'getIsWorkerClass');

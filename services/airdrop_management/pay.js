@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  *
@@ -8,14 +8,13 @@
  *
  */
 
-const rootPrefix = '../..'
-  , InstanceComposer = require( rootPrefix + "/instance_composer")
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , basicHelper = require(rootPrefix + '/helpers/basic_helper')
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
-  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+const rootPrefix = '../..',
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  basicHelper = require(rootPrefix + '/helpers/basic_helper'),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
@@ -45,13 +44,24 @@ require(rootPrefix + '/lib/contract_interact/airdrop');
  * @constructor
  *
  */
-const PayKlass = function (params) {
+const PayKlass = function(params) {
   const oThis = this;
   params = params || {};
-  logger.debug("=======PayKlass.params=======");
-  logger.debug(params.airdrop_contract_address, params.chain_id, params.sender_worker_address, params.beneficiary_address,
-    params.transfer_amount, params.commission_beneficiary_address, params.commission_amount, params.currency, params.intended_price_point,
-    params.spender, params.gas_price, params.options);
+  logger.debug('=======PayKlass.params=======');
+  logger.debug(
+    params.airdrop_contract_address,
+    params.chain_id,
+    params.sender_worker_address,
+    params.beneficiary_address,
+    params.transfer_amount,
+    params.commission_beneficiary_address,
+    params.commission_amount,
+    params.currency,
+    params.intended_price_point,
+    params.spender,
+    params.gas_price,
+    params.options
+  );
 
   oThis.airdropContractAddress = params.airdrop_contract_address;
   oThis.chainId = params.chain_id;
@@ -77,45 +87,43 @@ PayKlass.prototype = {
    * @return {promise}
    *
    */
-  perform: function () {
+  perform: function() {
     const oThis = this;
-    
-    return oThis.asyncPerform()
-      .catch(function (error) {
-        if (responseHelper.isCustomResult(error)) {
-          return error;
-        } else {
-          logger.error('openst-platform::services/airdrop_management/pay.js::perform::catch');
-          logger.error(error);
-    
-          return responseHelper.error({
-            internal_error_identifier: 's_am_p_perform_1',
-            api_error_identifier: 'unhandled_api_error',
-            error_config: basicHelper.fetchErrorConfig(),
-            debug_options: {err: error}
-          });
-        }
-      });
+
+    return oThis.asyncPerform().catch(function(error) {
+      if (responseHelper.isCustomResult(error)) {
+        return error;
+      } else {
+        logger.error('openst-platform::services/airdrop_management/pay.js::perform::catch');
+        logger.error(error);
+
+        return responseHelper.error({
+          internal_error_identifier: 's_am_p_perform_1',
+          api_error_identifier: 'unhandled_api_error',
+          error_config: basicHelper.fetchErrorConfig(),
+          debug_options: { err: error }
+        });
+      }
+    });
   },
-  
+
   /**
    * Async Perform
    *
    * @return {promise<result>}
    */
-  asyncPerform: async function () {
-    const oThis = this
-    ;
+  asyncPerform: async function() {
+    const oThis = this;
 
     var r = null;
 
     r = await oThis.validateParams();
-    logger.debug("=======PayKlass.validateParams.result=======");
+    logger.debug('=======PayKlass.validateParams.result=======');
     logger.debug(r);
     if (r.isFailure()) return r;
 
     r = await oThis.pay();
-    logger.debug("=======PayKlass.pay.result=======");
+    logger.debug('=======PayKlass.pay.result=======');
     logger.debug(r);
 
     return r;
@@ -127,9 +135,8 @@ PayKlass.prototype = {
    * @return {result}
    *
    */
-  validateParams: function () {
-    const oThis = this
-    ;
+  validateParams: function() {
+    const oThis = this;
     if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
       let errorParams = {
         internal_error_identifier: 's_a_p_validateParams_1',
@@ -172,16 +179,11 @@ PayKlass.prototype = {
    * @return {promise<result>}
    *
    */
-  pay: function () {
+  pay: function() {
+    const oThis = this,
+      AirdropContractInteractKlass = oThis.ic().getAirdropInteractClass();
 
-    const oThis = this
-      , AirdropContractInteractKlass = oThis.ic().getAirdropInteractClass()
-    ;
-
-    const AirdropContractInteractObject = new AirdropContractInteractKlass(
-      oThis.airdropContractAddress,
-      oThis.chainId
-    );
+    const AirdropContractInteractObject = new AirdropContractInteractKlass(oThis.airdropContractAddress, oThis.chainId);
 
     return AirdropContractInteractObject.pay(
       oThis.senderWorkerAddress,
@@ -199,7 +201,6 @@ PayKlass.prototype = {
       oThis.airdropBudgetHolder
     );
   }
-
 };
 
 InstanceComposer.registerShadowableClass(PayKlass, 'getPayClass');

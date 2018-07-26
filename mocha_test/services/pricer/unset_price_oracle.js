@@ -1,18 +1,15 @@
 /* global describe, it */
 
-const chai = require('chai')
-  , assert = chai.assert;
+const chai = require('chai'),
+  assert = chai.assert;
 
-const rootPrefix = "../../.."
-  , constants = require(rootPrefix + '/mocha_test/lib/constants')
-  , utils = require(rootPrefix+'/mocha_test/lib/utils')
-  , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
-  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
-;
-
+const rootPrefix = '../../..',
+  constants = require(rootPrefix + '/mocha_test/lib/constants'),
+  utils = require(rootPrefix + '/mocha_test/lib/utils'),
+  pricer = require(rootPrefix + '/lib/contract_interact/pricer'),
+  pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId);
 
 describe('Unset price oracle', function() {
-
   it('should pass the initial address checks', function() {
     assert.isDefined(constants.deployer);
     assert.isDefined(constants.ops);
@@ -33,7 +30,8 @@ describe('Unset price oracle', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response);
@@ -52,7 +50,8 @@ describe('Unset price oracle', function() {
       constants.deployerPassphrase,
       constants.currencyUSD,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if it failed
     assert.equal(response2.isFailure(), true);
@@ -61,54 +60,48 @@ describe('Unset price oracle', function() {
     const poResult2 = await pricerOstUsd.priceOracles(constants.currencyUSD);
     assert.equal(poResult2.isSuccess(), true);
     assert.equal(poResult2.data.priceOracles, constants.priceOracles.OST.USD);
-
   });
 
-
   it('should fail when currency is blank', async function() {
-
     // unset the price oracle
     const response = await pricerOstUsd.unsetPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyBlank,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if it failed
     assert.equal(response.isFailure(), true);
-
   });
 
-
   it('should fail when gas amount is 0', async function() {
-
     // unset the price oracle
     const response = await pricerOstUsd.unsetPriceOracle(
       constants.ops,
       constants.opsPassphrase,
       constants.currencyUSD,
       0,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if it failed
     assert.equal(response.isFailure(), true);
-
   });
 
   it('should fail when sender address is 0', async function() {
-
     // unset the price oracle
     const response = await pricerOstUsd.unsetPriceOracle(
       0,
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if it failed
     assert.equal(response.isFailure(), true);
-
   });
 
   // it('should fail when price oracle was not set prior', async function() {
@@ -122,7 +115,6 @@ describe('Unset price oracle', function() {
   //   assert.equal(poResult, 0x0);
   // });
 
-
   it('should pass when price oracle was set prior', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(200000);
@@ -134,7 +126,8 @@ describe('Unset price oracle', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(setResponse);
@@ -153,7 +146,8 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(unsetResponse);
@@ -165,12 +159,9 @@ describe('Unset price oracle', function() {
     const poResult2 = await pricerOstUsd.priceOracles(constants.currencyUSD);
     assert.equal(poResult2.isSuccess(), true);
     assert.equal(poResult2.data.priceOracles, 0x0);
-
   });
 
-
   it('should pass for interaction layer test when return type is uuid', async function() {
-
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
@@ -180,16 +171,15 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.gasUsed,
-      constants.optionsUUID);
+      constants.optionsUUID
+    );
 
     // verify if the transaction receipt is valid
     // we will not verify if it got mined as its just interaction layer testing
     utils.verifyTransactionUUID(unsetResponse);
-
   });
 
   it('should pass for interaction layer test when return type is txHash', async function() {
-
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
@@ -199,16 +189,15 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.gasUsed,
-      constants.optionsHash);
+      constants.optionsHash
+    );
 
     // verify if the transaction hash is valid
     // we will not verify if it got mined as its just interaction layer testing
     utils.verifyTransactionHash(unsetResponse);
-
   });
 
   it('should pass for interaction layer test when return type is txReceipt', async function() {
-
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
@@ -219,7 +208,8 @@ describe('Unset price oracle', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(setResponse);
@@ -241,14 +231,11 @@ describe('Unset price oracle', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid.
     // We will not check here if the value is really set as its just interaction layer testing.
     utils.verifyTransactionReceipt(unsetResponse);
-
   });
-
 });
-
-

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * List of all addresses and there respective abi, bin, passphrase
@@ -9,37 +9,31 @@
  *
  */
 
-const rootPrefix = ".."
-  , InstanceComposer = require(rootPrefix + '/instance_composer')
-  , coreAbis = require(rootPrefix + '/config/core_abis')
-  , coreBins = require(rootPrefix + '/config/core_bins')
-;
+const rootPrefix = '..',
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  coreAbis = require(rootPrefix + '/config/core_abis'),
+  coreBins = require(rootPrefix + '/config/core_bins');
 
 /**
  * Constructor to access different account and contract addresses and their respective details
  *
  * @constructor
  */
-const CoreAddresses = function (configStrategy, instanceComposer) {
-
+const CoreAddresses = function(configStrategy, instanceComposer) {
   const oThis = this;
 
   oThis._buildAllAddresses(configStrategy);
-
 };
 
 CoreAddresses.prototype = {
-
   _addrToContractNameMap: null,
 
   _allAddresses: null,
 
-  _buildAllAddresses: function (configStrategy) {
-
+  _buildAllAddresses: function(configStrategy) {
     const oThis = this;
 
     oThis._allAddresses = {
-
       users: {
         deployer: {
           address: configStrategy.OST_UTILITY_DEPLOYER_ADDR,
@@ -77,37 +71,32 @@ CoreAddresses.prototype = {
           bin: coreBins.airdrop
         }
       }
-    }
-
+    };
   },
 
   // generate a contract address to name map for reverse lookup
-  _getAddrToContractNameMap: function () {
-
+  _getAddrToContractNameMap: function() {
     const oThis = this;
 
     if (oThis._addrToContractNameMap) {
       return oThis._addrToContractNameMap;
     }
 
-    const addrToContractNameMap = oThis._addrToContractNameMap = {};
+    const addrToContractNameMap = (oThis._addrToContractNameMap = {});
 
     for (let contractName in oThis._allAddresses.contracts) {
-
       let addr = oThis._allAddresses.contracts[contractName].address;
 
       if (Array.isArray(addr)) {
         for (let i = 0; i < addr.length; i++) {
           addrToContractNameMap[addr[i].toLowerCase()] = contractName;
         }
-      } else if (addr !== null && typeof addr !== "undefined") {
+      } else if (addr !== null && typeof addr !== 'undefined') {
         addrToContractNameMap[addr.toLowerCase()] = contractName;
       }
-
     }
 
     return oThis._addrToContractNameMap;
-
   },
 
   getAddressForUser: function(userName) {
@@ -124,7 +113,7 @@ CoreAddresses.prototype = {
     const oThis = this;
     var contractAddress = oThis._allAddresses.contracts[contractName].address;
     if (Array.isArray(contractAddress)) {
-      throw "Please pass valid contractName to get contract address for: "+contractName;
+      throw 'Please pass valid contractName to get contract address for: ' + contractName;
     }
     return contractAddress;
   },
@@ -133,16 +122,15 @@ CoreAddresses.prototype = {
   getAddressesForContract: function(contractName) {
     const oThis = this;
     var contractAddresses = oThis._allAddresses.contracts[contractName].address;
-    if (!contractAddresses || !Array.isArray(contractAddresses) || contractAddresses.length===0) {
-      throw "Please pass valid contractName to get contract address for: "+contractName;
+    if (!contractAddresses || !Array.isArray(contractAddresses) || contractAddresses.length === 0) {
+      throw 'Please pass valid contractName to get contract address for: ' + contractName;
     }
     return contractAddresses;
   },
 
   getContractNameFor: function(contractAddr) {
-    const oThis = this
-      , addrToContractNameMap = oThis._getAddrToContractNameMap()
-    ;
+    const oThis = this,
+      addrToContractNameMap = oThis._getAddrToContractNameMap();
     return addrToContractNameMap[(contractAddr || '').toLowerCase()];
   },
 
@@ -155,10 +143,8 @@ CoreAddresses.prototype = {
     const oThis = this;
     return oThis._allAddresses.contracts[contractName].bin;
   }
-
 };
 
-InstanceComposer.register(CoreAddresses, "getCoreAddresses", true);
+InstanceComposer.register(CoreAddresses, 'getCoreAddresses', true);
 
 module.exports = CoreAddresses;
-

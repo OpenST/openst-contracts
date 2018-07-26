@@ -1,27 +1,22 @@
-
 /* global describe, it */
 
-const chai = require('chai')
-  , assert = chai.assert;
+const chai = require('chai'),
+  assert = chai.assert;
 
-const rootPrefix = "../../.."
-  , constants = require(rootPrefix + '/mocha_test/lib/constants')
-  , utils = require(rootPrefix+'/mocha_test/lib/utils')
-  , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
-  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
-;
+const rootPrefix = '../../..',
+  constants = require(rootPrefix + '/mocha_test/lib/constants'),
+  utils = require(rootPrefix + '/mocha_test/lib/utils'),
+  pricer = require(rootPrefix + '/lib/contract_interact/pricer'),
+  pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId);
 
 describe('Get price point', function() {
-
   it('should pass the initial address checks', function() {
-
     assert.isDefined(constants.deployer);
     assert.isDefined(constants.ops);
     assert.isDefined(constants.account1);
     assert.notEqual(constants.deployer, constants.ops);
     assert.notEqual(constants.deployer, constants.account1);
     assert.notEqual(constants.ops, constants.account1);
-
   });
 
   it('should get failure when currency is blank', async function() {
@@ -29,18 +24,14 @@ describe('Get price point', function() {
     this.timeout(100000);
     const pricePoint = await pricerOstUsd.getPricePoint(constants.currencyINR);
     assert.equal(pricePoint.isFailure(), true);
-
   });
-
 
   it('should get failure when currency is does not exists in system', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
-    const pricePoint = await pricerOstUsd.getPricePoint("ABC");
+    const pricePoint = await pricerOstUsd.getPricePoint('ABC');
     assert.equal(pricePoint.isFailure(), true);
-
   });
-
 
   it('should get correct price oracle address after set', async function() {
     // eslint-disable-next-line no-invalid-this
@@ -53,7 +44,8 @@ describe('Get price point', function() {
       constants.currencyEUR,
       constants.priceOracles.OST.EUR,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response);
@@ -66,7 +58,6 @@ describe('Get price point', function() {
     assert.equal(poResult.isSuccess(), true);
     assert.equal(poResult.data.priceOracles, constants.priceOracles.OST.EUR);
 
-
     // set price oracle 2
     const response2 = await pricerOstUsd.setPriceOracle(
       constants.ops,
@@ -74,7 +65,8 @@ describe('Get price point', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response2);
@@ -93,9 +85,7 @@ describe('Get price point', function() {
     const pricePoint2 = await pricerOstUsd.getPricePoint(constants.currencyEUR);
     assert.equal(pricePoint2.isSuccess(), true);
     assert.equal(pricePoint2.data.pricePoint, pricerOstUsd.toWei('0.2'));
-
   });
-
 
   it('should get correct price oracle address after unset', async function() {
     // eslint-disable-next-line no-invalid-this
@@ -107,7 +97,8 @@ describe('Get price point', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response);
@@ -126,8 +117,5 @@ describe('Get price point', function() {
     const pricePoint2 = await pricerOstUsd.getPricePoint(constants.currencyEUR);
     assert.equal(pricePoint2.isSuccess(), true);
     assert.equal(pricePoint2.data.pricePoint, pricerOstUsd.toWei('0.2'));
-
   });
-
 });
-

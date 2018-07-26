@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * Service manifest
@@ -6,17 +6,16 @@
  * @module services/manifest
  */
 
-const rootPrefix = ".."
-  , InstanceComposer = require( rootPrefix + "/instance_composer")
-;
+const rootPrefix = '..',
+  InstanceComposer = require(rootPrefix + '/instance_composer');
 
 // deploy related services
 require(rootPrefix + '/services/deploy/workers');
 require(rootPrefix + '/services/deploy/airdrop');
 
 // ops_managed related services
-require(rootPrefix + "/services/ops_managed/get_ops");
-require(rootPrefix + "/services/ops_managed/set_ops");
+require(rootPrefix + '/services/ops_managed/get_ops');
+require(rootPrefix + '/services/ops_managed/set_ops');
 
 // Workers related services
 require(rootPrefix + '/services/workers/set_worker');
@@ -33,23 +32,21 @@ require(rootPrefix + '/services/airdrop_management/set_price_oracle');
 require(rootPrefix + '/services/airdrop_management/transfer');
 require(rootPrefix + '/services/airdrop_management/user_balance');
 
-
 /**
  * Service Manifest Constructor
  *
  * @constructor
  */
-const ServiceManifestKlass = function (configStrategy, instanceComposer) {
-
+const ServiceManifestKlass = function(configStrategy, instanceComposer) {
   const oThis = this;
-  
+
   /**
    * deploy services
    **/
   let deploy = (oThis.deploy = {});
   deploy.workers = instanceComposer.getWorkerDeployerClass();
   deploy.airdrop = instanceComposer.getAirdropDeployerClass();
-  
+
   /**
    * opsManaged services
    **/
@@ -77,11 +74,9 @@ const ServiceManifestKlass = function (configStrategy, instanceComposer) {
   airdropManager.setPriceOracle = instanceComposer.getSetPriceOracleClass();
   airdropManager.transfer = instanceComposer.getTransferClass();
   airdropManager.userBalance = instanceComposer.getAirdropUserBalanceClass();
-
 };
 
 ServiceManifestKlass.prototype = {
-  
   // /**
   //  * deploy any contract
   //  *
@@ -128,9 +123,8 @@ ServiceManifestKlass.prototype = {
   //   pay: pay,
   //   postAirdropPay: postAirdropPay
   // },
-
 };
 
-InstanceComposer.register(ServiceManifestKlass, "getServiceManifest", true);
+InstanceComposer.register(ServiceManifestKlass, 'getServiceManifest', true);
 
 module.exports = ServiceManifestKlass;

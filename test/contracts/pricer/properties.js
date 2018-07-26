@@ -31,19 +31,17 @@ const pricerUtils = require('./pricer_utils.js');
 
 module.exports.perform = (accounts) => {
   const TOKEN_DECIMALS = 18,
-        conversionRate = 101,
-        conversionRateDecimals = 1
-        ;
+    conversionRate = 101,
+    conversionRateDecimals = 1;
 
-  var contracts      = null,
-      token          = null,
-      pricer         = null
-      ;
+  var contracts = null,
+    token = null,
+    pricer = null;
 
   before(async () => {
-    contracts   = await pricerUtils.deployPricer(artifacts, accounts);
-    token       = contracts.token;
-    pricer      = contracts.pricer;
+    contracts = await pricerUtils.deployPricer(artifacts, accounts);
+    token = contracts.token;
+    pricer = contracts.pricer;
   });
 
   it('has brandedToken', async () => {
@@ -65,4 +63,4 @@ module.exports.perform = (accounts) => {
   it('has conversionRateDecimals', async () => {
     assert.equal((await pricer.conversionRateDecimals.call()).toNumber(), conversionRateDecimals);
   });
-}
+};

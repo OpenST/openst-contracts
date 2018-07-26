@@ -1,35 +1,30 @@
-
 /* global describe, it */
 
-const chai = require('chai')
-  , assert = chai.assert;
+const chai = require('chai'),
+  assert = chai.assert;
 
-const rootPrefix = "../../.."
-  , constants = require(rootPrefix + '/mocha_test/lib/constants')
-  , utils = require(rootPrefix+'/mocha_test/lib/utils')
-  , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
-  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
-;
+const rootPrefix = '../../..',
+  constants = require(rootPrefix + '/mocha_test/lib/constants'),
+  utils = require(rootPrefix + '/mocha_test/lib/utils'),
+  pricer = require(rootPrefix + '/lib/contract_interact/pricer'),
+  pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId);
 
 describe('Get price oracles', function() {
-
   it('should fail when currency is blank', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
     const poResult = await pricerOstUsd.priceOracles(constants.currencyBlank);
     assert.equal(poResult.isFailure(), true);
-
   });
 
   it('should return 0x0 when currency is not set', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const poResult = await pricerOstUsd.priceOracles("ABC");
+    const poResult = await pricerOstUsd.priceOracles('ABC');
     assert.equal(poResult.isSuccess(), true);
     assert.equal(poResult.data.priceOracles, 0x0);
-
   });
 
   it('should return correct price oracles (after set)', async function() {
@@ -43,7 +38,8 @@ describe('Get price oracles', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(setResponse);
@@ -58,7 +54,8 @@ describe('Get price oracles', function() {
       constants.currencyEUR,
       constants.priceOracles.OST.EUR,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(setResponse);
@@ -75,7 +72,6 @@ describe('Get price oracles', function() {
     const poResult2 = await pricerOstUsd.priceOracles(constants.currencyEUR);
     assert.equal(poResult2.isSuccess(), true);
     assert.equal(poResult2.data.priceOracles, constants.priceOracles.OST.EUR);
-
   });
 
   it('should return 0x0 (after unset)', async function() {
@@ -88,7 +84,8 @@ describe('Get price oracles', function() {
       constants.opsPassphrase,
       constants.currencyUSD,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(unsetResponse);
@@ -102,7 +99,8 @@ describe('Get price oracles', function() {
       constants.opsPassphrase,
       constants.currencyEUR,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(unsetResponse1);
@@ -119,8 +117,5 @@ describe('Get price oracles', function() {
     const poResult2 = await pricerOstUsd.priceOracles(constants.currencyEUR);
     assert.equal(poResult2.isSuccess(), true);
     assert.equal(poResult2.data.priceOracles, 0x0);
-
   });
-
 });
-

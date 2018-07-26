@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * This is utility class for contract interacts<br><br>
@@ -8,18 +8,14 @@
  * @module lib/contract_helper/helper
  */
 
-const rootPrefix = '../..'
-  , BigNumber = require('bignumber.js')
-;
+const rootPrefix = '../..',
+  BigNumber = require('bignumber.js');
 
 /**
  * Mocha Test Helper class
  *
  * @exports lib/contract_helper/helper
  */
-const helper = {
-
-};
+const helper = {};
 
 module.exports = helper;
-

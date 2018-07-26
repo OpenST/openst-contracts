@@ -19,10 +19,9 @@
 //
 // ----------------------------------------------------------------------------
 
-const airdropUtils                          = require('./airdrop_utils.js'),
-      constructor                            = require('./constructor.js'),
-      payAirdrop                             = require('./pay_airdrop.js')
-      ;
+const airdropUtils = require('./airdrop_utils.js'),
+  constructor = require('./constructor.js'),
+  payAirdrop = require('./pay_airdrop.js');
 
 contract('Airdrop', function(accounts) {
   describe('Constructor', async () => constructor.perform(accounts));
@@ -31,5 +30,4 @@ contract('Airdrop', function(accounts) {
     airdropUtils.utils.printGasStatistics();
     airdropUtils.utils.clearReceipts();
   });
-  
 });

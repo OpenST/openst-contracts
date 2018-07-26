@@ -20,12 +20,11 @@
 // ----------------------------------------------------------------------------
 
 const pricerUtils = require('./pricer_utils.js'),
-      PriceOracle = artifacts.require('./PriceOracleMock.sol')
-      ;
+  PriceOracle = artifacts.require('./PriceOracleMock.sol');
 
 ///
 /// Test stories
-/// 
+///
 /// fails to set priceOracle by non-ops
 /// fails to set priceOracle if oracleAddress is null
 /// fails to set priceOracle if currency is empty
@@ -36,18 +35,17 @@ const pricerUtils = require('./pricer_utils.js'),
 module.exports.perform = (accounts) => {
   const opsAddress = accounts[1];
 
-  var contracts      = null,
-      pricer         = null,
-      abcPriceOracle = null,
-      xyzPriceOracle = null,
-      response       = null
-      ;
+  var contracts = null,
+    pricer = null,
+    abcPriceOracle = null,
+    xyzPriceOracle = null,
+    response = null;
 
   before(async () => {
-    contracts      = await pricerUtils.deployPricer(artifacts, accounts);
-    pricer         = contracts.pricer;
+    contracts = await pricerUtils.deployPricer(artifacts, accounts);
+    pricer = contracts.pricer;
     abcPriceOracle = contracts.abcPriceOracle;
-    xyzPriceOracle = contracts.xyzPriceOracle;     
+    xyzPriceOracle = contracts.xyzPriceOracle;
   });
 
   it('fails to set priceOracle by non-ops', async () => {
@@ -55,7 +53,9 @@ module.exports.perform = (accounts) => {
   });
 
   it('fails to set priceOracle if oracleAddress is null', async () => {
-    await pricerUtils.utils.expectThrow(pricer.setPriceOracle.call(pricerUtils.currencies.abc, 0, { from: opsAddress }));
+    await pricerUtils.utils.expectThrow(
+      pricer.setPriceOracle.call(pricerUtils.currencies.abc, 0, { from: opsAddress })
+    );
   });
 
   it('fails to set priceOracle if currency is empty', async () => {
@@ -64,8 +64,9 @@ module.exports.perform = (accounts) => {
 
   it('fails to set priceOracle if oracle baseCurrency does not match pricer baseCurrency', async () => {
     var inappositeOracle = await PriceOracle.new(pricerUtils.currencies.abc, pricerUtils.currencies.ost, 1);
-    await pricerUtils.utils.expectThrow(pricer.setPriceOracle.call(
-      pricerUtils.currencies.abc, inappositeOracle.address, { from: opsAddress }));
+    await pricerUtils.utils.expectThrow(
+      pricer.setPriceOracle.call(pricerUtils.currencies.abc, inappositeOracle.address, { from: opsAddress })
+    );
   });
 
   it('fails to set priceOracle if oracle quoteCurrency does not match currency', async () => {
@@ -73,19 +74,23 @@ module.exports.perform = (accounts) => {
   });
 
   it('successfully sets priceOracles', async () => {
-    assert.ok(await pricer.setPriceOracle.call(pricerUtils.currencies.abc, abcPriceOracle.address, { from: opsAddress }));
+    assert.ok(
+      await pricer.setPriceOracle.call(pricerUtils.currencies.abc, abcPriceOracle.address, { from: opsAddress })
+    );
     response = await pricer.setPriceOracle(pricerUtils.currencies.abc, abcPriceOracle.address, { from: opsAddress });
     assert.equal(await pricer.priceOracles.call(pricerUtils.currencies.abc), abcPriceOracle.address);
     checkPriceOracleSetEvent(response.logs[0], pricerUtils.currencies.abc, abcPriceOracle.address);
     pricerUtils.utils.logResponse(response, 'Pricer.setPriceOracle: ' + pricerUtils.currencies.abc);
 
-    assert.ok(await pricer.setPriceOracle.call(pricerUtils.currencies.xyz, xyzPriceOracle.address, { from: opsAddress }));
+    assert.ok(
+      await pricer.setPriceOracle.call(pricerUtils.currencies.xyz, xyzPriceOracle.address, { from: opsAddress })
+    );
     response = await pricer.setPriceOracle(pricerUtils.currencies.xyz, xyzPriceOracle.address, { from: opsAddress });
     assert.equal(await pricer.priceOracles.call(pricerUtils.currencies.xyz), xyzPriceOracle.address);
     checkPriceOracleSetEvent(response.logs[0], pricerUtils.currencies.xyz, xyzPriceOracle.address);
     pricerUtils.utils.logResponse(response, 'Pricer.setPriceOracle: ' + pricerUtils.currencies.xyz);
   });
-}
+};
 
 function checkPriceOracleSetEvent(event, _currency, _address) {
   assert.equal(event.event, 'PriceOracleSet');

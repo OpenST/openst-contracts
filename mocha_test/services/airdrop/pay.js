@@ -1,59 +1,55 @@
 /* global describe, it */
 
-const chai = require('chai')
-  , assert = chai.assert;
+const chai = require('chai'),
+  assert = chai.assert;
 
-const rootPrefix = "../../.."
-  , constants = require(rootPrefix + '/mocha_test/lib/constants')
-  , BigNumber = require('bignumber.js')
-  , utils = require(rootPrefix+'/mocha_test/lib/utils')
-  , airdrop = require(rootPrefix + '/lib/contract_interact/airdrop')
-  , mockToken = require(rootPrefix + '/lib/contract_interact/EIP20TokenMock')
-  , BrandedTokenKlass = require(rootPrefix + '/lib/contract_interact/branded_token')
-  , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
-  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+const rootPrefix = '../../..',
+  constants = require(rootPrefix + '/mocha_test/lib/constants'),
+  BigNumber = require('bignumber.js'),
+  utils = require(rootPrefix + '/mocha_test/lib/utils'),
+  airdrop = require(rootPrefix + '/lib/contract_interact/airdrop'),
+  mockToken = require(rootPrefix + '/lib/contract_interact/EIP20TokenMock'),
+  BrandedTokenKlass = require(rootPrefix + '/lib/contract_interact/branded_token'),
+  web3Provider = require(rootPrefix + '/lib/web3/providers/ws'),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
 
-const airdropOstUsd = new airdrop(constants.airdropOstUsdAddress, constants.chainId)
-  , TC5 = new mockToken(constants.TC5Address)
-  , brandedTokenObject = new BrandedTokenKlass(constants.TC5Address, constants.chainId)
-;
+const airdropOstUsd = new airdrop(constants.airdropOstUsdAddress, constants.chainId),
+  TC5 = new mockToken(constants.TC5Address),
+  brandedTokenObject = new BrandedTokenKlass(constants.TC5Address, constants.chainId);
 
-const AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
-  , openstPayment = require(rootPrefix + '/index')
-  , SetWorkerKlass = openstPayment.services.workers.setWorker
-  , IsWorkerKlass = openstPayment.services.workers.isWorker
-  , RegisterKlass = openstPayment.services.airdropManager.registerAirdrop
-  , TransferKlass = openstPayment.services.airdropManager.transfer
-  , ApproveKlass = openstPayment.services.airdropManager.approve
-  , BatchAllocatorKlass = openstPayment.services.airdropManager.batchAllocator
-  , UserBalanceKlass = openstPayment.services.airdropManager.userBalance
-  , PayKlass = openstPayment.services.airdropManager.pay
-  , SetPriceOracleKlass = openstPayment.services.airdropManager.setPriceOracle
-  , SetAcceptedMarginKlass = openstPayment.services.airdropManager.setAcceptedMargin
-  , airdropAllocationProofDetailKlass = require(rootPrefix + '/app/models/airdrop_allocation_proof_detail')
-  , UserAirdropDetailKlass = require(rootPrefix + '/app/models/user_airdrop_detail')
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
-;
+const AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model'),
+  openstPayment = require(rootPrefix + '/index'),
+  SetWorkerKlass = openstPayment.services.workers.setWorker,
+  IsWorkerKlass = openstPayment.services.workers.isWorker,
+  RegisterKlass = openstPayment.services.airdropManager.registerAirdrop,
+  TransferKlass = openstPayment.services.airdropManager.transfer,
+  ApproveKlass = openstPayment.services.airdropManager.approve,
+  BatchAllocatorKlass = openstPayment.services.airdropManager.batchAllocator,
+  UserBalanceKlass = openstPayment.services.airdropManager.userBalance,
+  PayKlass = openstPayment.services.airdropManager.pay,
+  SetPriceOracleKlass = openstPayment.services.airdropManager.setPriceOracle,
+  SetAcceptedMarginKlass = openstPayment.services.airdropManager.setAcceptedMargin,
+  airdropAllocationProofDetailKlass = require(rootPrefix + '/app/models/airdrop_allocation_proof_detail'),
+  UserAirdropDetailKlass = require(rootPrefix + '/app/models/user_airdrop_detail'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response');
 
-var transferToAirdropBudgetHolderTransactionHash = ''
-;
+var transferToAirdropBudgetHolderTransactionHash = '';
 
 /**
-  * Utitlity function to test set accepted margin
-  *
-  * @param {Object} airdropObject - airdrop object
-  * @param {string} currency - currency
-  * @param {string} margin - accepted margin
-  *
-  */
+ * Utitlity function to test set accepted margin
+ *
+ * @param {Object} airdropObject - airdrop object
+ * @param {string} currency - currency
+ * @param {string} margin - accepted margin
+ *
+ */
 
 async function setAcceptedMargin(airdropObject, currency, margin) {
   // set accepted margin
@@ -79,15 +75,14 @@ async function setAcceptedMargin(airdropObject, currency, margin) {
   assert.equal(margin, amResult.data.acceptedMargins);
 }
 
-
 /**
-  * Utitlity function to test set price oracle
-  *
-  * @param {Object} airdropObject - airdrop object
-  * @param {string} currency - currency
-  * @param {string} address - price oracle address
-  *
-  */
+ * Utitlity function to test set price oracle
+ *
+ * @param {Object} airdropObject - airdrop object
+ * @param {string} currency - currency
+ * @param {string} address - price oracle address
+ *
+ */
 async function setPriceOracle(airdropObject, currency, address) {
   // Set Price Oracle
   const SetPriceOracleObject = new SetPriceOracleKlass({
@@ -112,14 +107,13 @@ async function setPriceOracle(airdropObject, currency, address) {
   assert.equal(address, poResult.data.priceOracles);
 }
 
-
 /**
-  * Utitlity function to test set worker
-  *
-  * @param {string} workerAddress - worker address
-  * @param {Bignumber} deactivationHeight - deactivation height of the worker
-  *
-  */
+ * Utitlity function to test set worker
+ *
+ * @param {string} workerAddress - worker address
+ * @param {Bignumber} deactivationHeight - deactivation height of the worker
+ *
+ */
 async function setWorker(workerAddress, deactivationHeight) {
   const SetWorkerObject = new SetWorkerKlass({
     workers_contract_address: constants.workersContractAddress,
@@ -148,44 +142,37 @@ async function setWorker(workerAddress, deactivationHeight) {
   assert.equal(isWorkerResponse.data.isValid, true);
 }
 
-
 /**
-  * Utitlity function to test setBalance
-  *
-  * @param {Object} token - branded token object
-  * @param {string} address - account address
-  * @param {string} amount - amount that need to be set
-  * @param {BigNumber} gasPrice - gas price
-  *
-  */
+ * Utitlity function to test setBalance
+ *
+ * @param {Object} token - branded token object
+ * @param {string} address - account address
+ * @param {string} amount - amount that need to be set
+ * @param {BigNumber} gasPrice - gas price
+ *
+ */
 async function setBalance(token, address, amount) {
   const amountInWei = airdropOstUsd.toWei(amount);
-  await token.setBalance(
-    constants.ops,
-    constants.opsPassphrase,
-    address,
-    amountInWei,
-    constants.gasUsed);
+  await token.setBalance(constants.ops, constants.opsPassphrase, address, amountInWei, constants.gasUsed);
   // check if the balance was set
   const accountBalance = await token.balanceOf(address);
   assert.equal(accountBalance, amountInWei);
 }
 
 /**
-  * Utitlity function to get airdrop id from airdrop address
-  *
-  * @param {string} airdropAddress - airdrop address
-  *
-  * @return {Object} - formatted response
-  */
+ * Utitlity function to get airdrop id from airdrop address
+ *
+ * @param {string} airdropAddress - airdrop address
+ *
+ * @return {Object} - formatted response
+ */
 
 async function getAirdropIdFromAirdropAddress(airdropAddress) {
-  const airdropModelCacheObject = new AirdropModelCacheKlass({useObject: true, contractAddress: airdropAddress})
-    , airdropModelCacheResponse = await airdropModelCacheObject.fetch()
-    , airdropRecord = airdropModelCacheResponse.data[airdropAddress]
-  ;
+  const airdropModelCacheObject = new AirdropModelCacheKlass({ useObject: true, contractAddress: airdropAddress }),
+    airdropModelCacheResponse = await airdropModelCacheObject.fetch(),
+    airdropRecord = airdropModelCacheResponse.data[airdropAddress];
   if (airdropRecord) {
-    return responseHelper.successWithData({airdropId: airdropRecord.id});
+    return responseHelper.successWithData({ airdropId: airdropRecord.id });
   }
   let errorParams = {
     internal_error_identifier: 'gaidfad',
@@ -197,11 +184,11 @@ async function getAirdropIdFromAirdropAddress(airdropAddress) {
 }
 
 /**
-  * Utitlity function to register airdrop if not already registered
-  *
-  * @param {string} airdropAddress - airdrop address
-  *
-  */
+ * Utitlity function to register airdrop if not already registered
+ *
+ * @param {string} airdropAddress - airdrop address
+ *
+ */
 async function registerAirdrop(airdropAddress) {
   // Do Airdrop Setup if setup was not done
   const airDropIdResponse = await getAirdropIdFromAirdropAddress(airdropAddress);
@@ -220,28 +207,43 @@ async function registerAirdrop(airdropAddress) {
 }
 
 /**
-  * Utitlity function to transfer token to airdrop budget holder
-  *
-  * @param {Object} token - Branded token object
-  * @param {string} airdropAddress - airdrop address
-  * @param {string} fromAddress - reserve address
-  * @param {string} fromPassphrase - passphrase
-  * @param {string} budgetHolderAddress - budget holder address
-  * @param {string} amount - amount to transfer to budget holder
-  *
-  * @return {transaction hash}
-  */
-async function transferTokenToAirdropBugetHolder (token, airdropAddress, fromAddress, fromPassphrase, budgetHolderAddress, amount) {
-
+ * Utitlity function to transfer token to airdrop budget holder
+ *
+ * @param {Object} token - Branded token object
+ * @param {string} airdropAddress - airdrop address
+ * @param {string} fromAddress - reserve address
+ * @param {string} fromPassphrase - passphrase
+ * @param {string} budgetHolderAddress - budget holder address
+ * @param {string} amount - amount to transfer to budget holder
+ *
+ * @return {transaction hash}
+ */
+async function transferTokenToAirdropBugetHolder(
+  token,
+  airdropAddress,
+  fromAddress,
+  fromPassphrase,
+  budgetHolderAddress,
+  amount
+) {
   const airdropBudgetAmountInWei = new BigNumber(airdropOstUsd.toWei(amount));
   const initialBalance = new BigNumber(await token.balanceOf(fromAddress));
   const beforeTransferAirdropBudgetHolderBalance = new BigNumber(await token.balanceOf(budgetHolderAddress));
 
-  logger.debug("initialBalance:", initialBalance.toString(10),
-    "\nairdropBudgetAmount:", airdropBudgetAmountInWei.toString(10),
-    "\nairdropAddress:", airdropAddress);
+  logger.debug(
+    'initialBalance:',
+    initialBalance.toString(10),
+    '\nairdropBudgetAmount:',
+    airdropBudgetAmountInWei.toString(10),
+    '\nairdropAddress:',
+    airdropAddress
+  );
 
-  assert.equal(initialBalance.gte(airdropBudgetAmountInWei), true, "insufficent balance to transfer amount to budgetHolderAddress");
+  assert.equal(
+    initialBalance.gte(airdropBudgetAmountInWei),
+    true,
+    'insufficent balance to transfer amount to budgetHolderAddress'
+  );
 
   const TransferObject = new TransferKlass({
     sender_address: fromAddress,
@@ -253,7 +255,7 @@ async function transferTokenToAirdropBugetHolder (token, airdropAddress, fromAdd
     options: constants.optionsReceipt
   });
   const transferToAirdropBudgetHolderResult = await TransferObject.perform();
-  logger.debug("=======transferToAirdropBudgetHolderResult=======");
+  logger.debug('=======transferToAirdropBudgetHolderResult=======');
   logger.debug(transferToAirdropBudgetHolderResult);
   assert.equal(transferToAirdropBudgetHolderResult.isSuccess(), true);
   // verify if the transaction receipt is valid
@@ -262,7 +264,12 @@ async function transferTokenToAirdropBugetHolder (token, airdropAddress, fromAdd
   await utils.verifyIfMined(airdropOstUsd, transferToAirdropBudgetHolderResult.data.transaction_hash);
 
   const afterTransferAirdropBudgetHolderBalance = new BigNumber(await token.balanceOf(budgetHolderAddress));
-  assert.equal((beforeTransferAirdropBudgetHolderBalance.plus(airdropBudgetAmountInWei)).equals( afterTransferAirdropBudgetHolderBalance), true);
+  assert.equal(
+    beforeTransferAirdropBudgetHolderBalance
+      .plus(airdropBudgetAmountInWei)
+      .equals(afterTransferAirdropBudgetHolderBalance),
+    true
+  );
 
   // set transaction hash
   transferToAirdropBudgetHolderTransactionHash = transferToAirdropBudgetHolderResult.data.transaction_hash;
@@ -270,13 +277,13 @@ async function transferTokenToAirdropBugetHolder (token, airdropAddress, fromAdd
 }
 
 /**
-  * Utitlity function get user airdrop balance
-  *
-  * @param {string} airdropAddress - airdrop address
-  * @param {Array} userAddressArray - user address array
-  *
-  * @return {Object} - formatted response
-  */
+ * Utitlity function get user airdrop balance
+ *
+ * @param {string} airdropAddress - airdrop address
+ * @param {Array} userAddressArray - user address array
+ *
+ * @return {Object} - formatted response
+ */
 async function getUserAirdropBalanceFromCache(airdropAddress, userAddressArray) {
   // Get cache value
   const UserBalanceObject = new UserBalanceKlass({
@@ -296,7 +303,7 @@ async function getUserAirdropBalanceFromCache(airdropAddress, userAddressArray) 
   }
   var data = {};
   for (var i = userAddressArray.length - 1; i >= 0; i--) {
-    if(responseData[userAddressArray[i]]) {
+    if (responseData[userAddressArray[i]]) {
       data[userAddressArray[i]] = responseData[userAddressArray[i]];
     } else {
       data[userAddressArray[i]] = zeroAmount;
@@ -306,15 +313,14 @@ async function getUserAirdropBalanceFromCache(airdropAddress, userAddressArray) 
 }
 
 /**
-  * Utitlity function get user airdrop balance form DB, bypass cache layer
-  *
-  * @param {string} airdropAddress - airdrop address
-  * @param {Array} userAddressArray - user address array
-  *
-  * @return {Object} - formatted response
-  */
+ * Utitlity function get user airdrop balance form DB, bypass cache layer
+ *
+ * @param {string} airdropAddress - airdrop address
+ * @param {Array} userAddressArray - user address array
+ *
+ * @return {Object} - formatted response
+ */
 async function getUserAirdropBalanceFromDB(airdropAddress, userAddressArray) {
-
   const airDropIdResponse = await getAirdropIdFromAirdropAddress(airdropAddress);
   if (airDropIdResponse.isSuccess()) {
     const airdropId = airDropIdResponse.data.airdropId;
@@ -328,7 +334,7 @@ async function getUserAirdropBalanceFromDB(airdropAddress, userAddressArray) {
     }
     var data = {};
     for (var i = userAddressArray.length - 1; i >= 0; i--) {
-      if(responseData[userAddressArray[i]]) {
+      if (responseData[userAddressArray[i]]) {
         data[userAddressArray[i]] = responseData[userAddressArray[i]];
       } else {
         data[userAddressArray[i]] = {
@@ -344,14 +350,13 @@ async function getUserAirdropBalanceFromDB(airdropAddress, userAddressArray) {
 }
 
 /**
-  * Utitlity function to compare the airdrop balances from DB and cache
-  *
-  * @param {Object} dbBalance - airdrop balance from DB
-  * @param {Object} cacheBalance - airdrop balance from cache
-  *
-  */
+ * Utitlity function to compare the airdrop balances from DB and cache
+ *
+ * @param {Object} dbBalance - airdrop balance from DB
+ * @param {Object} cacheBalance - airdrop balance from cache
+ *
+ */
 function validateDBandCacheAirdropBalances(dbBalance, cacheBalance) {
-
   const compare = function(obj1, obj2) {
     assert.equal(obj1.totalAirdropAmount, obj2.totalAirdropAmount);
     assert.equal(obj1.totalAirdropUsedAmount, obj2.totalAirdropUsedAmount);
@@ -371,12 +376,12 @@ function validateDBandCacheAirdropBalances(dbBalance, cacheBalance) {
 }
 
 /**
-  * Utitlity function to get balance of address from contract
-  *
-  * @param {Object} token - token
-  * @param {string} address - address whose balances need to be found
-  *
-  */
+ * Utitlity function to get balance of address from contract
+ *
+ * @param {Object} token - token
+ * @param {string} address - address whose balances need to be found
+ *
+ */
 async function getBalanceFromContract(token, address) {
   var balances = {};
   for (var i = address.length - 1; i >= 0; i--) {
@@ -387,12 +392,12 @@ async function getBalanceFromContract(token, address) {
 }
 
 /**
-  * Utitlity function to get balance of address from cache
-  *
-  * @param {Object} token - token
-  * @param {string} address - address whose balances need to be found
-  *
-  */
+ * Utitlity function to get balance of address from cache
+ *
+ * @param {Object} token - token
+ * @param {string} address - address whose balances need to be found
+ *
+ */
 async function getBalanceFromCache(tokenObj, address) {
   var balances = {};
   for (var i = address.length - 1; i >= 0; i--) {
@@ -405,14 +410,14 @@ async function getBalanceFromCache(tokenObj, address) {
 }
 
 /**
-  * Utitlity function to compare balances from cache and contract
-  *
-  * @param {Object} contractBalances - balances from contract
-  * @param {Object} cacheBalance - balances from cache
-  *
-  */
+ * Utitlity function to compare balances from cache and contract
+ *
+ * @param {Object} contractBalances - balances from contract
+ * @param {Object} cacheBalance - balances from cache
+ *
+ */
 
-function validateContractAndCacheBalance(cacheBalance, contractBalances) {  
+function validateContractAndCacheBalance(cacheBalance, contractBalances) {
   const contractKeys = Object.keys(cacheBalance);
   const cacheKeys = Object.keys(contractBalances);
   assert.equal(contractKeys.length, cacheKeys.length);
@@ -426,15 +431,19 @@ function validateContractAndCacheBalance(cacheBalance, contractBalances) {
 }
 
 /**
-  * Utitlity function to validate if airdrop was transfered successfully
-  *
-  * @param {string} accountAddress - user address
-  * @param {Object} initialAirdropBalance - Initial airdrop balance
-  * @param {Object} currentAirdropBalance - Current airdrop balance
-  * @param {BigNumber} airdropAmountTransfered - estimated airdrop amount that was transfered
-  */
-function validateAirdropTransferSuccess(accountAddress, initialAirdropBalance, currentAirdropBalance, airdropAmountTransfered) {
-
+ * Utitlity function to validate if airdrop was transfered successfully
+ *
+ * @param {string} accountAddress - user address
+ * @param {Object} initialAirdropBalance - Initial airdrop balance
+ * @param {Object} currentAirdropBalance - Current airdrop balance
+ * @param {BigNumber} airdropAmountTransfered - estimated airdrop amount that was transfered
+ */
+function validateAirdropTransferSuccess(
+  accountAddress,
+  initialAirdropBalance,
+  currentAirdropBalance,
+  airdropAmountTransfered
+) {
   const initialAirdropBalanceData = initialAirdropBalance.data[accountAddress];
   const currentAirdropBalanceData = currentAirdropBalance.data[accountAddress];
 
@@ -450,8 +459,8 @@ function validateAirdropTransferSuccess(accountAddress, initialAirdropBalance, c
   const balanceAirdropAmount = new BigNumber(currentAirdropBalanceData.balanceAirdropAmount);
 
   assert.equal(intialTotalAirdropAmount.equals(totalAirdropAmount), true);
-  assert.equal((initialTotalAirdropUsedAmount.plus(airdropAmountTransfered)).equals(totalAirdropUsedAmount), true);
-  assert.equal((initialBalanceAirdropAmount.minus(airdropAmountTransfered)).equals(balanceAirdropAmount), true);
+  assert.equal(initialTotalAirdropUsedAmount.plus(airdropAmountTransfered).equals(totalAirdropUsedAmount), true);
+  assert.equal(initialBalanceAirdropAmount.minus(airdropAmountTransfered).equals(balanceAirdropAmount), true);
 }
 
 function validateTransferSuccess(
@@ -463,8 +472,8 @@ function validateTransferSuccess(
   commissionBeneficiary,
   airdropBudgetHolder,
   initialBalances,
-  currentBalances) {
-
+  currentBalances
+) {
   assert.isDefined(estimatedTokenAmount);
   assert.isDefined(estimatedCommissionTokenAmount);
   assert.isDefined(estimatedAirdropUsed);
@@ -489,9 +498,9 @@ function validateTransferSuccess(
 }
 
 /**
-  * Utitlity function to populate the cache of all test accounts
-  *
-  */
+ * Utitlity function to populate the cache of all test accounts
+ *
+ */
 async function populateCache() {
   // Populate Cache
   await brandedTokenObject.getBalanceOf(constants.account1);
@@ -503,7 +512,6 @@ async function populateCache() {
 }
 // Tests starts here
 describe('Airdrop Pay', function() {
-
   it('should pass the initial checks', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(500000);
@@ -520,67 +528,64 @@ describe('Airdrop Pay', function() {
     assert.notEqual(constants.ops, constants.account1);
 
     // set worker
-    logger.debug("============= Set worker =============");
+    logger.debug('============= Set worker =============');
     const currentBlockNumber = await web3Provider.eth.getBlockNumber();
     await setWorker(constants.workerAccount1, new BigNumber(currentBlockNumber).plus(100000000000));
 
     // Set Price Oracle
-    logger.debug("============= Set Price Oracle =============");
+    logger.debug('============= Set Price Oracle =============');
     await setPriceOracle(airdropOstUsd, constants.currencyUSD, constants.priceOracles.OST.USD);
 
     // set accepted margin
-    logger.debug("============= Set accepted margin =============");
+    logger.debug('============= Set accepted margin =============');
     await setAcceptedMargin(airdropOstUsd, constants.currencyUSD, 50);
 
     // set balance for account 1 (Spender)
-    logger.debug("============= Set account 1 balance =============");
+    logger.debug('============= Set account 1 balance =============');
     await setBalance(TC5, constants.account1, constants.account1InitialBrandedTokenBalance);
 
     // reset balance for account 2 to 100
-    logger.debug("============= Set account 2 balance =============");
+    logger.debug('============= Set account 2 balance =============');
     await setBalance(TC5, constants.account2, '100');
 
     // reset balance for account 3 to 0
-    logger.debug("============= Set account 3 balance =============");
+    logger.debug('============= Set account 3 balance =============');
     await setBalance(TC5, constants.account3, '0');
 
     // reset balance for account 4 to 0
-    logger.debug("============= Set account 4 balance =============");
+    logger.debug('============= Set account 4 balance =============');
     await setBalance(TC5, constants.account4, '0');
 
     // reset balance of account airdropBudgetHolder to 0
-    logger.debug("=============  Set airdropBudgetHolder balance =============");
+    logger.debug('=============  Set airdropBudgetHolder balance =============');
     await setBalance(TC5, constants.airdropBudgetHolder, '0');
 
     // Do Airdrop Setup if setup was not done
-    logger.debug("============= Do Airdrop Setup if setup was not done =============");
+    logger.debug('============= Do Airdrop Setup if setup was not done =============');
     await registerAirdrop(constants.airdropOstUsdAddress);
 
     // Populate Cache
     populateCache();
-
   });
 
   it('AirdropManager: transfer branded token from reserve to airdropBudgetHolder and approve airdrop contract', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
-    const address = [
-      constants.account1,
-      constants.airdropBudgetHolder
-    ];
+    const address = [constants.account1, constants.airdropBudgetHolder];
     const initalBalancesFromContract = await getBalanceFromContract(TC5, address);
     const initalBalancesCache = await getBalanceFromCache(brandedTokenObject, address);
     validateContractAndCacheBalance(initalBalancesFromContract, initalBalancesCache);
 
-
     // transfer amount
-    await transferTokenToAirdropBugetHolder(TC5,
+    await transferTokenToAirdropBugetHolder(
+      TC5,
       constants.airdropOstUsdAddress,
       constants.account1,
       constants.accountPassphrase1,
       constants.airdropBudgetHolder,
-      constants.airdropBudgetBrandedTokenBalance);
+      constants.airdropBudgetBrandedTokenBalance
+    );
 
     const balanceFromContract = await getBalanceFromContract(TC5, address);
     const balancesFromCache = await getBalanceFromCache(brandedTokenObject, address);
@@ -595,7 +600,7 @@ describe('Airdrop Pay', function() {
       options: constants.optionsReceipt
     });
     const approveToAirdropBudgetHolderResult = await ApproveObject.perform();
-    logger.debug("=======approveToAirdropBudgetHolderResult=======");
+    logger.debug('=======approveToAirdropBudgetHolderResult=======');
     logger.debug(approveToAirdropBudgetHolderResult);
 
     assert.equal(approveToAirdropBudgetHolderResult.isSuccess(), true);
@@ -605,17 +610,22 @@ describe('Airdrop Pay', function() {
     await utils.verifyIfMined(airdropOstUsd, approveToAirdropBudgetHolderResult.data.transaction_hash);
   });
 
-
   it('AirdropManager: batch allocate to airdrop users and check user balance', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(10000);
 
     var airdropUsers = constants.airdropUsers;
-    airdropUsers[constants.account2] = {airdropAmount: '100000000000000000000', expiryTimestamp: 0};
+    airdropUsers[constants.account2] = { airdropAmount: '100000000000000000000', expiryTimestamp: 0 };
 
     // checks for cache and DB consistency
-    const beforeAllocationBalanceFromDB = await getUserAirdropBalanceFromDB(constants.airdropOstUsdAddress, Object.keys(airdropUsers));
-    const beforeAllocationBalanceFromCache = await getUserAirdropBalanceFromCache(constants.airdropOstUsdAddress, Object.keys(airdropUsers));
+    const beforeAllocationBalanceFromDB = await getUserAirdropBalanceFromDB(
+      constants.airdropOstUsdAddress,
+      Object.keys(airdropUsers)
+    );
+    const beforeAllocationBalanceFromCache = await getUserAirdropBalanceFromCache(
+      constants.airdropOstUsdAddress,
+      Object.keys(airdropUsers)
+    );
     validateDBandCacheAirdropBalances(beforeAllocationBalanceFromDB.data, beforeAllocationBalanceFromCache.data);
 
     const BatchAllocatorObject = new BatchAllocatorKlass({
@@ -628,15 +638,27 @@ describe('Airdrop Pay', function() {
 
     assert.equal(batchAllocateAirdropAmountResult.isSuccess(), true);
     var airdropAllocationProofDetailModel = new airdropAllocationProofDetailKlass();
-    var result = await airdropAllocationProofDetailModel.getByTransactionHash(transferToAirdropBudgetHolderTransactionHash);
+    var result = await airdropAllocationProofDetailModel.getByTransactionHash(
+      transferToAirdropBudgetHolderTransactionHash
+    );
     var airdropAllocationProofDetailRecord = result[0];
     // airdrop_allocated_amount is less than or equal to airdrop_amount
-    assert.equal(new BigNumber(airdropAllocationProofDetailRecord.airdrop_allocated_amount).lte(new BigNumber(airdropAllocationProofDetailRecord.airdrop_amount)), true);
-
+    assert.equal(
+      new BigNumber(airdropAllocationProofDetailRecord.airdrop_allocated_amount).lte(
+        new BigNumber(airdropAllocationProofDetailRecord.airdrop_amount)
+      ),
+      true
+    );
 
     // checks for cache and DB consistency
-    const afterAllocationBalanceFromDB = await getUserAirdropBalanceFromDB(constants.airdropOstUsdAddress, Object.keys(airdropUsers));
-    const afterAllocationBalanceFromCache = await getUserAirdropBalanceFromCache(constants.airdropOstUsdAddress, Object.keys(airdropUsers));
+    const afterAllocationBalanceFromDB = await getUserAirdropBalanceFromDB(
+      constants.airdropOstUsdAddress,
+      Object.keys(airdropUsers)
+    );
+    const afterAllocationBalanceFromCache = await getUserAirdropBalanceFromCache(
+      constants.airdropOstUsdAddress,
+      Object.keys(airdropUsers)
+    );
     validateDBandCacheAirdropBalances(afterAllocationBalanceFromDB.data, afterAllocationBalanceFromCache.data);
 
     // check if the airdrop balance reflects the proper value.
@@ -644,22 +666,33 @@ describe('Airdrop Pay', function() {
     for (var i = allUserKeys.length - 1; i >= 0; i--) {
       const userKey = allUserKeys[i];
       const initialTotalAirdropAmount = new BigNumber(beforeAllocationBalanceFromDB.data[userKey].totalAirdropAmount);
-      const initialTotalAirdropUsedAmount = new BigNumber(beforeAllocationBalanceFromDB.data[userKey].totalAirdropUsedAmount);
-      const initialBalanceAirdropAmount = new BigNumber(beforeAllocationBalanceFromDB.data[userKey].balanceAirdropAmount);
+      const initialTotalAirdropUsedAmount = new BigNumber(
+        beforeAllocationBalanceFromDB.data[userKey].totalAirdropUsedAmount
+      );
+      const initialBalanceAirdropAmount = new BigNumber(
+        beforeAllocationBalanceFromDB.data[userKey].balanceAirdropAmount
+      );
 
       const totalAirdropAmount = new BigNumber(afterAllocationBalanceFromDB.data[userKey].totalAirdropAmount);
       const totalAirdropUsedAmount = new BigNumber(afterAllocationBalanceFromDB.data[userKey].totalAirdropUsedAmount);
       const balanceAirdropAmount = new BigNumber(afterAllocationBalanceFromDB.data[userKey].balanceAirdropAmount);
 
-      assert.equal((initialTotalAirdropAmount.plus(new BigNumber(airdropUsers[userKey].airdropAmount))).equals(totalAirdropAmount), true);
+      assert.equal(
+        initialTotalAirdropAmount.plus(new BigNumber(airdropUsers[userKey].airdropAmount)).equals(totalAirdropAmount),
+        true
+      );
 
       assert.equal(initialTotalAirdropUsedAmount.equals(totalAirdropUsedAmount), true);
       assert.equal(initialTotalAirdropUsedAmount.equals(0), true);
 
-      assert.equal((initialBalanceAirdropAmount.plus(new BigNumber(airdropUsers[userKey].airdropAmount))).equals(balanceAirdropAmount), true);
+      assert.equal(
+        initialBalanceAirdropAmount
+          .plus(new BigNumber(airdropUsers[userKey].airdropAmount))
+          .equals(balanceAirdropAmount),
+        true
+      );
     }
   });
-
 
   it('should fail when worker is not whitelisted', async function() {
     // eslint-disable-next-line no-invalid-this
@@ -668,34 +701,33 @@ describe('Airdrop Pay', function() {
     // Populate Cache
     populateCache();
 
-    const beneficiary = constants.account3
-      , commissionAmount = new BigNumber(airdropOstUsd.toWei('0.9'))
-      , commissionBeneficiary = constants.account4
-      , currency = constants.currencyUSD
-      , transferAmount = new BigNumber(airdropOstUsd.toWei('1.18'))
-      , spenderAddress = constants.account2
-      , spenderPassphrase = constants.accountPassphrase2
-      , airdropBudgetHolder = constants.airdropBudgetHolder
-    ;
+    const beneficiary = constants.account3,
+      commissionAmount = new BigNumber(airdropOstUsd.toWei('0.9')),
+      commissionBeneficiary = constants.account4,
+      currency = constants.currencyUSD,
+      transferAmount = new BigNumber(airdropOstUsd.toWei('1.18')),
+      spenderAddress = constants.account2,
+      spenderPassphrase = constants.accountPassphrase2,
+      airdropBudgetHolder = constants.airdropBudgetHolder;
 
     // checks for account balance cache and DB consistency
-    logger.debug("============ Validating consistency for account balance form cache and contract =============");
-    const address = [
-      spenderAddress,
-      beneficiary,
-      commissionBeneficiary,
-      airdropBudgetHolder
-    ];
+    logger.debug('============ Validating consistency for account balance form cache and contract =============');
+    const address = [spenderAddress, beneficiary, commissionBeneficiary, airdropBudgetHolder];
     const initalBalancesFromContract = await getBalanceFromContract(TC5, address);
     const initalBalancesCache = await getBalanceFromCache(brandedTokenObject, address);
     validateContractAndCacheBalance(initalBalancesFromContract, initalBalancesCache);
 
-
     // checks for airdrop balance cache and DB consistency
-    logger.debug("============ Validating consistency for airdrop balance form cache and DB =============");
+    logger.debug('============ Validating consistency for airdrop balance form cache and DB =============');
     const airdropUserAddress = [spenderAddress];
-    const initialAirdropBalanceFromDB = await getUserAirdropBalanceFromDB(constants.airdropOstUsdAddress, airdropUserAddress);
-    const initialAirdropBalanceFromCache = await getUserAirdropBalanceFromCache(constants.airdropOstUsdAddress, airdropUserAddress);
+    const initialAirdropBalanceFromDB = await getUserAirdropBalanceFromDB(
+      constants.airdropOstUsdAddress,
+      airdropUserAddress
+    );
+    const initialAirdropBalanceFromCache = await getUserAirdropBalanceFromCache(
+      constants.airdropOstUsdAddress,
+      airdropUserAddress
+    );
     validateDBandCacheAirdropBalances(initialAirdropBalanceFromDB.data, initialAirdropBalanceFromCache.data);
 
     const UserBalanceObject = new UserBalanceKlass({
@@ -710,7 +742,8 @@ describe('Airdrop Pay', function() {
     const estimatedValues = await airdropOstUsd.getPricePointAndCalculatedAmounts(
       transferAmount,
       commissionAmount,
-      currency);
+      currency
+    );
     assert.equal(estimatedValues.isSuccess(), true);
 
     const estimatedTokenAmount = new BigNumber(estimatedValues.data.tokenAmount);
@@ -720,7 +753,7 @@ describe('Airdrop Pay', function() {
     const estimatedTotalAmount = new BigNumber(0).plus(estimatedTokenAmount).plus(estimatedCommissionTokenAmount);
 
     const estimatedAirdropUsed = BigNumber.min(estimatedTotalAmount, availableAirdropBalance);
-    logger.debug("============ estimatedAirdropUsed ============");
+    logger.debug('============ estimatedAirdropUsed ============');
     logger.debug(estimatedAirdropUsed);
 
     // Approve account1 for transfer
@@ -729,12 +762,13 @@ describe('Airdrop Pay', function() {
       spenderPassphrase,
       constants.airdropOstUsdAddress,
       estimatedTotalAmount.plus(100),
-      constants.gasUsed);
+      constants.gasUsed
+    );
 
-    logger.debug("============spender approving to contract=============");
+    logger.debug('============spender approving to contract=============');
     logger.debug(accountApproveResponse);
     var worker1Balance = await web3Provider.eth.getBalance(constants.workerAccount1);
-    logger.debug("\nconstants.workerAccount1.balance: ", worker1Balance);
+    logger.debug('\nconstants.workerAccount1.balance: ', worker1Balance);
 
     const PayObject = new PayKlass({
       airdrop_contract_address: constants.airdropOstUsdAddress,
@@ -754,12 +788,13 @@ describe('Airdrop Pay', function() {
     const payResponse = await PayObject.perform();
 
     assert.equal(payResponse.isFailure(), true);
-    logger.debug("============airdrop.pay response=============");
+    logger.debug('============airdrop.pay response=============');
     logger.debug(payResponse);
 
-
     // checks for account balance cache and DB consistency
-    logger.debug("============ Validating consistency for account balance form cache and contract after pay =============");
+    logger.debug(
+      '============ Validating consistency for account balance form cache and contract after pay ============='
+    );
     const balanceFromContract = await getBalanceFromContract(TC5, address);
     const balancesFromCache = await getBalanceFromCache(brandedTokenObject, address);
     validateContractAndCacheBalance(balanceFromContract, balancesFromCache);
@@ -767,13 +802,15 @@ describe('Airdrop Pay', function() {
     validateContractAndCacheBalance(initalBalancesFromContract, balanceFromContract);
 
     // checks for airdrop balance cache and DB consistency
-    logger.debug("============ Validating consistency for airdrop balance form cache and DB after pay =============");
+    logger.debug('============ Validating consistency for airdrop balance form cache and DB after pay =============');
     const airdropBalanceFromDB = await getUserAirdropBalanceFromDB(constants.airdropOstUsdAddress, airdropUserAddress);
-    const airdropBalanceFromCache = await getUserAirdropBalanceFromCache(constants.airdropOstUsdAddress, airdropUserAddress);
+    const airdropBalanceFromCache = await getUserAirdropBalanceFromCache(
+      constants.airdropOstUsdAddress,
+      airdropUserAddress
+    );
     validateDBandCacheAirdropBalances(airdropBalanceFromDB.data, airdropBalanceFromCache.data);
     // validate if the airdrop transfer was reverted properly
     validateDBandCacheAirdropBalances(initialAirdropBalanceFromDB.data, airdropBalanceFromDB.data);
-
   });
 
   it('should pass when transfer amount is less than available airdrop amount', async function() {
@@ -783,34 +820,33 @@ describe('Airdrop Pay', function() {
     // Populate Cache
     populateCache();
 
-    const beneficiary = constants.account3
-      , commissionAmount = new BigNumber(airdropOstUsd.toWei('0.7'))
-      , commissionBeneficiary = constants.account4
-      , currency = constants.currencyUSD
-      , transferAmount = new BigNumber(airdropOstUsd.toWei('1.91'))
-      , spenderAddress = constants.account2
-      , spenderPassphrase = constants.accountPassphrase2
-      , airdropBudgetHolder = constants.airdropBudgetHolder
-    ;
+    const beneficiary = constants.account3,
+      commissionAmount = new BigNumber(airdropOstUsd.toWei('0.7')),
+      commissionBeneficiary = constants.account4,
+      currency = constants.currencyUSD,
+      transferAmount = new BigNumber(airdropOstUsd.toWei('1.91')),
+      spenderAddress = constants.account2,
+      spenderPassphrase = constants.accountPassphrase2,
+      airdropBudgetHolder = constants.airdropBudgetHolder;
 
     // checks for account balance cache and DB consistency
-    logger.debug("============ Validating consistency for account balance form cache and contract =============");
-    const address = [
-      spenderAddress,
-      beneficiary,
-      commissionBeneficiary,
-      airdropBudgetHolder
-    ];
+    logger.debug('============ Validating consistency for account balance form cache and contract =============');
+    const address = [spenderAddress, beneficiary, commissionBeneficiary, airdropBudgetHolder];
     const initalBalancesFromContract = await getBalanceFromContract(TC5, address);
     const initalBalancesCache = await getBalanceFromCache(brandedTokenObject, address);
     validateContractAndCacheBalance(initalBalancesFromContract, initalBalancesCache);
 
-
     // checks for airdrop balance cache and DB consistency
-    logger.debug("============ Validating consistency for airdrop balance form cache and DB =============");
+    logger.debug('============ Validating consistency for airdrop balance form cache and DB =============');
     const airdropUserAddress = [spenderAddress];
-    const initialAirdropBalanceFromDB = await getUserAirdropBalanceFromDB(constants.airdropOstUsdAddress, airdropUserAddress);
-    const initialAirdropBalanceFromCache = await getUserAirdropBalanceFromCache(constants.airdropOstUsdAddress, airdropUserAddress);
+    const initialAirdropBalanceFromDB = await getUserAirdropBalanceFromDB(
+      constants.airdropOstUsdAddress,
+      airdropUserAddress
+    );
+    const initialAirdropBalanceFromCache = await getUserAirdropBalanceFromCache(
+      constants.airdropOstUsdAddress,
+      airdropUserAddress
+    );
     validateDBandCacheAirdropBalances(initialAirdropBalanceFromDB.data, initialAirdropBalanceFromCache.data);
 
     const UserBalanceObject = new UserBalanceKlass({
@@ -825,7 +861,8 @@ describe('Airdrop Pay', function() {
     const estimatedValues = await airdropOstUsd.getPricePointAndCalculatedAmounts(
       transferAmount,
       commissionAmount,
-      currency);
+      currency
+    );
     assert.equal(estimatedValues.isSuccess(), true);
 
     const estimatedTokenAmount = new BigNumber(estimatedValues.data.tokenAmount);
@@ -835,7 +872,7 @@ describe('Airdrop Pay', function() {
     const estimatedTotalAmount = new BigNumber(0).plus(estimatedTokenAmount).plus(estimatedCommissionTokenAmount);
 
     const estimatedAirdropUsed = BigNumber.min(estimatedTotalAmount, availableAirdropBalance);
-    logger.debug("============ estimatedAirdropUsed ============");
+    logger.debug('============ estimatedAirdropUsed ============');
     logger.debug(estimatedAirdropUsed);
     // here we make sure that airdrop amount used will be greater than 0
     assert.equal(estimatedAirdropUsed.gt(0), true);
@@ -845,12 +882,13 @@ describe('Airdrop Pay', function() {
       spenderPassphrase,
       constants.airdropOstUsdAddress,
       estimatedTotalAmount.plus(100),
-      constants.gasUsed);
+      constants.gasUsed
+    );
 
-    logger.debug("============spender approving to contract=============");
+    logger.debug('============spender approving to contract=============');
     logger.debug(accountApproveResponse);
     var worker1Balance = await web3Provider.eth.getBalance(constants.workerAccount1);
-    logger.debug("\nconstants.workerAccount1.balance: ", worker1Balance);
+    logger.debug('\nconstants.workerAccount1.balance: ', worker1Balance);
 
     const PayObject = new PayKlass({
       airdrop_contract_address: constants.airdropOstUsdAddress,
@@ -870,7 +908,7 @@ describe('Airdrop Pay', function() {
     const payResponse = await PayObject.perform();
 
     assert.equal(payResponse.isSuccess(), true);
-    logger.debug("============airdrop.pay response=============");
+    logger.debug('============airdrop.pay response=============');
     logger.debug(payResponse);
 
     // verify if the transaction receipt is valid
@@ -878,9 +916,10 @@ describe('Airdrop Pay', function() {
     // verify if the transaction is actually mined
     await utils.verifyIfMined(airdropOstUsd, payResponse.data.transaction_hash);
 
-
     // checks for account balance cache and DB consistency
-    logger.debug("============ Validating consistency for account balance form cache and contract after pay =============");
+    logger.debug(
+      '============ Validating consistency for account balance form cache and contract after pay ============='
+    );
     const balanceFromContract = await getBalanceFromContract(TC5, address);
     const balancesFromCache = await getBalanceFromCache(brandedTokenObject, address);
     validateContractAndCacheBalance(balanceFromContract, balancesFromCache);
@@ -894,20 +933,24 @@ describe('Airdrop Pay', function() {
       commissionBeneficiary,
       airdropBudgetHolder,
       initalBalancesFromContract,
-      balanceFromContract);
+      balanceFromContract
+    );
 
     // checks for airdrop balance cache and DB consistency
-    logger.debug("============ Validating consistency for airdrop balance form cache and DB after pay =============");
+    logger.debug('============ Validating consistency for airdrop balance form cache and DB after pay =============');
     const airdropBalanceFromDB = await getUserAirdropBalanceFromDB(constants.airdropOstUsdAddress, airdropUserAddress);
-    const airdropBalanceFromCache = await getUserAirdropBalanceFromCache(constants.airdropOstUsdAddress, airdropUserAddress);
+    const airdropBalanceFromCache = await getUserAirdropBalanceFromCache(
+      constants.airdropOstUsdAddress,
+      airdropUserAddress
+    );
     validateDBandCacheAirdropBalances(airdropBalanceFromDB.data, airdropBalanceFromCache.data);
     // validate if the airdrop transfer was proper
     validateAirdropTransferSuccess(
       spenderAddress,
       initialAirdropBalanceFromDB,
       airdropBalanceFromDB,
-      estimatedAirdropUsed);
-
+      estimatedAirdropUsed
+    );
   });
 
   // This is with an assumption that pervious test was passed and due to that constants.account3 has some balance
@@ -918,34 +961,33 @@ describe('Airdrop Pay', function() {
     // Populate Cache
     populateCache();
 
-    const beneficiary = constants.account1
-      , commissionAmount = new BigNumber(airdropOstUsd.toWei('0.0000000001'))
-      , commissionBeneficiary = constants.account4
-      , currency = constants.currencyUSD
-      , transferAmount = new BigNumber(airdropOstUsd.toWei('0.000000033'))
-      , spenderAddress = constants.account3
-      , spenderPassphrase = constants.accountPassphrase3
-      , airdropBudgetHolder = constants.airdropBudgetHolder
-    ;
+    const beneficiary = constants.account1,
+      commissionAmount = new BigNumber(airdropOstUsd.toWei('0.0000000001')),
+      commissionBeneficiary = constants.account4,
+      currency = constants.currencyUSD,
+      transferAmount = new BigNumber(airdropOstUsd.toWei('0.000000033')),
+      spenderAddress = constants.account3,
+      spenderPassphrase = constants.accountPassphrase3,
+      airdropBudgetHolder = constants.airdropBudgetHolder;
 
     // checks for account balance cache and DB consistency
-    logger.debug("============ Validating consistency for account balance form cache and contract =============");
-    const address = [
-      spenderAddress,
-      beneficiary,
-      commissionBeneficiary,
-      airdropBudgetHolder
-    ];
+    logger.debug('============ Validating consistency for account balance form cache and contract =============');
+    const address = [spenderAddress, beneficiary, commissionBeneficiary, airdropBudgetHolder];
     const initalBalancesFromContract = await getBalanceFromContract(TC5, address);
     const initalBalancesCache = await getBalanceFromCache(brandedTokenObject, address);
     validateContractAndCacheBalance(initalBalancesFromContract, initalBalancesCache);
 
-
     // checks for airdrop balance cache and DB consistency
-    logger.debug("============ Validating consistency for airdrop balance form cache and DB =============");
+    logger.debug('============ Validating consistency for airdrop balance form cache and DB =============');
     const airdropUserAddress = [spenderAddress];
-    const initialAirdropBalanceFromDB = await getUserAirdropBalanceFromDB(constants.airdropOstUsdAddress, airdropUserAddress);
-    const initialAirdropBalanceFromCache = await getUserAirdropBalanceFromCache(constants.airdropOstUsdAddress, airdropUserAddress);
+    const initialAirdropBalanceFromDB = await getUserAirdropBalanceFromDB(
+      constants.airdropOstUsdAddress,
+      airdropUserAddress
+    );
+    const initialAirdropBalanceFromCache = await getUserAirdropBalanceFromCache(
+      constants.airdropOstUsdAddress,
+      airdropUserAddress
+    );
     validateDBandCacheAirdropBalances(initialAirdropBalanceFromDB.data, initialAirdropBalanceFromCache.data);
 
     const UserBalanceObject = new UserBalanceKlass({
@@ -962,7 +1004,8 @@ describe('Airdrop Pay', function() {
     const estimatedValues = await airdropOstUsd.getPricePointAndCalculatedAmounts(
       transferAmount,
       commissionAmount,
-      currency);
+      currency
+    );
     assert.equal(estimatedValues.isSuccess(), true);
 
     const estimatedTokenAmount = new BigNumber(estimatedValues.data.tokenAmount);
@@ -972,7 +1015,7 @@ describe('Airdrop Pay', function() {
     const estimatedTotalAmount = new BigNumber(0).plus(estimatedTokenAmount).plus(estimatedCommissionTokenAmount);
 
     const estimatedAirdropUsed = BigNumber.min(estimatedTotalAmount, availableAirdropBalance);
-    logger.debug("============ estimatedAirdropUsed ============");
+    logger.debug('============ estimatedAirdropUsed ============');
     logger.debug(estimatedAirdropUsed);
     // Here we make sure that the airdrop amount is 0;
     assert.equal(estimatedAirdropUsed.equals(0), true);
@@ -982,12 +1025,13 @@ describe('Airdrop Pay', function() {
       spenderPassphrase,
       constants.airdropOstUsdAddress,
       estimatedTotalAmount.plus(100),
-      constants.gasUsed);
+      constants.gasUsed
+    );
 
-    logger.debug("============spender approving to contract=============");
+    logger.debug('============spender approving to contract=============');
     logger.debug(accountApproveResponse);
     var worker1Balance = await web3Provider.eth.getBalance(constants.workerAccount1);
-    logger.debug("\nconstants.workerAccount1.balance: ", worker1Balance);
+    logger.debug('\nconstants.workerAccount1.balance: ', worker1Balance);
 
     const PayObject = new PayKlass({
       airdrop_contract_address: constants.airdropOstUsdAddress,
@@ -1006,7 +1050,7 @@ describe('Airdrop Pay', function() {
     });
     const payResponse = await PayObject.perform();
     assert.equal(payResponse.isSuccess(), true);
-    logger.debug("============airdrop.pay response=============");
+    logger.debug('============airdrop.pay response=============');
     logger.debug(payResponse);
 
     // verify if the transaction receipt is valid
@@ -1014,9 +1058,10 @@ describe('Airdrop Pay', function() {
     // verify if the transaction is actually mined
     await utils.verifyIfMined(airdropOstUsd, payResponse.data.transaction_hash);
 
-
     // checks for account balance cache and DB consistency
-    logger.debug("============ Validating consistency for account balance form cache and contract after pay =============");
+    logger.debug(
+      '============ Validating consistency for account balance form cache and contract after pay ============='
+    );
     const balanceFromContract = await getBalanceFromContract(TC5, address);
     const balancesFromCache = await getBalanceFromCache(brandedTokenObject, address);
     validateContractAndCacheBalance(balanceFromContract, balancesFromCache);
@@ -1030,19 +1075,24 @@ describe('Airdrop Pay', function() {
       commissionBeneficiary,
       airdropBudgetHolder,
       initalBalancesFromContract,
-      balanceFromContract);
+      balanceFromContract
+    );
 
     // checks for airdrop balance cache and DB consistency
-    logger.debug("============ Validating consistency for airdrop balance form cache and DB after pay =============");
+    logger.debug('============ Validating consistency for airdrop balance form cache and DB after pay =============');
     const airdropBalanceFromDB = await getUserAirdropBalanceFromDB(constants.airdropOstUsdAddress, airdropUserAddress);
-    const airdropBalanceFromCache = await getUserAirdropBalanceFromCache(constants.airdropOstUsdAddress, airdropUserAddress);
+    const airdropBalanceFromCache = await getUserAirdropBalanceFromCache(
+      constants.airdropOstUsdAddress,
+      airdropUserAddress
+    );
     validateDBandCacheAirdropBalances(airdropBalanceFromDB.data, airdropBalanceFromCache.data);
     // validate if the airdrop transfer was proper
     validateAirdropTransferSuccess(
       spenderAddress,
       initialAirdropBalanceFromDB,
       airdropBalanceFromDB,
-      estimatedAirdropUsed);
+      estimatedAirdropUsed
+    );
   });
 
   it('should pass when all airdrop amount is used and partial user balance is used', async function() {
@@ -1051,9 +1101,8 @@ describe('Airdrop Pay', function() {
 
     // Populate Cache
     populateCache();
-    const spenderAddress = constants.account2
-      , spenderPassphrase = constants.accountPassphrase2
-    ;
+    const spenderAddress = constants.account2,
+      spenderPassphrase = constants.accountPassphrase2;
     const UserBalanceObject = new UserBalanceKlass({
       chain_id: constants.chainId,
       airdrop_contract_address: constants.airdropOstUsdAddress,
@@ -1065,37 +1114,38 @@ describe('Airdrop Pay', function() {
     const availableAirdropBalance = new BigNumber(airdropBalanceResult.data[spenderAddress].balanceAirdropAmount);
     const partialAmount = new BigNumber(10);
 
-    const beneficiary = constants.account3
-      , commissionAmount = partialAmount
-      , commissionBeneficiary = constants.account4
-      , currency = constants.currencyUSD
-      , transferAmount = availableAirdropBalance.div(6).floor()
-      , airdropBudgetHolder = constants.airdropBudgetHolder
-    ;
+    const beneficiary = constants.account3,
+      commissionAmount = partialAmount,
+      commissionBeneficiary = constants.account4,
+      currency = constants.currencyUSD,
+      transferAmount = availableAirdropBalance.div(6).floor(),
+      airdropBudgetHolder = constants.airdropBudgetHolder;
 
     // checks for account balance cache and DB consistency
-    logger.debug("============ Validating consistency for account balance form cache and contract =============");
-    const address = [
-      spenderAddress,
-      beneficiary,
-      commissionBeneficiary,
-      airdropBudgetHolder
-    ];
+    logger.debug('============ Validating consistency for account balance form cache and contract =============');
+    const address = [spenderAddress, beneficiary, commissionBeneficiary, airdropBudgetHolder];
     const initalBalancesFromContract = await getBalanceFromContract(TC5, address);
     const initalBalancesCache = await getBalanceFromCache(brandedTokenObject, address);
     validateContractAndCacheBalance(initalBalancesFromContract, initalBalancesCache);
 
     // checks for airdrop balance cache and DB consistency
-    logger.debug("============ Validating consistency for airdrop balance form cache and DB =============");
+    logger.debug('============ Validating consistency for airdrop balance form cache and DB =============');
     const airdropUserAddress = [spenderAddress];
-    const initialAirdropBalanceFromDB = await getUserAirdropBalanceFromDB(constants.airdropOstUsdAddress, airdropUserAddress);
-    const initialAirdropBalanceFromCache = await getUserAirdropBalanceFromCache(constants.airdropOstUsdAddress, airdropUserAddress);
+    const initialAirdropBalanceFromDB = await getUserAirdropBalanceFromDB(
+      constants.airdropOstUsdAddress,
+      airdropUserAddress
+    );
+    const initialAirdropBalanceFromCache = await getUserAirdropBalanceFromCache(
+      constants.airdropOstUsdAddress,
+      airdropUserAddress
+    );
     validateDBandCacheAirdropBalances(initialAirdropBalanceFromDB.data, initialAirdropBalanceFromCache.data);
 
     const estimatedValues = await airdropOstUsd.getPricePointAndCalculatedAmounts(
       transferAmount,
       commissionAmount,
-      currency);
+      currency
+    );
     assert.equal(estimatedValues.isSuccess(), true);
 
     const estimatedTokenAmount = new BigNumber(estimatedValues.data.tokenAmount);
@@ -1105,7 +1155,7 @@ describe('Airdrop Pay', function() {
     const estimatedTotalAmount = new BigNumber(0).plus(estimatedTokenAmount).plus(estimatedCommissionTokenAmount);
 
     const estimatedAirdropUsed = BigNumber.min(estimatedTotalAmount, availableAirdropBalance);
-    logger.debug("============ estimatedAirdropUsed ============");
+    logger.debug('============ estimatedAirdropUsed ============');
     logger.debug(estimatedAirdropUsed);
     // here we make sure that airdrop amount used will be greater than 0
     assert.equal(estimatedAirdropUsed.gt(0), true);
@@ -1115,12 +1165,13 @@ describe('Airdrop Pay', function() {
       spenderPassphrase,
       constants.airdropOstUsdAddress,
       estimatedTotalAmount.plus(100),
-      constants.gasUsed);
+      constants.gasUsed
+    );
 
-    logger.debug("============spender approving to contract=============");
+    logger.debug('============spender approving to contract=============');
     logger.debug(accountApproveResponse);
     var worker1Balance = await web3Provider.eth.getBalance(constants.workerAccount1);
-    logger.debug("\nconstants.workerAccount1.balance: ", worker1Balance);
+    logger.debug('\nconstants.workerAccount1.balance: ', worker1Balance);
 
     const PayObject = new PayKlass({
       airdrop_contract_address: constants.airdropOstUsdAddress,
@@ -1140,7 +1191,7 @@ describe('Airdrop Pay', function() {
     const payResponse = await PayObject.perform();
 
     assert.equal(payResponse.isSuccess(), true);
-    logger.debug("============airdrop.pay response=============");
+    logger.debug('============airdrop.pay response=============');
     logger.debug(payResponse);
 
     // verify if the transaction receipt is valid
@@ -1148,9 +1199,10 @@ describe('Airdrop Pay', function() {
     // verify if the transaction is actually mined
     await utils.verifyIfMined(airdropOstUsd, payResponse.data.transaction_hash);
 
-
     // checks for account balance cache and DB consistency
-    logger.debug("============ Validating consistency for account balance form cache and contract after pay =============");
+    logger.debug(
+      '============ Validating consistency for account balance form cache and contract after pay ============='
+    );
     const balanceFromContract = await getBalanceFromContract(TC5, address);
     const balancesFromCache = await getBalanceFromCache(brandedTokenObject, address);
     validateContractAndCacheBalance(balanceFromContract, balancesFromCache);
@@ -1164,21 +1216,23 @@ describe('Airdrop Pay', function() {
       commissionBeneficiary,
       airdropBudgetHolder,
       initalBalancesFromContract,
-      balanceFromContract);
+      balanceFromContract
+    );
 
     // checks for airdrop balance cache and DB consistency
-    logger.debug("============ Validating consistency for airdrop balance form cache and DB after pay =============");
+    logger.debug('============ Validating consistency for airdrop balance form cache and DB after pay =============');
     const airdropBalanceFromDB = await getUserAirdropBalanceFromDB(constants.airdropOstUsdAddress, airdropUserAddress);
-    const airdropBalanceFromCache = await getUserAirdropBalanceFromCache(constants.airdropOstUsdAddress, airdropUserAddress);
+    const airdropBalanceFromCache = await getUserAirdropBalanceFromCache(
+      constants.airdropOstUsdAddress,
+      airdropUserAddress
+    );
     validateDBandCacheAirdropBalances(airdropBalanceFromDB.data, airdropBalanceFromCache.data);
     // validate if the airdrop transfer was proper
     validateAirdropTransferSuccess(
       spenderAddress,
       initialAirdropBalanceFromDB,
       airdropBalanceFromDB,
-      estimatedAirdropUsed);
-
+      estimatedAirdropUsed
+    );
   });
-
-
 });

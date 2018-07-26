@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  *
@@ -7,14 +7,13 @@
  * @module services/airdrop_management/set_price_oracle
  *
  */
-const rootPrefix = '../..'
-  , InstanceComposer = require( rootPrefix + "/instance_composer")
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , basicHelper = require(rootPrefix + '/helpers/basic_helper')
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
-  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+const rootPrefix = '../..',
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  basicHelper = require(rootPrefix + '/helpers/basic_helper'),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
@@ -42,13 +41,20 @@ require(rootPrefix + '/lib/contract_interact/helper');
  * @return {Object}
  *
  */
-const SetPriceOracleKlass = function (params) {
+const SetPriceOracleKlass = function(params) {
   const oThis = this;
   params = params || {};
-  logger.debug("=======SetPriceOracleKlass.params=======");
+  logger.debug('=======SetPriceOracleKlass.params=======');
   // Don't log passphrase
-  logger.debug(params.airdrop_contract_address, params.chain_id, params.sender_address, params.currency,
-    params.price_oracle_contract_address, params.gas_price, params.options);
+  logger.debug(
+    params.airdrop_contract_address,
+    params.chain_id,
+    params.sender_address,
+    params.currency,
+    params.price_oracle_contract_address,
+    params.gas_price,
+    params.options
+  );
 
   oThis.airdropContractAddress = params.airdrop_contract_address;
   oThis.chainId = params.chain_id;
@@ -61,54 +67,49 @@ const SetPriceOracleKlass = function (params) {
 };
 
 SetPriceOracleKlass.prototype = {
-  
   /**
    * Perform
    *
    * @return {promise}
    */
-  perform: function () {
-    const oThis = this
-    ;
-    return oThis.asyncPerform()
-      .catch(function (error) {
-        if (responseHelper.isCustomResult(error)) {
-          return error;
-        } else {
-          logger.error('openst-platform::services/airdrop_management/set_price_oracle.js::perform::catch');
-          logger.error(error);
-          
-          return responseHelper.error({
-            internal_error_identifier: 's_am_spo_perform_1',
-            api_error_identifier: 'unhandled_api_error',
-            error_config: basicHelper.fetchErrorConfig(),
-            debug_options: {err: error}
-          });
-        }
-      });
+  perform: function() {
+    const oThis = this;
+    return oThis.asyncPerform().catch(function(error) {
+      if (responseHelper.isCustomResult(error)) {
+        return error;
+      } else {
+        logger.error('openst-platform::services/airdrop_management/set_price_oracle.js::perform::catch');
+        logger.error(error);
+
+        return responseHelper.error({
+          internal_error_identifier: 's_am_spo_perform_1',
+          api_error_identifier: 'unhandled_api_error',
+          error_config: basicHelper.fetchErrorConfig(),
+          debug_options: { err: error }
+        });
+      }
+    });
   },
-  
+
   /**
    * Async Perform
    *
    * @return {promise<result>}
    */
-  asyncPerform: async function () {
-    const oThis = this
-    ;
-  
+  asyncPerform: async function() {
+    const oThis = this;
+
     var r = null;
     r = await oThis.validateParams();
-    logger.debug("=======SetPriceOracleKlass.validateParams.result=======");
+    logger.debug('=======SetPriceOracleKlass.validateParams.result=======');
     logger.debug(r);
     if (r.isFailure()) return r;
-  
-    r = await oThis.setPriceOracle();
-    logger.debug("=======SetPriceOracleKlass.setPriceOracle.result=======");
-    logger.debug(r);
-  
-    return r;
 
+    r = await oThis.setPriceOracle();
+    logger.debug('=======SetPriceOracleKlass.setPriceOracle.result=======');
+    logger.debug(r);
+
+    return r;
   },
 
   /**
@@ -117,11 +118,9 @@ SetPriceOracleKlass.prototype = {
    * @return {result}
    *
    */
-  validateParams: function () {
-
-    const oThis = this
-      , helper = oThis.ic().getContractInteractHelper()
-    ;
+  validateParams: function() {
+    const oThis = this,
+      helper = oThis.ic().getContractInteractHelper();
 
     if (!helper.isValidCurrency(oThis.currency, false)) {
       let errorParams = {
@@ -187,16 +186,11 @@ SetPriceOracleKlass.prototype = {
    * @return {promise<result>}
    *
    */
-  setPriceOracle: function () {
+  setPriceOracle: function() {
+    const oThis = this,
+      AirdropContractInteractKlass = oThis.ic().getAirdropInteractClass();
 
-    const oThis = this
-      , AirdropContractInteractKlass = oThis.ic().getAirdropInteractClass()
-    ;
-
-    const AirdropContractInteractObject = new AirdropContractInteractKlass(
-      oThis.airdropContractAddress,
-      oThis.chainId
-    );
+    const AirdropContractInteractObject = new AirdropContractInteractKlass(oThis.airdropContractAddress, oThis.chainId);
 
     return AirdropContractInteractObject.setPriceOracle(
       oThis.senderAddress,
@@ -207,7 +201,6 @@ SetPriceOracleKlass.prototype = {
       oThis.options
     );
   }
-
 };
 
 InstanceComposer.registerShadowableClass(SetPriceOracleKlass, 'getSetPriceOracleClass');

@@ -15,32 +15,28 @@
  * @module tools/deploy/pricer
  */
 
-const readline = require('readline')
-  , rootPrefix = '../..'
-  , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
-  , prompts = readline.createInterface(process.stdin, process.stdout)
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , Deployer = require(rootPrefix + '/services/deploy/deployer')
-  , coreAddresses = require(rootPrefix + '/config/core_addresses')
-  , returnTypes = require(rootPrefix + "/lib/global_constant/return_types")
-  , helper = require(rootPrefix + "/tools/deploy/helper")
-  , openstPayment = require(rootPrefix + '/index')
-  , SetOpsKlass = openstPayment.services.opsManaged.setOps
-  , GetOpsKlass = openstPayment.services.opsManaged.getOps
-  , gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit')
-;
+const readline = require('readline'),
+  rootPrefix = '../..',
+  web3Provider = require(rootPrefix + '/lib/web3/providers/ws'),
+  prompts = readline.createInterface(process.stdin, process.stdout),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  Deployer = require(rootPrefix + '/services/deploy/deployer'),
+  coreAddresses = require(rootPrefix + '/config/core_addresses'),
+  returnTypes = require(rootPrefix + '/lib/global_constant/return_types'),
+  helper = require(rootPrefix + '/tools/deploy/helper'),
+  openstPayment = require(rootPrefix + '/index'),
+  SetOpsKlass = openstPayment.services.opsManaged.setOps,
+  GetOpsKlass = openstPayment.services.opsManaged.getOps,
+  gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit');
 
 // Different addresses used for deployment
-const deployerName = "deployer"
-  , deployerAddress = coreAddresses.getAddressForUser(deployerName)
-  , deployerPassphrase = coreAddresses.getPassphraseForUser(deployerName)
-;
+const deployerName = 'deployer',
+  deployerAddress = coreAddresses.getAddressForUser(deployerName),
+  deployerPassphrase = coreAddresses.getPassphraseForUser(deployerName);
 
 // Set Ops Address
-const opsName = "ops"
-  ,  opsAddress = coreAddresses.getAddressForUser(opsName)
-;
-
+const opsName = 'ops',
+  opsAddress = coreAddresses.getAddressForUser(opsName);
 
 /**
  * Validation Method
@@ -51,20 +47,20 @@ const opsName = "ops"
  */
 function validate(argv) {
   if (!argv[2]) {
-    logger.error("Mandatory Param is missing! ( brandedTokenAddress)");
+    logger.error('Mandatory Param is missing! ( brandedTokenAddress)');
     process.exit(0);
   }
 
   if (!argv[3]) {
-    logger.error("Base currency is mandatory!");
+    logger.error('Base currency is mandatory!');
     process.exit(0);
   }
   if (!argv[4]) {
-    logger.error("Gas Price is mandatory!");
+    logger.error('Gas Price is mandatory!');
     process.exit(0);
   }
   if (!argv[5]) {
-    logger.error("Chain Id is mandatory!");
+    logger.error('Chain Id is mandatory!');
     process.exit(0);
   }
 }
@@ -77,7 +73,6 @@ function validate(argv) {
  * @return {}
  */
 async function performer(argv) {
-
   // logger.debug("argv[0]: " + argv[0]);
   // logger.debug("argv[1]: " + argv[1]);
   // logger.debug("argv[2]: " + argv[2]);
@@ -96,42 +91,35 @@ async function performer(argv) {
   if (argv[6] !== undefined) {
     isTravisCIEnabled = argv[6].trim() === 'travis';
   }
-  const fileForContractAddress = (argv[7] !== undefined) ? argv[7].trim() : '';
+  const fileForContractAddress = argv[7] !== undefined ? argv[7].trim() : '';
 
-  logger.debug("Branded Token Address: " + brandedTokenAddress);
-  logger.debug("Base currency: " + baseCurrency);
-  logger.debug("Gas price: " + gasPrice);
-  logger.debug("Chain id: " + chainId);
-  logger.debug("Travis CI enabled Status: " + isTravisCIEnabled);
-  logger.debug("File to write For ContractAddress: "+fileForContractAddress);
-  if (isTravisCIEnabled === false ) {
-    await new Promise(
-      function (onResolve, onReject) {
-        prompts.question("Please verify all above details. Do you want to proceed? [Y/N]", function (intent) {
-          if (intent === 'Y') {
-            logger.debug('Great! Proceeding deployment.');
-            prompts.close();
-            onResolve();
-          } else {
-            logger.error('Exiting deployment scripts. Change the enviroment variables and re-run.');
-            process.exit(1);
-          }
-        });
-      }
-    );
+  logger.debug('Branded Token Address: ' + brandedTokenAddress);
+  logger.debug('Base currency: ' + baseCurrency);
+  logger.debug('Gas price: ' + gasPrice);
+  logger.debug('Chain id: ' + chainId);
+  logger.debug('Travis CI enabled Status: ' + isTravisCIEnabled);
+  logger.debug('File to write For ContractAddress: ' + fileForContractAddress);
+  if (isTravisCIEnabled === false) {
+    await new Promise(function(onResolve, onReject) {
+      prompts.question('Please verify all above details. Do you want to proceed? [Y/N]', function(intent) {
+        if (intent === 'Y') {
+          logger.debug('Great! Proceeding deployment.');
+          prompts.close();
+          onResolve();
+        } else {
+          logger.error('Exiting deployment scripts. Change the enviroment variables and re-run.');
+          process.exit(1);
+        }
+      });
+    });
   } else {
     prompts.close();
   }
 
-  const constructorArgs = [
-    brandedTokenAddress,
-    web3Provider.utils.asciiToHex(baseCurrency)
-  ];
+  const constructorArgs = [brandedTokenAddress, web3Provider.utils.asciiToHex(baseCurrency)];
 
-  const contractName = 'pricer'
-    , deployOptions = {returnType: returnTypes.transactionReceipt()};
-  ;
-
+  const contractName = 'pricer',
+    deployOptions = { returnType: returnTypes.transactionReceipt() };
   const deployerInstance = new Deployer({
     contract_name: contractName,
     constructor_args: constructorArgs,
@@ -139,12 +127,11 @@ async function performer(argv) {
     gas_limit: gasLimitGlobalConstant.default(),
     options: deployOptions
   });
-  const deployResult =  await deployerInstance.perform();
+  const deployResult = await deployerInstance.perform();
 
   if (deployResult.isSuccess()) {
-
     const contractAddress = deployResult.data.transaction_receipt.contractAddress;
-    logger.win("contractAddress: " + contractAddress);
+    logger.win('contractAddress: ' + contractAddress);
     if (fileForContractAddress !== '') {
       helper.writeContractAddressToFile(fileForContractAddress, contractAddress);
     }
@@ -152,8 +139,8 @@ async function performer(argv) {
     const setOpsOptions = {
       returnType: returnTypes.transactionReceipt(),
       tag: ''
-    }
-    logger.debug("Setting Ops Address to: " + opsAddress);
+    };
+    logger.debug('Setting Ops Address to: ' + opsAddress);
     const SetOpsObject = new SetOpsKlass({
       contract_address: contractAddress,
       gas_price: gasPrice,
@@ -173,10 +160,9 @@ async function performer(argv) {
     });
     const getOpsResult = await GetOpsObject.perform();
     const contractOpsAddress = getOpsResult.data.opsAddress;
-    logger.debug("Ops Address Set to: " + contractOpsAddress);
-
+    logger.debug('Ops Address Set to: ' + contractOpsAddress);
   } else {
-    logger.error("Error deploying contract");
+    logger.error('Error deploying contract');
     logger.error(deployResult);
   }
 

@@ -19,16 +19,15 @@
 //
 // ----------------------------------------------------------------------------
 
-const pricerUtils                               = require('./pricer_utils.js'),
-      constructor                                = require('./constructor.js'),
-      properties                                 = require('./properties.js'),
-      set_price_oracle                           = require('./set_price_oracle.js'),
-      unset_price_oracle                         = require('./unset_price_oracle.js'),
-      set_accepted_margin                        = require('./set_accepted_margin.js'),
-      get_price_point                            = require('./get_price_point.js'),
-      get_price_point_and_calculated_amounts     = require('./get_price_point_and_calculated_amounts.js'),
-      pay                                        = require('./pay.js')
-      ;
+const pricerUtils = require('./pricer_utils.js'),
+  constructor = require('./constructor.js'),
+  properties = require('./properties.js'),
+  set_price_oracle = require('./set_price_oracle.js'),
+  unset_price_oracle = require('./unset_price_oracle.js'),
+  set_accepted_margin = require('./set_accepted_margin.js'),
+  get_price_point = require('./get_price_point.js'),
+  get_price_point_and_calculated_amounts = require('./get_price_point_and_calculated_amounts.js'),
+  pay = require('./pay.js');
 
 contract('Pricer', function(accounts) {
   // TODO: include PricerMock that wraps getBTAmountFromCurrencyValue and isPricePointInRange
@@ -45,5 +44,4 @@ contract('Pricer', function(accounts) {
     pricerUtils.utils.printGasStatistics();
     pricerUtils.utils.clearReceipts();
   });
-  
 });

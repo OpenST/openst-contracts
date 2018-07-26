@@ -1,21 +1,18 @@
 /* global describe, it */
 
 /*eslint-disable */
-const chai = require('chai')
-  , assert = chai.assert;
+const chai = require('chai'),
+  assert = chai.assert;
 
-const rootPrefix = "../../.."
-  , constants = require(rootPrefix + '/mocha_test/lib/constants')
-  , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
-  , utils = require(rootPrefix+'/mocha_test/lib/utils')
-  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
-;
+const rootPrefix = '../../..',
+  constants = require(rootPrefix + '/mocha_test/lib/constants'),
+  pricer = require(rootPrefix + '/lib/contract_interact/pricer'),
+  utils = require(rootPrefix + '/mocha_test/lib/utils'),
+  pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId);
 /*eslint-enable */
 
 describe('Set accepted margins', function() {
-
   it('should pass the initial address checks', async function() {
-
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
@@ -33,7 +30,8 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       30,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response);
@@ -45,11 +43,9 @@ describe('Set accepted margins', function() {
     const amResult = await pricerOstUsd.acceptedMargins(constants.currencyUSD);
     assert.equal(amResult.isSuccess(), true);
     assert.equal(30, amResult.data.acceptedMargins);
-
   });
 
   it('should pass for interaction layer test when return type is uuid', async function() {
-
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
@@ -60,16 +56,15 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       50,
       constants.gasUsed,
-      constants.optionsUUID);
+      constants.optionsUUID
+    );
 
     // verify if the transaction receipt is valid
     // we will not verify if it got mined as its just interaction layer testing
     utils.verifyTransactionUUID(response);
-
   });
 
   it('should pass for interaction layer test when return type is txHash', async function() {
-
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
@@ -80,16 +75,15 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       150,
       constants.gasUsed,
-      constants.optionsHash);
+      constants.optionsHash
+    );
 
     // verify if the transaction hash is valid
     // we will not verify if it got mined as its just interaction layer testing
     utils.verifyTransactionHash(response);
-
   });
 
   it('should pass for interaction layer test when return type is txReceipt', async function() {
-
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
@@ -100,17 +94,15 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       70,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid.
     // We will not check here if the value is really set as its just interaction layer testing.
     utils.verifyTransactionReceipt(response);
-
   });
 
-
   it('should fail when currency is blank', async function() {
-
     // set the accepted margin to 3
     const response = await pricerOstUsd.setAcceptedMargin(
       constants.ops,
@@ -118,16 +110,14 @@ describe('Set accepted margins', function() {
       constants.currencyBlank,
       3,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the response is failure
     assert.equal(response.isFailure(), true);
-
   });
 
-
   it('should fail when gas amount is 0', async function() {
-
     // set the accepted margin to 3
     const response = await pricerOstUsd.setAcceptedMargin(
       constants.ops,
@@ -135,15 +125,14 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       3,
       0,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the response is failure
     assert.equal(response.isFailure(), true);
-
   });
 
   it('should fail when sender address is 0', async function() {
-
     // set the accepted margin to 3
     const response = await pricerOstUsd.setAcceptedMargin(
       0,
@@ -151,16 +140,14 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       3,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the response is failure
     assert.equal(response.isFailure(), true);
-
   });
 
-
   it('should fail when accepted margin is negative', async function() {
-
     // set the accepted margin to -30
     const response = await pricerOstUsd.setAcceptedMargin(
       0,
@@ -168,13 +155,12 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       -30,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the response is failure
     assert.equal(response.isFailure(), true);
-
   });
-
 
   it('should fail when sender is not ops', async function() {
     // eslint-disable-next-line no-invalid-this
@@ -187,7 +173,8 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       3,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response1);
@@ -207,7 +194,8 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       8,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the response is failure
     assert.equal(response2.isFailure(), true);
@@ -216,12 +204,9 @@ describe('Set accepted margins', function() {
     const amResult2 = await pricerOstUsd.acceptedMargins(constants.currencyUSD);
     assert.equal(amResult2.isSuccess(), true);
     assert.equal(3, amResult2.data.acceptedMargins);
-
   });
 
-
   it('should pass when margin is 0', async function() {
-
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
@@ -232,7 +217,8 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       0,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response);
@@ -244,12 +230,9 @@ describe('Set accepted margins', function() {
     const amResult = await pricerOstUsd.acceptedMargins(constants.currencyUSD);
     assert.equal(amResult.isSuccess(), true);
     assert.equal(0, amResult.data.acceptedMargins);
-
   });
 
-
   it('should pass when margin is 50', async function() {
-
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
@@ -260,7 +243,8 @@ describe('Set accepted margins', function() {
       constants.currencyUSD,
       50,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response);
@@ -272,9 +256,5 @@ describe('Set accepted margins', function() {
     const amResult = await pricerOstUsd.acceptedMargins(constants.currencyUSD);
     assert.equal(amResult.isSuccess(), true);
     assert.equal(50, amResult.data.acceptedMargins);
-
   });
-
 });
-
-

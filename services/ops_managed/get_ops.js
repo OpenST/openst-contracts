@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  *
@@ -8,14 +8,13 @@
  *
  */
 
-const rootPrefix = '../..'
-  , InstanceComposer = require( rootPrefix + "/instance_composer")
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , basicHelper = require(rootPrefix + '/helpers/basic_helper')
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
-  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+const rootPrefix = '../..',
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  basicHelper = require(rootPrefix + '/helpers/basic_helper'),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
@@ -37,16 +36,15 @@ require(rootPrefix + '/lib/contract_interact/ops_managed_contract');
  * @return {object}
  *
  */
-const GetOpsKlass = function (params) {
+const GetOpsKlass = function(params) {
   const oThis = this;
   params = params || {};
-  logger.debug("=======GetOpsKlass.params=======");
+  logger.debug('=======GetOpsKlass.params=======');
   logger.debug(params);
 
   oThis.contractAddress = params.contract_address;
   oThis.chainId = params.chain_id;
   oThis.gasPrice = params.gas_price;
-
 };
 
 GetOpsKlass.prototype = {
@@ -55,49 +53,45 @@ GetOpsKlass.prototype = {
    *
    * @return {promise}
    */
-  perform: function () {
-    const oThis = this
-    ;
-    return oThis.asyncPerform()
-      .catch(function (error) {
-        if (responseHelper.isCustomResult(error)) {
-          return error;
-        } else {
-          logger.error('openst-platform::services/ops_managed/get_ops.js::perform::catch');
-          logger.error(error);
-          
-          return responseHelper.error({
-            internal_error_identifier: 's_om_go_perform_1',
-            api_error_identifier: 'unhandled_api_error',
-            error_config: basicHelper.fetchErrorConfig(),
-            debug_options: {err: error}
-          });
-        }
-      });
+  perform: function() {
+    const oThis = this;
+    return oThis.asyncPerform().catch(function(error) {
+      if (responseHelper.isCustomResult(error)) {
+        return error;
+      } else {
+        logger.error('openst-platform::services/ops_managed/get_ops.js::perform::catch');
+        logger.error(error);
+
+        return responseHelper.error({
+          internal_error_identifier: 's_om_go_perform_1',
+          api_error_identifier: 'unhandled_api_error',
+          error_config: basicHelper.fetchErrorConfig(),
+          debug_options: { err: error }
+        });
+      }
+    });
   },
-  
+
   /**
    * Async Perform
    *
    * @return {promise<result>}
    */
-  asyncPerform: async function () {
-    const oThis = this
-    ;
-  
+  asyncPerform: async function() {
+    const oThis = this;
+
     var r = null;
-  
+
     r = await oThis.validateParams();
-    logger.debug("=======GetOpsKlass.validateParams.result=======");
+    logger.debug('=======GetOpsKlass.validateParams.result=======');
     logger.debug(r);
     if (r.isFailure()) return r;
-  
-    r = await oThis.getOps();
-    logger.debug("=======GetOpsKlass.getOps.result=======");
-    logger.debug(r);
-  
-    return r;
 
+    r = await oThis.getOps();
+    logger.debug('=======GetOpsKlass.getOps.result=======');
+    logger.debug(r);
+
+    return r;
   },
 
   /**
@@ -106,9 +100,8 @@ GetOpsKlass.prototype = {
    * @return {promise<result>}
    *
    */
-  validateParams: function () {
-    const oThis = this
-    ;
+  validateParams: function() {
+    const oThis = this;
     if (!basicHelper.isAddressValid(oThis.contractAddress)) {
       let errorParams = {
         internal_error_identifier: 's_om_go_validateParams_1',
@@ -151,22 +144,18 @@ GetOpsKlass.prototype = {
    * @return {promise<result>}
    *
    */
-  getOps: function () {
-    
-    const oThis = this
-      , OpsManagedContractInteractKlass = oThis.ic().getOpsManagedInteractClass()
-    ;
+  getOps: function() {
+    const oThis = this,
+      OpsManagedContractInteractKlass = oThis.ic().getOpsManagedInteractClass();
 
     const OpsManagedContractInteractObject = new OpsManagedContractInteractKlass(
       oThis.contractAddress,
       oThis.gasPrice,
       oThis.chainId
     );
-    
-    return OpsManagedContractInteractObject.getOpsAddress();
-    
-  }
 
+    return OpsManagedContractInteractObject.getOpsAddress();
+  }
 };
 
 InstanceComposer.registerShadowableClass(GetOpsKlass, 'getOpsClass');

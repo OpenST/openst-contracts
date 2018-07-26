@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * Load all the DynamoDB related constants from from config strategy OR define them as literals here and export them.
@@ -7,12 +7,10 @@
  *
  */
 
-const rootPrefix = '..'
-  , InstanceComposer = require(rootPrefix + "/instance_composer")
-;
+const rootPrefix = '..',
+  InstanceComposer = require(rootPrefix + '/instance_composer');
 
-const DynamoDbConfig = function (configStrategy, instanceComposer) {
-
+const DynamoDbConfig = function(configStrategy, instanceComposer) {
   const oThis = this;
 
   oThis.apiVersion = configStrategy.OS_DYNAMODB_API_VERSION;
@@ -30,9 +28,8 @@ const DynamoDbConfig = function (configStrategy, instanceComposer) {
   if (configStrategy.OS_DYNAMODB_LOGGING_ENABLED == 1) {
     oThis.logger = console;
   }
-
 };
 
-InstanceComposer.register(DynamoDbConfig, "getDynamoDbConfig", true);
+InstanceComposer.register(DynamoDbConfig, 'getDynamoDbConfig', true);
 
 module.exports = DynamoDbConfig;

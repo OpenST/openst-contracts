@@ -19,22 +19,20 @@
 //
 // ----------------------------------------------------------------------------
 
-const pricerUtils   = require('./pricer_utils.js'),
-      Pricer         = artifacts.require('./Pricer.sol'),
-      EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol')
-      ;
+const pricerUtils = require('./pricer_utils.js'),
+  Pricer = artifacts.require('./Pricer.sol'),
+  EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol');
 
 ///
 /// Test stories
-/// 
+///
 /// fails to deploy if brandedToken is null
 /// fails to deploy if baseCurrency is empty
 /// successfully deploys
 
 module.exports.perform = () => {
-  var token    = null,
-      response = null
-      ;
+  var token = null,
+    response = null;
 
   before(async () => {
     token = await EIP20TokenMock.new(1, 0, pricerUtils.currencies.ost, 'name', 18);
@@ -52,4 +50,4 @@ module.exports.perform = () => {
     response = await Pricer.new(token.address, pricerUtils.currencies.ost);
     pricerUtils.utils.logTransaction(response.transactionHash, 'Pricer.constructor');
   });
-}
+};
