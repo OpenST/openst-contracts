@@ -7,38 +7,51 @@ const rootPrefix = '../../..',
   constants = require(rootPrefix + '/mocha_test/lib/constants'),
   BigNumber = require('bignumber.js'),
   utils = require(rootPrefix + '/mocha_test/lib/utils'),
-  airdrop = require(rootPrefix + '/lib/contract_interact/airdrop'),
-  mockToken = require(rootPrefix + '/lib/contract_interact/EIP20TokenMock'),
-  BrandedTokenKlass = require(rootPrefix + '/lib/contract_interact/branded_token'),
-  web3Provider = require(rootPrefix + '/lib/web3/providers/ws'),
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  configStrategy = require(rootPrefix + '/config/temp.json'),
+  instanceComposer = new InstanceComposer(configStrategy),
   logger = require(rootPrefix + '/helpers/custom_console_logger'),
   paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
-  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
 
+require(rootPrefix + '/lib/contract_interact/airdrop');
+require(rootPrefix + '/lib/contract_interact/EIP20TokenMock');
+require(rootPrefix + '/lib/contract_interact/branded_token');
+require(rootPrefix + '/lib/providers/web3_factory');
+require(rootPrefix + '/lib/cache_management/airdrop_model');
+require(rootPrefix + '/app/models/user_airdrop_detail');
+require(rootPrefix + '/app/models/airdrop_allocation_proof_detail');
+require(rootPrefix + '/services/manifest');
+
+const airdrop = instanceComposer.getAirdropInteractClass(),
+  mockToken = instanceComposer.getMockTokenInteractClass(),
+  BrandedTokenKlass = instanceComposer.getBrandedTokenInteractClass(),
+  web3ProviderFactory = instanceComposer.getWeb3ProviderFactory(),
+  web3Provider = web3ProviderFactory.getProvider(web3ProviderFactory.typeWS),
+  AirdropModelCacheKlass = instanceComposer.getCacheManagementAirdropModelClass(),
+  airdropAllocationProofDetailKlass = instanceComposer.getAirdropAllocationProofDetailModelKlass(),
+  UserAirdropDetailKlass = instanceComposer.getUserAirdropDetailModelClass(),
+  manifest = instanceComposer.getServiceManifest(),
+  SetWorkerKlass = manifest.workers.setWorker,
+  IsWorkerKlass = manifest.workers.isWorker,
+  RegisterKlass = manifest.airdropManager.registerAirdrop,
+  TransferKlass = manifest.airdropManager.transfer,
+  ApproveKlass = manifest.airdropManager.approve,
+  BatchAllocatorKlass = manifest.airdropManager.batchAllocator,
+  UserBalanceKlass = manifest.airdropManager.userBalance,
+  PayKlass = manifest.airdropManager.pay,
+  SetPriceOracleKlass = manifest.airdropManager.setPriceOracle,
+  SetAcceptedMarginKlass = manifest.airdropManager.setAcceptedMargin;
+
 const airdropOstUsd = new airdrop(constants.airdropOstUsdAddress, constants.chainId),
   TC5 = new mockToken(constants.TC5Address),
   brandedTokenObject = new BrandedTokenKlass(constants.TC5Address, constants.chainId);
-
-const AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model'),
-  openstPayment = require(rootPrefix + '/index'),
-  SetWorkerKlass = openstPayment.services.workers.setWorker,
-  IsWorkerKlass = openstPayment.services.workers.isWorker,
-  RegisterKlass = openstPayment.services.airdropManager.registerAirdrop,
-  TransferKlass = openstPayment.services.airdropManager.transfer,
-  ApproveKlass = openstPayment.services.airdropManager.approve,
-  BatchAllocatorKlass = openstPayment.services.airdropManager.batchAllocator,
-  UserBalanceKlass = openstPayment.services.airdropManager.userBalance,
-  PayKlass = openstPayment.services.airdropManager.pay,
-  SetPriceOracleKlass = openstPayment.services.airdropManager.setPriceOracle,
-  SetAcceptedMarginKlass = openstPayment.services.airdropManager.setAcceptedMargin,
-  airdropAllocationProofDetailKlass = require(rootPrefix + '/app/models/airdrop_allocation_proof_detail'),
-  UserAirdropDetailKlass = require(rootPrefix + '/app/models/user_airdrop_detail'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 var transferToAirdropBudgetHolderTransactionHash = '';
 
@@ -510,6 +523,7 @@ async function populateCache() {
   await brandedTokenObject.getBalanceOf(constants.account5);
   await brandedTokenObject.getBalanceOf(constants.airdropBudgetHolder);
 }
+
 // Tests starts here
 describe('Airdrop Pay', function() {
   it('should pass the initial checks', async function() {
