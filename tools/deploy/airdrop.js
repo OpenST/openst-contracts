@@ -17,9 +17,10 @@
  * @module tools/deploy/pricer
  */
 
-const readline = require('readline'),
-  rootPrefix = '../..',
-  coreAddresses = require(rootPrefix + '/config/core_addresses'),
+const readline = require('readline')
+;
+
+const rootPrefix = '../..',
   prompts = readline.createInterface(process.stdin, process.stdout),
   logger = require(rootPrefix + '/helpers/custom_console_logger'),
   returnTypes = require(rootPrefix + '/lib/global_constant/return_types'),
@@ -31,11 +32,16 @@ const readline = require('readline'),
 
 // Different addresses used for deployment
 const deployerName = 'deployer',
+  opsName = 'ops',
+  coreAddresses = '',
   deployerAddress = coreAddresses.getAddressForUser(deployerName),
-  deployerPassphrase = coreAddresses.getPassphraseForUser(deployerName);
+  deployerPassphrase = coreAddresses.getPassphraseForUser(deployerName),
+  opsAddress = coreAddresses.getAddressForUser(opsName)
+;
 
-const opsName = 'ops';
-const opsAddress = coreAddresses.getAddressForUser(opsName);
+require(rootPrefix + '/config/core_addresses');
+require(rootPrefix + '/services/manifest');
+require(rootPrefix + '/tools/deploy/helper');
 
 /**
  * Validation Method
@@ -170,5 +176,5 @@ async function performer(argv) {
   process.exit(0);
 }
 
-// node tools/deploy/airdrop.js brandedTokenContractAddress baseCurrency workerContractAddress airdropBudgetHolder gasPrice chainId <travis> <fileToWrite>
+// node tools/deploy/airdrop.js brandedTokenContractAddress baseCurrency workerContractAddress airdropBudgetHolder gasPrice chainId <travis> <fileToWrite> <strategyFilePath>
 performer(process.argv);

@@ -8,6 +8,10 @@
  * @module tools/deploy/helper
  */
 
+const fs = require('fs')
+  , Path = require('path')
+;
+
 const rootPrefix = '../..',
   coreConstants = require(rootPrefix + '/config/core_constants'),
   gasPrice = coreConstants.OST_VALUE_GAS_PRICE,
@@ -15,45 +19,20 @@ const rootPrefix = '../..',
   coreAddresses = require(rootPrefix + '/config/core_addresses'),
   logger = require(rootPrefix + '/helpers/custom_console_logger'),
   web3EventsFormatter = require(rootPrefix + '/lib/web3/events/formatter'),
-  populateEnvVars = require(rootPrefix + '/mocha_test/lib/populate_env_vars.js'),
-  fs = require('fs'),
-  Path = require('path');
-
-const _private = {
-  /**
-   * Wait for Transaction to be included in block
-   *
-   * @param {Web3} web3Provider - It could be value chain or utility chain provider
-   * @param {String} transactionHash - Hash for which receipt is required.
-   *
-   * @return {Promise<TransactionHash>}
-   */
-  getReceipt: function(web3Provider, transactionHash) {
-    return new Promise(function(onResolve, onReject) {
-      var txSetInterval = null;
-
-      var handleResponse = function(response) {
-        if (response) {
-          clearInterval(txSetInterval);
-          onResolve(response);
-        } else {
-          logger.debug('Waiting for ' + transactionHash + ' to be included in block.');
-        }
-      };
-
-      txSetInterval = setInterval(function() {
-        web3Provider.eth.getTransactionReceipt(transactionHash).then(handleResponse);
-      }, 5000);
-    });
-  }
-};
+  populateEnvVars = require(rootPrefix + '/mocha_test/lib/populate_env_vars.js')
+;
 
 /**
- * Deploy Helper class to perform deploy
+ * Constructor
  *
- * @exports tools/deploy/DeployHelper
+ * @constructor
  */
-const deployHelper = {
+const DeployHelper = function(configStrategy, instanceComposer) {
+
+};
+
+DeployHelper.prototype = {
+
   /**
    * Method deploys contract
    *
@@ -79,7 +58,9 @@ const deployHelper = {
     customOptions,
     constructorArgs
   ) {
-    const deployerAddr = coreAddresses.getAddressForUser(deployerName),
+
+    const oThis = this,
+      deployerAddr = coreAddresses.getAddressForUser(deployerName),
       deployerAddrPassphrase = coreAddresses.getPassphraseForUser(deployerName);
 
     var options = {
@@ -127,7 +108,7 @@ const deployHelper = {
     var deployFailedReason = null;
     const transactionReceipt = await deploy()
       .then(function(transactionHash) {
-        return _private.getReceipt(web3Provider, transactionHash);
+        return oThis.getReceipt(web3Provider, transactionHash);
       })
       .catch((reason) => {
         deployFailedReason = reason;
@@ -202,7 +183,37 @@ const deployHelper = {
       logger.debug('Writing to file: ', fileName, 'contract address: ', contractAddress);
       fs.writeFileSync(Path.join(__dirname, '/' + fileName), contractAddress);
     }
+  },
+
+  /**
+   * Wait for Transaction to be included in block
+   *
+   * @param {Web3} web3Provider - It could be value chain or utility chain provider
+   * @param {String} transactionHash - Hash for which receipt is required.
+   *
+   * @return {Promise<TransactionHash>}
+   */
+  getReceipt: function(web3Provider, transactionHash) {
+    return new Promise(function(onResolve, onReject) {
+      var txSetInterval = null;
+
+      var handleResponse = function(response) {
+        if (response) {
+          clearInterval(txSetInterval);
+          onResolve(response);
+        } else {
+          logger.debug('Waiting for ' + transactionHash + ' to be included in block.');
+        }
+      };
+
+      txSetInterval = setInterval(function() {
+        web3Provider.eth.getTransactionReceipt(transactionHash).then(handleResponse);
+      }, 5000);
+    });
   }
+
 };
 
-module.exports = deployHelper;
+InstanceComposer.register(DeployHelper, 'getDeployHelper', false);
+
+module.exports = DeployHelper;
