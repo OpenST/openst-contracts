@@ -17,26 +17,19 @@
 
 const readline = require('readline'),
   rootPrefix = '../..',
-  web3Provider = require(rootPrefix + '/lib/web3/providers/ws'),
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
   prompts = readline.createInterface(process.stdin, process.stdout),
   logger = require(rootPrefix + '/helpers/custom_console_logger'),
-  Deployer = require(rootPrefix + '/services/deploy/deployer'),
-  coreAddresses = require(rootPrefix + '/config/core_addresses'),
   returnTypes = require(rootPrefix + '/lib/global_constant/return_types'),
-  helper = require(rootPrefix + '/tools/deploy/helper'),
+  gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit'),
   openstPayment = require(rootPrefix + '/index'),
   SetOpsKlass = openstPayment.services.opsManaged.setOps,
-  GetOpsKlass = openstPayment.services.opsManaged.getOps,
-  gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit');
+  GetOpsKlass = openstPayment.services.opsManaged.getOps;
 
-// Different addresses used for deployment
-const deployerName = 'deployer',
-  deployerAddress = coreAddresses.getAddressForUser(deployerName),
-  deployerPassphrase = coreAddresses.getPassphraseForUser(deployerName);
-
-// Set Ops Address
-const opsName = 'ops',
-  opsAddress = coreAddresses.getAddressForUser(opsName);
+require(rootPrefix + '/config/core_addresses');
+require(rootPrefix + '/tools/deploy/helper');
+require(rootPrefix + '/services/deploy/deployer');
+require(rootPrefix + '/lib/providers/web3_factory.js');
 
 /**
  * Validation Method
@@ -63,6 +56,10 @@ function validate(argv) {
     logger.error('Chain Id is mandatory!');
     process.exit(0);
   }
+  if (!arv[8]) {
+    logger.error('Config Strategy is mandatory!');
+    process.exit(0);
+  }
 }
 
 /**
@@ -87,7 +84,30 @@ async function performer(argv) {
   const baseCurrency = argv[3].trim();
   const gasPrice = argv[4].trim();
   const chainId = argv[5].trim();
+  const fileForConfigStrategy = argv[8] !== undefined ? argv[8].trim() : '';
+  if (!fileForConfigStrategy) {
+    logger.error('Exiting deployment scripts. Invalid fileForConfigStrategy', fileForConfigStrategy);
+    process.exit(1);
+  }
   var isTravisCIEnabled = false;
+
+  const configStrategy = require(fileForConfigStrategy),
+    instanceComposer = new InstanceComposer(configStrategy),
+    helper = instanceComposer.getDeployHelper(),
+    coreAddresses = instanceComposer.getCoreAddresses(),
+    Deployer = instanceComposer.getDeployerClass(),
+    web3ProviderFactory = instanceComposer.getWeb3ProviderFactory(),
+    web3Provider = web3ProviderFactory.getProvider(web3ProviderFactory.typeWS);
+
+  // Different addresses used for deployment
+  const deployerName = 'deployer',
+    deployerAddress = coreAddresses.getAddressForUser(deployerName),
+    deployerPassphrase = coreAddresses.getPassphraseForUser(deployerName);
+
+  // Set Ops Address
+  const opsName = 'ops',
+    opsAddress = coreAddresses.getAddressForUser(opsName);
+
   if (argv[6] !== undefined) {
     isTravisCIEnabled = argv[6].trim() === 'travis';
   }
@@ -99,6 +119,8 @@ async function performer(argv) {
   logger.debug('Chain id: ' + chainId);
   logger.debug('Travis CI enabled Status: ' + isTravisCIEnabled);
   logger.debug('File to write For ContractAddress: ' + fileForContractAddress);
+  logger.debug('fileForConfigStrategy: ' + fileForConfigStrategy);
+
   if (isTravisCIEnabled === false) {
     await new Promise(function(onResolve, onReject) {
       prompts.question('Please verify all above details. Do you want to proceed? [Y/N]', function(intent) {
