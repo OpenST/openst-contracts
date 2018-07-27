@@ -6,8 +6,14 @@ const chai = require('chai'),
 
 const rootPrefix = '../../..',
   constants = require(rootPrefix + '/mocha_test/lib/constants'),
-  pricer = require(rootPrefix + '/lib/contract_interact/pricer'),
   utils = require(rootPrefix + '/mocha_test/lib/utils'),
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  configStrategy = require(rootPrefix + '/config/temp.json'),
+  instanceComposer = new InstanceComposer(configStrategy);
+
+require(rootPrefix + '/lib/contract_interact/pricer');
+
+const pricer = instanceComposer.getPricerInteractClass(),
   pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId);
 /*eslint-enable */
 

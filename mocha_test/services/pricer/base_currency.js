@@ -5,7 +5,13 @@ const chai = require('chai'),
 
 const rootPrefix = '../../..',
   constants = require(rootPrefix + '/mocha_test/lib/constants'),
-  pricer = require(rootPrefix + '/lib/contract_interact/pricer'),
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  configStrategy = require(rootPrefix + '/config/temp.json'),
+  instanceComposer = new InstanceComposer(configStrategy);
+
+require(rootPrefix + '/lib/contract_interact/pricer');
+
+const pricer = instanceComposer.getPricerInteractClass(),
   pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId),
   pricerOstEur = new pricer(constants.pricerOstEurAddress, constants.chainId),
   pricerOstUsd10Decimal = new pricer(constants.pricerOstUsd10DecimalAddress, constants.chainId);

@@ -3,9 +3,17 @@ const chai = require('chai'),
 
 const rootPrefix = '../../..',
   constants = require(rootPrefix + '/mocha_test/lib/constants'),
-  airdrop = require(rootPrefix + '/lib/contract_interact/airdrop'),
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  configStrategy = require(rootPrefix + '/config/temp.json'),
+  instanceComposer = new InstanceComposer(configStrategy);
+
+require(rootPrefix + '/lib/contract_interact/airdrop');
+require(rootPrefix + '/lib/providers/web3_factory');
+
+const airdrop = instanceComposer.getAirdropInteractClass(),
   airdropContract = new airdrop(constants.airdropOstUsdAddress, constants.chainId),
-  web3Provider = require(rootPrefix + '/lib/web3/providers/ws');
+  web3ProviderFactory = instanceComposer.getWeb3ProviderFactory(),
+  web3Provider = web3ProviderFactory.getProvider(web3ProviderFactory.typeWS);
 
 describe('Get Workers', function() {
   it('should return correct worker contract address', async function() {

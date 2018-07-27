@@ -7,12 +7,20 @@ const rootPrefix = '../../..',
   constants = require(rootPrefix + '/mocha_test/lib/constants'),
   BigNumber = require('bignumber.js'),
   utils = require(rootPrefix + '/mocha_test/lib/utils'),
-  pricer = require(rootPrefix + '/lib/contract_interact/pricer'),
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  configStrategy = require(rootPrefix + '/config/temp.json'),
+  instanceComposer = new InstanceComposer(configStrategy);
+
+require(rootPrefix + '/lib/contract_interact/pricer');
+require(rootPrefix + '/lib/contract_interact/EIP20TokenMock');
+require(rootPrefix + '/lib/contract_interact/branded_token');
+
+const pricer = instanceComposer.getPricerInteractClass(),
   pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId),
   pricerOstEur = new pricer(constants.pricerOstEurAddress, constants.chainId),
-  mockToken = require(rootPrefix + '/lib/contract_interact/EIP20TokenMock'),
+  mockToken = instanceComposer.getMockTokenInteractClass(),
   TC5 = new mockToken(constants.TC5Address),
-  BrandedTokenKlass = require(rootPrefix + '/lib/contract_interact/branded_token'),
+  BrandedTokenKlass = instanceComposer.getBrandedTokenInteractClass(),
   brandedTokenObj = new BrandedTokenKlass(constants.TC5Address, constants.chainId);
 
 async function getAmountFromCache(address) {
@@ -199,6 +207,8 @@ describe('Pay', function() {
       constants.gasUsed,
       constants.optionsReceipt
     );
+
+    console.log('-----payResponse', JSON.stringify(payResponse));
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(payResponse);
