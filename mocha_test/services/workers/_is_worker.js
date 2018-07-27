@@ -5,8 +5,14 @@ const chai = require('chai'),
 
 const rootPrefix = '../../..',
   constants = require(rootPrefix + '/mocha_test/lib/constants'),
-  openstPayment = require(rootPrefix + '/index'),
-  IsWorkerKlass = openstPayment.services.workers.isWorker,
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  configStrategy = require(rootPrefix + '/mocha_test/scripts/config_strategy'),
+  instanceComposer = new InstanceComposer(configStrategy);
+
+require(rootPrefix + '/services/manifest');
+
+const manifest = instanceComposer.getServiceManifest(),
+  IsWorkerKlass = manifest.workers.isWorker,
   apiErrorConfig = require(rootPrefix + '/config/api_error_config');
 
 describe('Is worker', function() {

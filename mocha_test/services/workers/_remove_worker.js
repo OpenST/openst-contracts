@@ -6,7 +6,13 @@ const chai = require('chai'),
 const rootPrefix = '../../..',
   constants = require(rootPrefix + '/mocha_test/lib/constants'),
   utils = require(rootPrefix + '/mocha_test/lib/utils'),
-  workersModule = require(rootPrefix + '/lib/contract_interact/workers'),
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  configStrategy = require(rootPrefix + '/mocha_test/scripts/config_strategy'),
+  instanceComposer = new InstanceComposer(configStrategy);
+
+require(rootPrefix + '/lib/contract_interact/workers');
+
+const workersModule = instanceComposer.getWorkersInteractClass(),
   workers = new workersModule(constants.workersContractAddress, constants.chainId),
   apiErrorConfig = require(rootPrefix + '/config/api_error_config');
 

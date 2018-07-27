@@ -6,10 +6,17 @@ const chai = require('chai'),
 const rootPrefix = '../../..',
   constants = require(rootPrefix + '/mocha_test/lib/constants'),
   utils = require(rootPrefix + '/mocha_test/lib/utils'),
-  workersModule = require(rootPrefix + '/lib/contract_interact/workers'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config'),
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  configStrategy = require(rootPrefix + '/mocha_test/scripts/config_strategy'),
+  instanceComposer = new InstanceComposer(configStrategy);
+
+require(rootPrefix + '/lib/contract_interact/workers');
+
+const workersModule = instanceComposer.getWorkersInteractClass(),
   workers = new workersModule(constants.workersContractAddress, constants.chainId),
-  web3Provider = require(rootPrefix + '/lib/web3/providers/ws'),
-  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
+  web3ProviderFactory = instanceComposer.getWeb3ProviderFactory(),
+  web3Provider = web3ProviderFactory.getProvider(web3ProviderFactory.typeWS);
 
 describe('Remove', function() {
   it('should pass the initial address checks', function() {

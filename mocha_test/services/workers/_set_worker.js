@@ -7,11 +7,17 @@ const rootPrefix = '../../..',
   constants = require(rootPrefix + '/mocha_test/lib/constants'),
   BigNumber = require('bignumber.js'),
   utils = require(rootPrefix + '/mocha_test/lib/utils'),
-  web3Provider = require(rootPrefix + '/lib/web3/providers/ws'),
-  openstPayment = require(rootPrefix + '/index'),
-  SetWorkerKlass = openstPayment.services.workers.setWorker,
-  IsWorkerKlass = openstPayment.services.workers.isWorker,
-  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config'),
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  configStrategy = require(rootPrefix + '/mocha_test/scripts/config_strategy'),
+  instanceComposer = new InstanceComposer(configStrategy);
+
+require(rootPrefix + '/services/manifest');
+
+const web3ProviderFactory = instanceComposer.getWeb3ProviderFactory(),
+  web3Provider = web3ProviderFactory.getProvider(web3ProviderFactory.typeWS),
+  manifest = instanceComposer.getServiceManifest();
+(SetWorkerKlass = manifest.workers.setWorker), (IsWorkerKlass = manifest.workers.isWorker);
 
 describe('Set worker', function() {
   it('should pass the initial address checks', function() {
