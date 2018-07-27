@@ -8,7 +8,7 @@ const rootPrefix = '../../..',
   BigNumber = require('bignumber.js'),
   utils = require(rootPrefix + '/mocha_test/lib/utils'),
   InstanceComposer = require(rootPrefix + '/instance_composer'),
-  configStrategy = require(rootPrefix + '/config/temp.json'),
+  configStrategy = require(rootPrefix + '/mocha_test/scripts/config_strategy'),
   instanceComposer = new InstanceComposer(configStrategy);
 
 require(rootPrefix + '/lib/contract_interact/pricer');

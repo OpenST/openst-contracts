@@ -4,7 +4,7 @@ const chai = require('chai'),
 const rootPrefix = '../../..',
   constants = require(rootPrefix + '/mocha_test/lib/constants'),
   InstanceComposer = require(rootPrefix + '/instance_composer'),
-  configStrategy = require(rootPrefix + '/config/temp.json'),
+  configStrategy = require(rootPrefix + '/mocha_test/scripts/config_strategy'),
   instanceComposer = new InstanceComposer(configStrategy);
 
 require(rootPrefix + '/lib/contract_interact/airdrop');
