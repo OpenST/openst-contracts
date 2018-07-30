@@ -1,4 +1,5 @@
 pragma solidity ^0.4.23;
+import "./MultiSigWallet.sol";
 
 // Copyright 2017 OpenST Ltd.
 //
@@ -28,7 +29,7 @@ pragma solidity ^0.4.23;
  *          scalable key management solutions for mainstream apps.
  *
  */
-contract TokenHolder {
+contract TokenHolder is MultiSigWallet{
 
     /** Storage */
 
@@ -65,7 +66,6 @@ contract TokenHolder {
     }
 
     validateSession(){
-
-}
+    }
 
 }
