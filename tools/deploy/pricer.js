@@ -21,14 +21,12 @@ const readline = require('readline'),
   prompts = readline.createInterface(process.stdin, process.stdout),
   logger = require(rootPrefix + '/helpers/custom_console_logger'),
   returnTypes = require(rootPrefix + '/lib/global_constant/return_types'),
-  gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit'),
-  openstPayment = require(rootPrefix + '/index'),
-  SetOpsKlass = openstPayment.services.opsManaged.setOps,
-  GetOpsKlass = openstPayment.services.opsManaged.getOps;
+  gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit');
 
 require(rootPrefix + '/config/core_addresses');
 require(rootPrefix + '/tools/deploy/helper');
 require(rootPrefix + '/services/deploy/deployer');
+require(rootPrefix + '/services/manifest');
 require(rootPrefix + '/lib/providers/web3_factory.js');
 
 /**
@@ -56,7 +54,7 @@ function validate(argv) {
     logger.error('Chain Id is mandatory!');
     process.exit(0);
   }
-  if (!arv[8]) {
+  if (!argv[6]) {
     logger.error('Config Strategy is mandatory!');
     process.exit(0);
   }
@@ -84,20 +82,23 @@ async function performer(argv) {
   const baseCurrency = argv[3].trim();
   const gasPrice = argv[4].trim();
   const chainId = argv[5].trim();
-  const fileForConfigStrategy = argv[8] !== undefined ? argv[8].trim() : '';
+  const fileForConfigStrategy = argv[6] !== undefined ? argv[6].trim() : '';
   if (!fileForConfigStrategy) {
     logger.error('Exiting deployment scripts. Invalid fileForConfigStrategy', fileForConfigStrategy);
     process.exit(1);
   }
   var isTravisCIEnabled = false;
 
-  const configStrategy = require(fileForConfigStrategy),
+  const configStrategy = require(rootPrefix + fileForConfigStrategy),
     instanceComposer = new InstanceComposer(configStrategy),
     helper = instanceComposer.getDeployHelper(),
     coreAddresses = instanceComposer.getCoreAddresses(),
     Deployer = instanceComposer.getDeployerClass(),
     web3ProviderFactory = instanceComposer.getWeb3ProviderFactory(),
-    web3Provider = web3ProviderFactory.getProvider(web3ProviderFactory.typeWS);
+    web3Provider = web3ProviderFactory.getProvider(web3ProviderFactory.typeWS),
+    manifest = instanceComposer.getServiceManifest(),
+    SetOpsKlass = manifest.opsManaged.setOps,
+    GetOpsKlass = manifest.opsManaged.getOps;
 
   // Different addresses used for deployment
   const deployerName = 'deployer',
@@ -108,10 +109,10 @@ async function performer(argv) {
   const opsName = 'ops',
     opsAddress = coreAddresses.getAddressForUser(opsName);
 
-  if (argv[6] !== undefined) {
-    isTravisCIEnabled = argv[6].trim() === 'travis';
+  if (argv[7] !== undefined) {
+    isTravisCIEnabled = argv[7].trim() === 'travis';
   }
-  const fileForContractAddress = argv[7] !== undefined ? argv[7].trim() : '';
+  const fileForContractAddress = argv[8] !== undefined ? argv[8].trim() : '';
 
   logger.debug('Branded Token Address: ' + brandedTokenAddress);
   logger.debug('Base currency: ' + baseCurrency);

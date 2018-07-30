@@ -7,10 +7,17 @@
  */
 
 var rootPrefix = '..',
-  coreConstants = require(rootPrefix + '/config/core_constants'),
-  QueryDBKlass = require(rootPrefix + '/app/models/queryDb'),
-  QueryDB = new QueryDBKlass(coreConstants.MYSQL_DATABASE),
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  configStrategy = require(rootPrefix + '/mocha_test/scripts/config_strategy'),
   logger = require(rootPrefix + '/helpers/custom_console_logger');
+
+require(rootPrefix + '/config/core_constants');
+require(rootPrefix + '/app/models/queryDb');
+
+const instanceComposer = new InstanceComposer(configStrategy),
+  coreConstants = instanceComposer.getCoreConstants(),
+  QueryDBKlass = instanceComposer.getQueryDBKlass(),
+  QueryDB = new QueryDBKlass(coreConstants.MYSQL_DATABASE);
 
 /**
  * Create payments table

@@ -21,6 +21,7 @@ export OP_MYSQL_CONNECTION_POOL_SIZE='5'
 
 export OST_CACHING_ENGINE='none'
 export OST_DEBUG_ENABLED=1
+export CONFIG_STRATEGY_FILE_NAME='/mocha_test/scripts/config_strategy.js'
 
 
 export OS_DYNAMODB_API_VERSION='2012-08-10'

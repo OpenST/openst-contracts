@@ -12,16 +12,14 @@
  * @module tools/deploy/EIP20TokenMock
  */
 
-const readline = require('readline')
-  , BigNumber = require('bignumber.js')
-;
+const readline = require('readline'),
+  BigNumber = require('bignumber.js');
 
 const rootPrefix = '../..',
   prompts = readline.createInterface(process.stdin, process.stdout),
   logger = require(rootPrefix + '/helpers/custom_console_logger'),
   gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit'),
-  InstanceComposer = require(rootPrefix + '/instance_composer')
-;
+  InstanceComposer = require(rootPrefix + '/instance_composer');
 
 require(rootPrefix + '/services/deploy/deployer');
 require(rootPrefix + '/tools/deploy/helper');
@@ -36,7 +34,6 @@ require(rootPrefix + '/lib/providers/storage');
  */
 
 async function performer(argv) {
-
   if (argv.length < 8) {
     logger.error('Invalid arguments !!!');
     process.exit(0);
@@ -107,13 +104,12 @@ async function performer(argv) {
 
   let constructorArgs = [conversionRate, conversionDecimals, symbol, name, decimals];
 
-  const configStrategy = require(fileForConfigStrategy)
-    , instanceComposer = new InstanceComposer(configStrategy)
-    , Deployer = instanceComposer.getDeployerClass()
-    , deployHelper = instanceComposer.getDeployHelper()
-    , storageProvider = instanceComposer.getStorageProvider()
-    , openSTStorage = storageProvider.getInstance()
-  ;
+  const configStrategy = require(rootPrefix + fileForConfigStrategy),
+    instanceComposer = new InstanceComposer(configStrategy),
+    Deployer = instanceComposer.getDeployerClass(),
+    deployHelper = instanceComposer.getDeployHelper(),
+    storageProvider = instanceComposer.getStorageProvider(),
+    openSTStorage = storageProvider.getInstance();
 
   const deployerInstance = new Deployer({
     contract_name: contractName,
@@ -126,7 +122,6 @@ async function performer(argv) {
   const deployResult = await deployerInstance.perform();
 
   if (deployResult.isSuccess()) {
-
     const contractAddress = deployResult.data.transaction_receipt.contractAddress;
     logger.win('contractAddress: ' + contractAddress);
 
@@ -139,11 +134,9 @@ async function performer(argv) {
     if (fileForContractAddress !== '') {
       await deployHelper.writeContractAddressToFile(fileForContractAddress, contractAddress);
     }
-
   }
 
   process.exit(0);
-
 }
 
 // example: node ../tools/deploy/EIP20TokenMock.js 5 DKN deepeshCoin 18 0x12A05F200 config_strategy.js travis bt.txt

@@ -28,7 +28,7 @@ const CoreConstants = function(configStrategy, instanceComposer) {
   oThis.MYSQL_PASSWORD = configStrategy.OP_MYSQL_PASSWORD;
   oThis.MYSQL_DATABASE = configStrategy.OP_MYSQL_DATABASE;
   oThis.MYSQL_CONNECTION_POOL_SIZE = configStrategy.OP_MYSQL_CONNECTION_POOL_SIZE;
-  oThis.STANDALONE_MODE = configStrategy.OST_STANDALONE_MODE;
+  oThis.OST_STANDALONE_MODE = configStrategy.OST_STANDALONE_MODE;
 
   //Debug level
   oThis.DEBUG_ENABLED = configStrategy.DEBUG_ENABLED || false;
@@ -84,7 +84,7 @@ CoreConstants.prototype = {
    * @constant {string}
    *
    */
-  STANDALONE_MODE: null,
+  OST_STANDALONE_MODE: null,
 
   /**
    * is debug enabled.<br><br>

@@ -4,13 +4,13 @@ var rootPrefix = '../..',
   InstanceComposer = require(rootPrefix + '/instance_composer'),
   logger = require(rootPrefix + '/helpers/custom_console_logger');
 
+require(rootPrefix + '/lib/mysql_wrapper');
+
 const QueryDB = function(dbName) {
   this.dbName = dbName;
 };
 
 QueryDB.prototype = {
-  constructor: QueryDB,
-
   // get read connection
   onReadConnection: function() {
     const oThis = this,

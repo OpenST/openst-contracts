@@ -2,7 +2,10 @@
 
 const rootPrefix = '../..',
   logger = require(rootPrefix + '/helpers/custom_console_logger'),
-  web3Provider = require(rootPrefix + '/lib/web3/providers/ws');
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  configStrategy = require(rootPrefix + '/mocha_test/scripts/config_strategy');
+
+require(rootPrefix + '/lib/providers/web3_factory');
 
 const performer = async function() {
   const delay = 10 * 1000,
@@ -15,6 +18,10 @@ const performer = async function() {
   setInterval(function() {
     if (totalTime <= timeoutValue) {
       if (isInProcess == false) {
+        let instanceComposer = new InstanceComposer(configStrategy),
+          web3ProviderFactory = instanceComposer.getWeb3ProviderFactory(),
+          web3Provider = web3ProviderFactory.getProvider(web3ProviderFactory.typeWS);
+
         isInProcess = true;
         web3Provider.eth.getBlockNumber(function(err, blocknumber) {
           if (err || blocknumber < 1) {

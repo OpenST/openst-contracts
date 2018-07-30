@@ -17,27 +17,17 @@
  * @module tools/deploy/pricer
  */
 
-const readline = require('readline')
-;
+const readline = require('readline');
 
 const rootPrefix = '../..',
   prompts = readline.createInterface(process.stdin, process.stdout),
   logger = require(rootPrefix + '/helpers/custom_console_logger'),
   returnTypes = require(rootPrefix + '/lib/global_constant/return_types'),
-  helper = require(rootPrefix + '/tools/deploy/helper'),
-  openstPayment = require(rootPrefix + '/index'),
-  SetOpsKlass = openstPayment.services.opsManaged.setOps,
-  GetOpsKlass = openstPayment.services.opsManaged.getOps,
-  DeployAirdropKlass = openstPayment.services.deploy.airdrop;
+  InstanceComposer = require(rootPrefix + '/instance_composer');
 
 // Different addresses used for deployment
 const deployerName = 'deployer',
-  opsName = 'ops',
-  coreAddresses = '',
-  deployerAddress = coreAddresses.getAddressForUser(deployerName),
-  deployerPassphrase = coreAddresses.getPassphraseForUser(deployerName),
-  opsAddress = coreAddresses.getAddressForUser(opsName)
-;
+  opsName = 'ops';
 
 require(rootPrefix + '/config/core_addresses');
 require(rootPrefix + '/services/manifest');
@@ -75,6 +65,11 @@ function validate(argv) {
     logger.error('chainId is mandatory!');
     process.exit(0);
   }
+
+  if (!argv[8]) {
+    logger.error('Config strategy file is mandatory!');
+    process.exit(0);
+  }
 }
 
 /**
@@ -93,13 +88,19 @@ async function performer(argv) {
   const gasPrice = argv[6].trim();
   const chainId = argv[7].trim();
   var isTravisCIEnabled = false;
-  if (argv[8] !== undefined) {
-    isTravisCIEnabled = argv[8].trim() === 'travis';
-  }
-  const fileForContractAddress = argv[9] !== undefined ? argv[9].trim() : '';
 
-  logger.debug('Deployer Address: ' + deployerAddress);
-  logger.debug('Ops Address: ' + opsAddress);
+  const fileForConfigStrategy = argv[8] !== undefined ? argv[8].trim() : '';
+
+  if (argv[9] !== undefined) {
+    isTravisCIEnabled = argv[9].trim() === 'travis';
+  }
+  const fileForContractAddress = argv[10] !== undefined ? argv[10].trim() : '';
+
+  if (!fileForConfigStrategy) {
+    logger.error('Exiting airdrop deployment script. Invalid fileForConfigStrategy', fileForConfigStrategy);
+    process.exit(1);
+  }
+
   logger.debug('Branded Token Address: ' + brandedTokenAddress);
   logger.debug('Base currency: ' + baseCurrency);
   logger.debug('Worker Contract Address: ' + workerContractAddress);
@@ -108,6 +109,7 @@ async function performer(argv) {
   logger.debug('chainId: ' + chainId);
   logger.debug('Travis CI enabled Status: ' + isTravisCIEnabled);
   logger.debug('File to write For ContractAddress: ' + fileForContractAddress);
+  logger.debug('fileForConfigStrategy: ' + fileForConfigStrategy);
 
   if (isTravisCIEnabled === false) {
     await new Promise(function(onResolve, onReject) {
@@ -125,6 +127,21 @@ async function performer(argv) {
   } else {
     prompts.close();
   }
+
+  const configStrategy = require(rootPrefix + fileForConfigStrategy),
+    instanceComposer = new InstanceComposer(configStrategy),
+    helper = instanceComposer.getDeployHelper(),
+    manifest = instanceComposer.getServiceManifest(),
+    SetOpsKlass = manifest.opsManaged.setOps,
+    GetOpsKlass = manifest.opsManaged.getOps,
+    DeployAirdropKlass = manifest.deploy.airdrop,
+    coreAddresses = instanceComposer.getCoreAddresses(),
+    deployerAddress = coreAddresses.getAddressForUser(deployerName),
+    deployerPassphrase = coreAddresses.getPassphraseForUser(deployerName),
+    opsAddress = coreAddresses.getAddressForUser(opsName);
+
+  logger.debug('Deployer Address: ' + deployerAddress);
+  logger.debug('Ops Address: ' + opsAddress);
 
   const deployOptions = { returnType: returnTypes.transactionReceipt() };
   const DeployAirdropObject = new DeployAirdropKlass({

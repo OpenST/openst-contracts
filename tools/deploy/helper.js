@@ -8,9 +8,8 @@
  * @module tools/deploy/helper
  */
 
-const fs = require('fs')
-  , Path = require('path')
-;
+const fs = require('fs'),
+  Path = require('path');
 
 const rootPrefix = '../..',
   coreConstants = require(rootPrefix + '/config/core_constants'),
@@ -19,20 +18,17 @@ const rootPrefix = '../..',
   coreAddresses = require(rootPrefix + '/config/core_addresses'),
   logger = require(rootPrefix + '/helpers/custom_console_logger'),
   web3EventsFormatter = require(rootPrefix + '/lib/web3/events/formatter'),
-  populateEnvVars = require(rootPrefix + '/mocha_test/lib/populate_env_vars.js')
-;
+  populateEnvVars = require(rootPrefix + '/mocha_test/lib/populate_env_vars.js'),
+  InstanceComposer = require(rootPrefix + '/instance_composer');
 
 /**
  * Constructor
  *
  * @constructor
  */
-const DeployHelper = function(configStrategy, instanceComposer) {
-
-};
+const DeployHelper = function(configStrategy, instanceComposer) {};
 
 DeployHelper.prototype = {
-
   /**
    * Method deploys contract
    *
@@ -58,7 +54,6 @@ DeployHelper.prototype = {
     customOptions,
     constructorArgs
   ) {
-
     const oThis = this,
       deployerAddr = coreAddresses.getAddressForUser(deployerName),
       deployerAddrPassphrase = coreAddresses.getPassphraseForUser(deployerName);
@@ -211,7 +206,6 @@ DeployHelper.prototype = {
       }, 5000);
     });
   }
-
 };
 
 InstanceComposer.register(DeployHelper, 'getDeployHelper', false);

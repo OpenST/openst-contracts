@@ -13,7 +13,6 @@ const _addresses = {
 };
 
 const rootPrefix = '../..',
-  coreConstants = require(rootPrefix + '/config/core_constants'),
   logger = require(rootPrefix + '/helpers/custom_console_logger'),
   populateEnvVars = require(rootPrefix + '/mocha_test/lib/populate_env_vars.js'),
   poaGenesis = require(rootPrefix + '/mocha_test/scripts/poa-genesis.json');

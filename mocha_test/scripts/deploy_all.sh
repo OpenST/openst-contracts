@@ -3,6 +3,7 @@
 cd ..
 sh ../contracts/compile.sh
 . ./scripts/env_vars.sh
+node ../tools/dynamo_db_init.js
 
 echo "\n********* Deploying test coin 1 *************"
 node ../tools/deploy/EIP20TokenMock.js 5 TC1 TestCoin1 18 0x12A05F200 $CONFIG_STRATEGY_FILE_NAME travis tc1.txt
@@ -30,7 +31,7 @@ echo "\n********* Done *************"
 
 echo "\n********* Deploying Pricer 1 *************"
 . ./scripts/env_vars.sh
-node ../tools/deploy/pricer.js $OST_UTILITY_TEST_COIN1_C5_ADDRESS OST 0x12A05F200 $OST_UTILITY_CHAIN_ID travis tp1.txt $CONFIG_STRATEGY_FILE_NAME
+node ../tools/deploy/pricer.js $OST_UTILITY_TEST_COIN1_C5_ADDRESS OST 0x12A05F200 $OST_UTILITY_CHAIN_ID $CONFIG_STRATEGY_FILE_NAME travis tp1.txt
 export OST_UTILITY_TEST_PRICER_C5_ADDRESS=$(cat ../tools/deploy/tp1.txt)
 echo '\nexport OST_UTILITY_TEST_PRICER_C5_ADDRESS='\'$OST_UTILITY_TEST_PRICER_C5_ADDRESS\'>>scripts/env_vars.sh
 rm ../tools/deploy/tp1.txt
@@ -38,7 +39,7 @@ echo "\n********* Done *************"
 
 echo "\n********* Deploying Pricer 2 *************"
 . ./scripts/env_vars.sh
-node ../tools/deploy/pricer.js $OST_UTILITY_TEST_COIN2_C2_ADDRESS OST 0x12A05F200 $OST_UTILITY_CHAIN_ID travis tp2.txt $CONFIG_STRATEGY_FILE_NAME
+node ../tools/deploy/pricer.js $OST_UTILITY_TEST_COIN2_C2_ADDRESS OST 0x12A05F200 $OST_UTILITY_CHAIN_ID $CONFIG_STRATEGY_FILE_NAME travis tp2.txt
 export OST_UTILITY_TEST_PRICER_C2_ADDRESS=$(cat ../tools/deploy/tp2.txt)
 echo '\nexport OST_UTILITY_TEST_PRICER_C2_ADDRESS='\'$OST_UTILITY_TEST_PRICER_C2_ADDRESS\'>>scripts/env_vars.sh
 rm ../tools/deploy/tp2.txt
@@ -46,14 +47,14 @@ echo "\n********* Done *************"
 
 echo "\n********* Deploying Pricer 3 *************"
 . ./scripts/env_vars.sh
-node ../tools/deploy/pricer.js $OST_UTILITY_TEST_COIN3_C3_ADDRESS OST 0x12A05F200 $OST_UTILITY_CHAIN_ID travis tp3.txt $CONFIG_STRATEGY_FILE_NAME
+node ../tools/deploy/pricer.js $OST_UTILITY_TEST_COIN3_C3_ADDRESS OST 0x12A05F200 $OST_UTILITY_CHAIN_ID $CONFIG_STRATEGY_FILE_NAME travis tp3.txt
 export OST_UTILITY_TEST_PRICER_C3_ADDRESS=$(cat ../tools/deploy/tp3.txt)
 echo '\nexport OST_UTILITY_TEST_PRICER_C3_ADDRESS='\'$OST_UTILITY_TEST_PRICER_C3_ADDRESS\'>>scripts/env_vars.sh
 rm ../tools/deploy/tp3.txt
 echo "\n********* Done *************"
 
 echo "\n********* Deploying Worker Contract Address *************"
-node ../tools/deploy/workers.js 0x12A05F200 $OST_UTILITY_CHAIN_ID travis w1.txt $CONFIG_STRATEGY_FILE_NAME
+node ../tools/deploy/workers.js 0x12A05F200 $OST_UTILITY_CHAIN_ID $CONFIG_STRATEGY_FILE_NAME travis w1.txt
 export OST_UTILITY_WORKER_CONTRACT_ADDRESS=$(cat ../tools/deploy/w1.txt)
 echo '\nexport OST_UTILITY_WORKER_CONTRACT_ADDRESS='\'$OST_UTILITY_WORKER_CONTRACT_ADDRESS\'>>scripts/env_vars.sh
 rm ../tools/deploy/w1.txt
