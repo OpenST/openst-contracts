@@ -66,7 +66,7 @@ contract TokenHolder is MultiSigWallet {
         address[] _wallets)
         public
     {
-        require(_brandedToken != address(0), "branded token contract address is 0");
+        require(_brandedToken != address(0), "Branded token contract address is 0");
         require(_coGateway != address(0), "Co gateway contract address is 0");
         require(_wallets.length >= 2, "Minimum two wallets are needed");
 
@@ -85,7 +85,7 @@ contract TokenHolder is MultiSigWallet {
         returns(bool)
     {
         require(_sessionLock != bytes32(0), "Input sessionLock is invalid!");
-        require(sessionLocks[_sessionLock] == bytes32(0), "sessionLock is already authorized");
+        require(sessionLocks[_sessionLock] == bytes32(0), "SessionLock is already authorized");
 
         sessionLocks[_sessionLock] = true;
         spendingLimit = _spendingLimit;
@@ -103,8 +103,8 @@ contract TokenHolder is MultiSigWallet {
         public
         returns(bool)
     {
-        require(_sessionLock != bytes32(0), "sessionLock is 0 ");
-        require(sessionLocks[_sessionLock] != bytes32(0), "sessionLock is not authorized");
+        require(_sessionLock != bytes32(0), "Input SessionLock is invalid");
+        require(sessionLocks[_sessionLock] != bytes32(0), "Input SessionLock is not authorized");
 
         delete sessionLocks[_sessionLock];
         spendingLimit = 0;
@@ -119,11 +119,10 @@ contract TokenHolder is MultiSigWallet {
      */
     function validateSession(
         bytes32 _newSessionLock)
-        internal
-        onlyWallet
+        private
         returns (bytes32)
     {
-        require(_newSessionLock != bytes32(0), "Input secret is 0");
+        require(_newSessionLock != bytes32(0), "Input session lock is invalid");
 
         bytes32 oldSessionLock = sha3(_newSessionLock);
         if (sessionLocks[oldSessionLock] == true){
@@ -156,7 +155,7 @@ contract TokenHolder is MultiSigWallet {
         returns (bool)
     {
         bytes32 oldSessionLock = validateSession(_spendingSecret);
-        require(oldSessionLock != bytes32(0), "session not validated");
+        require(oldSessionLock != bytes32(0), "Session is not validated");
 
         require(_amount <= spendingLimit, "Amount should be less than spending limit");
         BrandedToken(brandedToken).transfer(_to, _amount);
