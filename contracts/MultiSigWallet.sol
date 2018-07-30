@@ -45,12 +45,12 @@ contract MultiSigWallet {
     }
 
     modifier walletDoesNotExist(address wallet) {
-        require(!isWallet[wallet],"wallet address doesnt exist");
+        require(!isWallet[wallet],"Wallet address doesnt exist");
         _;
     }
 
     modifier walletExists(address wallet) {
-        require(isWallet[wallet],"");
+        require(isWallet[wallet],"Wallet should be added to proceed for this transaction");
         _;
     }
     //seems to be not needed
@@ -60,7 +60,7 @@ contract MultiSigWallet {
     //    }
 
     modifier confirmed(uint transactionId, address wallet) {
-        require(confirmations[transactionId][wallet]);
+        require(confirmations[transactionId][wallet],"Transaction is not confirmed by this wallet");
         _;
     }
 
@@ -75,7 +75,7 @@ contract MultiSigWallet {
     }
 
     modifier notNull(address _address) {
-        require(_address != 0);
+        require(_address != 0,"Wallet address should not be null");
         _;
     }
 
@@ -83,7 +83,7 @@ contract MultiSigWallet {
         require(//ownerCount <= MAX_OWNER_COUNT &&
             _required <= walletCount
         && _required != 0
-        && walletCount != 0);
+        && walletCount != 0,"Required to be set is incorrect or not null");
         _;
     }
 
@@ -106,7 +106,7 @@ contract MultiSigWallet {
     validRequirement(_wallets.length, _required)
     {
         for (uint i=0; i<_wallets.length; i++) {
-            require(!isWallet[_wallets[i]] && _wallets[i] != 0);
+            require(!isWallet[_wallets[i]] && _wallets[i] != 0,"Wallet address is incorrect or duplicate");
             isWallet[_wallets[i]] = true;
         }
         wallets = _wallets;
