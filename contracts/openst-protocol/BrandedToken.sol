@@ -98,6 +98,37 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
 
     /** Public functions */
 
+    function transfer(
+        address _to,
+        uint256 _value)
+        public
+        returns (bool success)
+    {
+        require(isEconomyActor(msg.sender) == true, "msg.sender is invalid economy actor");
+        EIP20Token.transfer(_to, _value);
+    }
+
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _value)
+        public
+        returns (bool success)
+    {
+        require(isEconomyActor(msg.sender) == true, "msg.sender is invalid economy actor");
+        EIP20Token.transferFrom(_from, _to, _value);
+    }
+
+    function approve(
+        address _spender,
+        uint256 _value)
+        public
+        returns (bool success)
+    {
+        require(isEconomyActor(msg.sender) == true, "msg.sender is invalid economy actor");
+        EIP20Token.approve(_spender, _value);
+    }
+
     /**
      *  @notice Public function claim.
      *
@@ -111,10 +142,11 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
      */
     function claim(
         address _beneficiary)
-        isEconomyActor
         public
         returns (bool /* success */)
     {
+        require(isEconomyActor(msg.sender) == true, "msg.sender is invalid economy actor");
+
         uint256 amount = claimInternal(_beneficiary);
 
         return claimEIP20(_beneficiary, amount);
@@ -134,11 +166,12 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
     function mint(
         address _beneficiary,
         uint256 _amount)
-        isEconomyActor
         public
         onlyProtocol
         returns (bool /* success */)
     {
+        require(isEconomyActor(msg.sender) == true, "msg.sender is invalid economy actor");
+
         mintEIP20(_amount);
 
         return mintInternal(_beneficiary, _amount);
@@ -158,14 +191,15 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
     function burn(
         address _burner,
         uint256 _amount)
-        isEconomyActor
         public
         onlyProtocol
         payable
         returns (bool /* success */)
     {
+        require(isEconomyActor(msg.sender) == true, "msg.sender is invalid economy actor");
+
         // force non-payable, as only ST' handles in base tokens
-        require(msg.value == 0);
+        require(msg.value == 0, "msg.value should be 0");
 
         burnEIP20(_amount);
 

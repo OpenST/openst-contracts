@@ -38,7 +38,7 @@ contract TokenHolder {
     /** how many max tokens can be spent in a single transfer */
     uint256 private spendingLimit;
 
-    mapping (bytes32 => uint256 /* spending limit */ ) public sessionLocks;
+    mapping (bytes32 => bool) public sessionLocks;
 
     /**
 	 *  @notice Contract constructor
@@ -63,9 +63,5 @@ contract TokenHolder {
         brandedToken = _brandedToken;
         coGateway = _coGateway;
     }
-
-    validateSession(){
-
-}
 
 }
