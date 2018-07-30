@@ -31,6 +31,7 @@ contract MultiSigWallet {
     /*
      *  Modifiers
      */
+    // TODO no need of this
     modifier onlyMultiSigWallet() {
         require(msg.sender == address(this), "Only wallet is allowed to do transaction for this operation");
         _;
@@ -92,6 +93,7 @@ contract MultiSigWallet {
       * @param _wallets List of initial wallets.
       * @param _required Number of required confirmations.
       */
+    // TODO Keep the constructor like this
     constructor(
         address[] _wallets,
         uint _required)
@@ -110,6 +112,7 @@ contract MultiSigWallet {
       *
       *  @param wallet Address of new wallet.
       */
+    // TODO make it internal
     function addWallet(
         address wallet)
         public
@@ -127,6 +130,7 @@ contract MultiSigWallet {
       *
       *  @param wallet Address of wallet.
       */
+    // TODO make it internal
     function removeWallet(
         address wallet)
         public
@@ -150,6 +154,7 @@ contract MultiSigWallet {
       *  @param wallet Address of wallet to be replaced.
       *  @param newWallet Address of new wallet.
       */
+    // TODO make it internal
     function replaceWallet(
         address wallet,
         address newWallet)
@@ -194,9 +199,9 @@ contract MultiSigWallet {
     function proposeTransaction(
         address to,
         uint256 value,
-        bytes data,
-        Enum.Operation operation, // Change this
-        uint256 nonce)
+        bytes data, // don't need
+        Enum.Operation operation, // type of operation Change this. Dont use low level call
+        uint256 nonce) // don't need
         public
         returns (bytes32 transactionId)
     {
@@ -210,6 +215,9 @@ contract MultiSigWallet {
       *
       *  @param transactionId Transaction ID.
       */
+    // TODO  Evaluate gnosis index vs all parameters
+    // TODO use If else
+    // TODO segregating parameters
     function confirmTransaction(
         address to,
         uint256 value,

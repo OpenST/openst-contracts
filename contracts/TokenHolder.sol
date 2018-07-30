@@ -48,8 +48,9 @@ contract TokenHolder is MultiSigWallet {
     address public coGateway;
     /** how many max tokens can be spent in a single transfer */
     uint256 private spendingLimit;
-
+    // TODO spending limit per session lock
     mapping (bytes32 => bool) public sessionLocks;
+    // TODO Storage needed for tokenRules from branded Token
 
     /**
 	 *  @notice Contract constructor
@@ -62,19 +63,20 @@ contract TokenHolder is MultiSigWallet {
     constructor(
         address _brandedToken,
         address _coGateway,
-        uint256 _spendingLimit,
+        uint256 _spendingLimit, // TODO remove
         address[] _wallets)
         public
     {
         require(_brandedToken != address(0), "Branded token contract address is 0");
         require(_coGateway != address(0), "Co gateway contract address is 0");
-        require(_wallets.length >= 2, "Minimum two wallets are needed");
+        require(_wallets.length >= 2, "Minimum two wallets are needed"); // TODO not needed
 
         spendingLimit = _spendingLimit;
         brandedToken = _brandedToken;
         coGateway = _coGateway;
     }
 
+    // TODO make it internal
     function authorizeSession(
         bytes32 _sessionLock,
         uint256 _spendingLimit)
@@ -95,9 +97,10 @@ contract TokenHolder is MultiSigWallet {
         return true;
     }
 
+    // TODO make it internal
     function revokeSession(
         bytes32 _sessionLock)
-        onlyMultiSigWallet
+        onlyMultiSigWallet // not needed
         walletDoesNotExist(msg.sender)
         notNull(msg.sender)
         public
@@ -131,7 +134,7 @@ contract TokenHolder is MultiSigWallet {
             return bytes32(0);
         }
     }
-
+    // TODO Combine with validateSession
     function updateSessionLock(
         bytes32 _oldSessionLock,
         bytes32 _newSessionLock)
@@ -146,6 +149,11 @@ contract TokenHolder is MultiSigWallet {
         return true;
     }
 
+    // TODO test the bottom top transaction failure
+    // TODO truffle test if validate session succeeds and transfer fails
+    // TODO update sessionlock irrespective of transfer success/failure
+    // TODO evaluate if more methods with explicit call needed - requestRedemption(spendingSecret)
+    // TODO redeem - internal method. multisig operation
     function transfer(
         address _to,
         address _amount,
@@ -156,11 +164,13 @@ contract TokenHolder is MultiSigWallet {
     {
         bytes32 oldSessionLock = validateSession(_spendingSecret);
         require(oldSessionLock != bytes32(0), "Session is not validated");
+        // TODO combine this method
+        updateSessionLock(oldSessionLock, _spendingSecret);
 
         require(_amount <= spendingLimit, "Amount should be less than spending limit");
-        BrandedToken(brandedToken).transfer(_to, _amount);
+        // TODO transfer call needed
 
-        updateSessionLock(oldSessionLock, _spendingSecret);
+        require(BrandedToken(brandedToken).transfer(_to, _amount));
 
         return true;
     }

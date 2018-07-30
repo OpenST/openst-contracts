@@ -57,7 +57,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
     /** token rules contract address  */
     address public tokenRules;
 
-    mapping (address /* hash */ => bool) public economyActors;
+    mapping (address /* economy actor */ => bool) public isEconomyActor;
 
     /**
      *  @notice Contract constructor. 
@@ -82,9 +82,10 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
         uint256 _chainIdValue,
         uint256 _chainIdUtility,
         uint256 _conversionRate,
-        uint8 _conversionRateDecimals)
+        uint8 _conversionRateDecimals,
+        address _tokenRules)
         public
-        Owned()
+        Owned() // TODO rename it organization
         EIP20Token(_symbol, _name, _decimals)
         UtilityTokenAbstract(
         _uuid,
@@ -94,7 +95,9 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
         _chainIdUtility,
         _conversionRate,
         _conversionRateDecimals)
-        { }
+        {
+            tokenRules = _tokenRules;
+        }
 
     /** Public functions */
 
@@ -104,7 +107,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
         public
         returns (bool success)
     {
-        require(isEconomyActor(msg.sender) == true, "msg.sender is invalid economy actor");
+        require(isEconomyActor(_to) == true, "msg.sender is invalid economy actor");
         EIP20Token.transfer(_to, _value);
     }
 
@@ -115,7 +118,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
         public
         returns (bool success)
     {
-        require(isEconomyActor(msg.sender) == true, "msg.sender is invalid economy actor");
+        require(isEconomyActor(_to) == true, "msg.sender is invalid economy actor");
         EIP20Token.transferFrom(_from, _to, _value);
     }
 
@@ -140,12 +143,15 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
      *  @return True if claim of utility tokens for beneficiary address is successful, 
      *          false otherwise.
      */
+    // TODO claim method needs to remove. Not needed at all.
+    // TODO needs to update coGateay
     function claim(
         address _beneficiary)
         public
         returns (bool /* success */)
     {
-        require(isEconomyActor(msg.sender) == true, "msg.sender is invalid economy actor");
+        // TODO not needed
+        //require(isEconomyActor(msg.sender) == true, "msg.sender is invalid economy actor");
 
         uint256 amount = claimInternal(_beneficiary);
 
@@ -170,7 +176,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
         onlyProtocol
         returns (bool /* success */)
     {
-        require(isEconomyActor(msg.sender) == true, "msg.sender is invalid economy actor");
+        require(isEconomyActor(_beneficiary) == true, "msg.sender is invalid economy actor");
 
         mintEIP20(_amount);
 
@@ -196,7 +202,6 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
         payable
         returns (bool /* success */)
     {
-        require(isEconomyActor(msg.sender) == true, "msg.sender is invalid economy actor");
 
         // force non-payable, as only ST' handles in base tokens
         require(msg.value == 0, "msg.value should be 0");
@@ -228,18 +233,19 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
 	 *
 	 *  @return bool
 	 */
+    // TODO registerEconomyActor => registerInternalActor in internal.sol isInternalActors
+    // TODO internal.sol inherited by brandedtoken
+    // TODO create internal.sol
+    // TODO support bulk economyActors. Check max array limit.
     function registerEconomyActor(
-        address _economyActor)
+        address[] _economyActor)
         public
-        onlyOwner()
+        onlyOwner() // onlyOrganization in internal.sol
         returns (bool /* success */)
     {
-        require(_economyActor != address(0), "economy actor address is 0");
-
-        require(economyActors[_economyActor] == address(0), 'Economy actor already present');
 
         economyActors[_economyActor] = true;
-
+        // TODO we can remove
         emit EconomyActorRegistered(_economyActor);
 
         return true;
