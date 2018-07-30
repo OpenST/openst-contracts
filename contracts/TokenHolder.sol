@@ -30,6 +30,14 @@ pragma solidity ^0.4.23;
  */
 contract TokenHolder {
 
+    /** Events */
+
+    event SessionAuthorized(bytes32 _sessionLock, uint256 _spendingLimit);
+
+    event SessionRevoked(bytes32 _sessionLock);
+
+    event SessionValidated(bytes32 oldSessionLock, bytes32 _newSessionLock);
+
     /** Storage */
 
     address public brandedToken;
@@ -62,6 +70,63 @@ contract TokenHolder {
         spendingLimit = _spendingLimit;
         brandedToken = _brandedToken;
         coGateway = _coGateway;
+    }
+
+    function authorizeSession(
+        bytes32 _sessionLock,
+        uint256 _spendingLimit)
+        onlyMultiSigWallet
+        public
+        returns(bool)
+    {
+        require(_sessionLock != bytes32(0), "sessionLock is 0 ");
+        require(sessionLocks[_sessionLock] == bytes32(0), "sessionLock is already authorized");
+
+        sessionLocks[_sessionLock] = true;
+        spendingLimit = _spendingLimit;
+
+        emit SessionAuthorized(_sessionLock, _spendingLimit);
+
+        return true;
+    }
+
+    function revokeSession(
+        bytes32 _sessionLock)
+        onlyMultiSigWallet
+        public
+        returns(bool)
+    {
+        require(_sessionLock != bytes32(0), "sessionLock is 0 ");
+        require(sessionLocks[_sessionLock] != bytes32(0), "sessionLock is not authorized");
+
+        delete sessionLocks[_sessionLock];
+        spendingLimit = 0;
+
+        emit SessionRevoked(_sessionLock);
+
+        return true;
+    }
+
+    /*
+        @dev support fault tolerance
+     */
+    function validateSession(
+        bytes32 _newSessionLock)
+        public
+        onlyWallet
+        returns (bytes32, bytes32)
+    {
+        require(_newSessionLock != bytes32(0), "Input secret is 0");
+
+        bytes32 oldSessionLock = sha3(_newSessionLock);
+        require(sessionLocks[oldSessionLock] != false, "session lock mismatch");
+
+        delete(sessionLocks[oldSessionLock]);
+        sessionLocks[_newSessionLock] = true;
+
+        SessionValidated(oldSessionLock, _newSessionLock);
+
+        return true;
     }
 
 }

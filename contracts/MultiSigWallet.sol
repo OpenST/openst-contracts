@@ -9,7 +9,6 @@ contract MultiSigWallet {
     event Revocation(address indexed sender, uint indexed transactionId);
     event Execution(uint indexed transactionId);
     event ExecutionFailure(uint indexed transactionId);
-    event Deposit(address indexed sender, uint value);
     event WalletAddition(address indexed wallet);
     event WalletRemoval(address indexed wallet);
     event RequirementChange(uint required);
@@ -86,14 +85,6 @@ contract MultiSigWallet {
         && walletCount != 0,"Required to be set is incorrect or not null");
         _;
     }
-
-    /// @dev Fallback function allows to deposit ether.
-//    function()
-//    payable
-//    {
-//        if (msg.value > 0)
-//            Deposit(msg.sender, msg.value);
-//    }
 
     /*
      * Public functions
