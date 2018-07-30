@@ -21,6 +21,8 @@ pragma solidity ^0.4.23;
 //
 // ----------------------------------------------------------------------------
 
+import "./BrandedToken.sol";
+
 /**
  *  @title TokenHolder contract.
  *
@@ -76,6 +78,8 @@ contract TokenHolder {
         bytes32 _sessionLock,
         uint256 _spendingLimit)
         onlyMultiSigWallet
+        walletDoesNotExist(msg.sender)
+        notNull(msg.sender)
         public
         returns(bool)
     {
@@ -93,6 +97,8 @@ contract TokenHolder {
     function revokeSession(
         bytes32 _sessionLock)
         onlyMultiSigWallet
+        walletDoesNotExist(msg.sender)
+        notNull(msg.sender)
         public
         returns(bool)
     {
@@ -112,19 +118,49 @@ contract TokenHolder {
      */
     function validateSession(
         bytes32 _newSessionLock)
-        public
+        internal
         onlyWallet
-        returns (bytes32, bytes32)
+        returns (bytes32)
     {
         require(_newSessionLock != bytes32(0), "Input secret is 0");
 
         bytes32 oldSessionLock = sha3(_newSessionLock);
-        require(sessionLocks[oldSessionLock] != false, "session lock mismatch");
+        if (sessionLocks[oldSessionLock] == true){
+            return oldSessionLock;
+        } else {
+            return bytes32(0);
+        }
+    }
 
-        delete(sessionLocks[oldSessionLock]);
+    function updateSessionLock(
+        bytes32 _oldSessionLock,
+        bytes32 _newSessionLock)
+        private
+        returns (bool)
+    {
+        delete(sessionLocks[_oldSessionLock]);
         sessionLocks[_newSessionLock] = true;
 
-        SessionValidated(oldSessionLock, _newSessionLock);
+        SessionValidated(_oldSessionLock, _newSessionLock);
+
+        return true;
+    }
+
+    function transfer(
+        address _to,
+        address _amount,
+        address _spendingSecret)
+        public
+        onlyWallet
+        returns (bool)
+    {
+        bytes32 oldSessionLock = validateSession(_spendingSecret);
+        require(oldSessionLock != bytes32(0), "session not validated");
+
+        require(_amount <= spendingLimit, "Amount should be less than spending limit");
+        BrandedToken(brandedToken).transfer(_to, _amount);
+
+        updateSessionLock(oldSessionLock, _spendingSecret);
 
         return true;
     }
