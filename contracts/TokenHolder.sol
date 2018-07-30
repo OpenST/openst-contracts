@@ -35,16 +35,16 @@ contract TokenHolder is MultiSigWallet {
 
     /** Events */
 
-    event SessionAuthorized(bytes32 _sessionLock, uint256 _spendingLimit);
+    event SessionAuthorized(bytes32 sessionLock, uint256 spendingLimit);
 
-    event SessionRevoked(bytes32 _sessionLock);
+    event SessionRevoked(bytes32 sessionLock);
 
-    event SessionValidated(bytes32 oldSessionLock, bytes32 _newSessionLock);
+    event SessionValidated(bytes32 oldSessionLock, bytes32 newSessionLock);
 
     /** Storage */
 
     address public brandedToken;
-    /** Co Gateway contract address */
+    /** Co Gateway contract address for redeem functionality */
     address public coGateway;
     /** how many max tokens can be spent in a single transfer */
     uint256 private spendingLimit;
@@ -84,7 +84,7 @@ contract TokenHolder is MultiSigWallet {
         public
         returns(bool)
     {
-        require(_sessionLock != bytes32(0), "sessionLock is 0 ");
+        require(_sessionLock != bytes32(0), "Input sessionLock is invalid!");
         require(sessionLocks[_sessionLock] == bytes32(0), "sessionLock is already authorized");
 
         sessionLocks[_sessionLock] = true;
