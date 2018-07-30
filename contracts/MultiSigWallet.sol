@@ -161,10 +161,10 @@ contract MultiSigWallet {
     function replaceWallet(
         address wallet,
         address newWallet)
-    public
-    onlyMultiSigWallet
-    walletExists(wallet)
-    walletDoesNotExist(newWallet)
+        public
+        onlyMultiSigWallet
+        walletExists(wallet)
+        walletDoesNotExist(newWallet)
     {
         for (uint i = 0; i < wallets.length; i++)
             if (wallets[i] == wallet) {
@@ -254,8 +254,8 @@ contract MultiSigWallet {
         bytes data,
         Enum.Operation operation, //needs to be changed
         uint256 txGas)
-    internal
-    returns (bool success)
+        internal
+        returns (bool success)
     {
         if (operation == Enum.Operation.Call) {
             assembly {
@@ -270,10 +270,10 @@ contract MultiSigWallet {
       */
     function revokeConfirmation(
         bytes32 transactionId)
-    public
-    walletExists(msg.sender)
-    confirmed(transactionId, msg.sender)
-    notExecuted(transactionId)
+        public
+        walletExists(msg.sender)
+        confirmed(transactionId, msg.sender)
+        notExecuted(transactionId)
     {
         confirmations[transactionId][msg.sender] = false;
         emit Revocation(msg.sender, transactionId);
@@ -286,9 +286,9 @@ contract MultiSigWallet {
       *  @return Confirmation status.
       */
     function isConfirmed(bytes32 transactionId)
-    public
-    constant
-    returns (bool)
+        public
+        constant
+        returns (bool)
     {
         uint count = 0;
         for (uint i = 0; i < wallets.length; i++) {
@@ -335,18 +335,6 @@ contract MultiSigWallet {
             if (pending && !transactions[i].executed
             || executed && transactions[i].executed)
                 count += 1;
-    }
-
-    /**  @dev Returns list of wallets.
-      *
-      *  @return List of wallet addresses.
-      */
-    function getWallets()
-    public
-    constant
-    returns (address[])
-    {
-        return wallets;
     }
 
     /**  @dev Returns array with wallet addresses, which confirmed transaction.
@@ -424,11 +412,10 @@ contract MultiSigWallet {
         uint256 value,
         bytes data,
         Enum.Operation operation,
-        uint256 nonce
-    )
-    public
-    view
-    returns (bytes32)
+        uint256 nonce)
+        public
+        view
+        returns (bytes32)
     {
         return keccak256(abi.encodePacked(byte(0x19), byte(0), this, to, value, data, operation, nonce));
     }

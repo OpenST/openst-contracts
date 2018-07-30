@@ -22,6 +22,7 @@ pragma solidity ^0.4.23;
 // ----------------------------------------------------------------------------
 
 import "./BrandedToken.sol";
+import "./MultiSigWallet.sol";
 
 /**
  *  @title TokenHolder contract.
@@ -30,7 +31,7 @@ import "./BrandedToken.sol";
  *          scalable key management solutions for mainstream apps.
  *
  */
-contract TokenHolder {
+contract TokenHolder is MultiSigWallet {
 
     /** Events */
 
