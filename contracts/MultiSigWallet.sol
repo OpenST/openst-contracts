@@ -13,15 +13,8 @@ contract MultiSigWallet {
     event WalletRemoval(address indexed wallet);
     event RequirementChange(uint required);
 
-    /*
-     *  Constants
-     */
-    //uint constant public MAX_OWNER_COUNT = 50;
+    /**  Storage */
 
-    /*
-     *  Storage
-     */
-    //mapping (uint => Transaction) public transactions;//check this..remove it if possible
     mapping(bytes32 => mapping(address => bool)) public confirmations;
     mapping(address => bool) public isWallet;
     address[] public wallets;
@@ -86,11 +79,10 @@ contract MultiSigWallet {
         uint walletCount,
         uint _required) {
 
-        require(//ownerCount <= MAX_OWNER_COUNT &&
-            _required <= walletCount
-        && _required != 0
-        && walletCount != 0,
-            "Required to be set is incorrect or not null");
+        require(_required <= walletCount
+                && _required != 0
+                && walletCount != 0,
+                "Required to be set is incorrect or not null");
         _;
 
     }
@@ -266,7 +258,7 @@ contract MultiSigWallet {
 
     /** @dev Allows an wallet to revoke a confirmation for a transaction.
       *
-      *  @param transactionId Transaction ID.
+      * @param transactionId Transaction ID.
       */
     function revokeConfirmation(
         bytes32 transactionId)
@@ -281,9 +273,9 @@ contract MultiSigWallet {
 
     /** @dev Returns the confirmation status of a transaction.
       *
-      *  @param transactionId Transaction ID.
+      * @param transactionId Transaction ID.
       *
-      *  @return Confirmation status.
+      * @return Confirmation status.
       */
     function isConfirmed(bytes32 transactionId)
         public
@@ -317,25 +309,7 @@ contract MultiSigWallet {
                 count += 1;
     }
 
-    /** @dev Returns total number of transactions after filers are applied.
-      *
-      *  @param pending Include pending transactions.
-      *  @param executed Include executed transactions.
-      *
-      *  @return Total number of transactions after filters are applied.
-      */
-    function getTransactionCount(
-        bool pending,
-        bool executed)
-        public
-        constant
-        returns (uint count)
-    {
-        for (uint i = 0; i < transactionCount; i++)
-            if (pending && !transactions[i].executed
-            || executed && transactions[i].executed)
-                count += 1;
-    }
+
 
     /**  @dev Returns array with wallet addresses, which confirmed transaction.
       *
@@ -361,41 +335,6 @@ contract MultiSigWallet {
         for (i = 0; i < count; i++)
             _confirmations[i] = confirmationsTemp[i];
     }
-
-    /** @dev Returns list of transaction IDs in defined range.
-      *
-      * @param from Index start position of transaction array.
-      * @param to Index end position of transaction array.
-      * @param pending Include pending transactions.
-      * @param executed Include executed transactions.
-      *
-      * @return Returns array of transaction IDs.
-      */
-    function getTransactionIds(
-        uint from,
-        uint to,
-        bool pending,
-        bool executed)
-        public
-        constant
-        returns (uint[] _transactionIds)
-    {
-        uint[] memory transactionIdsTemp = new uint[](transactionCount);
-        uint count = 0;
-        uint i;
-        for (i = 0; i < transactionCount; i++)
-            if (pending && !transactions[i].executed
-            || executed && transactions[i].executed)
-            {
-                transactionIdsTemp[count] = i;
-                count += 1;
-            }
-        _transactionIds = new uint[](to - from);
-        for (i = from; i < to; i++)
-            _transactionIds[i - from] = transactionIdsTemp[i];
-    }
-
-
 
      /** @dev Returns hash to be signed by wallets.
        *
