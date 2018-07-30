@@ -1,5 +1,4 @@
 pragma solidity ^0.4.23;
-import "./MultiSigWallet.sol";
 
 // Copyright 2017 OpenST Ltd.
 //
@@ -29,7 +28,7 @@ import "./MultiSigWallet.sol";
  *          scalable key management solutions for mainstream apps.
  *
  */
-contract TokenHolder is MultiSigWallet{
+contract TokenHolder {
 
     /** Storage */
 
@@ -39,7 +38,7 @@ contract TokenHolder is MultiSigWallet{
     /** how many max tokens can be spent in a single transfer */
     uint256 private spendingLimit;
 
-    mapping (bytes32 => uint256 /* spending limit */ ) public sessionLocks;
+    mapping (bytes32 => bool) public sessionLocks;
 
     /**
 	 *  @notice Contract constructor
@@ -63,9 +62,6 @@ contract TokenHolder is MultiSigWallet{
         spendingLimit = _spendingLimit;
         brandedToken = _brandedToken;
         coGateway = _coGateway;
-    }
-
-    validateSession(){
     }
 
 }
