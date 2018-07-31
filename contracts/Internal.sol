@@ -37,7 +37,7 @@ contract Internal {
     mapping (address /* internal actor */ => bool) public isInternalActor;
 
     /**
-     *  @notice Contract constructor
+     *  @notice contract constructor
      */
     constructor()
     {}
@@ -62,6 +62,7 @@ contract Internal {
         require(_internalActors.length <= MAX_INTERNAL_ACTORS, "Internal actors max length exceeded!");
 
         for (uint16 i=0; i<_internalActors.length; i++) {
+            /** address 0 is allowed in EIP20 */
             address actor = _internalActors[i];
             internalActors[actor] = true;
         }
