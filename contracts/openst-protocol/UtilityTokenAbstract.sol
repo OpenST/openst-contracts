@@ -36,7 +36,7 @@ import "./UtilityTokenInterface.sol";
  */
 contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterface {
     using SafeMath for uint256;
-    
+
     /** Events */
 
     /** 
@@ -49,7 +49,7 @@ contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterfac
 
     event Burnt(bytes32 indexed _uuid, address indexed _account,
         uint256 _amount, uint256 _totalSupply);
-    
+
     /** Storage */
 
     /** UUID for the utility token */
@@ -84,7 +84,7 @@ contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterfac
      *  @param _chainIdUtility Chain id of the utility chain.
      *  @param _conversionRate Conversion rate of the token.
      *  @param _conversionRateDecimals Decimal places of conversion rate of token.
-     */    
+     */
     constructor(
         bytes32 _uuid,
         string _symbol,
@@ -121,7 +121,7 @@ contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterfac
      *  @dev Get totalTokenSupply as view so that child cannot edit.
      *
      *  @return uint256 Total token supply.
-     */       
+     */
     function totalSupply()
         public
         view
@@ -136,7 +136,7 @@ contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterfac
      *  @dev Get tokenUuid as view so that child cannot edit.
      *
      *  @return bytes32 Token UUID.
-     */       
+     */
     function uuid()
         public
         view
@@ -151,7 +151,7 @@ contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterfac
      *  @dev Get tokenConversionRate as view so that child cannot edit.
      *
      *  @return uint256 Token conversion rate. 
-     */       
+     */
     function conversionRate()
         public
         view
@@ -159,17 +159,17 @@ contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterfac
     {
         return tokenConversionRate;
     }
- 
+
     /**
      *  @notice Public view function conversionRateDecimals.
      *
      *  @dev Get tokenConversionRateDecimal factor for utility token.
      *
      *  @return uint8 Token conversion rate decimals.
-     */       
-    function conversionRateDecimals() 
-        public 
-        view 
+     */
+    function conversionRateDecimals()
+        public
+        view
         returns (uint8)
     {
         return tokenConversionRateDecimals;
@@ -181,7 +181,7 @@ contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterfac
      *  @dev Get tokenChainIdValue as view so that child cannot edit.
      *
      *  @return uint256 Token genesis chain id value.
-     */       
+     */
     function genesisChainIdValue()
         public
         view
@@ -196,7 +196,7 @@ contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterfac
      *  @dev Get tokenChainIdUtility as view so that child cannot edit.
      *
      *  @return uint256 Token chain id utility.
-     */       
+     */
     function genesisChainIdUtility()
         public
         view
@@ -211,7 +211,7 @@ contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterfac
      *  @dev Get tokenOpenSTUtility as view so that child cannot edit.
      *
      *  @return address Genesis OpenSTUtility address.
-     */       
+     */
     function genesisOpenSTUtility()
         public
         view
@@ -228,7 +228,7 @@ contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterfac
      *  @dev Returns unclaimed amount for beneficiary.
      *
      *  @return uint256 Unclaimed amount in beneficiary account. 
-     */       
+     */
     function unclaimed(
         address _beneficiary)
         public

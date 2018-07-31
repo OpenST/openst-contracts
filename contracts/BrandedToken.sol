@@ -144,7 +144,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
      *          false otherwise.
      */
     // TODO claim method needs to remove. Not needed at all.
-    // TODO needs to update coGateay
+    // TODO needs to update coGateway
     function claim(
         address _beneficiary)
         public
