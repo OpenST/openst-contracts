@@ -31,12 +31,6 @@ contract MultiSigWallet {
     /*
      *  Modifiers
      */
-    // TODO no need of this
-    modifier onlyMultiSigWallet() {
-        require(msg.sender == address(this), "Only wallet is allowed to do transaction for this operation");
-        _;
-    }
-
     modifier walletDoesNotExist(address wallet) {
         require(!isWallet[wallet], "Wallet address doesnt exist");
         _;
@@ -118,7 +112,6 @@ contract MultiSigWallet {
     function addWallet(
         address wallet)
         public
-        onlyMultiSigWallet
         walletDoesNotExist(wallet)
         notNull(wallet)
         validRequirement(wallets.length + 1, required)
@@ -136,8 +129,7 @@ contract MultiSigWallet {
     function removeWallet(
         address wallet)
         public
-        onlyMultiSigWallet
-         walletExists(wallet)
+        walletExists(wallet)
     {
         isWallet[wallet] = false;
         for (uint i = 0; i < wallets.length - 1; i++)
@@ -161,7 +153,6 @@ contract MultiSigWallet {
         address wallet,
         address newWallet)
         public
-        onlyMultiSigWallet
         walletExists(wallet)
         walletDoesNotExist(newWallet)
     {
@@ -183,7 +174,6 @@ contract MultiSigWallet {
     function changeRequirement(
         uint _required)
         public
-        onlyMultiSigWallet
         validRequirement(wallets.length, _required)
     {
         required = _required;
