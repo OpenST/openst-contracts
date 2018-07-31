@@ -25,9 +25,10 @@ pragma solidity ^0.4.23;
 import "../contracts/SafeMath.sol";
 
 /** utility chain contracts */
-import "../contracts/EIP20Token.sol";
-import "./UtilityTokenAbstract.sol";
-import "../contracts/Owned.sol";
+import "./contracts/openst-protocol/EIP20Token.sol";
+import "./contracts/openst-protocol/UtilityTokenAbstract.sol";
+import "./Owned.sol";
+import "./Internal.sol";
 
 
 /**
@@ -45,19 +46,13 @@ import "../contracts/Owned.sol";
  *         their equivalent part of the Simple Token stake
  *         on Ethereum (before v1.0).
  */
-contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
+contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned, Internal {
     using SafeMath for uint256;
-
-    /** Events */
-
-    event EconomyActorRegistered(address economyActor);
 
     /** Storage */
 
     /** token rules contract address  */
     address public tokenRules;
-
-    mapping (address /* economy actor */ => bool) public isEconomyActor;
 
     /**
      *  @notice Contract constructor. 
@@ -95,9 +90,9 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
         _chainIdUtility,
         _conversionRate,
         _conversionRateDecimals)
-        {
-            tokenRules = _tokenRules;
-        }
+     {
+        tokenRules = _tokenRules;
+     }
 
     /** Public functions */
 
@@ -107,7 +102,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
         public
         returns (bool success)
     {
-        require(isEconomyActor(_to) == true, "msg.sender is invalid economy actor");
+        require((isInternalActor[_to] == true), "to is invalid economy actor");
         EIP20Token.transfer(_to, _value);
     }
 
@@ -118,7 +113,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
         public
         returns (bool success)
     {
-        require(isEconomyActor(_to) == true, "msg.sender is invalid economy actor");
+        require((isInternalActor[_to] == true), "to is invalid economy actor");
         EIP20Token.transferFrom(_from, _to, _value);
     }
 
@@ -128,7 +123,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
         public
         returns (bool success)
     {
-        require(isEconomyActor(msg.sender) == true, "msg.sender is invalid economy actor");
+        require((isInternalActor[_spender] == true), "spender is invalid economy actor");
         EIP20Token.approve(_spender, _value);
     }
 
@@ -176,7 +171,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
         onlyProtocol
         returns (bool /* success */)
     {
-        require(isEconomyActor(_beneficiary) == true, "msg.sender is invalid economy actor");
+        require((isInternalActor[_beneficiary] == true), "beneficiary is invalid economy actor");
 
         mintEIP20(_amount);
 
@@ -209,45 +204,5 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned {
         burnEIP20(_amount);
 
         return burnInternal(_burner, _amount);
-    }
-
-    /**
-    *  @notice public function isEconomyActor
-    *
-    *  @param _actor Address of an economy actor which is being validated for
-    *
-    *  @return bool
-    */
-    function isEconomyActor(
-        address _actor)
-        public
-        returns (bool /* success */)
-    {
-        return (economyActors[_actor] != address(0));
-    }
-
-    /**
-	 *  @notice public function registerEconomyActor
-	 *
-	 *  @param _economyActor Address of the economy actor which needs to be registered
-	 *
-	 *  @return bool
-	 */
-    // TODO registerEconomyActor => registerInternalActor in internal.sol isInternalActors
-    // TODO internal.sol inherited by brandedtoken
-    // TODO create internal.sol
-    // TODO support bulk economyActors. Check max array limit.
-    function registerEconomyActor(
-        address[] _economyActor)
-        public
-        onlyOwner() // onlyOrganization in internal.sol
-        returns (bool /* success */)
-    {
-
-        economyActors[_economyActor] = true;
-        // TODO we can remove
-        emit EconomyActorRegistered(_economyActor);
-
-        return true;
     }
 }
