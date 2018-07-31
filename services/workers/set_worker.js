@@ -86,7 +86,7 @@ SetWorkerKlass.prototype = {
         return responseHelper.error({
           internal_error_identifier: 's_w_sw_perform_1',
           api_error_identifier: 'unhandled_api_error',
-          error_config: basicHelper.fetchErrorConfig(),
+          error_config: errorConfig,
           debug_options: { err: error }
         });
       }
