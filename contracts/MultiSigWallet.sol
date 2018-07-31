@@ -96,10 +96,12 @@ contract MultiSigWallet {
     // TODO Keep the constructor like this
     constructor(
         address[] _wallets,
-        uint _required)
+        uint256 _required)
         public
         validRequirement(_wallets.length, _required)
     {
+        require(_wallets.length > 0,"Wallets cannot be empty");
+        require(_required > 0,"Atleast one confirmation is required");
         for (uint i = 0; i < _wallets.length; i++) {
             require(!isWallet[_wallets[i]] && _wallets[i] != 0, "Wallet address is incorrect or duplicate");
             isWallet[_wallets[i]] = true;

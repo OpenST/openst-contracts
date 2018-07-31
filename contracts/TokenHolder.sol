@@ -64,7 +64,8 @@ contract TokenHolder is MultiSigWallet {
         address _brandedToken,
         address _coGateway,
         uint256 _spendingLimit, // TODO remove
-        address[] _wallets)
+        uint256 _required,
+        address[] _wallets) MultiSigWallet(_wallets, _required)
         public
     {
         require(_brandedToken != address(0), "Branded token contract address is 0");
