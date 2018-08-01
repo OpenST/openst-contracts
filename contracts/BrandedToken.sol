@@ -22,12 +22,11 @@ pragma solidity ^0.4.23;
 //
 // ----------------------------------------------------------------------------
 
-import "../contracts/SafeMath.sol";
+import "./SafeMath.sol";
 
 /** utility chain contracts */
-import "./contracts/openst-protocol/EIP20Token.sol";
-import "./contracts/openst-protocol/UtilityTokenAbstract.sol";
-import "./Owned.sol";
+import "./openst-protocol/EIP20Token.sol";
+import "./openst-protocol/UtilityTokenAbstract.sol";
 import "./Internal.sol";
 
 
@@ -46,7 +45,7 @@ import "./Internal.sol";
  *         their equivalent part of the Simple Token stake
  *         on Ethereum (before v1.0).
  */
-contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned, Internal {
+contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     using SafeMath for uint256;
 
     /** Storage */
@@ -68,6 +67,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned, Internal {
      *  @param _chainIdUtility Chain id of the utility chain.
      *  @param _conversionRate Conversion rate of the token.
      *  @param _conversionRateDecimals Decimal places of conversion rate of token.
+     *  @param _tokenRules tokenRules contract address.
      */
     constructor(
         bytes32 _uuid,
@@ -80,7 +80,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned, Internal {
         uint8 _conversionRateDecimals,
         address _tokenRules)
         public
-        Owned() // TODO rename it organization
+        Internal()
         EIP20Token(_symbol, _name, _decimals)
         UtilityTokenAbstract(
         _uuid,

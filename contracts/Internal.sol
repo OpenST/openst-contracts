@@ -71,7 +71,7 @@ contract Internal {
 	 *
 	 *  @param _internalActors Array of addresses of the internal actor which needs to be registered.
 	 *
-	 *  @return bool
+	 *  @return uint256 total count of registered actors
 	 */
     function registerInternalActor(
         address[] _internalActors)
