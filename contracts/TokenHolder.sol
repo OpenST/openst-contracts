@@ -63,8 +63,8 @@ contract TokenHolder is MultiSigWallet {
         address _coGateway,
         uint256 _required,
         address[] _wallets)
-        MultiSigWallet(_wallets, _required)
         public
+        MultiSigWallet(_wallets, _required)
     {
         require(_brandedToken != address(0), "Branded token contract address is 0");
         require(_coGateway != address(0), "Co gateway contract address is 0");
@@ -86,9 +86,9 @@ contract TokenHolder is MultiSigWallet {
     function authorizeSession(
         bytes32 _sessionLock,
         uint256 _spendingLimit)
+        internal
         walletDoesNotExist(msg.sender)
         notNull(msg.sender)
-        internal
         returns(bool /* success */)
     {
         require(_sessionLock != bytes32(0), "Input sessionLock is invalid!");

@@ -34,40 +34,65 @@ contract Internal {
     /** max accepted internal actors in registerInternalActor method */
     uint16 private constant MAX_INTERNAL_ACTORS = 100;
 
+    /** organization/company address who will be deploying branded token contract */
+    address private organization;
+
     mapping (address /* internal actor */ => bool) public isInternalActor;
 
-    /**
-     *  @notice contract constructor
-     */
-    constructor()
-    {}
+    /** Modifiers */
 
     /**
-	 *  @notice public function registerInternalActor
+     *  @notice Modifier onlyOrganization.
+     *
+     *  @dev Checks if msg.sender is organization address or not.
+     */
+    modifier onlyOrganization() {
+        require(organization == msg.sender);
+        _;
+    }
+
+    /** Public functions */
+
+    /**
+     *  @notice contract constructor.
+     *
+     *  @dev it sets msg.sender as organization/company address.
+     */
+    constructor()
+        public
+    {
+        organization = msg.sender;
+    }
+
+    /**
+	 *  @notice public function registerInternalActor.
 	 *
-	 *  @dev there is max limit on how many internal actors who can register at once
+	 *  @dev there is max limit on how many internal actors who can register at once.
 	 *
-	 *  @param _internalActors Array of addresses of the internal actor which needs to be registered
+	 *  @param _internalActors Array of addresses of the internal actor which needs to be registered.
 	 *
 	 *  @return bool
 	 */
     function registerInternalActor(
         address[] _internalActors)
         public
-        onlyOwner() // TODO onlyOrganization in internal.sol
-        returns (bool /* success */)
+        onlyOrganization()
+        returns (uint16 /* Registered Count */)
     {
         require(_internalActors.length != 0, "Internal actors length is 0");
 
-        require(_internalActors.length <= MAX_INTERNAL_ACTORS, "Internal actors max length exceeded!");
+        require(_internalActors.length <= MAX_INTERNAL_ACTORS, "Internal actors max length exceeded!!!");
 
         for (uint16 i=0; i<_internalActors.length; i++) {
-            /** address 0 is allowed in EIP20 */
+            /** address 0 transfer is allowed in EIP20 */
             address actor = _internalActors[i];
-            internalActors[actor] = true;
+            /** if actor already present, skip it else add in the mapping  */
+            if (isInternalActor[actor] == false){
+                isInternalActor[actor] = true;
+            }
         }
 
-        return true;
+        return _internalActors.length;
     }
 
 }
