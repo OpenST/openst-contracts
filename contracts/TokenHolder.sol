@@ -70,13 +70,13 @@ contract TokenHolder is MultiSigWallet {
         require(_coGateway != address(0), "Co gateway contract address is 0");
 
         brandedToken = _brandedToken;
+        coGateway = _coGateway;
         /** Needed for onlyTokenRules validation */
         tokenRules = BrandedToken(brandedToken).tokenRules;
-        coGateway = _coGateway;
     }
 
     /**
-	 *  @notice Contract constructor
+	 *  @notice authorize session method
 	 *
 	 *  @param _sessionLock session lock to be authorized
 	 *  @param _spendingLimit max tokens user can spend at a time
@@ -102,7 +102,7 @@ contract TokenHolder is MultiSigWallet {
     }
 
     /**
-	 *  @notice Contract constructor
+	 *  @notice Revoke session method
 	 *
 	 *  @param _sessionLock session lock to be revoked
 	 *
@@ -110,9 +110,9 @@ contract TokenHolder is MultiSigWallet {
 	 */
     function revokeSession(
         bytes32 _sessionLock)
+        internal
         walletDoesNotExist(msg.sender)
         notNull(msg.sender)
-        internal
         returns(bool /* success */)
     {
         require(_sessionLock != bytes32(0), "Input SessionLock is invalid!");
@@ -128,33 +128,21 @@ contract TokenHolder is MultiSigWallet {
     /*
         @dev support fault tolerance
      */
-    function validateSession(
+    function updateSessionLock(
         bytes32 _newSessionLock)
         private
-        returns (bytes32)
+        returns (bool /* success */)
     {
-        require(_newSessionLock != bytes32(0), "Input session lock is invalid");
-
         bytes32 oldSessionLock = sha3(_newSessionLock);
         if (sessionLocks[oldSessionLock] == true){
-            return oldSessionLock;
+            delete(sessionLocks[oldSessionLock]);
+            sessionLocks[_newSessionLock] = true;
+
+            emit SessionValidated(oldSessionLock, _newSessionLock);
+            return true;
         } else {
-            return bytes32(0);
+            return false;
         }
-    }
-    // TODO Combine with validateSession
-    function updateSessionLock(
-        bytes32 _oldSessionLock,
-        bytes32 _newSessionLock)
-        private
-        returns (bool)
-    {
-        delete(sessionLocks[_oldSessionLock]);
-        sessionLocks[_newSessionLock] = true;
-
-        SessionValidated(_oldSessionLock, _newSessionLock);
-
-        return true;
     }
 
     // TODO test the bottom top transaction failure
@@ -165,19 +153,16 @@ contract TokenHolder is MultiSigWallet {
     function transfer(
         address _to,
         address _amount,
-        address _spendingSecret)
+        address _spendingSessionLock)
         public
         onlyWallet
         returns (bool)
     {
-        bytes32 oldSessionLock = validateSession(_spendingSecret);
-        require(oldSessionLock != bytes32(0), "Session is not validated");
-        // TODO combine this method
-        updateSessionLock(oldSessionLock, _spendingSecret);
+        require(_spendingSessionLock != bytes32(0), "Spending session lock is invalid");
+        require(updateSessionLock(_spendingSessionLock));
 
         require(_amount <= spendingLimit, "Amount should be less than spending limit");
         // TODO transfer call needed
-
         require(BrandedToken(brandedToken).transfer(_to, _amount));
 
         return true;
