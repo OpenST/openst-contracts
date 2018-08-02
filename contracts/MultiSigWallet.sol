@@ -21,11 +21,15 @@ contract MultiSigWallet {
 
     /**  Storage */
 
-    mapping(bytes32 => mapping(address => bool)) public confirmations;
-    mapping(address => bool) public isWallet;
+    /** It contains all the wallets added.*/
     address[] public wallets;
-    uint public required;
+    /** It denotes the total number of confirmations required for an transaction to be executed. */
+    uint16 public required;
 
+    /** It maps status for transactionId for a wallet.If it is true then that transaction is approved by the wallet address. */
+    mapping(bytes32 => mapping(address => bool)) public confirmations;
+    /** It helps to direct lookup whether an wallet is already present or not  */
+    mapping(address => bool) public isWallet;
     /** isExecuted mapping allows to check if a transaction (by hash) was already proposed and executed.
         Values could be :-
         00 :- initial state/Not proposed.
@@ -280,7 +284,7 @@ contract MultiSigWallet {
 
     /** Internal functions */
 
-    /**  @dev It is called whereever we need to propose transactions in multisig.
+    /**  @dev It is called whereever we need to propose transactions in multisig. The transaction status is in confirmed state for the wallet which has proposed it.`
       *
       *  @param transactionId It marks it in proposed state against the wallet which has sent the transaction.
       *
