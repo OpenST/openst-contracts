@@ -97,59 +97,73 @@ contract MultiSigWallet {
         require(_wallets.length > 0,"Wallets cannot be empty");
         require(_required > 0,"Atleast one confirmation is required");
         require(_required <= _wallets,"Number of confirmations cannot be less than wallets");
+
         for (uint i = 0; i < _wallets.length; i++) {
             require(!isWallet[_wallets[i]] && _wallets[i] != 0, "Wallet address is incorrect or duplicate");
             isWallet[_wallets[i]] = true;
         }
+
         wallets = _wallets;
         required = _required;
     }
 
-    /**  @dev Allows to add a new wallet. Transaction has to be sent by wallet.
+    /** Public functions */
+
+    /** @dev Allows to propose a new wallet or confirm an already proposed wallet.
       *
-      *  @param wallet Address of new wallet.
+      * @param _wallet Address of wallet which is to be proposed or confirmed.
+      * @param proposeOrConfirm If true then transaction will be proposed otherwise confirmation is being done.
+      *
+      * @return transactionId   It is unique for each request.
       */
-    // TODO Check for isExecuted failure 10
     function proposeOrConfirmAddWallet(
         address _wallet,
-        proposeOrConfirm) // TODO remove proposeOrConfirm
+        bool proposeOrConfirm)
         notNull(wallet)
         validRequirement(wallets.length + 1, required)
         public
+        returns (bytes32 transactionId)
     {
-        bytes32 transactionId = keccak256(abi.encodePacked(_wallet, this, "addWallet"));
-        if(proposeOrConfirm){
+        transactionId = keccak256(abi.encodePacked(_wallet, this, "addWallet"));
+        if(proposeOrConfirm) {
+            require(isAlreadyProposedTransaction(transactionId) == false, "Transaction is already proposed!");
             require(isWallet[wallet] == false, "Wallet address already exists");
             performProposeTransaction(transactionId);
         }
-        else{
+        else {
             genericConfirmTransaction(transactionId);
             if (isExecuted[transactionId] == 11) {
-                isWallet[wallet] = true; // TODO Remove
+                isWallet[wallet] = true;
                 wallets.push(wallet);
                 emit WalletAddition(wallet);
             }
         }
+        return transactionId;
     }
 
-    /**  @dev Allows to remove an wallet. Transaction has to be sent by wallet.
+    /** @dev Allows to propose removal of an wallet or confirm already proposed removal. Transaction has to be sent by wallet.
       *
-      *  @param wallet Address of wallet.
+      * @param wallet Address of wallet.
+      * @param proposeOrConfirm If true then transaction will be proposed otherwise confirmation is being done.
+      *
+      * @return transactionId   It is unique for each request.
       */
     function proposeOrConfirmRemoveWallet(
         address _wallet,
         bool proposeOrConfirm)
         walletExists(wallet)
         public
+        returns(bytes32 transactionId)
     {
 
-        bytes32 transactionId = keccak256(abi.encodePacked(_wallet, this, "removeWallet"));
-        if(proposeOrConfirm){
+        transactionId = keccak256(abi.encodePacked(_wallet, this, "removeWallet"));
+        if(proposeOrConfirm) {
+            require(isAlreadyProposedTransaction(transactionId) == false, "Transaction is already proposed!");
             performProposeTransaction(transactionId);
         }
-        else{
+        else {
             performConfirmTransaction(transactionId);
-            if(isExecuted[transactionId] == 11){
+            if(isExecuted[transactionId] == 11) {
                 isWallet[wallet] = false;
                 for (uint i = 0; i < wallets.length - 1; i++)
                     if (wallets[i] == wallet) {
@@ -159,17 +173,20 @@ contract MultiSigWallet {
                 wallets.length -= 1;
                 if (required > wallets.length)
                     changeRequirement(wallets.length);
-                    emit WalletRemoval(wallet);
+                emit WalletRemoval(wallet);
             }
         }
-
+        return transactionId;
     }
 
 
-    /**  @dev Allows to replace an wallet with a new wallet. Transaction has to be sent by wallet.
+    /** @dev Allows to propose or confirmation intent to replace an wallet with a new wallet. Transaction has to be sent by wallet.
       *
-      *  @param wallet Address of wallet to be replaced.
-      *  @param newWallet Address of new wallet.
+      * @param wallet Address of wallet to be replaced.
+      * @param newWallet Address of new wallet.
+      * @param proposeOrConfirm If true then transaction will be proposed otherwise confirmation is being done.
+      *
+      * @return transactionId   It is unique for each request.
       */
     function proposeOrConfirmReplaceWallet(
         address _oldWallet,
@@ -178,12 +195,14 @@ contract MultiSigWallet {
         public
         walletExists(_oldWallet)
         walletDoesNotExist(_newWallet)
+        returns(bytes32 transactionId)
     {
-        bytes32 transactionId = keccak256(abi.encodePacked(_oldWallet,_newWallet,this, "replaceWallet"));
-        if(proposeOrConfirm){
+        transactionId = keccak256(abi.encodePacked(_oldWallet,_newWallet,this, "replaceWallet"));
+        if(proposeOrConfirm) {
+            require(isAlreadyProposedTransaction(transactionId) == false, "Transaction is already proposed!");
             performProposeTransaction(transactionId);
         }
-        else{
+        else {
             performConfirmTransaction(transactionId);
             if(isExecuted[transactionId] == 11 ){
                 for (uint i = 0; i < wallets.length; i++)
@@ -197,34 +216,43 @@ contract MultiSigWallet {
             emit WalletAddition(newWallet);
             }
         }
+        return transactionId;
      }
 
-    /**  @dev Allows to change the number of required confirmations. Transaction has to be sent by wallet.
+    /** @dev Allows to propose or confirm intent for changing for the number of required confirmations. Transaction has to be sent by wallet.
       *
-      *  @param _required Number of required confirmations.
+      * @param _required Number of required confirmations.
+      * @param proposeOrConfirm If true then transaction will be proposed otherwise confirmation is being done.
+      *
+      * @return transactionId   It is unique for each unique request.
       */
     function proposeOrConfirmChangeRequirement(
         uint _required,
         bool proposeOrConfirm)
         public
         validRequirement(wallets.length, _required)
+        returns(bytes32 transactionId)
     {
-        bytes32 transactionId = keccak256(abi.encodePacked(_required, _newWallet, this, "changeRequirement"));
-        if(proposeOrConfirm){
+        transactionId = keccak256(abi.encodePacked(_required, _newWallet, this, "changeRequirement"));
+        if(proposeOrConfirm) {
+            require(isAlreadyProposedTransaction(transactionId) == false, "Transaction is already proposed!");
             performProposeTransaction(transactionId);
         }
-        else{
+        else {
             performConfirmTransaction(transactionId);
-            if(isExecuted[transactionId] == 11){
+            if(isExecuted[transactionId] == 11) {
                 required = _required;
                 emit RequirementChange(_required);
             }
         }
     }
 
-    /** @dev Allows an wallet to revoke a confirmation for a transaction.
+    /** @dev Allows to propose or confirm intent for wallet to be revoked for a transaction.
       *
       * @param transactionId Transaction ID.
+      * @param proposeOrConfirm If true then transaction will be proposed otherwise confirmation is being done.
+      *
+      * @return transactionId   It is unique for each unique request.
       */
     function proposeOrConfirmRevokeConfirmation(
         bytes32 transactionId,
@@ -233,62 +261,48 @@ contract MultiSigWallet {
         walletExists(msg.sender)
         confirmed(transactionId, msg.sender)
         notExecuted(transactionId)
+        returns(bytes32 transactionId)
     {
-        bytes32 transactionId = keccak256(abi.encodePacked(_required, _newWallet, this, "revokeConfirmation"));
-        if(proposeOrConfirm){
+        if(proposeOrConfirm) {
+            require(isAlreadyProposedTransaction(transactionId) == false, "Transaction is already proposed!");
             performProposeTransaction(transactionId);
         }
-        else{
+        else {
             performConfirmTransaction(transactionId);
             if(isExecuted[transactionId] == 11){
                 confirmations[transactionId][msg.sender] = false;
                 emit Revocation(msg.sender, transactionId);
             }
         }
-
+        return transactionId;
     }
 
-    /** @dev Allows an wallet to revoke a confirmation for a transaction.
-      *
-      * @param transactionId Transaction ID.
-      */
-    function revokeConfirmation(
-        bytes32 transactionId)
-        public
-        walletExists(msg.sender)
-        confirmed(transactionId, msg.sender)
-        notExecuted(transactionId)
-    {
-        confirmations[transactionId][msg.sender] = false;
-        emit Revocation(msg.sender, transactionId);
-    }
+    /** Internal functions */
 
-    /**  @dev Allows an wallet to submit and confirm a transaction.
+    /**  @dev It is called whereever we need to propose transactions in multisig.
       *
-      *  @param destination Transaction target address.
-      *  @param value Transaction ether value.
-      *  @param data Transaction data payload.
+      *  @param transactionId It marks it in proposed state against the wallet which has sent the transaction.
       *
-      *  @return Returns transaction ID.
       */
     function performProposeTransaction(
         bytes32 transactionId)
-    internal
+        internal
     {
         isExecuted[transactionId] = 01;
         confirmations[transactionId][msg.sender] = true;
+
         emit Propose(msg.sender, transactionId);
     }
 
-    /**  @dev Allows an wallet to confirm a transaction.
+    /**  @dev It is used to send the transaction to confirmation state by the wallet who has sent the transaction.
       *
-      *  @param transactionId Transaction ID.
+      *  @param transactionId It marks this transaction id as confirmed against the wallet which has sent the transaction.
       */
     function performConfirmTransaction(
         bytes32 transactionId)
-    internal
-    walletExists(msg.sender)
-    notConfirmed(transactionId, msg.sender) //transactionExists(transactionId) check whether this is needed
+        internal
+        walletExists(msg.sender)
+        notConfirmed(transactionId, msg.sender) //transactionExists(transactionId) check whether this is needed
     {
         require(isExecuted[transactionId] == 00, "Please first propose the transaction");
         confirmations[transactionId][msg.sender] = true;
@@ -297,18 +311,18 @@ contract MultiSigWallet {
         if ((isExecuted[transactionId] == 01)) {//transaction is not executed,only proposed
             if (isConfirmed(transactionId)) {
                 isExecuted[transactionId] = 11;
-                //                if (execute(to, value, data, operation, gasleft())) //TODO Remove
-                //                    emit Execution(transactionId);
-                //                else {
-                //                    emit ExecutionFailure(transactionId);
-                //                    isExecuted[transactionId] = 10;
-                //                }
             }
 
         }
 
     }
 
+    /** @dev  It is used to check whether the transaction is in proposed state.
+      *
+      * @param transactionId It denotes whose transaction status(Proposed state) is to be checked.
+      *
+      * @bool  If true then transaction is in proposed state.
+      */
     function isAlreadyProposedTransaction(
         bytes32 transactionId)
         internal
