@@ -22,12 +22,11 @@ pragma solidity ^0.4.23;
 //
 // ----------------------------------------------------------------------------
 
-import "../contracts/SafeMath.sol";
+import "./SafeMath.sol";
 
 /** utility chain contracts */
-import "./contracts/openst-protocol/EIP20Token.sol";
-import "./contracts/openst-protocol/UtilityTokenAbstract.sol";
-import "./Owned.sol";
+import "./openst-protocol/EIP20Token.sol";
+import "./openst-protocol/UtilityTokenAbstract.sol";
 import "./Internal.sol";
 
 
@@ -46,7 +45,7 @@ import "./Internal.sol";
  *         their equivalent part of the Simple Token stake
  *         on Ethereum (before v1.0).
  */
-contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned, Internal {
+contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     using SafeMath for uint256;
 
     /** Storage */
@@ -68,6 +67,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned, Internal {
      *  @param _chainIdUtility Chain id of the utility chain.
      *  @param _conversionRate Conversion rate of the token.
      *  @param _conversionRateDecimals Decimal places of conversion rate of token.
+     *  @param _tokenRules tokenRules contract address.
      */
     constructor(
         bytes32 _uuid,
@@ -80,7 +80,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned, Internal {
         uint8 _conversionRateDecimals,
         address _tokenRules)
         public
-        Owned() // TODO rename it organization
+        Internal()
         EIP20Token(_symbol, _name, _decimals)
         UtilityTokenAbstract(
         _uuid,
@@ -96,34 +96,59 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned, Internal {
 
     /** Public functions */
 
+    /**
+	 *  @notice public function transfer.
+	 *
+	 *  @param _to address to which BT needs to transfer.
+	 *  @param _value how many BTs needs to transfer.
+	 *
+	 *  @return bool true/false status of transfer
+	 */
     function transfer(
         address _to,
         uint256 _value)
         public
-        returns (bool success)
+        returns (bool /* success */)
     {
-        require((isInternalActor[_to] == true), "to is invalid economy actor");
+        require(isInternalActor[_to] == true, "to address is invalid economy actor!");
         EIP20Token.transfer(_to, _value);
     }
 
+    /**
+	 *  @notice public function transferFrom.
+	 *
+	 *  @param _from address from which BT needs to transfer.
+	 *  @param _to address to which BT needs to transfer.
+	 *  @param _value how many BTs needs to transfer.
+	 *
+	 *  @return bool true/false status of transferFrom.
+	 */
     function transferFrom(
         address _from,
         address _to,
         uint256 _value)
         public
-        returns (bool success)
+        returns (bool /* success */)
     {
-        require((isInternalActor[_to] == true), "to is invalid economy actor");
+        require(isInternalActor[_to] == true, "to is invalid economy actor");
         EIP20Token.transferFrom(_from, _to, _value);
     }
 
+    /**
+	 *  @notice public function approve.
+	 *
+	 *  @param _spender address to which msg.sender is approving.
+	 *  @param _value how many BTs needs to approve.
+	 *
+	 *  @return bool true/false status of approve.
+	 */
     function approve(
         address _spender,
         uint256 _value)
         public
-        returns (bool success)
+        returns (bool /* success */)
     {
-        require((isInternalActor[_spender] == true), "spender is invalid economy actor");
+        require(isInternalActor[_spender] == true, "spender is invalid economy actor");
         EIP20Token.approve(_spender, _value);
     }
 
@@ -156,7 +181,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned, Internal {
     /**
      *  @notice Public function mintEIP20.
      *
-     *  @dev Only callable by openSTProtocol contract. Adds _amount of utility tokens to 
+     *  @dev Only callable by openSTProtocol contract. Adds _amount of utility tokens to.
      *       be claimed for a _beneficiary address.
      *
      *  @param _beneficiary Address of beneficiary.
@@ -181,7 +206,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Owned, Internal {
     /**
      *  @notice Public function burn.
      *
-     *  @dev Only callable by openSTProtocol contract. Implements a burn function to permit 
+     *  @dev Only callable by openSTProtocol contract. Implements a burn function to permit.
      *       msg.sender to reduce its balance, which also reduces tokenTotalSupply.
      *
      *  @param _burner Address of token burner. 

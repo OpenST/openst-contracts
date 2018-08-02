@@ -35,9 +35,9 @@ contract TokenHolder is MultiSigWallet {
 
     /** Events */
 
-    event SessionAuthorized(bytes32 sessionLock, uint256 spendingLimit);
+    event SessionAuthorized(address wallet, bytes32 sessionLock, uint256 spendingLimit);
 
-    event SessionRevoked(bytes32 sessionLock);
+    event SessionRevoked(address wallet, bytes32 sessionLock);
 
     event SessionValidated(bytes32 oldSessionLock, bytes32 newSessionLock);
 
@@ -46,74 +46,81 @@ contract TokenHolder is MultiSigWallet {
     address public brandedToken;
     /** Co Gateway contract address for redeem functionality */
     address public coGateway;
-    /** how many max tokens can be spent in a single transfer */
-    uint256 private spendingLimit;
-    // TODO spending limit per session lock
-    mapping (bytes32 => bool) public sessionLocks;
-    // TODO Storage needed for tokenRules from branded Token
+
+    address private tokenRules;
+    /** support for spending limit per session lock */
+    mapping (bytes32 /* session lock*/ => uint256 /* spending limit */) public sessionLocks;
 
     /**
 	 *  @notice Contract constructor
 	 *
 	 *  @param _brandedToken erc20 contract address this user is part of
 	 *  @param _coGateway utility chain gateway contract address
-	 *  @param _spendingLimit max tokens user can spend at a time
 	 *  @param _wallets wallet addresses minimum 2 is needed
 	 */
     constructor(
         address _brandedToken,
         address _coGateway,
-        uint256 _spendingLimit, // TODO remove
         uint256 _required,
-        address[] _wallets) MultiSigWallet(_wallets, _required)
+        address[] _wallets)
         public
+        MultiSigWallet(_wallets, _required)
     {
         require(_brandedToken != address(0), "Branded token contract address is 0");
         require(_coGateway != address(0), "Co gateway contract address is 0");
-        require(_wallets.length >= 2, "Minimum two wallets are needed"); // TODO not needed
 
-        spendingLimit = _spendingLimit;
         brandedToken = _brandedToken;
+        /** Needed for onlyTokenRules validation */
+        tokenRules = BrandedToken(brandedToken).tokenRules;
         coGateway = _coGateway;
     }
 
-    // TODO make it internal
+    /**
+	 *  @notice Contract constructor
+	 *
+	 *  @param _sessionLock session lock to be authorized
+	 *  @param _spendingLimit max tokens user can spend at a time
+	 *
+	 *  @return bool
+	 */
     function authorizeSession(
         bytes32 _sessionLock,
         uint256 _spendingLimit)
-        onlyMultiSigWallet
+        internal
         walletDoesNotExist(msg.sender)
         notNull(msg.sender)
-        public
-        returns(bool)
+        returns(bool /* success */)
     {
         require(_sessionLock != bytes32(0), "Input sessionLock is invalid!");
         require(sessionLocks[_sessionLock] == bytes32(0), "SessionLock is already authorized");
 
-        sessionLocks[_sessionLock] = true;
-        spendingLimit = _spendingLimit;
+        sessionLocks[_sessionLock] = _spendingLimit;
 
-        emit SessionAuthorized(_sessionLock, _spendingLimit);
+        emit SessionAuthorized(msg.sender, _sessionLock, _spendingLimit);
 
         return true;
     }
 
-    // TODO make it internal
+    /**
+	 *  @notice Contract constructor
+	 *
+	 *  @param _sessionLock session lock to be revoked
+	 *
+	 *  @return bool
+	 */
     function revokeSession(
         bytes32 _sessionLock)
-        onlyMultiSigWallet // not needed
         walletDoesNotExist(msg.sender)
         notNull(msg.sender)
-        public
-        returns(bool)
+        internal
+        returns(bool /* success */)
     {
-        require(_sessionLock != bytes32(0), "Input SessionLock is invalid");
+        require(_sessionLock != bytes32(0), "Input SessionLock is invalid!");
         require(sessionLocks[_sessionLock] != bytes32(0), "Input SessionLock is not authorized");
 
         delete sessionLocks[_sessionLock];
-        spendingLimit = 0;
 
-        emit SessionRevoked(_sessionLock);
+        emit SessionRevoked(msg.sender, _sessionLock);
 
         return true;
     }
