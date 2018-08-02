@@ -1,10 +1,15 @@
 pragma solidity ^0.4.23;
 
+/**
+ *  @title MultiSigWallet
+ *
+ *  @notice Implement operations which require multiple confirmations.It is inherited by TokenHolder.sol
+ *
+ */
 contract MultiSigWallet {
 
-    /*
-    *  Events
-    */
+    /** Events */
+
     event Confirmation(address indexed sender, uint indexed transactionId);
     event Revocation(address indexed sender, uint indexed transactionId);
     event Execution(uint indexed transactionId);
@@ -21,17 +26,15 @@ contract MultiSigWallet {
     address[] public wallets;
     uint public required;
 
-    // isExecuted mapping allows to check if a transaction (by hash) was already proposed and executed.
-    // Values could be :-
-    // 00 :- initial state/Not proposed.
-    // 01 :- Proposed state.
-    // 10 :- Failed state.
-    // 11 :- Successfully executed state.
+    /** isExecuted mapping allows to check if a transaction (by hash) was already proposed and executed.
+        Values could be :-
+        00 :- initial state/Not proposed.
+        01 :- Proposed state.
+        11 :- Successfully executed state. */
     mapping(bytes32 => uint8) public isExecuted;
 
-    /*
-     *  Modifiers
-     */
+    /** Modifiers */
+
     modifier walletDoesNotExist(address wallet) {
         require(!isWallet[wallet], "Wallet address doesnt exist");
         _;
@@ -62,10 +65,10 @@ contract MultiSigWallet {
 
         require(!isExecuted[transactionId]);
         _;
-
     }
 
     modifier notNull(address _address) {
+
         require(_address != 0, "Wallet address should not be null");
         _;
     }
@@ -79,7 +82,6 @@ contract MultiSigWallet {
                 && walletCount != 0,
                 "Requirement to be set is incorrect");
         _;
-
     }
 
     /** @dev Contract constructor sets initial wallets and required number of confirmations.
@@ -87,7 +89,6 @@ contract MultiSigWallet {
       * @param _wallets List of initial wallets.
       * @param _required Number of required confirmations.
       */
-    // TODO Keep the constructor like this
     constructor(
         address[] _wallets,
         uint256 _required)
