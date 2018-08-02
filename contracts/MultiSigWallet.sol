@@ -1,11 +1,16 @@
 pragma solidity ^0.4.23;
 
 /**
- *  @title MultiSigWallet
+ *  @title MultiSigWallet Contract
  *
- *  @notice Implement operations which require multiple confirmations.It is inherited by TokenHolder.sol
+ *  @notice Implement operations which require multiple owner confirmations. It is inherited by TokenHolder.sol
  *
  */
+// TODO change all uint => uint256
+// TODO if else spacing handling
+// TODO grouping public, internal, private functions
+// TODO Period after comment
+// A space after returns
 contract MultiSigWallet {
 
     /** Events */
@@ -16,21 +21,23 @@ contract MultiSigWallet {
     event ExecutionFailure(uint indexed transactionId);
     event WalletAddition(address indexed wallet);
     event WalletRemoval(address indexed wallet);
-    event RequirementChange(uint required);
+    event RequirementChange(uint16 required);
     event Propose(address sender,bytes32 transactionId);
 
     /**  Storage */
-
+    // TODO variables ordering
     mapping(bytes32 => mapping(address => bool)) public confirmations;
     mapping(address => bool) public isWallet;
     address[] public wallets;
-    uint public required;
+    uint16 public required;
 
-    /** isExecuted mapping allows to check if a transaction (by hash) was already proposed and executed.
+    /**
+        isExecuted mapping allows to check if a transaction (by hash) was already proposed and executed.
         Values could be :-
         00 :- initial state/Not proposed.
         01 :- Proposed state.
-        11 :- Successfully executed state. */
+        11 :- Successfully executed state.
+     */
     mapping(bytes32 => uint8) public isExecuted;
 
     /** Modifiers */
@@ -68,14 +75,13 @@ contract MultiSigWallet {
     }
 
     modifier notNull(address _address) {
-
         require(_address != 0, "Wallet address should not be null");
         _;
     }
 
     modifier validRequirement(
         uint walletCount,
-        uint _required) {
+        uint16 _required) {
 
         require(_required <= walletCount
                 && _required != 0
@@ -91,7 +97,7 @@ contract MultiSigWallet {
       */
     constructor(
         address[] _wallets,
-        uint256 _required)
+        uint16 _required)
         public
         validRequirement(_wallets.length, _required)
     {
@@ -154,7 +160,7 @@ contract MultiSigWallet {
         bool proposeOrConfirm)
         walletExists(wallet)
         public
-        returns(bytes32 transactionId)
+        returns (bytes32 transactionId)
     {
 
         transactionId = keccak256(abi.encodePacked(_wallet, this, "removeWallet"));
@@ -228,7 +234,7 @@ contract MultiSigWallet {
       * @return transactionId   It is unique for each unique request.
       */
     function proposeOrConfirmChangeRequirement(
-        uint _required,
+        uint16 _required,
         bool proposeOrConfirm)
         public
         validRequirement(wallets.length, _required)
