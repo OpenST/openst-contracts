@@ -101,6 +101,36 @@ contract TokenHolder is MultiSigWallet {
         return true;
     }
 
+
+    function proposeOrAuthorizeSession(
+        bytes32 _sessionLock,
+        uint256 _spendingLimit,
+        bool proposeOrConfirm)
+        public
+        walletDoesNotExist(msg.sender)
+        notNull(msg.sender)
+        returns(bool /* success */)
+    {
+        bytes32 transactionId = keccak256(abi.encodePacked(_sessionLock, _spendingLimit, this, "authorizeSession"));
+        if(proposeOrConfirm){
+            genericProposeTransaction(transactionId);
+        }
+        else
+        {
+            genericConfirmTransaction(transactionId);
+            if(isExecuted[transactionId] == 11){
+                require(_sessionLock != bytes32(0), "Input sessionLock is invalid!");
+                require(sessionLocks[_sessionLock] == bytes32(0), "SessionLock is already authorized");
+
+                sessionLocks[_sessionLock] = _spendingLimit;
+
+                emit SessionAuthorized(msg.sender, _sessionLock, _spendingLimit);
+            }
+
+        }
+
+    }
+
     /**
 	 *  @notice Contract constructor
 	 *
