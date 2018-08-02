@@ -1,7 +1,7 @@
 pragma solidity ^0.4.23;
 
 /**
- *  @title MultiSigWallet
+ *  @title MultiSigWallet Contract
  *
  *  @notice Implement operations which require multiple confirmations.It is inherited by TokenHolder.sol
  *
@@ -16,7 +16,7 @@ contract MultiSigWallet {
     event ExecutionFailure(uint indexed transactionId);
     event WalletAddition(address indexed wallet);
     event WalletRemoval(address indexed wallet);
-    event RequirementChange(uint required);
+    event RequirementChange(uint16 required);
     event Propose(address sender,bytes32 transactionId);
 
     /**  Storage */
@@ -34,7 +34,8 @@ contract MultiSigWallet {
         Values could be :-
         00 :- initial state/Not proposed.
         01 :- Proposed state.
-        11 :- Successfully executed state. */
+        11 :- Successfully executed state.
+     */
     mapping(bytes32 => uint8) public isExecuted;
 
     /** Modifiers */
@@ -79,7 +80,7 @@ contract MultiSigWallet {
 
     modifier validRequirement(
         uint walletCount,
-        uint _required) {
+        uint16 _required) {
 
         require(_required <= walletCount
                 && _required != 0
@@ -95,7 +96,7 @@ contract MultiSigWallet {
       */
     constructor(
         address[] _wallets,
-        uint256 _required)
+        uint16 _required)
         public
         validRequirement(_wallets.length, _required)
     {
@@ -158,7 +159,7 @@ contract MultiSigWallet {
         bool proposeOrConfirm)
         walletExists(wallet)
         public
-        returns(bytes32 transactionId)
+        returns (bytes32 transactionId)
     {
 
         transactionId = keccak256(abi.encodePacked(_wallet, this, "removeWallet"));
@@ -232,7 +233,7 @@ contract MultiSigWallet {
       * @return transactionId   It is unique for each unique request.
       */
     function proposeOrConfirmChangeRequirement(
-        uint _required,
+        uint16 _required,
         bool proposeOrConfirm)
         public
         validRequirement(wallets.length, _required)
