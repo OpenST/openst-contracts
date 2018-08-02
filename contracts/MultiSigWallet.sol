@@ -1,5 +1,4 @@
 pragma solidity ^0.4.23;
-import "./JsmnSolLib.sol"
 
 contract MultiSigWallet {
 
@@ -13,7 +12,7 @@ contract MultiSigWallet {
     event WalletAddition(address indexed wallet);
     event WalletRemoval(address indexed wallet);
     event RequirementChange(uint required);
-    event GenericPropose(address sender,bytes32 transactionId);
+    event Propose(address sender,bytes32 transactionId);
 
     /**  Storage */
 
@@ -57,8 +56,7 @@ contract MultiSigWallet {
 
         require(!confirmations[transactionId][wallet]);
         _;
-
-    }
+     }
 
     modifier notExecuted(bytes32 transactionId) {
 
@@ -119,10 +117,10 @@ contract MultiSigWallet {
         validRequirement(wallets.length + 1, required)
         public
     {
-        bytes32 transactionId = keccak256(abi.encodePacked(_wallet,this, "addWallet"));
+        bytes32 transactionId = keccak256(abi.encodePacked(_wallet, this, "addWallet"));
         if(proposeOrConfirm){
             require(isWallet[wallet] == false, "Wallet address already exists");
-            genericProposeTransaction(transactionId);
+            performProposeTransaction(transactionId);
         }
         else{
             genericConfirmTransaction(transactionId);
@@ -145,13 +143,12 @@ contract MultiSigWallet {
         public
     {
 
-        bytes32 transactionId = keccak256(abi.encodePacked(_wallet,this, "removeWallet"));
+        bytes32 transactionId = keccak256(abi.encodePacked(_wallet, this, "removeWallet"));
         if(proposeOrConfirm){
-            genericProposeTransaction(transactionId);
-
+            performProposeTransaction(transactionId);
         }
         else{
-            genericConfirmTransaction(transactionId);
+            performConfirmTransaction(transactionId);
             if(isExecuted[transactionId] == 11){
                 isWallet[wallet] = false;
                 for (uint i = 0; i < wallets.length - 1; i++)
@@ -184,10 +181,10 @@ contract MultiSigWallet {
     {
         bytes32 transactionId = keccak256(abi.encodePacked(_oldWallet,_newWallet,this, "replaceWallet"));
         if(proposeOrConfirm){
-            genericProposeTransaction(transactionId);
+            performProposeTransaction(transactionId);
         }
         else{
-            genericConfirmTransaction(transactionId);
+            performConfirmTransaction(transactionId);
             if(isExecuted[transactionId] == 11 ){
                 for (uint i = 0; i < wallets.length; i++)
                 if (wallets[i] == wallet) {
@@ -207,17 +204,17 @@ contract MultiSigWallet {
       *  @param _required Number of required confirmations.
       */
     function proposeOrConfirmChangeRequirement(
-        uint _required
+        uint _required,
         bool proposeOrConfirm)
         public
         validRequirement(wallets.length, _required)
     {
         bytes32 transactionId = keccak256(abi.encodePacked(_required, _newWallet, this, "changeRequirement"));
         if(proposeOrConfirm){
-            genericProposeTransaction(transactionId);
+            performProposeTransaction(transactionId);
         }
         else{
-            genericConfirmTransaction(transactionId);
+            performConfirmTransaction(transactionId);
             if(isExecuted[transactionId] == 11){
                 required = _required;
                 emit RequirementChange(_required);
@@ -230,7 +227,7 @@ contract MultiSigWallet {
       * @param transactionId Transaction ID.
       */
     function proposeOrConfirmRevokeConfirmation(
-        bytes32 transactionId
+        bytes32 transactionId,
         bool proposeOrConfirm)
         public
         walletExists(msg.sender)
@@ -239,60 +236,14 @@ contract MultiSigWallet {
     {
         bytes32 transactionId = keccak256(abi.encodePacked(_required, _newWallet, this, "revokeConfirmation"));
         if(proposeOrConfirm){
-            genericProposeTransaction(transactionId);
+            performProposeTransaction(transactionId);
         }
         else{
-            genericConfirmTransaction(transactionId);
+            performConfirmTransaction(transactionId);
             if(isExecuted[transactionId] == 11){
                 confirmations[transactionId][msg.sender] = false;
                 emit Revocation(msg.sender, transactionId);
             }
-        }
-
-    }
-
-    /**  @dev Allows an wallet to submit and confirm a transaction.
-      *
-      *  @param destination Transaction target address.
-      *  @param value Transaction ether value.
-      *  @param data Transaction data payload.
-      *
-      *  @return Returns transaction ID.
-      */
-    function genericProposeTransaction(
-        bytes32 transactionId)
-        internal
-    {
-        isExecuted[transactionId] = 01;
-        confirmations[transactionId][msg.sender] = true;
-        emit GenericPropose(msg.sender, transactionId);
-    }
-
-    /**  @dev Allows an wallet to confirm a transaction.
-      *
-      *  @param transactionId Transaction ID.
-      */
-    function genericConfirmTransaction(
-        bytes32 transactionId)
-        internal
-        walletExists(msg.sender)
-        notConfirmed(transactionId, msg.sender) //transactionExists(transactionId) check whether this is needed
-    {
-        require(isExecuted[transactionId] == 00, "Please first propose the transaction");
-        confirmations[transactionId][msg.sender] = true;
-        emit Confirmation(msg.sender, transactionId);
-        executeTransaction(transactionId); // TODO Remove
-        if ((isExecuted[transactionId] == 01)) {//transaction is not executed,only proposed
-            if (isConfirmed(transactionId)) {
-                isExecuted[transactionId] = 11;
-//                if (execute(to, value, data, operation, gasleft())) //TODO Remove
-//                    emit Execution(transactionId);
-//                else {
-//                    emit ExecutionFailure(transactionId);
-//                    isExecuted[transactionId] = 10;
-//                }
-            }
-
         }
 
     }
@@ -312,69 +263,124 @@ contract MultiSigWallet {
         emit Revocation(msg.sender, transactionId);
     }
 
-    /** @dev Returns the confirmation status of a transaction.
+    /**  @dev Allows an wallet to submit and confirm a transaction.
       *
-      * @param transactionId Transaction ID.
+      *  @param destination Transaction target address.
+      *  @param value Transaction ether value.
+      *  @param data Transaction data payload.
       *
-      * @return Confirmation status.
+      *  @return Returns transaction ID.
       */
-    function isConfirmed(bytes32 transactionId)
-        public
-        constant
-        returns (bool)
+    function performProposeTransaction(
+        bytes32 transactionId)
+    internal
     {
-        uint count = 0;
-        for (uint i = 0; i < wallets.length; i++) {
-            if (confirmations[transactionId][wallets[i]])
-                count += 1;
-            if (count == required)
-                return true;
-        }
+        isExecuted[transactionId] = 01;
+        confirmations[transactionId][msg.sender] = true;
+        emit Propose(msg.sender, transactionId);
     }
 
-    /**
-      *  @dev Returns number of confirmations of a transaction.
+    /**  @dev Allows an wallet to confirm a transaction.
       *
       *  @param transactionId Transaction ID.
-      *
-      *  @return Number of confirmations.
       */
-    function getConfirmationCount(
+    function performConfirmTransaction(
         bytes32 transactionId)
-        public
-        constant
-        returns (uint count)
+    internal
+    walletExists(msg.sender)
+    notConfirmed(transactionId, msg.sender) //transactionExists(transactionId) check whether this is needed
     {
-        for (uint i = 0; i < wallets.length; i++)
-            if (confirmations[transactionId][wallets[i]])
-                count += 1;
-    }
-
-
-
-    /**  @dev Returns array with wallet addresses, which confirmed transaction.
-      *
-      *  @param transactionId Transaction ID.
-      *
-      *  @return Returns array of wallet addresses.
-      */
-    function getConfirmations(
-        bytes32 transactionId)
-        public
-        constant
-        returns (address[] _confirmations)
-    {
-        address[] memory confirmationsTemp = new address[](wallets.length);
-        uint count = 0;
-        uint i;
-        for (i = 0; i < wallets.length; i++)
-            if (confirmations[transactionId][wallets[i]]) {
-                confirmationsTemp[count] = wallets[i];
-                count += 1;
+        require(isExecuted[transactionId] == 00, "Please first propose the transaction");
+        confirmations[transactionId][msg.sender] = true;
+        emit Confirmation(msg.sender, transactionId);
+        executeTransaction(transactionId); // TODO Remove
+        if ((isExecuted[transactionId] == 01)) {//transaction is not executed,only proposed
+            if (isConfirmed(transactionId)) {
+                isExecuted[transactionId] = 11;
+                //                if (execute(to, value, data, operation, gasleft())) //TODO Remove
+                //                    emit Execution(transactionId);
+                //                else {
+                //                    emit ExecutionFailure(transactionId);
+                //                    isExecuted[transactionId] = 10;
+                //                }
             }
-        _confirmations = new address[](count);
-        for (i = 0; i < count; i++)
-            _confirmations[i] = confirmationsTemp[i];
+
+        }
+
     }
+
+    function isAlreadyProposedTransaction(
+        bytes32 transactionId)
+        internal
+        returns (bool /* success */)
+    {
+        return isExecuted[transactionId] == 01;
+    }
+
+    // TODO Do we need below functions
+//    /** @dev Returns the confirmation status of a transaction.
+//      *
+//      * @param transactionId Transaction ID.
+//      *
+//      * @return Confirmation status.
+//      */
+//    function isConfirmed(bytes32 transactionId)
+//        public
+//        constant
+//        returns (bool)
+//    {
+//        uint count = 0;
+//        for (uint i = 0; i < wallets.length; i++) {
+//            if (confirmations[transactionId][wallets[i]])
+//                count += 1;
+//            if (count == required)
+//                return true;
+//        }
+//    }
+//
+//    /**
+//      *  @dev Returns number of confirmations of a transaction.
+//      *
+//      *  @param transactionId Transaction ID.
+//      *
+//      *  @return Number of confirmations.
+//      */
+//    function getConfirmationCount(
+//        bytes32 transactionId)
+//        public
+//        constant
+//        returns (uint count)
+//    {
+//        for (uint i = 0; i < wallets.length; i++)
+//            if (confirmations[transactionId][wallets[i]])
+//                count += 1;
+//    }
+//
+//
+//
+//    /**  @dev Returns array with wallet addresses, which confirmed transaction.
+//      *
+//      *  @param transactionId Transaction ID.
+//      *
+//      *  @return Returns array of wallet addresses.
+//      */
+//    function getConfirmations(
+//        bytes32 transactionId)
+//        public
+//        constant
+//        returns (address[] _confirmations)
+//    {
+//        address[] memory confirmationsTemp = new address[](wallets.length);
+//        uint count = 0;
+//        uint i;
+//        for (i = 0; i < wallets.length; i++)
+//            if (confirmations[transactionId][wallets[i]]) {
+//                confirmationsTemp[count] = wallets[i];
+//                count += 1;
+//            }
+//        _confirmations = new address[](count);
+//        for (i = 0; i < count; i++)
+//            _confirmations[i] = confirmationsTemp[i];
+//    }
 
 }
