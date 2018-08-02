@@ -1,4 +1,5 @@
 pragma solidity ^0.4.23;
+import "./JsmnSolLib.sol"
 
 contract MultiSigWallet {
 
@@ -12,6 +13,7 @@ contract MultiSigWallet {
     event WalletAddition(address indexed wallet);
     event WalletRemoval(address indexed wallet);
     event RequirementChange(uint required);
+    event GenericPropose(address sender,bytes32 transactionId);
 
     /**  Storage */
 
@@ -77,7 +79,7 @@ contract MultiSigWallet {
         require(_required <= walletCount
                 && _required != 0
                 && walletCount != 0,
-                "Required to be set is incorrect or not null");
+                "Requirement to be set is incorrect");
         _;
 
     }
@@ -96,6 +98,7 @@ contract MultiSigWallet {
     {
         require(_wallets.length > 0,"Wallets cannot be empty");
         require(_required > 0,"Atleast one confirmation is required");
+        require(_required <= _wallets,"Number of confirmations cannot be less than wallets");
         for (uint i = 0; i < _wallets.length; i++) {
             require(!isWallet[_wallets[i]] && _wallets[i] != 0, "Wallet address is incorrect or duplicate");
             isWallet[_wallets[i]] = true;
@@ -108,76 +111,144 @@ contract MultiSigWallet {
       *
       *  @param wallet Address of new wallet.
       */
-    // TODO make it internal
-    function addWallet(
-        address wallet)
-        public
-        walletDoesNotExist(wallet)
+    // TODO Check for isExecuted failure 10
+    function proposeOrConfirmAddWallet(
+        address _wallet,
+        proposeOrConfirm) // TODO remove proposeOrConfirm
         notNull(wallet)
         validRequirement(wallets.length + 1, required)
+        public
     {
-        isWallet[wallet] = true;
-        wallets.push(wallet);
-        emit WalletAddition(wallet);
+        bytes32 transactionId = keccak256(abi.encodePacked(_wallet,this, "addWallet"));
+        if(proposeOrConfirm){
+            require(isWallet[wallet] == false, "Wallet address already exists");
+            genericProposeTransaction(transactionId);
+        }
+        else{
+            genericConfirmTransaction(transactionId);
+            if (isExecuted[transactionId] == 11) {
+                isWallet[wallet] = true; // TODO Remove
+                wallets.push(wallet);
+                emit WalletAddition(wallet);
+            }
+        }
     }
 
     /**  @dev Allows to remove an wallet. Transaction has to be sent by wallet.
       *
       *  @param wallet Address of wallet.
       */
-    // TODO make it internal
-    function removeWallet(
-        address wallet)
-        public
+    function proposeOrConfirmRemoveWallet(
+        address _wallet,
+        bool proposeOrConfirm)
         walletExists(wallet)
+        public
     {
-        isWallet[wallet] = false;
-        for (uint i = 0; i < wallets.length - 1; i++)
-            if (wallets[i] == wallet) {
-                wallets[i] = wallets[wallets.length - 1];
-                break;
+
+        bytes32 transactionId = keccak256(abi.encodePacked(_wallet,this, "removeWallet"));
+        if(proposeOrConfirm){
+            genericProposeTransaction(transactionId);
+
+        }
+        else{
+            genericConfirmTransaction(transactionId);
+            if(isExecuted[transactionId] == 11){
+                isWallet[wallet] = false;
+                for (uint i = 0; i < wallets.length - 1; i++)
+                    if (wallets[i] == wallet) {
+                        wallets[i] = wallets[wallets.length - 1];
+                        break;
+                    }
+                wallets.length -= 1;
+                if (required > wallets.length)
+                    changeRequirement(wallets.length);
+                    emit WalletRemoval(wallet);
             }
-        wallets.length -= 1;
-        if (required > wallets.length)
-            changeRequirement(wallets.length);
-        emit WalletRemoval(wallet);
+        }
+
     }
+
 
     /**  @dev Allows to replace an wallet with a new wallet. Transaction has to be sent by wallet.
       *
       *  @param wallet Address of wallet to be replaced.
       *  @param newWallet Address of new wallet.
       */
-    // TODO make it internal
-    function replaceWallet(
-        address wallet,
-        address newWallet)
+    function proposeOrConfirmReplaceWallet(
+        address _oldWallet,
+        address _newWallet,
+        bool proposeOrConfirm)
         public
-        walletExists(wallet)
-        walletDoesNotExist(newWallet)
+        walletExists(_oldWallet)
+        walletDoesNotExist(_newWallet)
     {
-        for (uint i = 0; i < wallets.length; i++)
-            if (wallets[i] == wallet) {
-                wallets[i] = newWallet;
-                break;
+        bytes32 transactionId = keccak256(abi.encodePacked(_oldWallet,_newWallet,this, "replaceWallet"));
+        if(proposeOrConfirm){
+            genericProposeTransaction(transactionId);
+        }
+        else{
+            genericConfirmTransaction(transactionId);
+            if(isExecuted[transactionId] == 11 ){
+                for (uint i = 0; i < wallets.length; i++)
+                if (wallets[i] == wallet) {
+                    wallets[i] = newWallet;
+                    break;
+                }
+            isWallet[wallet] = false;
+            isWallet[newWallet] = true;
+            emit WalletRemoval(wallet);
+            emit WalletAddition(newWallet);
             }
-        isWallet[wallet] = false;
-        isWallet[newWallet] = true;
-        emit WalletRemoval(wallet);
-        emit WalletAddition(newWallet);
-    }
+        }
+     }
 
     /**  @dev Allows to change the number of required confirmations. Transaction has to be sent by wallet.
       *
       *  @param _required Number of required confirmations.
       */
-    function changeRequirement(
-        uint _required)
+    function proposeOrConfirmChangeRequirement(
+        uint _required
+        bool proposeOrConfirm)
         public
         validRequirement(wallets.length, _required)
     {
-        required = _required;
-        emit RequirementChange(_required);
+        bytes32 transactionId = keccak256(abi.encodePacked(_required, _newWallet, this, "changeRequirement"));
+        if(proposeOrConfirm){
+            genericProposeTransaction(transactionId);
+        }
+        else{
+            genericConfirmTransaction(transactionId);
+            if(isExecuted[transactionId] == 11){
+                required = _required;
+                emit RequirementChange(_required);
+            }
+        }
+    }
+
+    /** @dev Allows an wallet to revoke a confirmation for a transaction.
+      *
+      * @param transactionId Transaction ID.
+      */
+    function proposeOrConfirmRevokeConfirmation(
+        bytes32 transactionId
+        bool proposeOrConfirm)
+        public
+        walletExists(msg.sender)
+        confirmed(transactionId, msg.sender)
+        notExecuted(transactionId)
+    {
+        bytes32 transactionId = keccak256(abi.encodePacked(_required, _newWallet, this, "revokeConfirmation"));
+        if(proposeOrConfirm){
+            genericProposeTransaction(transactionId);
+        }
+        else{
+            genericConfirmTransaction(transactionId);
+            if(isExecuted[transactionId] == 11){
+                confirmations[transactionId][msg.sender] = false;
+                emit Revocation(msg.sender, transactionId);
+            }
+        }
+
     }
 
     /**  @dev Allows an wallet to submit and confirm a transaction.
@@ -188,72 +259,42 @@ contract MultiSigWallet {
       *
       *  @return Returns transaction ID.
       */
-    function proposeTransaction(
-        address to,
-        uint256 value,
-        bytes data, // don't need
-        Enum.Operation operation, // type of operation Change this. Dont use low level call
-        uint256 nonce) // don't need
-        public
-        returns (bytes32 transactionId)
+    function genericProposeTransaction(
+        bytes32 transactionId)
+        internal
     {
-        transactionId = getTransactionHash(to, value, data, operation, nonce);
         isExecuted[transactionId] = 01;
         confirmations[transactionId][msg.sender] = true;
-        confirmTransaction(transactionId);
+        emit GenericPropose(msg.sender, transactionId);
     }
 
     /**  @dev Allows an wallet to confirm a transaction.
       *
       *  @param transactionId Transaction ID.
       */
-    // TODO  Evaluate gnosis index vs all parameters
-    // TODO use If else
-    // TODO segregating parameters
-    function confirmTransaction(
-        address to,
-        uint256 value,
-        bytes data,
-        Enum.Operation operation, // Change this
-        uint256 nonce)
-        public
+    function genericConfirmTransaction(
+        bytes32 transactionId)
+        internal
         walletExists(msg.sender)
         notConfirmed(transactionId, msg.sender) //transactionExists(transactionId) check whether this is needed
     {
-        bytes32 transactionId = getTransactionHash(to, value, data, operation, nonce);
         require(isExecuted[transactionId] == 00, "Please first propose the transaction");
         confirmations[transactionId][msg.sender] = true;
         emit Confirmation(msg.sender, transactionId);
-        executeTransaction(transactionId);
+        executeTransaction(transactionId); // TODO Remove
         if ((isExecuted[transactionId] == 01)) {//transaction is not executed,only proposed
             if (isConfirmed(transactionId)) {
                 isExecuted[transactionId] = 11;
-                if (execute(to, value, data, operation, gasleft()))
-                    emit Execution(transactionId);
-                else {
-                    emit ExecutionFailure(transactionId);
-                    isExecuted[transactionId] = 10;
-                }
+//                if (execute(to, value, data, operation, gasleft())) //TODO Remove
+//                    emit Execution(transactionId);
+//                else {
+//                    emit ExecutionFailure(transactionId);
+//                    isExecuted[transactionId] = 10;
+//                }
             }
 
         }
 
-    }
-
-    function execute(
-        address to,
-        uint256 value,
-        bytes data,
-        Enum.Operation operation, //needs to be changed
-        uint256 txGas)
-        internal
-        returns (bool success)
-    {
-        if (operation == Enum.Operation.Call) {
-            assembly {
-                success := call(txGas, to, value, add(data, 0x20), mload(data), 0, 0)
-            }
-        }
     }
 
     /** @dev Allows an wallet to revoke a confirmation for a transaction.
@@ -334,29 +375,6 @@ contract MultiSigWallet {
         _confirmations = new address[](count);
         for (i = 0; i < count; i++)
             _confirmations[i] = confirmationsTemp[i];
-    }
-
-     /** @dev Returns hash to be signed by wallets.
-       *
-       * @param to Destination address.
-       * @param value Ether value.
-       * @param data Data payload.
-       * @param operation Operation type.
-       * @param nonce Transaction nonce.
-       *
-       * @return Transaction hash.
-       */
-    function getTransactionHash(
-        address to,
-        uint256 value,
-        bytes data,
-        Enum.Operation operation,
-        uint256 nonce)
-        public
-        view
-        returns (bytes32)
-    {
-        return keccak256(abi.encodePacked(byte(0x19), byte(0), this, to, value, data, operation, nonce));
     }
 
 }
