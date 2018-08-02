@@ -39,7 +39,7 @@ contract TokenHolder is MultiSigWallet {
 
     event SessionRevoked(address wallet, bytes32 sessionLock);
 
-    event SessionValidated(bytes32 oldSessionLock, bytes32 newSessionLock);
+    event SessionLockUpdated(bytes32 oldSessionLock, bytes32 newSessionLock);
 
     /** Storage */
 
@@ -101,7 +101,9 @@ contract TokenHolder is MultiSigWallet {
         return true;
     }
 
-
+    // TODO commenting
+    // TODO genericProposeTransaction, genericConfirmTransaction function name change
+    // TODO remove authorizeSession method
     function proposeOrAuthorizeSession(
         bytes32 _sessionLock,
         uint256 _spendingLimit,
@@ -111,6 +113,9 @@ contract TokenHolder is MultiSigWallet {
         notNull(msg.sender)
         returns(bool /* success */)
     {
+        require(_sessionLock != bytes32(0), "Input sessionLock is invalid!");
+        require(sessionLocks[_sessionLock] == bytes32(0), "SessionLock is already authorized");
+
         bytes32 transactionId = keccak256(abi.encodePacked(_sessionLock, _spendingLimit, this, "authorizeSession"));
         if(proposeOrConfirm){
             genericProposeTransaction(transactionId);
@@ -118,12 +123,8 @@ contract TokenHolder is MultiSigWallet {
         else
         {
             genericConfirmTransaction(transactionId);
-            if(isExecuted[transactionId] == 11){
-                require(_sessionLock != bytes32(0), "Input sessionLock is invalid!");
-                require(sessionLocks[_sessionLock] == bytes32(0), "SessionLock is already authorized");
-
+            if (isExecuted[transactionId] == 11) {
                 sessionLocks[_sessionLock] = _spendingLimit;
-
                 emit SessionAuthorized(msg.sender, _sessionLock, _spendingLimit);
             }
 
@@ -155,20 +156,24 @@ contract TokenHolder is MultiSigWallet {
         return true;
     }
 
-    /*
-        @dev support fault tolerance
-     */
+    /**
+	 *  @notice Validate and update session lcok
+	 *
+	 *  @param _newSessionLock session lock to be verified and updated
+	 *
+	 *  @return bool
+	 */
     function updateSessionLock(
         bytes32 _newSessionLock)
         private
         returns (bool /* success */)
     {
-        bytes32 oldSessionLock = sha3(_newSessionLock);
+        bytes32 oldSessionLock = keccak256(abi.encodePacked(_newSessionLock));
         if (sessionLocks[oldSessionLock] == true){
             delete(sessionLocks[oldSessionLock]);
             sessionLocks[_newSessionLock] = true;
 
-            emit SessionValidated(oldSessionLock, _newSessionLock);
+            emit SessionLockUpdated(oldSessionLock, _newSessionLock);
             return true;
         } else {
             return false;
