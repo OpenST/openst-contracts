@@ -10,10 +10,10 @@ contract MultiSigWallet {
 
     /** Events */
 
-    event Confirmation(address indexed sender, uint indexed transactionId);
-    event Revocation(address indexed sender, uint indexed transactionId);
-    event Execution(uint indexed transactionId);
-    event ExecutionFailure(uint indexed transactionId);
+    event Confirmation(address indexed sender, bytes32 indexed transactionId);
+    event Revocation(address indexed sender, bytes32 indexed transactionId);
+    event Execution(bytes32 indexed transactionId);
+    event ExecutionFailure(bytes32 indexed transactionId);
     event WalletAddition(address indexed wallet);
     event WalletRemoval(address indexed wallet);
     event RequirementChange(uint16 required);
