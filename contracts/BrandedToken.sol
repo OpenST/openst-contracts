@@ -130,7 +130,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         public
         returns (bool /* success */)
     {
-        require(isInternalActor[_to] == true, "to is invalid economy actor");
+        require(isInternalActor[_to] == true, "to is invalid economy actor!");
         EIP20Token.transferFrom(_from, _to, _value);
     }
 
@@ -148,34 +148,8 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         public
         returns (bool /* success */)
     {
-        require(isInternalActor[_spender] == true, "spender is invalid economy actor");
+        require(isInternalActor[_spender] == true, "spender is invalid economy actor!");
         EIP20Token.approve(_spender, _value);
-    }
-
-    /**
-     *  @notice Public function claim.
-     *
-     *  @dev Calls on claimInteral which returns amount of utility
-     *       tokens to transfer for _beneficiary address.
-     *
-     *  @param _beneficiary Address of the utility tokens beneficiary.
-     *
-     *  @return True if claim of utility tokens for beneficiary address is successful, 
-     *          false otherwise.
-     */
-    // TODO claim method needs to remove. Not needed at all.
-    // TODO needs to update coGateway
-    function claim(
-        address _beneficiary)
-        public
-        returns (bool /* success */)
-    {
-        // TODO not needed
-        //require(isEconomyActor(msg.sender) == true, "msg.sender is invalid economy actor");
-
-        uint256 amount = claimInternal(_beneficiary);
-
-        return claimEIP20(_beneficiary, amount);
     }
 
     /**
@@ -196,7 +170,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         onlyProtocol
         returns (bool /* success */)
     {
-        require((isInternalActor[_beneficiary] == true), "beneficiary is invalid economy actor");
+        require((isInternalActor[_beneficiary] == true), "beneficiary is invalid economy actor!");
 
         mintEIP20(_amount);
 
@@ -222,7 +196,6 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         payable
         returns (bool /* success */)
     {
-
         // force non-payable, as only ST' handles in base tokens
         require(msg.value == 0, "msg.value should be 0");
 
