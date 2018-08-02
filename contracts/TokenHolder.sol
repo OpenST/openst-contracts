@@ -76,44 +76,27 @@ contract TokenHolder is MultiSigWallet {
     }
 
     /**
-	 *  @notice authorize session method
+	 *  @notice authorize session method.
 	 *
-	 *  @param _sessionLock session lock to be authorized
-	 *  @param _spendingLimit max tokens user can spend at a time
+	 *  @param _sessionLock session lock to be authorized.
+	 *  @param _spendingLimit max tokens user can spend at a time.
+	 *  @param proposeOrConfirm if true transaction will be proposed otherwise confirmation is done.
 	 *
-	 *  @return bool
+	 *  @return bytes32 transactionId for the request.
 	 */
-    function authorizeSession(
-        bytes32 _sessionLock,
-        uint256 _spendingLimit)
-        internal
-        walletDoesNotExist(msg.sender)
-        notNull(msg.sender)
-        returns(bool /* success */)
-    {
-        require(_sessionLock != bytes32(0), "Input sessionLock is invalid!");
-        require(sessionLocks[_sessionLock] == bytes32(0), "SessionLock is already authorized");
-
-        sessionLocks[_sessionLock] = _spendingLimit;
-
-        emit SessionAuthorized(msg.sender, _sessionLock, _spendingLimit);
-
-        return true;
-    }
-
-
-    function proposeOrAuthorizeSession(
+    function proposeOrConfirmAuthorizeSession(
         bytes32 _sessionLock,
         uint256 _spendingLimit,
         bool proposeOrConfirm)
         public
         walletDoesNotExist(msg.sender)
         notNull(msg.sender)
-        returns(bool /* success */)
+        returns(bytes32 transactionId)
     {
-        bytes32 transactionId = keccak256(abi.encodePacked(_sessionLock, _spendingLimit, this, "authorizeSession"));
+        transactionId = keccak256(abi.encodePacked(_sessionLock, _spendingLimit, this, "authorizeSession"));
         if(proposeOrConfirm){
-            genericProposeTransaction(transactionId);
+            require(isExecuted[transactionId] != 01,"This request is already proposed");
+            performProposeTransaction(transactionId);
         }
         else
         {
@@ -126,9 +109,8 @@ contract TokenHolder is MultiSigWallet {
 
                 emit SessionAuthorized(msg.sender, _sessionLock, _spendingLimit);
             }
-
         }
-
+        return transactionId;
     }
 
     /**
