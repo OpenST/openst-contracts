@@ -76,7 +76,7 @@ contract Internal {
     function registerInternalActor(
         address[] _internalActors)
         public
-        onlyOrganization()
+        onlyOrganization
         returns (uint16 /* Registered Count */)
     {
         require(_internalActors.length != 0, "Internal actors length is 0");
@@ -92,7 +92,7 @@ contract Internal {
             }
         }
 
-        return _internalActors.length;
+        return uint16(_internalActors.length);
     }
 
 }

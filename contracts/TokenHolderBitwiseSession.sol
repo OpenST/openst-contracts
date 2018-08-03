@@ -18,7 +18,7 @@ contract TokenHolder {
     }
 
     function validateSession_1(bytes32 newScret) returns (bool){
-        require(sha3(newScret) == secret);
+        require(keccak256(newScret) == secret);
         secret = newScret;
         return true;
     }
@@ -26,7 +26,7 @@ contract TokenHolder {
     event Test(bytes32 msg, bytes32 created);
 
     function validateSession_2(bytes32 msgHash, uint8 v, bytes32 r, bytes32 s, uint128 nonce) returns (bool) {
-        bytes32 message = prefixed(keccak256(uint256(nonce)));
+        bytes32 message = prefixed(keccak256(abi.encodePacked((uint256(nonce)))));
 
         address _addr = ecrecover(msgHash, v, r, s);
         require(msgHash == message);
@@ -53,7 +53,7 @@ contract TokenHolder {
     }
 
     function prefixed(bytes32 hash) internal pure returns (bytes32) {
-        return keccak256("\x19Ethereum Signed Message:\n32", hash);
+        return keccak256(abi.encodePacked(("\x19Ethereum Signed Message:\n32", hash));
     }
 
 }
