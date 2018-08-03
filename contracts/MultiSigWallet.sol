@@ -12,6 +12,7 @@ pragma solidity ^0.4.23;
 // TODO uint should be changed to uint256
 // TODO use @notice for all functions. @dev is optional
 // TODO new line after comment start in functions
+// TODO compile contracts
 contract MultiSigWallet {
 
     /** Events */
@@ -80,9 +81,9 @@ contract MultiSigWallet {
         _;
      }
 
-    modifier notExecuted(bytes32 transactionId) {
-
-        require(!isExecuted[transactionId]);
+    modifier notSuccessfullyExecuted(bytes32 transactionId) {
+        /** Transaction should not be success */
+        require(isExecuted[transactionId] != 2);
         _;
     }
 
@@ -180,6 +181,7 @@ contract MultiSigWallet {
         address _wallet,
         bool _proposeOrConfirm)
         onlyWallet
+        notNull(_wallet)
         walletExists(_wallet)
         public
         returns (bytes32 transactionId)
@@ -202,6 +204,7 @@ contract MultiSigWallet {
                         break;
                     }
                 wallets.length -= 1;
+                // TODO do we need this or another approach
                 if (required > wallets.length)
                     changeRequirement(wallets.length);
                 emit WalletRemoval(wallet);
@@ -294,13 +297,12 @@ contract MultiSigWallet {
       * @return transactionId   It is unique for each unique request.
       */
     function _proposeOrConfirmRevokeConfirmation(
-        bytes32 transactionId,
+        bytes32 transactionId, // TODO _transactionId
         bool _proposeOrConfirm)
         public
         onlyWallet
-        walletExists(msg.sender)
         confirmed(transactionId, msg.sender)
-        notExecuted(transactionId)
+        notSuccessfullyExecuted(transactionId)
         returns(bytes32 transactionId)
     {
         if(_proposeOrConfirm) {
@@ -310,6 +312,7 @@ contract MultiSigWallet {
         else {
             performConfirmTransaction(transactionId);
             if(isExecuted[transactionId] == 11){
+                // TODO should we delete this
                 confirmations[transactionId][msg.sender] = false;
                 emit Revocation(msg.sender, transactionId);
             }
@@ -325,7 +328,7 @@ contract MultiSigWallet {
       *
       */
     function performProposeTransaction(
-        bytes32 transactionId)
+        bytes32 transactionId) // TODO _transactionId
         internal
     {
         isExecuted[transactionId] = 01;
@@ -339,10 +342,9 @@ contract MultiSigWallet {
       *  @param transactionId It marks this transaction id as confirmed against the wallet which has sent the transaction.
       */
     function performConfirmTransaction(
-        bytes32 transactionId)
+        bytes32 transactionId) // TODO _transactionId
         internal
-        walletExists(msg.sender)
-        notConfirmed(transactionId, msg.sender) //transactionExists(transactionId) check whether this is needed
+        notConfirmed(transactionId, msg.sender)
     {
         require(isExecuted[transactionId] == 00, "Please first propose the transaction");
         confirmations[transactionId][msg.sender] = true;

@@ -100,6 +100,7 @@ contract TokenHolder is MultiSigWallet {
         onlyWallet
         returns (bytes32 transactionId)
     {
+        // TODO change to modifiers
         require(_sessionLock != bytes32(0), "Input sessionLock is invalid!");
         require(sessionLocks[_sessionLock] == bytes32(0), "SessionLock is already authorized");
 
@@ -126,11 +127,13 @@ contract TokenHolder is MultiSigWallet {
 	 *  @return bytes32 transactionId for the request.
 	 */
     function proposeOrConfirmRevokeSession(
-        bytes32 _sessionLock)
+        bytes32 _sessionLock,
+        bool _proposeOrConfirm)
         public
         onlyWallet
         returns (bytes32 transactionId)
     {
+        // TODO change to modifiers
         require(_sessionLock != bytes32(0), "Input sessionLock is invalid!");
         require(sessionLocks[_sessionLock] != bytes32(0), "Input SessionLock is not authorized!");
 
