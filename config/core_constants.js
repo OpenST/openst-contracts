@@ -23,11 +23,12 @@ const CoreConstants = function(configStrategy, instanceComposer) {
   oThis.OST_UTILITY_GETH_WS_PROVIDER = configStrategy.OST_UTILITY_GETH_WS_PROVIDER;
 
   // MySQL details
-  oThis.MYSQL_HOST = configStrategy.OP_MYSQL_HOST;
-  oThis.MYSQL_USER = configStrategy.OP_MYSQL_USER;
-  oThis.MYSQL_PASSWORD = configStrategy.OP_MYSQL_PASSWORD;
-  oThis.MYSQL_DATABASE = configStrategy.OP_MYSQL_DATABASE;
-  oThis.MYSQL_CONNECTION_POOL_SIZE = configStrategy.OP_MYSQL_CONNECTION_POOL_SIZE;
+  oThis.MYSQL_HOST = process.env.OP_MYSQL_HOST;
+  oThis.MYSQL_USER = process.env.OP_MYSQL_USER;
+  oThis.MYSQL_PASSWORD = process.env.OP_MYSQL_PASSWORD;
+  oThis.MYSQL_DATABASE = process.env.OP_MYSQL_DATABASE;
+  oThis.MYSQL_CONNECTION_POOL_SIZE = process.env.OP_MYSQL_CONNECTION_POOL_SIZE;
+
   oThis.OST_STANDALONE_MODE = configStrategy.OST_STANDALONE_MODE;
 
   //Debug level

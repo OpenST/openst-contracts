@@ -1,10 +1,8 @@
 'use strict';
 
-const rootPrefix = '../..'
-;
+const rootPrefix = '../..';
 
 const configStrategy = {
-
   // Geth
   OST_UTILITY_GETH_RPC_PROVIDER: process.env.OST_UTILITY_GETH_RPC_PROVIDER,
   OST_UTILITY_GETH_WS_PROVIDER: process.env.OST_UTILITY_GETH_WS_PROVIDER,
@@ -44,15 +42,7 @@ const configStrategy = {
 
   // Cache variables.
   OST_CACHING_ENGINE: process.env.OST_CACHING_ENGINE,
-  OST_CACHE_CONSISTENT_BEHAVIOR: 1,
-
-  // MySql variables.
-  OP_MYSQL_HOST: process.env.OP_MYSQL_HOST,
-  OP_MYSQL_USER: process.env.OP_MYSQL_USER,
-  OP_MYSQL_PASSWORD: process.env.OP_MYSQL_PASSWORD,
-  OP_MYSQL_DATABASE: process.env.OP_MYSQL_DATABASE,
-  OP_MYSQL_CONNECTION_POOL_SIZE: process.env.OP_MYSQL_CONNECTION_POOL_SIZE
-
+  OST_CACHE_CONSISTENT_BEHAVIOR: 1
 };
 
 module.exports = configStrategy;
