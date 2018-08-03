@@ -13,10 +13,9 @@ contract MultiSigWallet {
     event Confirmation(address indexed sender, bytes32 indexed transactionId);
     event Revocation(address indexed sender, bytes32 indexed transactionId);
     event Execution(bytes32 indexed transactionId);
-    event ExecutionFailure(bytes32 indexed transactionId);
     event WalletAddition(address indexed wallet);
     event WalletRemoval(address indexed wallet);
-    event RequirementChange(uint16 required);
+    event RequirementChange(uint8 required);
     event Propose(address sender,bytes32 transactionId);
 
     /**  Storage */
@@ -24,7 +23,7 @@ contract MultiSigWallet {
     /** It contains all the wallets added.*/
     address[] public wallets;
     /** It denotes the total number of confirmations required for an transaction to be executed. */
-    uint16 public required;
+    uint8 public required;
 
     /** It maps status for transactionId for a wallet.If it is true then that transaction is approved by the wallet address. */
     mapping(bytes32 => mapping(address => bool)) public confirmations;
@@ -59,7 +58,7 @@ contract MultiSigWallet {
     }
 
     modifier notConfirmed(
-        uint transactionId,
+        bytes32 transactionId,
         address wallet) {
 
         require(!confirmations[transactionId][wallet]);
@@ -89,7 +88,8 @@ contract MultiSigWallet {
         _;
     }
 
-    /** @dev Contract constructor sets initial wallets and required number of confirmations.
+    /**
+      * @notice Contract constructor sets initial wallets and required number of confirmations.
       *
       * @param _wallets List of initial wallets.
       * @param _required Number of required confirmations.
@@ -115,7 +115,8 @@ contract MultiSigWallet {
 
     /** Public functions */
 
-    /** @dev Allows to propose a new wallet or confirm an already proposed wallet.
+    /**
+      * @notice Allows to propose a new wallet or confirm an already proposed wallet.
       *
       * @param _wallet Address of wallet which is to be proposed or confirmed.
       * @param proposeOrConfirm If true then transaction will be proposed otherwise confirmation is being done.
@@ -147,7 +148,8 @@ contract MultiSigWallet {
         return transactionId;
     }
 
-    /** @dev Allows to propose removal of an wallet or confirm already proposed removal. Transaction has to be sent by wallet.
+    /**
+      * @notice Allows to propose removal of an wallet or confirm already proposed removal. Transaction has to be sent by wallet.
       *
       * @param wallet Address of wallet.
       * @param proposeOrConfirm If true then transaction will be proposed otherwise confirmation is being done.
@@ -186,7 +188,8 @@ contract MultiSigWallet {
     }
 
 
-    /** @dev Allows to propose or confirmation intent to replace an wallet with a new wallet. Transaction has to be sent by wallet.
+    /**
+      * @notice Allows to propose or confirmation intent to replace an wallet with a new wallet. Transaction has to be sent by wallet.
       *
       * @param wallet Address of wallet to be replaced.
       * @param newWallet Address of new wallet.
@@ -225,7 +228,8 @@ contract MultiSigWallet {
         return transactionId;
      }
 
-    /** @dev Allows to propose or confirm intent for changing for the number of required confirmations. Transaction has to be sent by wallet.
+    /**
+      * @notice Allows to propose or confirm intent for changing for the number of required confirmations. Transaction has to be sent by wallet.
       *
       * @param _required Number of required confirmations.
       * @param proposeOrConfirm If true then transaction will be proposed otherwise confirmation is being done.
@@ -233,7 +237,7 @@ contract MultiSigWallet {
       * @return transactionId   It is unique for each unique request.
       */
     function proposeOrConfirmChangeRequirement(
-        uint16 _required,
+        uint8 _required,
         bool proposeOrConfirm)
         public
         validRequirement(wallets.length, _required)
@@ -253,7 +257,7 @@ contract MultiSigWallet {
         }
     }
 
-    /** @dev Allows to propose or confirm intent for wallet to be revoked for a transaction.
+    /** @notice Allows to propose or confirm intent for wallet to be revoked for a transaction.
       *
       * @param transactionId Transaction ID.
       * @param proposeOrConfirm If true then transaction will be proposed otherwise confirmation is being done.
@@ -285,7 +289,7 @@ contract MultiSigWallet {
 
     /** Internal functions */
 
-    /**  @dev It is called whereever we need to propose transactions in multisig. The transaction status is in confirmed state for the wallet which has proposed it.`
+    /**  @notice It is called whereever we need to propose transactions in multisig. The transaction status is in confirmed state for the wallet which has proposed it.`
       *
       *  @param transactionId It marks it in proposed state against the wallet which has sent the transaction.
       *
@@ -294,13 +298,13 @@ contract MultiSigWallet {
         bytes32 transactionId)
         internal
     {
-        isExecuted[transactionId] = 01;
+        isExecuted[transactionId] = 1;
         confirmations[transactionId][msg.sender] = true;
 
         emit Propose(msg.sender, transactionId);
     }
 
-    /**  @dev It is used to send the transaction to confirmation state by the wallet who has sent the transaction.
+    /**  @notice It is used to send the transaction to confirmation state by the wallet who has sent the transaction.
       *
       *  @param transactionId It marks this transaction id as confirmed against the wallet which has sent the transaction.
       */
@@ -310,11 +314,10 @@ contract MultiSigWallet {
         walletExists(msg.sender)
         notConfirmed(transactionId, msg.sender) //transactionExists(transactionId) check whether this is needed
     {
-        require(isExecuted[transactionId] == 00, "Please first propose the transaction");
+        require(isExecuted[transactionId] == 0, "Please first propose the transaction");
         confirmations[transactionId][msg.sender] = true;
         emit Confirmation(msg.sender, transactionId);
-        executeTransaction(transactionId); // TODO Remove
-        if ((isExecuted[transactionId] == 01)) {//transaction is not executed,only proposed
+        if ((isExecuted[transactionId] == 1)) {//transaction is not executed,only proposed
             if (isConfirmed(transactionId)) {
                 isExecuted[transactionId] = 11;
             }
@@ -323,7 +326,7 @@ contract MultiSigWallet {
 
     }
 
-    /** @dev  It is used to check whether the transaction is in proposed state.
+    /** @notice  It is used to check whether the transaction is in proposed state.
       *
       * @param transactionId It denotes whose transaction status(Proposed state) is to be checked.
       *
@@ -334,73 +337,7 @@ contract MultiSigWallet {
         internal
         returns (bool /* success */)
     {
-        return isExecuted[transactionId] == 01;
+        return isExecuted[transactionId] == 1;
     }
-
-    // TODO Do we need below functions
-//    /** @dev Returns the confirmation status of a transaction.
-//      *
-//      * @param transactionId Transaction ID.
-//      *
-//      * @return Confirmation status.
-//      */
-//    function isConfirmed(bytes32 transactionId)
-//        public
-//        constant
-//        returns (bool)
-//    {
-//        uint count = 0;
-//        for (uint i = 0; i < wallets.length; i++) {
-//            if (confirmations[transactionId][wallets[i]])
-//                count += 1;
-//            if (count == required)
-//                return true;
-//        }
-//    }
-//
-//    /**
-//      *  @dev Returns number of confirmations of a transaction.
-//      *
-//      *  @param transactionId Transaction ID.
-//      *
-//      *  @return Number of confirmations.
-//      */
-//    function getConfirmationCount(
-//        bytes32 transactionId)
-//        public
-//        constant
-//        returns (uint count)
-//    {
-//        for (uint i = 0; i < wallets.length; i++)
-//            if (confirmations[transactionId][wallets[i]])
-//                count += 1;
-//    }
-//
-//
-//
-//    /**  @dev Returns array with wallet addresses, which confirmed transaction.
-//      *
-//      *  @param transactionId Transaction ID.
-//      *
-//      *  @return Returns array of wallet addresses.
-//      */
-//    function getConfirmations(
-//        bytes32 transactionId)
-//        public
-//        constant
-//        returns (address[] _confirmations)
-//    {
-//        address[] memory confirmationsTemp = new address[](wallets.length);
-//        uint count = 0;
-//        uint i;
-//        for (i = 0; i < wallets.length; i++)
-//            if (confirmations[transactionId][wallets[i]]) {
-//                confirmationsTemp[count] = wallets[i];
-//                count += 1;
-//            }
-//        _confirmations = new address[](count);
-//        for (i = 0; i < count; i++)
-//            _confirmations[i] = confirmationsTemp[i];
-//    }
 
 }
