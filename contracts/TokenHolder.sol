@@ -49,7 +49,7 @@ contract TokenHolder is MultiSigWallet {
 
     address private tokenRules;
     /** Max No of times spending session lock should be hashed for verification */
-    uint16 private maxFaultToleranceCount;
+    uint8 private maxFaultToleranceCount;
     /** support for spending limit per session lock */
     mapping (bytes32 /* session lock*/ => uint256 /* spending limit */) public sessionLocks;
 
@@ -65,8 +65,8 @@ contract TokenHolder is MultiSigWallet {
     constructor(
         address _brandedToken,
         address _coGateway,
-        uint16 _maxFaultToleranceCount,
-        uint16 _required,
+        uint8 _maxFaultToleranceCount,
+        uint8 _required,
         address[] _wallets)
         public
         MultiSigWallet(_wallets, _required)
@@ -88,17 +88,16 @@ contract TokenHolder is MultiSigWallet {
 	 *
 	 *  @param _sessionLock session lock to be authorized.
 	 *  @param _spendingLimit max tokens user can spend at a time.
-	 *  @param proposeOrConfirm if true transaction will be proposed otherwise confirmation is done.
+	 *  @param _proposeOrConfirm if true transaction will be proposed otherwise confirmation is done.
 	 *
 	 *  @return bytes32 transactionId for the request.
 	 */
     function proposeOrConfirmAuthorizeSession(
         bytes32 _sessionLock,
         uint256 _spendingLimit,
-        bool proposeOrConfirm)
+        bool _proposeOrConfirm)
         public
-        walletDoesNotExist(msg.sender)
-        notNull(msg.sender)
+        onlyWallet
         returns (bytes32 transactionId)
     {
         require(_sessionLock != bytes32(0), "Input sessionLock is invalid!");
@@ -106,7 +105,7 @@ contract TokenHolder is MultiSigWallet {
 
         transactionId = keccak256(abi.encodePacked(_sessionLock, _spendingLimit, this, "authorizeSession"));
 
-        if (proposeOrConfirm) {
+        if (_proposeOrConfirm) {
             require(isAlreadyProposedTransaction(transactionId) == false, "Transaction is already proposed!");
             performProposeTransaction(transactionId);
         } else {
@@ -129,15 +128,14 @@ contract TokenHolder is MultiSigWallet {
     function proposeOrConfirmRevokeSession(
         bytes32 _sessionLock)
         public
-        walletDoesNotExist(msg.sender)
-        notNull(msg.sender)
+        onlyWallet
         returns (bytes32 transactionId)
     {
         require(_sessionLock != bytes32(0), "Input sessionLock is invalid!");
         require(sessionLocks[_sessionLock] != bytes32(0), "Input SessionLock is not authorized!");
 
         transactionId = keccak256(abi.encodePacked(_sessionLock, this, "revokeSession"));
-        if (proposeOrConfirm) {
+        if (_proposeOrConfirm) {
             require(isAlreadyProposedTransaction(transactionId) == false, "Transaction is already proposed!");
             performProposeTransaction(transactionId);
         } else {
@@ -208,7 +206,7 @@ contract TokenHolder is MultiSigWallet {
     {
         bytes32 oldSessionLock;
 
-        for(uint16 i=0; i<maxFaultToleranceCount; i++) {
+        for(uint8 i=0; i<maxFaultToleranceCount; i++) {
             oldSessionLock = keccak256(abi.encodePacked(_newSessionLock));
             /** if entry exists in sessionLocks mapping */
             if (sessionLocks[oldSessionLock] != uint(0)) {
