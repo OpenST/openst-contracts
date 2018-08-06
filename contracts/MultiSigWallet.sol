@@ -88,8 +88,6 @@ contract MultiSigWallet {
     /**
       * @notice It checks for total number of confirmations required should be equal or less than the number of wallets.
       *
-      * @param _walletCount  Total number of wallets available
-      * @param _required    Total number of confirmations to be done
       */
     modifier validRequirement(
         uint8 _walletCount,
