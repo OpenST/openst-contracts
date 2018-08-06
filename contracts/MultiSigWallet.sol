@@ -58,8 +58,8 @@ contract MultiSigWallet {
 	 *  @dev Checks whether wallets doesnt exist.
 	 */
     modifier walletDoesNotExist(
-        address wallet) {
-        require(!isWallet[wallet], "Wallet address doesnt exist");
+        address _wallet) {
+        require(!isWallet[_wallet], "Wallet address doesnt exist");
         _;
     }
 
@@ -70,8 +70,8 @@ contract MultiSigWallet {
 	 *  @dev Checks whether wallet exists.
 	 */
     modifier walletExists(
-        address wallet) {
-        require(isWallet[wallet], "Wallet should be added to proceed for this transaction");
+        address _wallet) {
+        require(isWallet[_wallet], "Wallet should be added to proceed for this transaction");
         _;
     }
 
@@ -82,10 +82,10 @@ contract MultiSigWallet {
      *  @dev It checks whether the transaction is confirmed by the wallet.
      */
     modifier confirmed(
-        bytes32 transactionId,
-        address wallet) {
+        bytes32 _transactionId,
+        address _wallet) {
 
-        require(confirmations[transactionId][wallet], "Transaction is not confirmed by this wallet");
+        require(confirmations[_transactionId][_wallet], "Transaction is not confirmed by this wallet");
         _;
     }
 
@@ -95,10 +95,10 @@ contract MultiSigWallet {
 	 *  @dev Checks whether transactions are not confirmed.
 	 */
     modifier notConfirmed(
-        bytes32 transactionId,
-        address wallet) {
+        bytes32 _transactionId,
+        address _wallet) {
 
-        require(!confirmations[transactionId][wallet]);
+        require(!confirmations[_transactionId][_wallet]);
         _;
      }
 
@@ -108,9 +108,9 @@ contract MultiSigWallet {
 	 *  @dev Checks whether transactions are successfully executed or not.
 	 */
     modifier notSuccessfullyExecuted(
-        bytes32 transactionId) {
+        bytes32 _transactionId) {
         /** Transaction should not be in success state */
-        require(isExecuted[transactionId] != 2);
+        require(isExecuted[_transactionId] != 2);
         _;
     }
 
