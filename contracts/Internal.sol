@@ -33,10 +33,12 @@ contract Internal {
 
     /** max accepted internal actors in registerInternalActor method */
     uint16 private constant MAX_INTERNAL_ACTORS = 100;
-
     /** organization/company address who will be deploying branded token contract */
     address private organization;
-
+    /**
+        stores internal actor and checks if internal actor exists or not.
+        If actor is not present in isInternalActor, it returns false else returns true.
+     */
     mapping (address /* internal actor */ => bool) public isInternalActor;
 
     /** Modifiers */
@@ -86,7 +88,7 @@ contract Internal {
         for (uint16 i=0; i<_internalActors.length; i++) {
             /** address 0 transfer is allowed in EIP20 */
             address actor = _internalActors[i];
-            /** if actor already present, skip it else add in the mapping  */
+            /** If actor is not present in isInternalActor, returns false else returns true */
             if (isInternalActor[actor] == false){
                 isInternalActor[actor] = true;
             }

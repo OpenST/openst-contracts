@@ -76,7 +76,7 @@ contract TokenHolder is MultiSigWallet {
     address private tokenRules;
     /** Max No of times spending session lock should be hashed for verification */
     uint8 private maxFaultToleranceCount;
-    /** support for spending limit per session lock */
+    /** Stores spending limit per session lock */
     mapping (bytes32 /* session lock */ => uint256 /* spending limit */) public sessionLocks;
 
     /**

@@ -50,7 +50,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
 
     /** Storage */
 
-    /** token rules contract address  */
+    /** Token rules contract address  */
     address public tokenRules;
 
     /**
@@ -91,6 +91,8 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         _conversionRate,
         _conversionRateDecimals)
      {
+        require(_tokenRules != address(0), "Token rules contracts address is invalid!");
+
         tokenRules = _tokenRules;
      }
 
@@ -111,6 +113,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(isInternalActor[_to] == true, "to address is invalid economy actor!");
+
         EIP20Token.transfer(_to, _value);
     }
 
@@ -131,6 +134,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(isInternalActor[_to] == true, "to is invalid economy actor!");
+
         EIP20Token.transferFrom(_from, _to, _value);
     }
 
@@ -149,6 +153,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(isInternalActor[_spender] == true, "spender is invalid economy actor!");
+
         EIP20Token.approve(_spender, _value);
     }
 
