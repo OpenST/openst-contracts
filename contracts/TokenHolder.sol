@@ -40,9 +40,9 @@ contract TokenHolder is MultiSigWallet {
     event SessionAuthorized(address wallet, bytes32 sessionLock, uint256 spendingLimit);
 
     event SessionRevoked(address wallet, bytes32 sessionLock);
-
+    /** Event emitted whenever newSessionLock is consumed */
     event SessionLockUpdated(bytes32 oldSessionLock, bytes32 newSessionLock, uint256 spendingLimit);
-
+    /** Event emitted on increase allowance and decrease allowance */
     event AllowanceUpdated(address spender, uint256 existingAllowanceAmount, uint256 updatedAllowanceAmount);
 
     /** Modifiers */
@@ -77,7 +77,7 @@ contract TokenHolder is MultiSigWallet {
     /** Max No of times spending session lock should be hashed for verification */
     uint8 private maxFaultToleranceCount;
     /** support for spending limit per session lock */
-    mapping (bytes32 /* session lock*/ => uint256 /* spending limit */) public sessionLocks;
+    mapping (bytes32 /* session lock */ => uint256 /* spending limit */) public sessionLocks;
 
     /**
 	 *  @notice Contract constructor
@@ -130,7 +130,6 @@ contract TokenHolder is MultiSigWallet {
         require(sessionLocks[_sessionLock] == uint256(0), "SessionLock is already authorized");
 
         transactionId = keccak256(abi.encodePacked(_sessionLock, _spendingLimit, this, "authorizeSession"));
-
         if (_proposeOrConfirm) {
             require(isAlreadyProposedTransaction(transactionId) == false, "Transaction is already proposed!");
             performProposeTransaction(transactionId);
@@ -141,6 +140,7 @@ contract TokenHolder is MultiSigWallet {
                 emit SessionAuthorized(msg.sender, _sessionLock, _spendingLimit);
             }
         }
+
         return transactionId;
     }
 
@@ -148,6 +148,7 @@ contract TokenHolder is MultiSigWallet {
 	 *  @notice Revoke session method.
 	 *
 	 *  @param _sessionLock session lock to be revoked.
+	 *  @param _proposeOrConfirm if true transaction will be proposed otherwise confirmation is done.
 	 *
 	 *  @return bytes32 transactionId for the request.
 	 */
@@ -173,6 +174,7 @@ contract TokenHolder is MultiSigWallet {
                 emit SessionRevoked(msg.sender, _sessionLock);
             }
         }
+
         return transactionId;
     }
 
@@ -182,7 +184,8 @@ contract TokenHolder is MultiSigWallet {
 	 *  @param _amount Amount to redeem.
 	 *  @param _nonce incremental nonce.
 	 *  @param _beneficiary beneficiary address who will get redeemed amount.
-	 *  @param _hashLock hash lock. Secret will be used during redeem process to unlock the secret
+	 *  @param _hashLock hash lock. Secret will be used during redeem process to unlock the secret.
+	 *  @param _proposeOrConfirm if true transaction will be proposed otherwise confirmation is done.
 	 *
 	 *  @return bytes32 transactionId for the request.
 	 */
@@ -213,9 +216,9 @@ contract TokenHolder is MultiSigWallet {
     /**
 	 *  @notice TokenHolder transfer method
 	 *
-	 *  @param _to address to whom BT amount needs to transfer
-	 *  @param _amount amount to tokens to transfer
-	 *  @param _spendingSessionLock session lock which will be spent for this transaction
+	 *  @param _to address to whom BT amount needs to transfer.
+	 *  @param _amount amount of tokens to transfer.
+	 *  @param _spendingSessionLock session lock which will be spent for this transaction.
 	 *
 	 *  @return bool
 	 */
@@ -246,10 +249,10 @@ contract TokenHolder is MultiSigWallet {
     /**
 	 *  @notice TokenHolder requestRedemption method
 	 *
-	 *  @param _amount amount of tokens to transfer
-	 *  @param _fee Fee to be paid
-	 *  @param _beneficiary address to whom amount needs to transfer
-	 *  @param _spendingSessionLock session lock which will be spent for this transaction
+	 *  @param _amount amount of tokens to transfer.
+	 *  @param _fee Fee to be paid.
+	 *  @param _beneficiary address to whom amount needs to transfer.
+	 *  @param _spendingSessionLock session lock which will be spent for this transaction.
 	 *
 	 *  @return bool
 	 */
@@ -272,13 +275,16 @@ contract TokenHolder is MultiSigWallet {
     }
 
     /**
-	 *  @notice TokenHolder increaseAllowance method
+	 *  @notice TokenHolder increaseAllowance method.
 	 *
-	 *  @param _spender address to whom allowance needs to increase
-	 *  @param _amount amount of tokens to transfer
-	 *  @param _spendingSessionLock session lock which will be spent for this transaction
+	 *  @dev Below method is needed so that BrandedToken.transferFrom can be called.
+	 *       Amount can be approved to an escrow contract address for BT.transferFrom to work.
 	 *
-	 *  @return uint256
+	 *  @param _spender address to whom allowance needs to increase.
+	 *  @param _amount amount of tokens to transfer.
+	 *  @param _spendingSessionLock session lock which will be spent for this transaction.
+	 *
+	 *  @return uint256 final allowance which is approved
 	 */
     function increaseAllowance(
         address _spender,
@@ -303,11 +309,14 @@ contract TokenHolder is MultiSigWallet {
     /**
 	 *  @notice TokenHolder decreaseAllowance method
 	 *
-	 *  @param _spender address to whom allowance needs to increase
-	 *  @param _amount amount of tokens to transfer
-	 *  @param _spendingSessionLock session lock which will be spent for this transaction
+	 *  @dev Below method is needed so that BrandedToken.transferFrom can be called.
+	 *       Amount can be approved to an escrow contract address for BT.transferFrom to work.
 	 *
-	 *  @return uint256
+	 *  @param _spender address to whom allowance needs to decrease.
+	 *  @param _amount amount of tokens to transfer.
+	 *  @param _spendingSessionLock session lock which will be spent for this transaction.
+	 *
+	 *  @return uint256 final allowance which is approved
 	 */
     function decreaseAllowance(
         address _spender,
@@ -332,11 +341,11 @@ contract TokenHolder is MultiSigWallet {
     /** Private Functions */
 
     /**
-	 *  @notice Validate and update session lock
+	 *  @notice Validate and update session lock.
 	 *
-	 *  @param _newSessionLock session lock to be verified and updated
+	 *  @param _newSessionLock session lock to be verified and updated.
 	 *
-	 *  @return bool
+	 *  @return bool success if _newSessionLock is consumed.
 	 */
     function updateSessionLock(
         bytes32 _newSessionLock)
@@ -356,9 +365,11 @@ contract TokenHolder is MultiSigWallet {
                 sessionLocks[_newSessionLock] = spendingLimit;
 
                 emit SessionLockUpdated(oldSessionLock, _newSessionLock, spendingLimit);
+
                 return true;
             }
         }
+
         return false;
     }
 
