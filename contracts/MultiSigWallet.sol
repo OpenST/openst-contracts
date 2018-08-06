@@ -349,7 +349,7 @@ contract MultiSigWallet {
         require(isExecuted[_transactionId] == 0, "Please first propose the transaction");
         confirmations[_transactionId][msg.sender] = true;
         emit Confirmation(msg.sender, _transactionId);
-        if ((isExecuted[_transactionId] == 1)) {
+        if (isAlreadyProposedTransaction(_transactionId)) {
             if (isConfirmed(_transactionId)) {
                 isExecuted[_transactionId] = 2;
             }
