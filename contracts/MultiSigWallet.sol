@@ -41,22 +41,46 @@ contract MultiSigWallet {
 
     /** Modifiers */
 
+    /**
+	 *  @notice Modifier onlyWallet.
+	 *
+	 *  @dev Allows only registered wallet to call multi-sig methods.
+	 */
     modifier onlyWallet() {
         require(isWallet[msg.sender] == true, "Transaction should be done by valid wallet!");
         _;
     }
 
-    modifier walletDoesNotExist(address wallet) {
+
+    /**
+	 *  @notice Modifier walletDoesNotExist.
+	 *
+	 *  @dev Checks whether wallets doesnt exist.
+	 */
+    modifier walletDoesNotExist(
+        address wallet) {
         require(!isWallet[wallet], "Wallet address doesnt exist");
         _;
     }
 
-    modifier walletExists(address wallet) {
+
+    /**
+	 *  @notice Modifier walletExists.
+	 *
+	 *  @dev Checks whether wallet exists.
+	 */
+    modifier walletExists(
+        address wallet) {
         require(isWallet[wallet], "Wallet should be added to proceed for this transaction");
         _;
     }
 
-    /** It checks whether the transaction is confirmed by the wallet */
+
+    /**
+     *  @notice Modifier confirmed.
+     *
+     *  @dev It checks whether the transaction is confirmed by the wallet.
+     */
     modifier confirmed(
         bytes32 transactionId,
         address wallet) {
@@ -65,6 +89,11 @@ contract MultiSigWallet {
         _;
     }
 
+    /**
+	 *  @notice Modifier notConfirmed.
+	 *
+	 *  @dev Checks whether transactions are not confirmed.
+	 */
     modifier notConfirmed(
         bytes32 transactionId,
         address wallet) {
@@ -73,22 +102,35 @@ contract MultiSigWallet {
         _;
      }
 
-    modifier notSuccessfullyExecuted(bytes32 transactionId) {
+    /**
+	 *  @notice Modifier onlyWallet.
+	 *
+	 *  @dev Checks whether transactions are successfully executed or not.
+	 */
+    modifier notSuccessfullyExecuted(
+        bytes32 transactionId) {
         /** Transaction should not be in success state */
         require(isExecuted[transactionId] != 2);
         _;
     }
 
-    modifier notNull(address _address) {
+    /**
+	 *  @notice Modifier notNull.
+	 *
+	 *  @dev Checks whether the wallet address is not null.
+	 */
+    modifier notNull(
+        address _address) {
 
         require(_address != 0, "Wallet address should not be null");
         _;
     }
 
     /**
-      * @notice It checks for total number of confirmations required should be equal or less than the number of wallets.
-      *
-      */
+	 *  @notice Modifier validRequirement.
+	 *
+	 *  @dev It checks for total number of confirmations required should be equal or less than the number of wallets.
+	 */
     modifier validRequirement(
         uint8 _walletCount,
         uint8 _required) {
