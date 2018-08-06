@@ -167,7 +167,7 @@ contract TokenHolder is MultiSigWallet {
             performProposeTransaction(transactionId);
         } else {
             performConfirmTransaction(transactionId);
-            if(isTransactionExecuted(_transactionId)) {
+            if(isTransactionExecuted(transactionId)) {
                 /** Remove session lock from the mapping */
                 delete sessionLocks[_sessionLock];
                 emit SessionRevoked(msg.sender, _sessionLock);
@@ -202,7 +202,7 @@ contract TokenHolder is MultiSigWallet {
             performProposeTransaction(transactionId);
         } else {
             performConfirmTransaction(transactionId);
-            if(isTransactionExecuted(_transactionId)) {
+            if(isTransactionExecuted(transactionId)) {
                 // TODO Redeem Integration with CoGateway Interface
             }
         }
@@ -292,7 +292,7 @@ contract TokenHolder is MultiSigWallet {
         require(updateSessionLock(_spendingSessionLock));
 
         uint256 existingAllowanceAmount = BrandedToken(brandedToken).allowance(this, _spender);
-        uint256 updatedAllowanceAmount = existingAllowanceAmount.add(_amount);
+        updatedAllowanceAmount = existingAllowanceAmount.add(_amount);
         require(BrandedToken(brandedToken).approve(_spender, updatedAllowanceAmount));
 
         emit AllowanceUpdated(_spender, existingAllowanceAmount, updatedAllowanceAmount);
@@ -321,7 +321,7 @@ contract TokenHolder is MultiSigWallet {
         require(updateSessionLock(_spendingSessionLock));
 
         uint256 existingAllowanceAmount = BrandedToken(brandedToken).allowance(this, _spender);
-        uint256 updatedAllowanceAmount = existingAllowanceAmount.sub(_amount);
+        updatedAllowanceAmount = existingAllowanceAmount.sub(_amount);
         require(BrandedToken(brandedToken).approve(_spender, updatedAllowanceAmount));
 
         emit AllowanceUpdated(_spender, existingAllowanceAmount, updatedAllowanceAmount);
