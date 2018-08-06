@@ -21,6 +21,7 @@ pragma solidity ^0.4.23;
 //
 // ----------------------------------------------------------------------------
 
+import "./SafeMath.sol";
 import "./BrandedToken.sol";
 import "./MultiSigWallet.sol";
 
@@ -32,6 +33,7 @@ import "./MultiSigWallet.sol";
  *
  */
 contract TokenHolder is MultiSigWallet {
+    using SafeMath for uint256;
 
     /** Events */
 
@@ -39,12 +41,29 @@ contract TokenHolder is MultiSigWallet {
 
     event SessionRevoked(address wallet, bytes32 sessionLock);
 
-    event SessionLockUpdated(bytes32 oldSessionLock, bytes32 newSessionLock);
+    event SessionLockUpdated(bytes32 oldSessionLock, bytes32 newSessionLock, uint256 spendingLimit);
+
+    event AllowanceUpdated(address spender, uint256 existingAllowanceAmount, uint256 updatedAllowanceAmount);
 
     /** Modifiers */
 
-    modifier notNullSessionLock(bytes32 sessionLock) {
-        require(sessionLock != bytes32(0), "Session lock is invalid!");
+    /**
+     *   @notice onlyTokenRules modifier
+     *
+     *   @dev msg.sender should be token rules contract address
+     */
+    modifier onlyTokenRules() {
+        require(msg.sender == tokenRules, "msg.sender should be token rules contract address!");
+        _;
+    }
+
+    /**
+     *   @notice notNullSessionLock modifier
+     *
+     *   @dev checks session lock should be valid bytes32
+     */
+    modifier notNullSessionLock(bytes32 _sessionLock) {
+        require(_sessionLock != bytes32(0), "Session lock is invalid!");
         _;
     }
 
@@ -53,7 +72,7 @@ contract TokenHolder is MultiSigWallet {
     address public brandedToken;
     /** Co Gateway contract address for redeem functionality */
     address public coGateway;
-
+    /** Token rules contract address read from BT contract */
     address private tokenRules;
     /** Max No of times spending session lock should be hashed for verification */
     uint8 private maxFaultToleranceCount;
@@ -117,7 +136,7 @@ contract TokenHolder is MultiSigWallet {
             performProposeTransaction(transactionId);
         } else {
             performConfirmTransaction(transactionId);
-            if(isExecuted[transactionId] == 11){
+            if(isTransactionExecuted(transactionId)) {
                 sessionLocks[_sessionLock] = _spendingLimit;
                 emit SessionAuthorized(msg.sender, _sessionLock, _spendingLimit);
             }
@@ -148,7 +167,8 @@ contract TokenHolder is MultiSigWallet {
             performProposeTransaction(transactionId);
         } else {
             performConfirmTransaction(transactionId);
-            if(isExecuted[transactionId] == 11) {
+            if(isTransactionExecuted(_transactionId)) {
+                /** Remove session lock from the mapping */
                 delete sessionLocks[_sessionLock];
                 emit SessionRevoked(msg.sender, _sessionLock);
             }
@@ -157,7 +177,7 @@ contract TokenHolder is MultiSigWallet {
     }
 
     /**
-	 *  @notice Redeem multisigwallet operation.
+	 *  @notice redeem multisigwallet operation.
 	 *
 	 *  @param _amount Amount to redeem.
 	 *  @param _nonce incremental nonce.
@@ -182,17 +202,18 @@ contract TokenHolder is MultiSigWallet {
             performProposeTransaction(transactionId);
         } else {
             performConfirmTransaction(transactionId);
-            if(isExecuted[transactionId] == 11) {
-                // TODO CoGateway Redeem Integration
+            if(isTransactionExecuted(_transactionId)) {
+                // TODO Redeem Integration with CoGateway Interface
             }
         }
+
         return transactionId;
     }
 
     /**
 	 *  @notice TokenHolder transfer method
 	 *
-	 *  @param _to address to whom amount needs to transfer
+	 *  @param _to address to whom BT amount needs to transfer
 	 *  @param _amount amount to tokens to transfer
 	 *  @param _spendingSessionLock session lock which will be spent for this transaction
 	 *
@@ -203,7 +224,7 @@ contract TokenHolder is MultiSigWallet {
         uint256 _amount,
         bytes32 _spendingSessionLock)
         public
-        onlyWallet
+        onlyTokenRules
         notNullSessionLock(_spendingSessionLock)
         returns (bool /** success */)
     {
@@ -211,13 +232,12 @@ contract TokenHolder is MultiSigWallet {
 
         uint256 spendingLimit = sessionLocks[_spendingSessionLock];
         require(_amount <= spendingLimit, "Transfer amount should be less or equal to spending limit");
-        // TODO check transfer call is success before actual transfer method
         // .call returns true/false not the actual return values
-        bool transferCallResult = address(brandedToken).call(bytes4(keccak256("transfer(address, uint256)")),_to, _amount);
+        bool transferCallResult = address(brandedToken).call(bytes4(keccak256("transfer(address, uint256)")), _to, _amount);
         if (transferCallResult == true) {
             require(BrandedToken(brandedToken).transfer(_to, _amount));
         } else {
-            // Emit failure event
+            // TODO Emit failure event
         }
 
         return true;
@@ -239,15 +259,14 @@ contract TokenHolder is MultiSigWallet {
         address _beneficiary,
         bytes32 _spendingSessionLock)
         public
-        onlyWallet
+        onlyTokenRules
         notNullSessionLock(_spendingSessionLock)
         returns (bool /** success */)
     {
         require(updateSessionLock(_spendingSessionLock));
 
-        // TODO CoGateway Integration
-        // TODO evaluate if explicit call needed
-        //CoGateway(coGateway).requestRedemption(_amount, _fee, _beneficiary);
+        // TODO Integration with CoGateway Interface
+        // TODO evaluate if solidity call needed before requestRedemption
 
         return true;
     }
@@ -259,22 +278,26 @@ contract TokenHolder is MultiSigWallet {
 	 *  @param _amount amount of tokens to transfer
 	 *  @param _spendingSessionLock session lock which will be spent for this transaction
 	 *
-	 *  @return bool
+	 *  @return uint256
 	 */
     function increaseAllowance(
         address _spender,
         uint256 _amount,
         bytes32 _spendingSessionLock)
         public
-        onlyWallet
+        onlyTokenRules
         notNullSessionLock(_spendingSessionLock)
-        returns (bool /** success */)
+        returns (uint256 updatedAllowanceAmount)
     {
         require(updateSessionLock(_spendingSessionLock));
 
-        // TODO
+        uint256 existingAllowanceAmount = BrandedToken(brandedToken).allowance(this, _spender);
+        uint256 updatedAllowanceAmount = existingAllowanceAmount.add(_amount);
+        require(BrandedToken(brandedToken).approve(_spender, updatedAllowanceAmount));
 
-        return true;
+        emit AllowanceUpdated(_spender, existingAllowanceAmount, updatedAllowanceAmount);
+
+        return updatedAllowanceAmount;
     }
 
     /**
@@ -284,22 +307,26 @@ contract TokenHolder is MultiSigWallet {
 	 *  @param _amount amount of tokens to transfer
 	 *  @param _spendingSessionLock session lock which will be spent for this transaction
 	 *
-	 *  @return bool
+	 *  @return uint256
 	 */
     function decreaseAllowance(
         address _spender,
         uint256 _amount,
         bytes32 _spendingSessionLock)
         public
-        onlyWallet
+        onlyTokenRules
         notNullSessionLock(_spendingSessionLock)
-        returns (bool /** success */)
+        returns (uint256 updatedAllowanceAmount)
     {
         require(updateSessionLock(_spendingSessionLock));
 
-        // TODO
+        uint256 existingAllowanceAmount = BrandedToken(brandedToken).allowance(this, _spender);
+        uint256 updatedAllowanceAmount = existingAllowanceAmount.sub(_amount);
+        require(BrandedToken(brandedToken).approve(_spender, updatedAllowanceAmount));
 
-        return true;
+        emit AllowanceUpdated(_spender, existingAllowanceAmount, updatedAllowanceAmount);
+
+        return updatedAllowanceAmount;
     }
 
     /** Private Functions */
@@ -322,13 +349,13 @@ contract TokenHolder is MultiSigWallet {
             oldSessionLock = keccak256(abi.encodePacked(_newSessionLock));
             uint256 spendingLimit = sessionLocks[oldSessionLock];
             // TODO check spendingLimit value when oldSessionLock doesn't exist
-            // accordingly modify below condition
+            // TODO accordingly modify below condition
             /** if entry exists in sessionLocks mapping */
             if (spendingLimit >= uint(0)) {
                 delete(sessionLocks[oldSessionLock]);
                 sessionLocks[_newSessionLock] = spendingLimit;
 
-                emit SessionLockUpdated(oldSessionLock, _newSessionLock);
+                emit SessionLockUpdated(oldSessionLock, _newSessionLock, spendingLimit);
                 return true;
             }
         }
