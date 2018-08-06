@@ -213,7 +213,7 @@ contract TokenHolder is MultiSigWallet {
         require(_amount <= spendingLimit, "Transfer amount should be less or equal to spending limit");
         // TODO check transfer call is success before actual transfer method
         // .call returns true/false not the actual return values
-        transferCallResult = BrandedToken(brandedToken).call(bytes4(keccak256("transfer(address, uint256)")),_to, _amount);
+        bool transferCallResult = address(brandedToken).call(bytes4(keccak256("transfer(address, uint256)")),_to, _amount);
         if (transferCallResult == true) {
             require(BrandedToken(brandedToken).transfer(_to, _amount));
         } else {
