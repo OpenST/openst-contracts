@@ -25,7 +25,7 @@ contract TokenHolder {
 
     event Test(bytes32 msg, bytes32 created);
 
-    function validateSession_2(bytes32 msgHash, uint8 v, bytes32 r, bytes32 s, uint128 nonce) returns (bool) {
+    function validateSession_2(bytes32 msgHash, uint8 v, bytes32 r, bytes32 s, uint256 nonce) returns (bool) {
         bytes32 message = prefixed(keccak256(abi.encodePacked((uint256(nonce)))));
 
         address _addr = ecrecover(msgHash, v, r, s);
@@ -47,13 +47,13 @@ contract TokenHolder {
         //check if current bit is consumed
         require((currentAllowedNonces & (1 << nonce)) == 0);
         //set bit which is consumed
-        currentAllowedNonces = currentAllowedNonces | 1 << (nonce-1);
+        currentAllowedNonces = currentAllowedNonces | (1 << (nonce-1));
 
         return true;
     }
 
     function prefixed(bytes32 hash) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(("\x19Ethereum Signed Message:\n32", hash));
+        return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
     }
 
 }

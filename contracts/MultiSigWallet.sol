@@ -10,7 +10,7 @@ contract MultiSigWallet {
 
     /** Events */
 
-    event Propose(address sender,bytes32 transactionId);
+    event Propose(address indexed sender,bytes32 transactionId);
     event Confirmation(address indexed sender, bytes32 indexed transactionId);
     event Revocation(address indexed sender, bytes32 indexed transactionId);
     event Execution(address indexed sender, bytes32 indexed transactionId);
@@ -89,7 +89,7 @@ contract MultiSigWallet {
     /**
       * @notice It checks for total number of confirmations required should be equal or less than the number of wallets.
       *
-      * @param walletCount  Total number of wallets available
+      * @param _walletCount  Total number of wallets available
       * @param _required    Total number of confirmations to be done
       */
     modifier validRequirement(
@@ -117,14 +117,14 @@ contract MultiSigWallet {
     {
         require(_wallets.length > 0,"Wallets cannot be empty");
         require(_required > 0,"Atleast one confirmation is required");
-        require(_required <= _wallets,"Number of confirmations cannot be less than wallets");
+        require(_required <= uint8(_wallets.length),"Number of confirmations cannot be less than wallets");
 
         for (uint8 i = 0; i < _wallets.length; i++) {
             require(!isWallet[_wallets[i]] && _wallets[i] != 0, "Wallet address is incorrect or duplicate");
             isWallet[_wallets[i]] = true;
         }
 
-        totalWalletCount = _wallets.length;
+        totalWalletCount = uint8(_wallets.length);
         required = _required;
     }
 
@@ -136,7 +136,7 @@ contract MultiSigWallet {
       * @param _wallet Address of wallet which is to be proposed or confirmed.
       * @param _proposeOrConfirm If true then transaction will be proposed otherwise confirmation is being done.
       *
-      * @return transactionId   It is unique for each request.
+      * @return bytes32 transactionId is unique for each request.
       */
     function proposeOrConfirmAddWallet(
         address _wallet,
@@ -159,7 +159,7 @@ contract MultiSigWallet {
             if (isTransactionExecuted(transactionId)) {
                 isWallet[_wallet] = true;
                 totalWalletCount++;
-                emit WalletAddition(_wallet);
+                emit WalletAddition(msg.sender, _wallet);
             }
         }
         return transactionId;
@@ -168,10 +168,10 @@ contract MultiSigWallet {
     /**
       * @notice Allows to propose removal of an wallet or confirm already proposed removal. Transaction has to be sent by wallet.
       *
-      * @param wallet Address of wallet.
+      * @param _wallet Address of wallet.
       * @param _proposeOrConfirm If true then transaction will be proposed otherwise confirmation is being done.
       *
-      * @return transactionId   It is unique for each request.
+      * @return bytes32 transactionId is unique for each request.
       */
     function proposeOrConfirmRemoveWallet(
         address _wallet,
@@ -205,11 +205,11 @@ contract MultiSigWallet {
     /**
       * @notice Allows to propose or confirmation intent to replace an wallet with a new wallet. Transaction has to be sent by wallet.
       *
-      * @param _wallet Address of wallet to be replaced.
+      * @param _oldWallet Address of wallet to be replaced.
       * @param _newWallet Address of new wallet.
       * @param _proposeOrConfirm If true then transaction will be proposed otherwise confirmation is being done.
       *
-      * @return transactionId   It is unique for each request.
+      * @return bytes32 transactionId is unique for each request.
       */
     function _proposeOrConfirmReplaceWallet(
         address _oldWallet,
@@ -239,12 +239,13 @@ contract MultiSigWallet {
      }
 
     /**
-      * @notice Allows to propose or confirm intent for changing for the number of required confirmations. Transaction has to be sent by wallet.
+      * @notice Allows to propose or confirm intent for changing for the number of required confirmations.
+      *         Transaction has to be sent by wallet.
       *
       * @param _required Number of required confirmations.
       * @param _proposeOrConfirm If true then transaction will be proposed otherwise confirmation is being done.
       *
-      * @return transactionId   It is unique for each unique request.
+      * @return bytes32 transactionId is unique for each unique request.
       */
     function _proposeOrConfirmChangeRequirement(
         uint8 _required,
@@ -276,7 +277,7 @@ contract MultiSigWallet {
       * @param _transactionId Transaction ID.
       * @param _proposeOrConfirm If true then transaction will be proposed otherwise confirmation is being done.
       *
-      * @return transactionId   It is unique for each unique request.
+      * @return bytes32 transactionId is unique for each unique request.
       */
     function proposeOrConfirmRevokeConfirmation(
         bytes32 _transactionId,
@@ -306,7 +307,7 @@ contract MultiSigWallet {
     /**
       * @notice It is called whereever we need to propose transactions in multisig. The transaction status is in confirmed state for the wallet which has proposed it.`
       *
-      * @param transactionId It marks it in proposed state against the wallet which has sent the transaction.
+      * @param _transactionId It marks it in proposed state against the wallet which has sent the transaction.
       *
       */
     function performProposeTransaction(
@@ -322,7 +323,7 @@ contract MultiSigWallet {
     /**
       * @notice It is used to send the transaction to confirmation state by the wallet who has sent the transaction.
       *
-      * @param transactionId It marks this transaction id as confirmed against the wallet which has sent the transaction.
+      * @param _transactionId It marks this transaction id as confirmed against the wallet which has sent the transaction.
       */
     function performConfirmTransaction(
         bytes32 _transactionId)
@@ -342,9 +343,9 @@ contract MultiSigWallet {
     /**
       * @notice  It is used to check whether the transaction is in proposed state.
       *
-      * @param transactionId It denotes whose transaction status(Proposed state) is to be checked.
+      * @param _transactionId It denotes whose transaction status(Proposed state) is to be checked.
       *
-      * @bool  If true then transaction is in proposed state.
+      * @return bool If true then transaction is in proposed state.
       */
     function isAlreadyProposedTransaction(
         bytes32 _transactionId)
@@ -354,12 +355,12 @@ contract MultiSigWallet {
         return (isExecuted[_transactionId] == 1);
     }
 
-
     /**
       * @notice It check whether transaction is available for execution
       *
-      * @param  _transactionId  For which transaction execution status is required.
+      * @param _transactionId  For which transaction execution status is required.
       *
+      * @return bool executed status
       */
     function isTransactionExecuted(
         bytes32 _transactionId)
@@ -372,22 +373,22 @@ contract MultiSigWallet {
     /**
       * @dev Returns the confirmation status of a transaction.
       *
-      * @param transactionId Transaction ID.
+      * @param _transactionId Transaction ID.
       *
-      * @return Confirmation status.
+      * @return bool Confirmation status.
       */
-    function isConfirmed(bytes32 transactionId)
+    function isConfirmed(bytes32 _transactionId)
         public
         constant
         returns (bool)
     {
-            uint8 count = 0;
-            for (uint8 i = 0; i < wallets.length; i++) {
-                if (confirmations[transactionId][wallets[i]])
-                    count += 1;
-                if (count == required)
-                    return true;
-            }
+        uint8 count = 0;
+        for (uint8 i = 0; i < wallets.length; i++) {
+            if (confirmations[_transactionId][wallets[i]])
+                count += 1;
+            if (count == required)
+                return true;
+        }
     }
 
 }
