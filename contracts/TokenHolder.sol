@@ -128,6 +128,7 @@ contract TokenHolder is MultiSigWallet {
         returns (bytes32 transactionId)
     {
         require(sessionLocks[_sessionLock] == uint256(0), "SessionLock is already authorized");
+        require(_spendingLimit > 0, "Spending limit should be greater than 0!");
 
         transactionId = keccak256(abi.encodePacked(_sessionLock, _spendingLimit, this, "authorizeSession"));
         if (_proposeOrConfirm) {
@@ -357,10 +358,8 @@ contract TokenHolder is MultiSigWallet {
         for(uint8 i=0; i<maxFaultToleranceCount; i++) {
             oldSessionLock = keccak256(abi.encodePacked(_newSessionLock));
             uint256 spendingLimit = sessionLocks[oldSessionLock];
-            // TODO check spendingLimit value when oldSessionLock doesn't exist
-            // TODO accordingly modify below condition
             /** if entry exists in sessionLocks mapping */
-            if (spendingLimit >= uint(0)) {
+            if (spendingLimit > 0) {
                 delete(sessionLocks[oldSessionLock]);
                 sessionLocks[_newSessionLock] = spendingLimit;
 
