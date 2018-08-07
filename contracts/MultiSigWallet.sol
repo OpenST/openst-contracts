@@ -11,7 +11,7 @@ contract MultiSigWallet {
     /** Events */
 
     event Propose(address indexed sender,bytes32 transactionId);
-    event Confirmation(address indexed sender, bytes32 indexed transactionId);
+    event ConfirmationDone(address indexed sender, bytes32 indexed transactionId);
     event Revocation(address indexed sender, bytes32 indexed transactionId);
     event Execution(address indexed sender, bytes32 indexed transactionId);
     event ReplaceWallet(address indexed sender,address _oldWallet, address _newWallet);
@@ -24,18 +24,21 @@ contract MultiSigWallet {
     /** It denotes the total number of confirmations required for an transaction to be executed. */
     uint8 public required;
 
+    /** It denotes which wallet has confirmed and status for the transaction.
+       Status values could be :-
+       0 :- initial state/Not proposed.
+       1 :- Proposed state.
+       2 :- Successfully executed state.
+    */
+    struct Confirmation{
+        mapping(address => bool) isConfirmedBy;
+        uint8 status;
+    }
+
+    mapping(bytes32 => Confirmation) confirmations;
     /** It maps status for transactionId for a wallet.If it is true then that transaction is approved by the wallet address. */
-    mapping(bytes32 => mapping(address => bool)) public confirmations;
     /** It helps to direct lookup whether an wallet is already present or not  */
     mapping(address => bool) public isWallet;
-    /** isExecuted mapping allows to check if a transaction (by hash) was already proposed and executed.
-        Values could be :-
-        0 :- initial state/Not proposed.
-        1 :- Proposed state.
-        2 :- Successfully executed state.
-     */
-    mapping(bytes32 => uint8) public isExecuted;
-
     /** It contains all the added wallets.*/
     address[] public wallets;
 
@@ -51,11 +54,10 @@ contract MultiSigWallet {
         _;
     }
 
-
     /**
 	 *  @notice Modifier walletDoesNotExist.
 	 *
-	 *  @dev Checks whether wallets doesnt exist.
+	 *  @dev Checks whether wallets doesn't exist.
 	 */
     modifier walletDoesNotExist(
         address _wallet) {
@@ -85,22 +87,22 @@ contract MultiSigWallet {
         bytes32 _transactionId,
         address _wallet) {
 
-        require(confirmations[_transactionId][_wallet], "Transaction is not confirmed by this wallet");
+        require(confirmations[_transactionId].isConfirmedBy[_wallet], "Transaction is not confirmed by this wallet");
         _;
     }
 
     /**
 	 *  @notice Modifier notConfirmed.
 	 *
-	 *  @dev Checks whether transactions are not confirmed.
+	 *  @dev Checks whether transactions is not confirmed by wallet.
 	 */
     modifier notConfirmed(
         bytes32 _transactionId,
         address _wallet) {
 
-        require(!confirmations[_transactionId][_wallet],"Transaction is already confirmed");
+        require(!confirmations[_transactionId].isConfirmedBy[_wallet]);
         _;
-     }
+    }
 
     /**
 	 *  @notice Modifier onlyWallet.
@@ -110,7 +112,7 @@ contract MultiSigWallet {
     modifier notSuccessfullyExecuted(
         bytes32 _transactionId) {
         /** Transaction should not be in success state */
-        require(isExecuted[_transactionId] != 2,"Transaction is already executed");
+        require(confirmations[_transactionId].status != 2);
         _;
     }
 
@@ -289,11 +291,11 @@ contract MultiSigWallet {
                 //isWallet[wallet] = false;
                 delete isWallet[_oldWallet];
                 isWallet[_newWallet] = true;
-            emit ReplaceWallet(msg.sender, _oldWallet, _newWallet);
+                emit ReplaceWallet(msg.sender, _oldWallet, _newWallet);
             }
         }
         return transactionId;
-     }
+    }
 
     /**
       * @notice Allows to propose or confirm intent for changing for the number of required confirmations.
@@ -353,7 +355,7 @@ contract MultiSigWallet {
         else {
             performConfirmTransaction(_transactionId);
             if(isTransactionExecuted(_transactionId)){
-                confirmations[_transactionId][msg.sender] = false;
+                confirmations[_transactionId].isConfirmedBy[msg.sender] = false;
                 emit Revocation(msg.sender, _transactionId);
             }
         }
@@ -372,8 +374,7 @@ contract MultiSigWallet {
         bytes32 _transactionId)
         internal
     {
-        isExecuted[_transactionId] = 1;
-        confirmations[_transactionId][msg.sender] = true;
+        confirmations[_transactionId].status = 1;
 
         emit Propose(msg.sender, _transactionId);
     }
@@ -388,12 +389,12 @@ contract MultiSigWallet {
         internal
         notConfirmed(_transactionId, msg.sender)
     {
-        require(isExecuted[_transactionId] == 0, "Please first propose the transaction");
-        confirmations[_transactionId][msg.sender] = true;
-        emit Confirmation(msg.sender, _transactionId);
+        require(confirmations[_transactionId].status == 0, "Please first propose the transaction");
+        confirmations[_transactionId].isConfirmedBy[msg.sender] = true;
+        emit ConfirmationDone(msg.sender, _transactionId);
         if (isAlreadyProposedTransaction(_transactionId)) {
             if (isConfirmed(_transactionId)) {
-                isExecuted[_transactionId] = 2;
+                confirmations[_transactionId].status = 2;
             }
         }
     }
@@ -411,7 +412,7 @@ contract MultiSigWallet {
         view
         returns (bool /* success */)
     {
-        return (isExecuted[_transactionId] == 1);
+        return (confirmations[_transactionId].status == 1);
     }
 
     /**
@@ -427,7 +428,7 @@ contract MultiSigWallet {
         view
         returns(bool /* success */)
     {
-        return (isExecuted[_transactionId] == 2);
+        return (confirmations[_transactionId].status == 2);
     }
 
     /**
@@ -445,7 +446,7 @@ contract MultiSigWallet {
     {
         uint8 count = 0;
         for (uint8 i = 0; i < wallets.length; i++) {
-            if (confirmations[_transactionId][wallets[i]])
+            if (confirmations[_transactionId].isConfirmedBy[wallets[i]])
                 count += 1;
             if (count == required)
                 return true;
