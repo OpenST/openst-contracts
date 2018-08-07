@@ -236,11 +236,10 @@ contract TokenHolder is MultiSigWallet {
 
         uint256 spendingLimit = sessionLocks[_spendingSessionLock];
         require(_amount <= spendingLimit, "Transfer amount should be less or equal to spending limit");
-        // Solidity .call returns true in success case
-        // In case of exception returns false and transaction is not reverted.
-        bool transferCallResult = address(brandedToken).call(bytes4(keccak256("transfer(address,uint256)")), _to, _amount);
 
-        return transferCallResult;
+        require(BrandedToken(brandedToken).transfer(_to, _amount));
+
+        return true;
     }
 
     /**
