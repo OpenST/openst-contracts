@@ -236,15 +236,11 @@ contract TokenHolder is MultiSigWallet {
 
         uint256 spendingLimit = sessionLocks[_spendingSessionLock];
         require(_amount <= spendingLimit, "Transfer amount should be less or equal to spending limit");
-        // .call returns true/false not the actual return values
-        bool transferCallResult = address(brandedToken).call(bytes4(keccak256("transfer(address, uint256)")), _to, _amount);
-        if (transferCallResult == true) {
-            require(BrandedToken(brandedToken).transfer(_to, _amount));
-        } else {
-            // TODO Emit failure event
-        }
+        // Solidity .call returns true in success case
+        // In case of exception returns false and transaction is not reverted.
+        bool transferCallResult = address(brandedToken).call(bytes4(keccak256("transfer(address,uint256)")), _to, _amount);
 
-        return true;
+        return transferCallResult;
     }
 
     /**
@@ -270,7 +266,6 @@ contract TokenHolder is MultiSigWallet {
         require(updateSessionLock(_spendingSessionLock));
 
         // TODO Integration with CoGateway Interface
-        // TODO evaluate if solidity call needed before requestRedemption
 
         return true;
     }
