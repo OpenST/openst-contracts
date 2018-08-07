@@ -98,7 +98,7 @@ contract MultiSigWallet {
         bytes32 _transactionId,
         address _wallet) {
 
-        require(!confirmations[_transactionId][_wallet]);
+        require(!confirmations[_transactionId][_wallet],"Transaction is already confirmed");
         _;
      }
 
@@ -110,7 +110,7 @@ contract MultiSigWallet {
     modifier notSuccessfullyExecuted(
         bytes32 _transactionId) {
         /** Transaction should not be in success state */
-        require(isExecuted[_transactionId] != 2);
+        require(isExecuted[_transactionId] != 2,"Transaction is already executed");
         _;
     }
 
