@@ -132,7 +132,7 @@ contract TokenHolder is MultiSigWallet {
 
         transactionId = keccak256(abi.encodePacked(_sessionLock, _spendingLimit, this, "authorizeSession"));
         if (_proposeOrConfirm) {
-            require(isAlreadyProposedTransaction(transactionId) == false, "Transaction is already proposed!");
+            require(!isAlreadyProposedTransaction(transactionId), "Transaction is already proposed!");
             performProposeTransaction(transactionId);
         } else {
             performConfirmTransaction(transactionId);
@@ -165,7 +165,7 @@ contract TokenHolder is MultiSigWallet {
 
         transactionId = keccak256(abi.encodePacked(_sessionLock, this, "revokeSession"));
         if (_proposeOrConfirm) {
-            require(isAlreadyProposedTransaction(transactionId) == false, "Transaction is already proposed!");
+            require(!isAlreadyProposedTransaction(transactionId), "Transaction is already proposed!");
             performProposeTransaction(transactionId);
         } else {
             performConfirmTransaction(transactionId);
@@ -202,7 +202,7 @@ contract TokenHolder is MultiSigWallet {
     {
         transactionId = keccak256(abi.encodePacked(_amount, _nonce, _beneficiary, _hashLock, this, "redeem"));
         if (_proposeOrConfirm) {
-            require(isAlreadyProposedTransaction(transactionId) == false, "Transaction is already proposed!");
+            require(!isAlreadyProposedTransaction(transactionId), "Transaction is already proposed!");
             performProposeTransaction(transactionId);
         } else {
             performConfirmTransaction(transactionId);

@@ -192,7 +192,7 @@ contract MultiSigWallet {
         /* _proposeOrConfirm is not used in encode to ensure we get same transactionId for same set of parameters in propose and confirm flow. */
         transactionId = keccak256(abi.encodePacked(_wallet, this, "addWallet"));
         if(_proposeOrConfirm) {
-            require(isAlreadyProposedTransaction(transactionId) == false, "Transaction is already proposed!");
+            require(!isAlreadyProposedTransaction(transactionId), "Transaction is already proposed!");
             performProposeTransaction(transactionId);
         }
         else {
@@ -228,7 +228,7 @@ contract MultiSigWallet {
         /* _proposeOrConfirm is not used in encode to ensure we get same transactionId for same set of parameters in propose and confirm flow. */
         transactionId = keccak256(abi.encodePacked(_wallet, this, "removeWallet"));
         if(_proposeOrConfirm) {
-            require(isAlreadyProposedTransaction(transactionId) == false, "Transaction is already proposed!");
+            require(!isAlreadyProposedTransaction(transactionId), "Transaction is already proposed!");
             performProposeTransaction(transactionId);
         }
         else {
@@ -276,7 +276,7 @@ contract MultiSigWallet {
         /* _proposeOrConfirm is not used in encode to ensure we get same transactionId for same set of parameters in propose and confirm flow. */
         transactionId = keccak256(abi.encodePacked(_oldWallet, _newWallet, this, "replaceWallet"));
         if(_proposeOrConfirm) {
-            require(isAlreadyProposedTransaction(transactionId) == false, "Transaction is already proposed!");
+            require(!isAlreadyProposedTransaction(transactionId), "Transaction is already proposed!");
             performProposeTransaction(transactionId);
         }
         else {
@@ -317,7 +317,7 @@ contract MultiSigWallet {
         /* _proposeOrConfirm is not used in encode to ensure we get same transactionId for same set of parameters in propose and confirm flow. */
         transactionId = keccak256(abi.encodePacked(_required, this, "changeRequirement"));
         if(_proposeOrConfirm) {
-            require(isAlreadyProposedTransaction(transactionId) == false, "Transaction is already proposed!");
+            require(!isAlreadyProposedTransaction(transactionId), "Transaction is already proposed!");
             performProposeTransaction(transactionId);
         }
         else {
@@ -349,7 +349,7 @@ contract MultiSigWallet {
         returns(bytes32 transactionId)
     {
         if(_proposeOrConfirm) {
-            require(isAlreadyProposedTransaction(_transactionId) == false, "Transaction is already proposed!");
+            require(!isAlreadyProposedTransaction(_transactionId), "Transaction is already proposed!");
             performProposeTransaction(_transactionId);
         }
         else {
@@ -392,7 +392,7 @@ contract MultiSigWallet {
         require(confirmations[_transactionId].status == 0, "Please first propose the transaction");
         confirmations[_transactionId].isConfirmedBy[msg.sender] = true;
         emit ConfirmationDone(msg.sender, _transactionId);
-        if (isAlreadyProposedTransaction(_transactionId)) {
+        if (!isAlreadyProposedTransaction(_transactionId)) {
             if (isConfirmed(_transactionId)) {
                 confirmations[_transactionId].status = 2;
             }
