@@ -76,8 +76,13 @@ contract TokenHolder is MultiSigWallet {
     address private tokenRules;
     /** Max No of times spending session lock should be hashed for verification */
     uint8 private maxFaultToleranceCount;
+    /** isPresent identifies if session lock is present in sessionLocks mapping or not */
+    struct SessionLockData {
+        uint256 spendingLimit;
+        bool isPresent;
+    }
     /** Stores spending limit per session lock */
-    mapping (bytes32 /* session lock */ => uint256 /* spending limit */) public sessionLocks;
+    mapping (bytes32 /* session lock */ => SessionLockData /* spending limit */) public sessionLocks;
 
     /**
 	 *  @notice Contract constructor
@@ -112,6 +117,8 @@ contract TokenHolder is MultiSigWallet {
     /**
 	 *  @notice propose or confirm authorize session method.
 	 *
+	 *  @dev 0 spendingLimit is a valid transfer amount
+	 *
 	 *  @param _sessionLock session lock to be authorized.
 	 *  @param _spendingLimit max tokens user can spend at a time.
 	 *  @param _proposeOrConfirm if true transaction will be proposed otherwise confirmation is done.
@@ -127,8 +134,7 @@ contract TokenHolder is MultiSigWallet {
         notNullSessionLock(_sessionLock)
         returns (bytes32 transactionId)
     {
-        require(sessionLocks[_sessionLock] == uint256(0), "SessionLock is already authorized");
-        require(_spendingLimit > 0, "Spending limit should be greater than 0!");
+        require(!sessionLocks[_sessionLock].isPresent, "SessionLock is already authorized");
 
         transactionId = keccak256(abi.encodePacked(_sessionLock, _spendingLimit, this, "authorizeSession"));
         if (_proposeOrConfirm) {
@@ -137,7 +143,8 @@ contract TokenHolder is MultiSigWallet {
         } else {
             performConfirmTransaction(transactionId);
             if(isTransactionExecuted(transactionId)) {
-                sessionLocks[_sessionLock] = _spendingLimit;
+                setSessionLockData(_sessionLock, _spendingLimit);
+
                 emit SessionAuthorized(msg.sender, _sessionLock, _spendingLimit);
             }
         }
@@ -161,7 +168,7 @@ contract TokenHolder is MultiSigWallet {
         notNullSessionLock(_sessionLock)
         returns (bytes32 transactionId)
     {
-        require(sessionLocks[_sessionLock] != uint256(0), "Input SessionLock is not authorized!");
+        require(sessionLocks[_sessionLock].isPresent, "Input SessionLock is not authorized!");
 
         transactionId = keccak256(abi.encodePacked(_sessionLock, this, "revokeSession"));
         if (_proposeOrConfirm) {
@@ -234,7 +241,7 @@ contract TokenHolder is MultiSigWallet {
     {
         require(updateSessionLock(_spendingSessionLock));
 
-        uint256 spendingLimit = sessionLocks[_spendingSessionLock];
+        uint256 spendingLimit = sessionLocks[_spendingSessionLock].spendingLimit;
         require(_amount <= spendingLimit, "Transfer amount should be less or equal to spending limit");
 
         require(BrandedToken(brandedToken).transfer(_to, _amount));
@@ -351,19 +358,35 @@ contract TokenHolder is MultiSigWallet {
 
         for(uint8 i=0; i<maxFaultToleranceCount; i++) {
             oldSessionLock = keccak256(abi.encodePacked(_newSessionLock));
-            uint256 spendingLimit = sessionLocks[oldSessionLock];
             /** if entry exists in sessionLocks mapping */
-            if (spendingLimit > 0) {
+            if (sessionLocks[oldSessionLock].isPresent) {
+                uint256 spendingLimit = sessionLocks[oldSessionLock].spendingLimit;
+                setSessionLockData(_newSessionLock, spendingLimit);
                 delete(sessionLocks[oldSessionLock]);
-                sessionLocks[_newSessionLock] = spendingLimit;
 
                 emit SessionLockUpdated(oldSessionLock, _newSessionLock, spendingLimit);
 
                 return true;
             }
         }
-
+        /** False is error condition in case _newSessionLock is not found in sessionLocks mapping */
         return false;
+    }
+
+    /**
+	 *  @notice private method to update SessionLockData.
+	 *
+	 *  @param _sessionLock session lock which need to be added in sessionLocks mapping.
+	 *  @param _spendingLimit spending limit to be updated.
+	 *
+	 */
+    function setSessionLockData(
+        bytes32 _sessionLock,
+        uint256 _spendingLimit)
+        private
+    {
+        sessionLocks[_sessionLock].spendingLimit = _spendingLimit;
+        sessionLocks[_sessionLock].isPresent = true;
     }
 
 }
