@@ -29,6 +29,10 @@ pragma solidity ^0.4.23;
  */
 contract Internal {
 
+    /** Events */
+
+    event InternalActorRegistered(uint16 newlyRegisteredActorCount, uint16 alreadyRegisteredActorCount);
+
     /** Storage */
 
     /** max accepted internal actors in registerInternalActor method */
@@ -79,7 +83,7 @@ contract Internal {
         address[] _internalActors)
         public
         onlyOrganization
-        returns (uint16 /* Registered Count */)
+        returns (uint16 newlyRegisteredActorCount, uint16 alreadyRegisteredActorCount)
     {
         require(_internalActors.length != 0, "Internal actors length is 0");
 
@@ -87,14 +91,20 @@ contract Internal {
 
         for (uint16 i=0; i<_internalActors.length; i++) {
             /** address 0 transfer is allowed in EIP20 */
-            address actor = _internalActors[i];
-            /** If actor is not present in isInternalActor, returns false else returns true */
-            if (isInternalActor[actor] == false){
-                isInternalActor[actor] = true;
+            address internalActor = _internalActors[i];
+            /** If internalActor is not present, isInternalActor returns false else returns true */
+            if (isInternalActor[internalActor]){
+                /** If internalActor is already registered, he will be part of alreadyRegisteredActorCount */
+                alreadyRegisteredActorCount++;
+            } else {
+                isInternalActor[internalActor] = true;
+                newlyRegisteredActorCount++;
             }
         }
 
-        return uint16(_internalActors.length);
+        emit InternalActorRegistered(newlyRegisteredActorCount, alreadyRegisteredActorCount);
+
+        return (newlyRegisteredActorCount, alreadyRegisteredActorCount);
     }
 
 }
