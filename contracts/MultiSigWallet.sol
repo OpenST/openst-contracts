@@ -373,7 +373,6 @@ contract MultiSigWallet {
     )
         public
         onlyWallet
-        confirmed(_transactionId, msg.sender)
         returns(bytes32 transactionId_)
     {
         require(confirmations[_transactionId].status != 2,
