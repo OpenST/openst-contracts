@@ -136,7 +136,7 @@ contract TokenHolder is MultiSigWallet {
 
         brandedToken = _brandedToken;
         coGateway = _coGateway;
-        /** Needed for onlyTokenRules validation */
+        // Needed for onlyTokenRules contract validation
         tokenRules = BrandedToken(brandedToken).tokenRules();
         maxFaultToleranceCount = _maxFaultToleranceCount;
     }

@@ -81,7 +81,7 @@ contract MultiSigWallet {
        0 :- initial state/Not proposed.
        1 :- Proposed state.
        2 :- Successfully executed state.
-    */
+     */
     struct Confirmation{
         mapping(address => bool) isConfirmedBy;
         uint8 status;
@@ -259,7 +259,7 @@ contract MultiSigWallet {
         }
         else {
             performConfirmTransaction(transactionId_);
-            //Removal of wallet is being done.
+            // Removal of wallet is being done.
             if(isTransactionExecuted(transactionId_)) {
                 delete isWallet[_wallet];
                 for (uint8 i = 0; i < wallets.length - 1; i++)
@@ -268,8 +268,8 @@ contract MultiSigWallet {
                         break;
                     }
                 wallets.length -= 1;
-                /* If after removal number of wallets are less than required
-                 confirmations then set it to current number of wallets. */
+                // If after removal number of wallets are less than required
+                // confirmations then set it to current number of wallets.
                 if (required > wallets.length){
                     required = uint8(wallets.length);
                     emit RequirementChange(uint8(wallets.length));

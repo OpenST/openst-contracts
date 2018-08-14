@@ -97,8 +97,10 @@ contract Internal {
     {
         require(_internalActors.length != 0, "Internal actors length is 0");
 
-        require(_internalActors.length <= MAX_INTERNAL_ACTORS,
-            "Internal actors max length exceeded!!!");
+        require(
+            _internalActors.length <= MAX_INTERNAL_ACTORS,
+            "Internal actors max length exceeded!!!"
+        );
 
         for (uint16 i=0; i<_internalActors.length; i++) {
             // address 0 transfer is allowed in EIP20.
