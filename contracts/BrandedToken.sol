@@ -102,13 +102,13 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     /* Public functions */
 
     /**
-	 * @notice public function transfer.
-	 *
-	 * @param _to address to which BT needs to transfer.
-	 * @param _value how many BTs needs to transfer.
-	 *
-	 * @return bool true/false status of transfer.
-	 */
+     * @notice public function transfer.
+     *
+     * @param _to address to which BT needs to transfer.
+     * @param _value how many BTs needs to transfer.
+     *
+     * @return bool true/false status of transfer.
+     */
     function transfer(
         address _to,
         uint256 _value
@@ -122,14 +122,14 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     }
 
     /**
-	 * @notice public function transferFrom.
-	 *
-	 * @param _from address from which BT needs to transfer.
-	 * @param _to address to which BT needs to transfer.
-	 * @param _value how many BTs needs to transfer.
-	 *
-	 * @return bool true/false status of transferFrom.
-	 */
+     * @notice public function transferFrom.
+     *
+     * @param _from address from which BT needs to transfer.
+     * @param _to address to which BT needs to transfer.
+     * @param _value how many BTs needs to transfer.
+     *
+     * @return bool true/false status of transferFrom.
+     */
     function transferFrom(
         address _from,
         address _to,
@@ -144,13 +144,13 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     }
 
     /**
-	 * @notice public function approve.
-	 *
-	 * @param _spender address to which msg.sender is approving.
-	 * @param _value how many BTs needs to approve.
-	 *
-	 * @return bool true/false status of approve.
-	 */
+     * @notice public function approve.
+     *
+     * @param _spender address to which msg.sender is approving.
+     * @param _value how many BTs needs to approve.
+     *
+     * @return bool true/false status of approve.
+     */
     function approve(
         address _spender,
         uint256 _value
