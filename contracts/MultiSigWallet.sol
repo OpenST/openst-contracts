@@ -119,66 +119,6 @@ contract MultiSigWallet {
     }
 
     /**
-	 *  @notice Modifier walletDoesNotExist.
-	 *
-	 *  @dev Checks whether wallets doesn't exist.
-	 */
-    modifier walletDoesNotExist(
-        address _wallet) {
-        require(!isWallet[_wallet], "Wallet address doesnt exist");
-        _;
-    }
-
-    /**
-	 *  @notice Modifier walletExists.
-	 *
-	 *  @dev Checks whether wallet exists.
-	 */
-    modifier walletExists(
-        address _wallet) {
-        require(isWallet[_wallet], "Wallet should be added to proceed for this transaction");
-        _;
-    }
-
-    /**
-     *  @notice Modifier confirmed.
-     *
-     *  @dev It checks whether the transaction is confirmed by the wallet.
-     */
-    modifier confirmed(
-        bytes32 _transactionId,
-        address _wallet) {
-
-        require(confirmations[_transactionId].isConfirmedBy[_wallet], "Transaction is not confirmed by this wallet");
-        _;
-    }
-
-    /**
-	 * @notice Modifier notConfirmed.
-	 *
-	 * @dev Checks whether transactions is not confirmed by wallet.
-	 */
-    modifier notConfirmed(
-        bytes32 _transactionId,
-        address _wallet) {
-
-        require(!confirmations[_transactionId].isConfirmedBy[_wallet]);
-        _;
-    }
-
-    /**
-	 *  @notice Modifier onlyWallet.
-	 *
-	 *  @dev Checks whether transactions are successfully executed or not.
-	 */
-    modifier notSuccessfullyExecuted(
-        bytes32 _transactionId) {
-        /** Transaction should not be in success state */
-        require(confirmations[_transactionId].status != 2);
-        _;
-    }
-
-    /**
 	 * @notice Modifier validRequirement.
 	 *
 	 * @dev It checks for total number of confirmations required should be
@@ -241,12 +181,12 @@ contract MultiSigWallet {
         bool _proposeOrConfirm
     )
         onlyWallet
-        walletDoesNotExist(_wallet)
         validRequirement(uint8(wallets.length + 1), required)
         public
         returns (bytes32 transactionId_)
     {
         require(_wallet != 0, "Wallet address should not be null");
+        require(!isWallet[_wallet], "Wallet address doesnt exist");
 
         // _proposeOrConfirm is not used in encode to ensure we get same
         //  transactionId for same set of parameters in propose and confirm flow.
@@ -284,12 +224,14 @@ contract MultiSigWallet {
         bool _proposeOrConfirm
     )
         onlyWallet
-        walletExists(_wallet)
         validRequirement(uint8(wallets.length - 1), required)
         public
         returns (bytes32 transactionId_)
     {
         require(_wallet != 0, "Wallet address should not be null");
+        require(isWallet[_wallet],
+            "Wallet should be added to proceed for this transaction");
+
         // _proposeOrConfirm is not used in encode to ensure we get same
         //  transactionId_ for same set of parameters in propose and confirm flow.
         transactionId_ = keccak256(abi.encodePacked(
@@ -343,10 +285,10 @@ contract MultiSigWallet {
     )
         public
         onlyWallet
-        walletExists(_oldWallet)
-        walletDoesNotExist(_newWallet)
         returns(bytes32 transactionId_)
     {
+        require(!isWallet[_wallet], "Wallet address doesnt exist");
+
         // _proposeOrConfirm is not used in encode to ensure we get same
         // transactionId for same set of parameters in propose and confirm flow.
         transactionId_ = keccak256(abi.encodePacked(_oldWallet, _newWallet,
@@ -518,7 +460,7 @@ contract MultiSigWallet {
         require(confirmations[_transactionId].status == 0,
             "Please first propose the transaction");
         require(!confirmations[_transactionId].isConfirmedBy[msg.sender],
-            "Transaction is already confirmed");
+            "Transaction is already confirmed by this wallet");
 
         confirmations[_transactionId].isConfirmedBy[msg.sender] = true;
         emit ConfirmationDone(
