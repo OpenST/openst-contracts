@@ -61,7 +61,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      *  @notice Contract constructor. 
      *
      *  @dev Creates an EIP20Token and a UtilityTokenAbstract contract with
-     *       arguments passed in the contract constructor
+     *       arguments passed in the contract constructor.
      *  
      *  @param _uuid UUID of the token.
      *  @param _symbol Symbol of the token. 
@@ -109,7 +109,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
 	 *  @param _to address to which BT needs to transfer.
 	 *  @param _value how many BTs needs to transfer.
 	 *
-	 *  @return bool true/false status of transfer
+	 *  @return bool true/false status of transfer.
 	 */
     function transfer(
         address _to,
