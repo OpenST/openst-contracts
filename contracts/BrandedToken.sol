@@ -29,24 +29,23 @@ import "./Internal.sol";
 
 
 /**
- *  @title BrandedToken contract which implements EIP20Token, UtilityTokenAbstract. 
+ * @title BrandedToken contract which implements EIP20Token, UtilityTokenAbstract.
  *
- *  @notice Branded Token is an EIP20 token minted by staking Simple Token
- *          on Ethereum mainnet.  
+ * @notice Branded Token is an EIP20 token minted by staking Simple Token
+ *         on Ethereum mainnet.
  *
- *  @dev Branded tokens are designed to be used within a (decentralised) application and support:
- *       - Smart contract controlled password reset for users who don't
- *         yet (hard-spoon FTW) manage their own private keys (+v0.9.2).
- *       - Soft-exit for a user to redeem their equivalent part of the 
- *         Simple Token stake on Ethereum mainnet.
- *       - Hard-exit for all users if the utility chain halts to reclaim
- *         their equivalent part of the Simple Token stake
- *         on Ethereum (before v1.0).
- *
+ * @dev Branded tokens are designed to be used within a (decentralised) application and support:
+ *      - Smart contract controlled password reset for users who don't
+ *        yet (hard-spoon FTW) manage their own private keys (+v0.9.2).
+ *      - Soft-exit for a user to redeem their equivalent part of the
+ *        Simple Token stake on Ethereum mainnet.
+ *      - Hard-exit for all users if the utility chain halts to reclaim
+ *        their equivalent part of the Simple Token stake
+ *        on Ethereum (before v1.0).
  */
 contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
 
-    /* Usings */
+     /* Usings */
 
     using SafeMath for uint256;
 
@@ -57,20 +56,20 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     address public tokenRules;
 
     /**
-     *  @notice Contract constructor. 
+     * @notice Contract constructor.
      *
-     *  @dev Creates an EIP20Token and a UtilityTokenAbstract contract with
-     *       arguments passed in the contract constructor.
-     *  
-     *  @param _uuid UUID of the token.
-     *  @param _symbol Symbol of the token. 
-     *  @param _name Name of the token.
-     *  @param _decimals Decimal places of the token.
-     *  @param _chainIdValue Chain id of the value chain.
-     *  @param _chainIdUtility Chain id of the utility chain.
-     *  @param _conversionRate Conversion rate of the token.
-     *  @param _conversionRateDecimals Decimal places of conversion rate of token.
-     *  @param _tokenRules tokenRules contract address.
+     * @dev Creates an EIP20Token and a UtilityTokenAbstract contract with
+     *      arguments passed in the contract constructor.
+     *
+     * @param _uuid UUID of the token.
+     * @param _symbol Symbol of the token.
+     * @param _name Name of the token.
+     * @param _decimals Decimal places of the token.
+     * @param _chainIdValue Chain id of the value chain.
+     * @param _chainIdUtility Chain id of the utility chain.
+     * @param _conversionRate Conversion rate of the token.
+     * @param _conversionRateDecimals Decimal places of conversion rate of token.
+     * @param _tokenRules tokenRules contract address.
      */
     constructor(
         bytes32 _uuid,
@@ -103,16 +102,17 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     /* Public functions */
 
     /**
-	 *  @notice public function transfer.
+	 * @notice public function transfer.
 	 *
-	 *  @param _to address to which BT needs to transfer.
-	 *  @param _value how many BTs needs to transfer.
+	 * @param _to address to which BT needs to transfer.
+	 * @param _value how many BTs needs to transfer.
 	 *
-	 *  @return bool true/false status of transfer.
+	 * @return bool true/false status of transfer.
 	 */
     function transfer(
         address _to,
-        uint256 _value)
+        uint256 _value
+    )
         public
         returns (bool /* success */)
     {
@@ -122,18 +122,19 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     }
 
     /**
-	 *  @notice public function transferFrom.
+	 * @notice public function transferFrom.
 	 *
-	 *  @param _from address from which BT needs to transfer.
-	 *  @param _to address to which BT needs to transfer.
-	 *  @param _value how many BTs needs to transfer.
+	 * @param _from address from which BT needs to transfer.
+	 * @param _to address to which BT needs to transfer.
+	 * @param _value how many BTs needs to transfer.
 	 *
-	 *  @return bool true/false status of transferFrom.
+	 * @return bool true/false status of transferFrom.
 	 */
     function transferFrom(
         address _from,
         address _to,
-        uint256 _value)
+        uint256 _value
+    )
         public
         returns (bool /* success */)
     {
@@ -143,16 +144,17 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     }
 
     /**
-	 *  @notice public function approve.
+	 * @notice public function approve.
 	 *
-	 *  @param _spender address to which msg.sender is approving.
-	 *  @param _value how many BTs needs to approve.
+	 * @param _spender address to which msg.sender is approving.
+	 * @param _value how many BTs needs to approve.
 	 *
-	 *  @return bool true/false status of approve.
+	 * @return bool true/false status of approve.
 	 */
     function approve(
         address _spender,
-        uint256 _value)
+        uint256 _value
+    )
         public
         returns (bool /* success */)
     {
@@ -162,19 +164,20 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     }
 
     /**
-     *  @notice Public function mintEIP20.
+     * @notice Public function mintEIP20.
      *
-     *  @dev Only callable by openSTProtocol contract. Adds _amount of utility
-     *       tokens to be claimed for a _beneficiary address.
+     * @dev Only callable by openSTProtocol contract. Adds _amount of utility
+     *      tokens to be claimed for a _beneficiary address.
      *
-     *  @param _beneficiary Address of beneficiary.
-     *  @param _amount Amount of utility tokens to mint.
+     * @param _beneficiary Address of beneficiary.
+     * @param _amount Amount of utility tokens to mint.
      *
-     *  @return True if mint is successful, false otherwise.
+     * @return True if mint is successful, false otherwise.
      */
     function mint(
         address _beneficiary,
-        uint256 _amount)
+        uint256 _amount
+    )
         public
         onlyProtocol
         returns (bool /* success */)
@@ -187,19 +190,20 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     }
 
     /**
-     *  @notice Public function burn.
+     * @notice Public function burn.
      *
-     *  @dev Only callable by openSTProtocol contract. Implements a burn function
-     *       to permit msg.sender to reduce its balance, which also reduces tokenTotalSupply.
+     * @dev Only callable by openSTProtocol contract. Implements a burn function
+     *      to permit msg.sender to reduce its balance, which also reduces tokenTotalSupply.
      *
-     *  @param _burner Address of token burner. 
-     *  @param _amount Amount of tokens to burn.
+     * @param _burner Address of token burner.
+     * @param _amount Amount of tokens to burn.
      *
-     *  @return True if burn is successful, false otherwise.
+     * @return True if burn is successful, false otherwise.
      */
     function burn(
         address _burner,
-        uint256 _amount)
+        uint256 _amount
+    )
         public
         onlyProtocol
         payable

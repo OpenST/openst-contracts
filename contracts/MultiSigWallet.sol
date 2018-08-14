@@ -34,43 +34,43 @@ contract MultiSigWallet {
     /* Events */
 
     event Propose(
-        address indexed sender,
-        bytes32 transactionId
+        address indexed _sender,
+        bytes32 _transactionId
     );
 
     event ConfirmationDone(
-        address indexed sender,
-        bytes32 indexed transactionId
+        address indexed _sender,
+        bytes32 indexed _transactionId
     );
 
     event Revocation(
-        address indexed sender,
-        bytes32 indexed transactionId
+        address indexed _sender,
+        bytes32 indexed _transactionId
     );
 
     event Execution(
-        address indexed sender,
-        bytes32 indexed transactionId
+        address indexed _sender,
+        bytes32 indexed _transactionId
     );
 
     event ReplaceWallet(
-        address indexed sender,
+        address indexed _sender,
         address _oldWallet,
         address _newWallet
     );
 
     event WalletAddition(
-        address indexed sender,
-        address indexed wallet
+        address indexed _sender,
+        address indexed _wallet
     );
 
     event WalletRemoval(
-        address indexed sender,
-        address indexed wallet
+        address indexed _sender,
+        address indexed _wallet
     );
 
     event RequirementChange(
-        uint8 required
+        uint8 _required
     );
 
     /* Struct */
@@ -96,11 +96,11 @@ contract MultiSigWallet {
      */
     uint8 public required;
 
-    mapping(bytes32 => Confirmation) public confirmations;
+    mapping (bytes32 => Confirmation) public confirmations;
     /** It maps status for transactionId for a wallet.If it is true then that
         transaction is approved by the wallet address. */
     /** It helps to direct lookup whether an wallet is already present or not */
-    mapping(address => bool) public isWallet;
+    mapping (address => bool) public isWallet;
     /** It contains all the added wallets.*/
     address[] public wallets;
 

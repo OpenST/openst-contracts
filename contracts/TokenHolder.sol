@@ -67,7 +67,10 @@ contract TokenHolder is MultiSigWallet {
 
     /* Structs */
 
-    /** isPresent identifies if session lock is present in sessionLocks mapping or not */
+    /**
+        isPresent identifies if session lock is present in sessionLocks
+        mapping or not
+     */
     struct SessionLockData {
         uint256 spendingLimit;
         bool isPresent;
@@ -147,7 +150,7 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _sessionLock,
         uint256 _spendingLimit,
         bool _proposeOrConfirm
-        )
+    )
         public
         onlyWallet
         returns (bytes32 transactionId_)
@@ -187,7 +190,8 @@ contract TokenHolder is MultiSigWallet {
 	 */
     function proposeOrConfirmRevokeSession(
         bytes32 _sessionLock,
-        bool _proposeOrConfirm)
+        bool _proposeOrConfirm
+    )
         public
         onlyWallet
         returns (bytes32 transactionId_)
@@ -233,7 +237,8 @@ contract TokenHolder is MultiSigWallet {
         uint256 _nonce,
         address _beneficiary,
         bytes32 _hashLock,
-        bool _proposeOrConfirm)
+        bool _proposeOrConfirm
+    )
         public
         onlyWallet
         returns (bytes32 transactionId_)
@@ -272,7 +277,8 @@ contract TokenHolder is MultiSigWallet {
     function transfer(
         address _to,
         uint256 _amount,
-        bytes32 _spendingSessionLock)
+        bytes32 _spendingSessionLock
+    )
         public
         onlyTokenRules
         returns (bool /** success */)
@@ -303,7 +309,8 @@ contract TokenHolder is MultiSigWallet {
         uint256 _amount,
         uint256 _fee,
         address _beneficiary,
-        bytes32 _spendingSessionLock)
+        bytes32 _spendingSessionLock
+    )
         public
         onlyTokenRules
         returns (bool /** success */)
@@ -333,7 +340,8 @@ contract TokenHolder is MultiSigWallet {
     function increaseAllowance(
         address _spender,
         uint256 _amount,
-        bytes32 _spendingSessionLock)
+        bytes32 _spendingSessionLock
+    )
         public
         onlyTokenRules
         returns (uint256 _updatedAllowanceAmount)
@@ -354,18 +362,21 @@ contract TokenHolder is MultiSigWallet {
 	 * @notice TokenHolder decreaseAllowance method.
 	 *
 	 * @dev Below method is needed so that BrandedToken.transferFrom can be called.
-	 *      Amount can be approved to an escrow contract address for BT.transferFrom to work.
+	 *      Amount can be approved to an escrow contract address for
+	 *      BT.transferFrom to work.
 	 *
 	 * @param _spender address to whom allowance needs to decrease.
 	 * @param _amount amount of tokens to transfer.
-	 * @param _spendingSessionLock session lock which will be spent for this transaction.
+	 * @param _spendingSessionLock session lock which will be spent
+	 *        for this transaction.
 	 *
 	 * @return uint256 final allowance which is approved.
 	 */
     function decreaseAllowance(
         address _spender,
         uint256 _amount,
-        bytes32 _spendingSessionLock)
+        bytes32 _spendingSessionLock
+    )
         public
         onlyTokenRules
         returns (uint256 _updatedAllowanceAmount)
@@ -393,7 +404,8 @@ contract TokenHolder is MultiSigWallet {
 	 * @return bool success if _newSessionLock is consumed.
 	 */
     function updateSessionLock(
-        bytes32 _newSessionLock)
+        bytes32 _newSessionLock
+    )
         private
         returns (bool /* success */)
     {
@@ -428,11 +440,11 @@ contract TokenHolder is MultiSigWallet {
 	 *
 	 * @param _sessionLock session lock which need to be added in sessionLocks mapping.
 	 * @param _spendingLimit spending limit to be updated.
-	 *
 	 */
     function setSessionLockData(
         bytes32 _sessionLock,
-        uint256 _spendingLimit)
+        uint256 _spendingLimit
+    )
         private
     {
         sessionLocks[_sessionLock].spendingLimit = _spendingLimit;
