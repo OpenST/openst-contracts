@@ -373,7 +373,7 @@ contract MultiSigWallet {
     )
         public
         onlyWallet
-        returns(bytes32 transactionId_)
+        returns(bool /*success*/)
     {
         require(confirmations[_transactionId].status != 2,
             "Cannot revoke this transaction because it is already executed");
@@ -395,7 +395,7 @@ contract MultiSigWallet {
                 );
             }
         }
-        return transactionId_;
+        return true;
     }
 
     /**
