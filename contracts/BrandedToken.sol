@@ -42,6 +42,7 @@ import "./Internal.sol";
  *      - Hard-exit for all users if the utility chain halts to reclaim
  *        their equivalent part of the Simple Token stake
  *        on Ethereum (before v1.0).
+ *
  */
 contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
 

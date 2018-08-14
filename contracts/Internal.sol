@@ -84,7 +84,7 @@ contract Internal {
      *         needs to be registered.
      *
      * @return uint256 total count of registered actors.
-	 */
+     */
     function registerInternalActor(
         address[] _internalActors
     )
