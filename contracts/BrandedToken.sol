@@ -81,7 +81,8 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         uint256 _chainIdUtility,
         uint256 _conversionRate,
         uint8 _conversionRateDecimals,
-        address _tokenRules)
+        address _tokenRules
+    )
         public
         Internal()
         EIP20Token(_symbol, _name, _decimals)
@@ -94,7 +95,10 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         _conversionRate,
         _conversionRateDecimals)
      {
-        require(_tokenRules != address(0), "Token rules contracts address is invalid!");
+        require(
+            _tokenRules != address(0),
+            "Token rules contracts address is invalid!"
+        );
 
         tokenRules = _tokenRules;
      }
@@ -108,7 +112,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @param _to address to which BT needs to transfer.
      * @param _value how many BTs needs to transfer.
      *
-     * @return bool true/false status of transfer.
+     * @return success/failure status of transfer.
      */
     function transfer(
         address _to,
@@ -117,7 +121,10 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         public
         returns (bool /* success */)
     {
-        require(isInternalActor[_to] == true, "to address is invalid economy actor!");
+        require(
+            isInternalActor[_to] == true,
+            "to address is invalid economy actor!"
+        );
 
         EIP20Token.transfer(_to, _value);
     }
@@ -129,7 +136,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @param _to address to which BT needs to transfer.
      * @param _value how many BTs needs to transfer.
      *
-     * @return bool true/false status of transferFrom.
+     * @return success/failure status of transferFrom.
      */
     function transferFrom(
         address _from,
@@ -139,7 +146,10 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         public
         returns (bool /* success */)
     {
-        require(isInternalActor[_to] == true, "to is invalid economy actor!");
+        require(
+            isInternalActor[_to] == true,
+            "to is invalid economy actor!"
+        );
 
         EIP20Token.transferFrom(_from, _to, _value);
     }
@@ -150,7 +160,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @param _spender address to which msg.sender is approving.
      * @param _value how many BTs needs to approve.
      *
-     * @return bool true/false status of approve.
+     * @return success/failure status of approve.
      */
     function approve(
         address _spender,
@@ -159,7 +169,10 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         public
         returns (bool /* success */)
     {
-        require(isInternalActor[_spender] == true, "spender is invalid economy actor!");
+        require(
+            isInternalActor[_spender] == true,
+            "spender is invalid economy actor!"
+        );
 
         EIP20Token.approve(_spender, _value);
     }
@@ -173,7 +186,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @param _beneficiary Address of beneficiary.
      * @param _amount Amount of utility tokens to mint.
      *
-     * @return True if mint is successful, false otherwise.
+     * @return true if mint is successful, false otherwise.
      */
     function mint(
         address _beneficiary,
@@ -183,7 +196,10 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         onlyProtocol
         returns (bool /* success */)
     {
-        require((isInternalActor[_beneficiary] == true), "beneficiary is invalid economy actor!");
+        require(
+            (isInternalActor[_beneficiary] == true),
+            "beneficiary is invalid economy actor!"
+        );
 
         mintEIP20(_amount);
 
@@ -199,7 +215,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @param _burner Address of token burner.
      * @param _amount Amount of tokens to burn.
      *
-     * @return True if burn is successful, false otherwise.
+     * @return true if burn is successful, false otherwise.
      */
     function burn(
         address _burner,
