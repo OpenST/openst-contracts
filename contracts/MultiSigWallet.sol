@@ -91,14 +91,12 @@ contract MultiSigWallet {
     /* Storage */
 
     /**
-        It denotes the total number of confirmations required for an
-        transaction to be executed.
+      It denotes the total number of confirmations required for an
+      transaction to be executed.
      */
     uint8 public required;
-
+    /** It maps status and who approved that transactionId. */
     mapping (bytes32 => Confirmation) public confirmations;
-    /** It maps status for transactionId for a wallet.If it is true then that
-        transaction is approved by the wallet address. */
     /** It helps to direct lookup whether an wallet is already present or not */
     mapping (address => bool) public isWallet;
     /** It contains all the added wallets.*/
