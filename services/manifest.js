@@ -61,7 +61,7 @@ const ServiceManifestKlass = function(configStrategy, instanceComposer) {
   let workers = (oThis.workers = {});
   workers.setWorker = instanceComposer.getSetWorkerClass();
   workers.isWorker = instanceComposer.getIsWorkerClass();
-  workers.setWorkerAndOps = instanceComposer.getSetWorkerOpsClass();
+  workers.deployWorkersAndSetOps = instanceComposer.getSetWorkerOpsClass();
 
   /**
    * airdropManager services
