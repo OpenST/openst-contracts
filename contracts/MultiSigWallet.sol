@@ -107,9 +107,10 @@ contract MultiSigWallet {
 
     /* Modifiers */
 
-    /**  @notice Modifier onlyWallet.
+    /**
+     * @notice Modifier onlyWallet.
      *
-     *  @dev Allows only registered wallet to call multi-sig methods.
+     * @dev Allows only registered wallet to call multi-sig methods.
      */
     modifier onlyWallet() {
         require(isWallet[msg.sender] == true,
