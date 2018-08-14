@@ -52,13 +52,13 @@ contract TokenHolder is MultiSigWallet {
         address wallet,
         bytes32 sessionLock
     );
-    /** Event emitted whenever newSessionLock is consumed */
+    /** Event emitted whenever newSessionLock is consumed. */
     event SessionLockUpdated(
         bytes32 oldSessionLock,
         bytes32 newSessionLock,
         uint256 spendingLimit
     );
-    /** Event emitted on increase allowance and decrease allowance */
+    /** Event emitted on increase allowance and decrease allowance. */
     event AllowanceUpdated(
         address spender,
         uint256 existingAllowanceAmount,
@@ -68,8 +68,8 @@ contract TokenHolder is MultiSigWallet {
     /* Structs */
 
     /**
-        isPresent identifies if session lock is present in sessionLocks
-        mapping or not
+      isPresent identifies if session lock is present in sessionLocks
+      mapping or not.
      */
     struct SessionLockData {
         uint256 spendingLimit;
@@ -80,13 +80,13 @@ contract TokenHolder is MultiSigWallet {
     /* Storage */
 
     address public brandedToken;
-    /** Co Gateway contract address for redeem functionality */
+    /** Co Gateway contract address for redeem functionality. */
     address public coGateway;
-    /** Stores spending limit per session lock */
+    /** Stores spending limit per session lock. */
     mapping (bytes32 /* session lock */ => SessionLockData /* spending limit */) public sessionLocks;
-    /** Token rules contract address read from BT contract */
+    /** Token rules contract address read from BT contract. */
     address private tokenRules;
-    /** Max No of times spending session lock should be hashed for verification */
+    /** Max No of times spending session lock should be hashed for verification. */
     uint8 private maxFaultToleranceCount;
 
 
@@ -265,7 +265,7 @@ contract TokenHolder is MultiSigWallet {
     }
 
     /**
-     * @notice TokenHolder transfer method
+     * @notice TokenHolder transfer method.
      *
      * @param _to address to whom BT amount needs to transfer.
      * @param _amount amount of tokens to transfer.
@@ -295,7 +295,7 @@ contract TokenHolder is MultiSigWallet {
     }
 
     /**
-     * @notice TokenHolder requestRedemption method
+     * @notice TokenHolder requestRedemption method.
      *
      * @param _amount amount of tokens to transfer.
      * @param _fee Fee to be paid.

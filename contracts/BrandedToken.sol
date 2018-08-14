@@ -210,7 +210,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         payable
         returns (bool /* success */)
     {
-        // force non-payable, as only ST" handles in base tokens
+        // force non-payable, as only ST" handles in base tokens.
         require(msg.value == 0, "msg.value should be 0");
 
         burnEIP20(_amount);

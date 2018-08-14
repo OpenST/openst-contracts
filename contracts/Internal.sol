@@ -33,7 +33,7 @@ contract Internal {
 
     /* Storage */
 
-    /** max accepted internal actors in registerInternalActor method */
+    /** max accepted internal actors in registerInternalActor method. */
     uint16 private constant MAX_INTERNAL_ACTORS = 100;
     /**
         organization/company address who will be deploying branded token
@@ -98,10 +98,10 @@ contract Internal {
             "Internal actors max length exceeded!!!");
 
         for (uint16 i=0; i<_internalActors.length; i++) {
-            // address 0 transfer is allowed in EIP20
+            // address 0 transfer is allowed in EIP20.
             address actor = _internalActors[i];
             // If actor is not present in isInternalActor, returns false else
-            // returns true
+            // returns true.
             if (isInternalActor[actor] == false){
                 isInternalActor[actor] = true;
             }

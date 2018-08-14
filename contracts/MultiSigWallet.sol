@@ -26,7 +26,7 @@ pragma solidity ^0.4.23;
  * @title MultiSigWallet Contract
  *
  * @notice Implement operations which require multiple confirmations.
- * It is inherited by TokenHolder.sol
+ *         It is inherited by TokenHolder.sol.
  *
  */
 contract MultiSigWallet {
@@ -346,8 +346,8 @@ contract MultiSigWallet {
         else {
             performConfirmTransaction(transactionId_);
             if(isTransactionExecuted(transactionId_)) {
-                /** Old requirements i.e. number of required confirmations for
-                 an transaction to be executed is being changed */
+                // Old requirements i.e. number of required confirmations for
+                // an transaction to be executed is being changed. */
                 required = _required;
                 emit RequirementChange(_required);
             }
@@ -491,12 +491,12 @@ contract MultiSigWallet {
     }
 
     /**
-     * @notice It check whether transaction is available for execution
+     * @notice It check whether transaction is available for execution.
      *
      * @param _transactionId  For which transaction execution status is
      *        required.
      *
-     * @return bool executed status
+     * @return bool executed status.
      */
     function isTransactionExecuted(
         bytes32 _transactionId
