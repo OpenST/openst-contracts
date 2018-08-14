@@ -1,5 +1,26 @@
 pragma solidity ^0.4.23;
 
+// Copyright 2017 OpenST Ltd.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// ----------------------------------------------------------------------------
+// Utility Chain: Token Holder
+//
+// http://www.simpletoken.org/
+//
+// ----------------------------------------------------------------------------
+
 
 /**
  * @title MultiSigWallet Contract
@@ -10,7 +31,7 @@ pragma solidity ^0.4.23;
  */
 contract MultiSigWallet {
 
-    /** Events */
+    /* Events */
 
     event Propose(
         address indexed sender,
@@ -52,14 +73,10 @@ contract MultiSigWallet {
         uint8 required
     );
 
+    /* Struct */
 
-    /* Storage */
-
-    /** It denotes the total number of confirmations required for an
-        transaction to be executed. */
-    uint8 public required;
-
-    /** It denotes which wallet has confirmed and status for the transaction.
+    /**
+        It denotes which wallet has confirmed and status for the transaction.
        Status values could be :-
        0 :- initial state/Not proposed.
        1 :- Proposed state.
@@ -70,7 +87,16 @@ contract MultiSigWallet {
         uint8 status;
     }
 
-    mapping(bytes32 => Confirmation) confirmations;
+
+    /* Storage */
+
+    /**
+        It denotes the total number of confirmations required for an
+        transaction to be executed.
+     */
+    uint8 public required;
+
+    mapping(bytes32 => Confirmation) public confirmations;
     /** It maps status for transactionId for a wallet.If it is true then that
         transaction is approved by the wallet address. */
     /** It helps to direct lookup whether an wallet is already present or not */
@@ -299,7 +325,6 @@ contract MultiSigWallet {
         return transactionId_;
     }
 
-
     /**
      * @notice Allows to propose or confirmation intent to replace an wallet
      *         with a new wallet. Transaction has to be sent by wallet.
@@ -432,6 +457,28 @@ contract MultiSigWallet {
         return transactionId_;
     }
 
+    /**
+     * @dev Returns the confirmation status of a transaction.
+     *
+     * @param _transactionId Transaction ID.
+     *
+     * @return bool Confirmation status.
+     */
+    function isConfirmed(
+        bytes32 _transactionId)
+        public
+        view
+        returns (bool)
+    {
+        uint8 count = 0;
+        for (uint8 i = 0; i < wallets.length; i++) {
+            if (confirmations[_transactionId].isConfirmedBy[wallets[i]])
+                count += 1;
+            if (count == required)
+                return true;
+        }
+    }
+
 
     /* Internal functions */
 
@@ -521,27 +568,4 @@ contract MultiSigWallet {
     {
         return (confirmations[_transactionId].status == 2);
     }
-
-    /**
-     * @dev Returns the confirmation status of a transaction.
-     *
-     * @param _transactionId Transaction ID.
-     *
-     * @return bool Confirmation status.
-     */
-    function isConfirmed(
-        bytes32 _transactionId)
-        public
-        view
-        returns (bool)
-    {
-        uint8 count = 0;
-        for (uint8 i = 0; i < wallets.length; i++) {
-            if (confirmations[_transactionId].isConfirmedBy[wallets[i]])
-                count += 1;
-            if (count == required)
-                return true;
-        }
-    }
-
 }
