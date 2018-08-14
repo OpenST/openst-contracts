@@ -20,6 +20,7 @@ require(rootPrefix + '/services/ops_managed/set_ops');
 // Workers related services
 require(rootPrefix + '/services/workers/set_worker');
 require(rootPrefix + '/services/workers/is_worker');
+require(rootPrefix + '/lib/set_worker_and_ops');
 
 // airdropManager related services
 require(rootPrefix + '/services/airdrop_management/approve');
@@ -60,6 +61,7 @@ const ServiceManifestKlass = function(configStrategy, instanceComposer) {
   let workers = (oThis.workers = {});
   workers.setWorker = instanceComposer.getSetWorkerClass();
   workers.isWorker = instanceComposer.getIsWorkerClass();
+  workers.setWorkerAndOps = instanceComposer.getSetWorkerOpsClass();
 
   /**
    * airdropManager services

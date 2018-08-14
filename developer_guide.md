@@ -181,6 +181,17 @@ let SetOpsKlass = instanceComposer.getSetOpsClass(),
 setOpsObject.perform().then(function(r){console.log(JSON.stringify(r))});
 ```
 
+#### setWorkerAndOps service usage
+```js
+let SetWorkerOpsKlass = instanceComposer.getSetWorkerOpsClass(),
+  setWorkerOpsObj = new SetWorkerOpsKlass(
+    {
+        gas_price: 1000000000,
+        chain_id: 2000
+    });
+setWorkerOpsObj.perform().then(function(r){console.log(JSON.stringify(r))});
+```
+
 
 
 #### Workers Service Examples
