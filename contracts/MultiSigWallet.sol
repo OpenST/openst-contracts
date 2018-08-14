@@ -76,7 +76,7 @@ contract MultiSigWallet {
     /* Struct */
 
     /**
-        It denotes which wallet has confirmed and status for the transaction.
+       It denotes which wallet has confirmed and status for the transaction.
        Status values could be :-
        0 :- initial state/Not proposed.
        1 :- Proposed state.
@@ -107,11 +107,10 @@ contract MultiSigWallet {
 
     /* Modifiers */
 
-    /**
-	 *  @notice Modifier onlyWallet.
-	 *
-	 *  @dev Allows only registered wallet to call multi-sig methods.
-	 */
+    /**  @notice Modifier onlyWallet.
+     *
+     *  @dev Allows only registered wallet to call multi-sig methods.
+     */
     modifier onlyWallet() {
         require(isWallet[msg.sender] == true,
             "Transaction should be done by valid wallet!");
@@ -119,11 +118,11 @@ contract MultiSigWallet {
     }
 
     /**
-	 * @notice Modifier validRequirement.
-	 *
-	 * @dev It checks for total number of confirmations required should be
-	 *       equal or less than the number of wallets.
-	 */
+     * @notice Modifier validRequirement.
+     *
+     * @dev It checks for total number of confirmations required should be
+     *       equal or less than the number of wallets.
+     */
     modifier validRequirement(
         uint8 _walletCount,
         uint8 _required) {
