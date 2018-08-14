@@ -23,7 +23,6 @@ pragma solidity ^0.4.23;
 
 
 import "./SafeMath.sol";
-/** utility chain contracts */
 import "./openst-protocol/EIP20Token.sol";
 import "./openst-protocol/UtilityTokenAbstract.sol";
 import "./Internal.sol";
@@ -43,6 +42,7 @@ import "./Internal.sol";
  *       - Hard-exit for all users if the utility chain halts to reclaim
  *         their equivalent part of the Simple Token stake
  *         on Ethereum (before v1.0).
+ *
  */
 contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
 
