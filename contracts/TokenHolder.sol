@@ -227,7 +227,7 @@ contract TokenHolder is MultiSigWallet {
 	 * @param _proposeOrConfirm if true transaction will be proposed
 	 *        otherwise confirmation is done.
 	 *
-	 * @return bytes32 transactionId for the request.
+	 * @return bytes32 transactionId_ for the request.
 	 */
     function proposeOrConfirmReedem(
         bytes32 _amount,
@@ -239,7 +239,7 @@ contract TokenHolder is MultiSigWallet {
         onlyWallet
         returns (bytes32 transactionId_)
     {
-        transactionId = keccak256(abi.encodePacked(
+        transactionId_ = keccak256(abi.encodePacked(
                 _amount,
                 _nonce,
                 _beneficiary,
