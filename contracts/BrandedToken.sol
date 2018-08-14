@@ -1,4 +1,3 @@
-/* solhint-disable-next-line compiler-fixed */
 pragma solidity ^0.4.23;
 
 // Copyright 2017 OpenST Ltd.
@@ -22,8 +21,8 @@ pragma solidity ^0.4.23;
 //
 // ----------------------------------------------------------------------------
 
-import "./SafeMath.sol";
 
+import "./SafeMath.sol";
 /** utility chain contracts */
 import "./openst-protocol/EIP20Token.sol";
 import "./openst-protocol/UtilityTokenAbstract.sol";
@@ -46,9 +45,14 @@ import "./Internal.sol";
  *         on Ethereum (before v1.0).
  */
 contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
+
+
+    /* Usings */
+
     using SafeMath for uint256;
 
-    /** Storage */
+
+    /* Storage */
 
     /** Token rules contract address  */
     address public tokenRules;
@@ -56,8 +60,8 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     /**
      *  @notice Contract constructor. 
      *
-     *  @dev Creates an EIP20Token and a UtilityTokenAbstract contract with arguments 
-     *       passed in the contract constructor
+     *  @dev Creates an EIP20Token and a UtilityTokenAbstract contract with
+     *       arguments passed in the contract constructor
      *  
      *  @param _uuid UUID of the token.
      *  @param _symbol Symbol of the token. 
@@ -96,7 +100,8 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         tokenRules = _tokenRules;
      }
 
-    /** Public functions */
+
+    /* Public functions */
 
     /**
 	 *  @notice public function transfer.
@@ -160,8 +165,8 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     /**
      *  @notice Public function mintEIP20.
      *
-     *  @dev Only callable by openSTProtocol contract. Adds _amount of utility tokens to.
-     *       be claimed for a _beneficiary address.
+     *  @dev Only callable by openSTProtocol contract. Adds _amount of utility
+     *       tokens to be claimed for a _beneficiary address.
      *
      *  @param _beneficiary Address of beneficiary.
      *  @param _amount Amount of utility tokens to mint.
@@ -185,8 +190,8 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     /**
      *  @notice Public function burn.
      *
-     *  @dev Only callable by openSTProtocol contract. Implements a burn function to permit.
-     *       msg.sender to reduce its balance, which also reduces tokenTotalSupply.
+     *  @dev Only callable by openSTProtocol contract. Implements a burn function
+     *       to permit msg.sender to reduce its balance, which also reduces tokenTotalSupply.
      *
      *  @param _burner Address of token burner. 
      *  @param _amount Amount of tokens to burn.
@@ -201,7 +206,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         payable
         returns (bool /* success */)
     {
-        // force non-payable, as only ST' handles in base tokens
+        // force non-payable, as only ST" handles in base tokens
         require(msg.value == 0, "msg.value should be 0");
 
         burnEIP20(_amount);

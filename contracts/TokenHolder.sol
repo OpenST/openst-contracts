@@ -25,6 +25,7 @@ import "./SafeMath.sol";
 import "./BrandedToken.sol";
 import "./MultiSigWallet.sol";
 
+
 /**
  *  @title TokenHolder contract.
  *
@@ -33,19 +34,59 @@ import "./MultiSigWallet.sol";
  *
  */
 contract TokenHolder is MultiSigWallet {
+
+
+    /* Usings */
+
     using SafeMath for uint256;
 
-    /** Events */
 
-    event SessionAuthorized(address wallet, bytes32 sessionLock, uint256 spendingLimit);
+    /* Events */
 
-    event SessionRevoked(address wallet, bytes32 sessionLock);
+    event SessionAuthorized(
+        address wallet,
+        bytes32 sessionLock,
+        uint256 spendingLimit
+    );
+
+    event SessionRevoked(
+        address wallet,
+        bytes32 sessionLock
+    );
     /** Event emitted whenever newSessionLock is consumed */
-    event SessionLockUpdated(bytes32 oldSessionLock, bytes32 newSessionLock, uint256 spendingLimit);
+    event SessionLockUpdated(
+        bytes32 oldSessionLock,
+        bytes32 newSessionLock,
+        uint256 spendingLimit
+    );
     /** Event emitted on increase allowance and decrease allowance */
-    event AllowanceUpdated(address spender, uint256 existingAllowanceAmount, uint256 updatedAllowanceAmount);
+    event AllowanceUpdated(
+        address spender,
+        uint256 existingAllowanceAmount,
+        uint256 updatedAllowanceAmount
+    );
 
-    /** Modifiers */
+    /** isPresent identifies if session lock is present in sessionLocks mapping or not */
+    struct SessionLockData {
+        uint256 spendingLimit;
+        bool isPresent;
+    }
+
+
+    /* Storage */
+
+    address public brandedToken;
+    /** Co Gateway contract address for redeem functionality */
+    address public coGateway;
+    /** Stores spending limit per session lock */
+    mapping (bytes32 /* session lock */ => SessionLockData /* spending limit */) public sessionLocks;
+    /** Token rules contract address read from BT contract */
+    address private tokenRules;
+    /** Max No of times spending session lock should be hashed for verification */
+    uint8 private maxFaultToleranceCount;
+
+
+    /* Modifiers */
 
     /**
      *   @notice onlyTokenRules modifier
@@ -58,38 +99,12 @@ contract TokenHolder is MultiSigWallet {
     }
 
     /**
-     *   @notice notNullSessionLock modifier
-     *
-     *   @dev checks session lock should be valid bytes32
-     */
-    modifier notNullSessionLock(bytes32 _sessionLock) {
-        require(_sessionLock != bytes32(0), "Session lock is invalid!");
-        _;
-    }
-
-    /** Storage */
-
-    address public brandedToken;
-    /** Co Gateway contract address for redeem functionality */
-    address public coGateway;
-    /** Token rules contract address read from BT contract */
-    address private tokenRules;
-    /** Max No of times spending session lock should be hashed for verification */
-    uint8 private maxFaultToleranceCount;
-    /** isPresent identifies if session lock is present in sessionLocks mapping or not */
-    struct SessionLockData {
-        uint256 spendingLimit;
-        bool isPresent;
-    }
-    /** Stores spending limit per session lock */
-    mapping (bytes32 /* session lock */ => SessionLockData /* spending limit */) public sessionLocks;
-
-    /**
 	 *  @notice Contract constructor
 	 *
 	 *  @param _brandedToken erc20 contract address this user is part of
 	 *  @param _coGateway utility chain gateway contract address
-	 *  @param _maxFaultToleranceCount Max No of times spending session lock should be hashed for verification
+	 *  @param _maxFaultToleranceCount Max No of times spending session lock
+	 *         should be hashed for verification
 	 *  @param _required No of requirements for multi sig wallet
 	 *  @param _wallets array of wallet addresses
 	 */
@@ -112,7 +127,8 @@ contract TokenHolder is MultiSigWallet {
         maxFaultToleranceCount = _maxFaultToleranceCount;
     }
 
-    /** Public Functions */
+
+    /* Public Functions */
 
     /**
 	 *  @notice propose or confirm authorize session method.
@@ -121,22 +137,29 @@ contract TokenHolder is MultiSigWallet {
 	 *
 	 *  @param _sessionLock session lock to be authorized.
 	 *  @param _spendingLimit max tokens user can spend at a time.
-	 *  @param _proposeOrConfirm if true transaction will be proposed otherwise confirmation is done.
+	 *  @param _proposeOrConfirm if true transaction will be proposed
+	 *         otherwise confirmation is done.
 	 *
 	 *  @return bytes32 transactionId for the request.
 	 */
     function proposeOrConfirmAuthorizeSession(
         bytes32 _sessionLock,
         uint256 _spendingLimit,
-        bool _proposeOrConfirm)
+        bool _proposeOrConfirm
+        )
         public
         onlyWallet
-        notNullSessionLock(_sessionLock)
         returns (bytes32 transactionId)
     {
+        require(_sessionLock != bytes32(0), "Session lock is invalid!");
         require(!sessionLocks[_sessionLock].isPresent, "SessionLock is already authorized");
 
-        transactionId = keccak256(abi.encodePacked(_sessionLock, _spendingLimit, this, "authorizeSession"));
+        transactionId = keccak256(abi.encodePacked(
+                _sessionLock,
+                _spendingLimit,
+                this,
+                "authorizeSession"
+        ));
         if (_proposeOrConfirm) {
             require(!isAlreadyProposedTransaction(transactionId), "Transaction is already proposed!");
             performProposeTransaction(transactionId);
@@ -156,7 +179,8 @@ contract TokenHolder is MultiSigWallet {
 	 *  @notice Revoke session method.
 	 *
 	 *  @param _sessionLock session lock to be revoked.
-	 *  @param _proposeOrConfirm if true transaction will be proposed otherwise confirmation is done.
+	 *  @param _proposeOrConfirm if true transaction will be proposed otherwise
+	 *         confirmation is done.
 	 *
 	 *  @return bytes32 transactionId for the request.
 	 */
@@ -165,12 +189,16 @@ contract TokenHolder is MultiSigWallet {
         bool _proposeOrConfirm)
         public
         onlyWallet
-        notNullSessionLock(_sessionLock)
         returns (bytes32 transactionId)
     {
+        require(_sessionLock != bytes32(0), "Session lock is invalid!");
         require(sessionLocks[_sessionLock].isPresent, "Input SessionLock is not authorized!");
 
-        transactionId = keccak256(abi.encodePacked(_sessionLock, this, "revokeSession"));
+        transactionId = keccak256(abi.encodePacked(
+                _sessionLock,
+                this,
+                "revokeSession"
+        ));
         if (_proposeOrConfirm) {
             require(!isAlreadyProposedTransaction(transactionId), "Transaction is already proposed!");
             performProposeTransaction(transactionId);
@@ -192,8 +220,10 @@ contract TokenHolder is MultiSigWallet {
 	 *  @param _amount Amount to redeem.
 	 *  @param _nonce incremental nonce.
 	 *  @param _beneficiary beneficiary address who will get redeemed amount.
-	 *  @param _hashLock hash lock. Secret will be used during redeem process to unlock the secret.
-	 *  @param _proposeOrConfirm if true transaction will be proposed otherwise confirmation is done.
+	 *  @param _hashLock hash lock. Secret will be used during redeem process
+	 *         to unlock the secret.
+	 *  @param _proposeOrConfirm if true transaction will be proposed
+	 *         otherwise confirmation is done.
 	 *
 	 *  @return bytes32 transactionId for the request.
 	 */
@@ -207,7 +237,14 @@ contract TokenHolder is MultiSigWallet {
         onlyWallet
         returns (bytes32 transactionId)
     {
-        transactionId = keccak256(abi.encodePacked(_amount, _nonce, _beneficiary, _hashLock, this, "redeem"));
+        transactionId = keccak256(abi.encodePacked(
+                _amount,
+                _nonce,
+                _beneficiary,
+                _hashLock,
+                this,
+                "redeem"
+        ));
         if (_proposeOrConfirm) {
             require(!isAlreadyProposedTransaction(transactionId), "Transaction is already proposed!");
             performProposeTransaction(transactionId);
@@ -226,7 +263,8 @@ contract TokenHolder is MultiSigWallet {
 	 *
 	 *  @param _to address to whom BT amount needs to transfer.
 	 *  @param _amount amount of tokens to transfer.
-	 *  @param _spendingSessionLock session lock which will be spent for this transaction.
+	 *  @param _spendingSessionLock session lock which will be spent for
+	 *         this transaction.
 	 *
 	 *  @return bool
 	 */
@@ -236,9 +274,9 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _spendingSessionLock)
         public
         onlyTokenRules
-        notNullSessionLock(_spendingSessionLock)
         returns (bool /** success */)
     {
+        require(_spendingSessionLock != bytes32(0), "Session lock is invalid!");
         require(updateSessionLock(_spendingSessionLock));
 
         uint256 spendingLimit = sessionLocks[_spendingSessionLock].spendingLimit;
@@ -255,7 +293,8 @@ contract TokenHolder is MultiSigWallet {
 	 *  @param _amount amount of tokens to transfer.
 	 *  @param _fee Fee to be paid.
 	 *  @param _beneficiary address to whom amount needs to transfer.
-	 *  @param _spendingSessionLock session lock which will be spent for this transaction.
+	 *  @param _spendingSessionLock session lock which will be spent
+	 *         for this transaction.
 	 *
 	 *  @return bool
 	 */
@@ -266,9 +305,9 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _spendingSessionLock)
         public
         onlyTokenRules
-        notNullSessionLock(_spendingSessionLock)
         returns (bool /** success */)
     {
+        require(_spendingSessionLock != bytes32(0), "Session lock is invalid!");
         require(updateSessionLock(_spendingSessionLock));
 
         // TODO Integration with CoGateway Interface
@@ -280,11 +319,13 @@ contract TokenHolder is MultiSigWallet {
 	 *  @notice TokenHolder increaseAllowance method.
 	 *
 	 *  @dev Below method is needed so that BrandedToken.transferFrom can be called.
-	 *       Amount can be approved to an escrow contract address for BT.transferFrom to work.
+	 *       Amount can be approved to an escrow contract address for
+	 *       BT.transferFrom to work.
 	 *
 	 *  @param _spender address to whom allowance needs to increase.
 	 *  @param _amount amount of tokens to transfer.
-	 *  @param _spendingSessionLock session lock which will be spent for this transaction.
+	 *  @param _spendingSessionLock session lock which will be spent for
+	 *         this transaction.
 	 *
 	 *  @return uint256 final allowance which is approved
 	 */
@@ -294,9 +335,9 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _spendingSessionLock)
         public
         onlyTokenRules
-        notNullSessionLock(_spendingSessionLock)
         returns (uint256 updatedAllowanceAmount)
     {
+        require(_spendingSessionLock != bytes32(0), "Session lock is invalid!");
         require(updateSessionLock(_spendingSessionLock));
 
         uint256 existingAllowanceAmount = BrandedToken(brandedToken).allowance(this, _spender);
@@ -326,9 +367,9 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _spendingSessionLock)
         public
         onlyTokenRules
-        notNullSessionLock(_spendingSessionLock)
         returns (uint256 updatedAllowanceAmount)
     {
+        require(_spendingSessionLock != bytes32(0), "Session lock is invalid!");
         require(updateSessionLock(_spendingSessionLock));
 
         uint256 existingAllowanceAmount = BrandedToken(brandedToken).allowance(this, _spender);
@@ -340,7 +381,8 @@ contract TokenHolder is MultiSigWallet {
         return updatedAllowanceAmount;
     }
 
-    /** Private Functions */
+
+    /* Private Functions */
 
     /**
 	 *  @notice Validate and update session lock.
@@ -356,20 +398,28 @@ contract TokenHolder is MultiSigWallet {
     {
         bytes32 oldSessionLock;
 
-        for(uint8 i=0; i<maxFaultToleranceCount; i++) {
-            oldSessionLock = keccak256(abi.encodePacked(_newSessionLock));
+        for(uint8 i = 0; i < maxFaultToleranceCount; i++) {
+            oldSessionLock = keccak256(abi.encodePacked(
+                    _newSessionLock
+            ));
             /** if entry exists in sessionLocks mapping */
             if (sessionLocks[oldSessionLock].isPresent) {
                 uint256 spendingLimit = sessionLocks[oldSessionLock].spendingLimit;
                 setSessionLockData(_newSessionLock, spendingLimit);
                 delete(sessionLocks[oldSessionLock]);
 
-                emit SessionLockUpdated(oldSessionLock, _newSessionLock, spendingLimit);
+                emit SessionLockUpdated(
+                    oldSessionLock,
+                    _newSessionLock,
+                    spendingLimit
+                );
 
                 return true;
             }
         }
-        /** False is error condition in case _newSessionLock is not found in sessionLocks mapping */
+        /** False is error condition in case _newSessionLock is not found in
+            sessionLocks mapping
+         */
         return false;
     }
 
