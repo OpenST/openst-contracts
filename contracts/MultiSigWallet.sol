@@ -287,7 +287,7 @@ contract MultiSigWallet {
         onlyWallet
         returns(bytes32 transactionId_)
     {
-        require(!isWallet[_wallet], "Wallet address doesnt exist");
+        require(!isWallet[_oldWallet], "Wallet address doesnt exist");
 
         // _proposeOrConfirm is not used in encode to ensure we get same
         // transactionId for same set of parameters in propose and confirm flow.
