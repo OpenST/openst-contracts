@@ -46,7 +46,6 @@ import "./Internal.sol";
  */
 contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
 
-
     /* Usings */
 
     using SafeMath for uint256;

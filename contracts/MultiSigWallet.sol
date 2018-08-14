@@ -179,8 +179,8 @@ contract MultiSigWallet {
     constructor(
         address[] _wallets,
         uint8 _required)
-    public
-    validRequirement(uint8(_wallets.length), _required)
+        public
+        validRequirement(uint8(_wallets.length), _required)
     {
         require(_wallets.length > 0,"Wallets cannot be empty");
         require(_required > 0,"Atleast one confirmation is required");
@@ -214,16 +214,16 @@ contract MultiSigWallet {
         address _wallet,
         bool _proposeOrConfirm
     )
-    onlyWallet
-    walletDoesNotExist(_wallet)
-    validRequirement(uint8(wallets.length + 1), required)
-    public
-    returns (bytes32 transactionId_)
+        onlyWallet
+        walletDoesNotExist(_wallet)
+        validRequirement(uint8(wallets.length + 1), required)
+        public
+        returns (bytes32 transactionId_)
     {
         require(_wallet != 0, "Wallet address should not be null");
 
-        /* _proposeOrConfirm is not used in encode to ensure we get same
-        transactionId for same set of parameters in propose and confirm flow. */
+        // _proposeOrConfirm is not used in encode to ensure we get same
+        //  transactionId for same set of parameters in propose and confirm flow.
         transactionId_ = keccak256(abi.encodePacked(_wallet, this, "addWallet"));
 
         if(_proposeOrConfirm) {
@@ -233,7 +233,7 @@ contract MultiSigWallet {
         }
         else {
             performConfirmTransaction(transactionId_);
-            /** add wallet is being done */
+            // add wallet is being done
             if (isTransactionExecuted(transactionId_)) {
                 isWallet[_wallet] = true;
                 wallets.push(_wallet);
@@ -257,15 +257,15 @@ contract MultiSigWallet {
         address _wallet,
         bool _proposeOrConfirm
     )
-    onlyWallet
-    walletExists(_wallet)
-    validRequirement(uint8(wallets.length - 1), required)
-    public
-    returns (bytes32 transactionId_)
+        onlyWallet
+        walletExists(_wallet)
+        validRequirement(uint8(wallets.length - 1), required)
+        public
+        returns (bytes32 transactionId_)
     {
         require(_wallet != 0, "Wallet address should not be null");
-        /* _proposeOrConfirm is not used in encode to ensure we get same
-        transactionId_ for same set of parameters in propose and confirm flow. */
+        // _proposeOrConfirm is not used in encode to ensure we get same
+        //  transactionId_ for same set of parameters in propose and confirm flow.
         transactionId_ = keccak256(abi.encodePacked(
                 _wallet,
                 this,
@@ -278,7 +278,7 @@ contract MultiSigWallet {
         }
         else {
             performConfirmTransaction(transactionId_);
-            /** Removal of wallet is being done */
+            //Removal of wallet is being done.
             if(isTransactionExecuted(transactionId_)) {
                 delete isWallet[_wallet];
                 for (uint8 i = 0; i < wallets.length - 1; i++)
@@ -316,14 +316,14 @@ contract MultiSigWallet {
         address _newWallet,
         bool _proposeOrConfirm
     )
-    public
-    onlyWallet
-    walletExists(_oldWallet)
-    walletDoesNotExist(_newWallet)
-    returns(bytes32 transactionId_)
+        public
+        onlyWallet
+        walletExists(_oldWallet)
+        walletDoesNotExist(_newWallet)
+        returns(bytes32 transactionId_)
     {
-        /* _proposeOrConfirm is not used in encode to ensure we get same
-        transactionId for same set of parameters in propose and confirm flow. */
+        // _proposeOrConfirm is not used in encode to ensure we get same
+        // transactionId for same set of parameters in propose and confirm flow.
         transactionId_ = keccak256(abi.encodePacked(_oldWallet, _newWallet,
             this, "replaceWallet"));
 
@@ -334,14 +334,13 @@ contract MultiSigWallet {
         }
         else {
             performConfirmTransaction(transactionId_);
-            /** old wallet is deleted and new wallet entry is done */
+            // old wallet is deleted and new wallet entry is done.
             if(isTransactionExecuted(transactionId_)){
                 for (uint8 i = 0; i < wallets.length; i++)
                     if (wallets[i] == _oldWallet) {
                         wallets[i] = _newWallet;
                         break;
                     }
-                //isWallet[wallet] = false;
                 delete isWallet[_oldWallet];
                 isWallet[_newWallet] = true;
                 emit ReplaceWallet(msg.sender, _oldWallet, _newWallet);
@@ -365,13 +364,13 @@ contract MultiSigWallet {
         uint8 _required,
         bool _proposeOrConfirm
     )
-    public
-    onlyWallet
-    validRequirement(uint8(wallets.length), _required)
-    returns(bytes32 transactionId_)
+        public
+        onlyWallet
+        validRequirement(uint8(wallets.length), _required)
+        returns(bytes32 transactionId_)
     {
-        /* _proposeOrConfirm is not used in encode to ensure we get same
-        transactionId_ for same set of parameters in propose and confirm flow.*/
+        //_proposeOrConfirm is not used in encode to ensure we get same
+        // transactionId_ for same set of parameters in propose and confirm flow.
         transactionId_ = keccak256(abi.encodePacked(_required, this,
             "changeRequirement"));
         if(_proposeOrConfirm) {
@@ -405,14 +404,14 @@ contract MultiSigWallet {
         bytes32 _transactionId,
         bool _proposeOrConfirm
     )
-    public
-    onlyWallet
-    confirmed(_transactionId, msg.sender)
-    returns(bytes32 transactionId_)
+        public
+        onlyWallet
+        confirmed(_transactionId, msg.sender)
+        returns(bytes32 transactionId_)
     {
         require(confirmations[_transactionId].status != 2,
             "Cannot revoke this transaction because it is already executed");
-        require(confirmations[_transactionId].isConfirmedBy[_wallet],
+        require(confirmations[_transactionId].isConfirmedBy[msg.sender],
             "Transaction is not confirmed by this wallet");
 
         if(_proposeOrConfirm) {
@@ -447,7 +446,7 @@ contract MultiSigWallet {
     function performProposeTransaction(
         bytes32 _transactionId
     )
-    internal
+        internal
     {
         confirmations[_transactionId].status = 1;
 
@@ -467,11 +466,11 @@ contract MultiSigWallet {
     function performConfirmTransaction(
         bytes32 _transactionId
     )
-    internal
+        internal
     {
         require(confirmations[_transactionId].status == 0,
             "Please first propose the transaction");
-        require(!confirmations[_transactionId].isConfirmedBy[_wallet],
+        require(!confirmations[_transactionId].isConfirmedBy[msg.sender],
             "Transaction is already confirmed");
 
         confirmations[_transactionId].isConfirmedBy[msg.sender] = true;
@@ -498,9 +497,9 @@ contract MultiSigWallet {
     function isAlreadyProposedTransaction(
         bytes32 _transactionId
     )
-    internal
-    view
-    returns (bool /* success */)
+        internal
+        view
+        returns (bool /* success */)
     {
         return (confirmations[_transactionId].status == 1);
     }
@@ -516,9 +515,9 @@ contract MultiSigWallet {
     function isTransactionExecuted(
         bytes32 _transactionId
     )
-    internal
-    view
-    returns(bool /* success */)
+        internal
+        view
+        returns(bool /* success */)
     {
         return (confirmations[_transactionId].status == 2);
     }
@@ -532,9 +531,9 @@ contract MultiSigWallet {
      */
     function isConfirmed(
         bytes32 _transactionId)
-    public
-    view
-    returns (bool)
+        public
+        view
+        returns (bool)
     {
         uint8 count = 0;
         for (uint8 i = 0; i < wallets.length; i++) {

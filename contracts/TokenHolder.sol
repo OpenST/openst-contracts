@@ -35,7 +35,6 @@ import "./MultiSigWallet.sol";
  */
 contract TokenHolder is MultiSigWallet {
 
-
     /* Usings */
 
     using SafeMath for uint256;
