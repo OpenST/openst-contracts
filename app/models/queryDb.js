@@ -34,6 +34,7 @@ QueryDB.prototype = {
       // Only Whitelisted Migration Queries Allowed
       var allowed_queries = ['CREATE', 'ALTER', 'create', 'alter'];
       var querySubstring = query.substring(0, 6);
+      querySubstring = querySubstring.trim();
       if (allowed_queries.indexOf(querySubstring) < 0) {
         return onReject('Wrong Migration. Allowed Queries: ' + allowed_queries);
       }

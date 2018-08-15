@@ -36,6 +36,9 @@ const CoreConstants = function(configStrategy, instanceComposer) {
 
   //Environment
   oThis.AUTO_SCALE_DYNAMO = configStrategy.AUTO_SCALE_DYNAMO;
+
+  //For Multi Chain
+  oThis.CHAIN_ID = process.env.OST_UTILITY_CHAIN_ID;
 };
 
 CoreConstants.prototype = {
