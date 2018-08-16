@@ -8,12 +8,11 @@
  * @module migrations/alter_table_for_chain_id_column.js
  */
 
-var rootPrefix = '..',
+const rootPrefix = '..',
   InstanceComposer = require(rootPrefix + '/instance_composer'),
   configStrategy = require(rootPrefix + '/mocha_test/scripts/config_strategy'),
   logger = require(rootPrefix + '/helpers/custom_console_logger');
 
-require(rootPrefix + '/config/core_constants');
 require(rootPrefix + '/app/models/queryDb');
 
 const instanceComposer = new InstanceComposer(configStrategy),
