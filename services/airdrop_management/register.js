@@ -183,11 +183,13 @@ RegisterKlass.prototype = {
   runRegister: function() {
     const oThis = this,
       airdropKlass = oThis.ic().getAirdropModelKlass(),
+      coreConstants = oThis.ic().getCoreConstants(),
       AirdropModelCacheKlass = oThis.ic().getCacheManagementAirdropModelClass();
 
     return new Promise(async function(onResolve, onReject) {
       try {
         const airdropModelObject = {
+          chain_id: coreConstants.OST_UTILITY_CHAIN_ID,
           contract_address: oThis.airdropContractAddress
         };
         logger.debug('========register.runRegister.airdropModelObject=======');

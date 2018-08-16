@@ -21,6 +21,7 @@ const CoreConstants = function(configStrategy, instanceComposer) {
   // Geth
   oThis.OST_UTILITY_GETH_RPC_PROVIDER = configStrategy.OST_UTILITY_GETH_RPC_PROVIDER;
   oThis.OST_UTILITY_GETH_WS_PROVIDER = configStrategy.OST_UTILITY_GETH_WS_PROVIDER;
+  oThis.OST_UTILITY_CHAIN_ID = configStrategy.OST_UTILITY_CHAIN_ID;
 
   // MySQL details
   oThis.MYSQL_HOST = process.env.OP_MYSQL_HOST;
@@ -42,6 +43,15 @@ const CoreConstants = function(configStrategy, instanceComposer) {
 };
 
 CoreConstants.prototype = {
+
+  /**
+   * utility chain id.<br><br>
+   *
+   * @constant {integer}
+   *
+   */
+  OST_UTILITY_CHAIN_ID: null,
+
   /**
    * utility geth rpc endpoint.<br><br>
    *

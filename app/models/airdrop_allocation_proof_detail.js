@@ -41,11 +41,16 @@ const AirdropAllocationProofDetailKlassPrototype = {
    *
    */
   getByTransactionHash: function(transactionHash) {
-    var oThis = this;
+
+    const oThis = this
+      , coreConstants = oThis.ic().getCoreConstants()
+    ;
+
     return oThis
       .select()
-      .where(['transaction_hash=?', transactionHash])
+      .where(['transaction_hash=? AND chain_id=?', transactionHash, coreConstants.OST_UTILITY_CHAIN_ID])
       .fire();
+
   },
 
   /**
@@ -59,13 +64,18 @@ const AirdropAllocationProofDetailKlassPrototype = {
    *
    */
   createRecord: async function(transactionHash, airdropAmount, airdropAllocatedAmount = 0) {
-    var oThis = this;
+
+    const oThis = this
+      , coreConstants = oThis.ic().getCoreConstants()
+    ;
+
     try {
       const insertedRecord = await oThis
         .insert({
           transaction_hash: transactionHash,
           airdrop_amount: airdropAmount,
-          airdrop_allocated_amount: airdropAllocatedAmount
+          airdrop_allocated_amount: airdropAllocatedAmount,
+          chain_id: coreConstants.OST_UTILITY_CHAIN_ID
         })
         .fire();
       return responseHelper.successWithData({ response: insertedRecord });

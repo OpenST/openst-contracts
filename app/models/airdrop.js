@@ -58,11 +58,14 @@ const AirdropKlassPrototype = {
    *
    */
   getByContractAddress: function(airdropContractAddress) {
-    const oThis = this;
+
+    const oThis = this
+      , coreConstants = oThis.ic().getCoreConstants()
+    ;
 
     return oThis
       .select()
-      .where(['contract_address=?', airdropContractAddress])
+      .where(['contract_address=? AND chain_id=?', airdropContractAddress, coreConstants.OST_UTILITY_CHAIN_ID])
       .limit(1)
       .fire();
   }
