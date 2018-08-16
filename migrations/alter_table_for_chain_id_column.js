@@ -44,7 +44,7 @@ const alterTables = {
   },
 
   getQueries: function() {
-    const chainId = coreConstants.CHAIN_ID;
+    const chainId = coreConstants.UTILITY_CHAIN_ID;
 
     if (chainId != undefined) {
       const alterAirdropAllocationProofDetailsTable =
