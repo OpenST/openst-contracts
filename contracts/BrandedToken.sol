@@ -81,10 +81,11 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         uint256 _chainIdUtility,
         uint256 _conversionRate,
         uint8 _conversionRateDecimals,
-        address _tokenRules
+        address _tokenRules,
+        address _organization
     )
         public
-        Internal()
+        Internal(_organization)
         EIP20Token(_symbol, _name, _decimals)
         UtilityTokenAbstract(
         _uuid,

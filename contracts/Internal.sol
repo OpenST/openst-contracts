@@ -71,10 +71,12 @@ contract Internal {
      *
      * @dev it sets msg.sender as organization/company address.
      */
-    constructor()
+    constructor(
+        address _organization
+    )
         public
     {
-        organization = msg.sender;
+        organization = _organization;
     }
 
     /**
