@@ -396,7 +396,11 @@ contract TokenHolder is MultiSigWallet {
         _updatedAllowanceAmount = existingAllowanceAmount.add(_amount);
         require(BrandedToken(brandedToken).approve(_spender, _updatedAllowanceAmount));
 
-        emit AllowanceUpdated(_spender, existingAllowanceAmount, _updatedAllowanceAmount);
+        emit AllowanceUpdated(
+            _spender,
+            existingAllowanceAmount,
+            _updatedAllowanceAmount
+        );
 
         return _updatedAllowanceAmount;
     }

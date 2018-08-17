@@ -21,24 +21,26 @@ pragma solidity ^0.4.23;
 //
 // ----------------------------------------------------------------------------
 
-
 /**
  * @title Internal contract
  *
- * @notice Implements properties and actions performed by an economy internal
- *         actors.
+ * @notice Implements properties and actions performed by an economy internal actors.
  *
  */
 contract Internal {
 
+    /* Events */
+
+    event InternalActorRegistered(
+        uint16 newlyRegisteredActorCount,
+        uint16 alreadyRegisteredActorCount
+    );
+
     /* Storage */
 
-    /** max accepted internal actors in registerInternalActor method. */
+    /** max accepted internal actors in registerInternalActor method */
     uint16 private constant MAX_INTERNAL_ACTORS = 100;
-    /**
-        organization/company address who will be deploying branded token
-        contract
-    */
+    /** organization/company address who will be deploying branded token contract */
     address private organization;
     /**
         stores internal actor and checks if internal actor exists or not.
@@ -91,11 +93,13 @@ contract Internal {
      * @return total count of registered actors.
      */
     function registerInternalActor(
-        address[] _internalActors
-    )
+        address[] _internalActors)
         public
         onlyOrganization
-        returns (uint16 /* Registered Count */)
+        returns (
+            uint16 newlyRegisteredActorCount,
+            uint16 alreadyRegisteredActorCount
+        )
     {
         require(_internalActors.length != 0, "Internal actors length is 0");
 
@@ -105,16 +109,26 @@ contract Internal {
         );
 
         for (uint16 i=0; i<_internalActors.length; i++) {
-            // address 0 transfer is allowed in EIP20.
-            address actor = _internalActors[i];
+            // address 0 transfer is allowed in EIP20
+            address internalActor = _internalActors[i];
             // If actor is not present in isInternalActor, returns false else
             // returns true.
-            if (isInternalActor[actor] == false){
-                isInternalActor[actor] = true;
+            if (isInternalActor[internalActor]){
+                // If internalActor is already registered,
+                // he will be part of alreadyRegisteredActorCount.
+                alreadyRegisteredActorCount++;
+            } else {
+                isInternalActor[internalActor] = true;
+                newlyRegisteredActorCount++;
             }
         }
 
-        return uint16(_internalActors.length);
+        emit InternalActorRegistered(
+            newlyRegisteredActorCount,
+            alreadyRegisteredActorCount
+        );
+
+        return (newlyRegisteredActorCount, alreadyRegisteredActorCount);
     }
 
 }
