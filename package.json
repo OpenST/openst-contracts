@@ -1,6 +1,6 @@
 {
   "name": "@openstfoundation/openst-payments",
-  "version": "1.0.9-beta.12",
+  "version": "1.0.10-beta.1",
   "description": "Payment infrastructure on top of the OpenST network.",
   "keywords": [
     "openst",
@@ -23,10 +23,10 @@
     "pre-commit": "lint-staged"
   },
   "dependencies": {
-    "@openstfoundation/openst-base": "0.9.2-beta.5",
-    "@openstfoundation/openst-cache": "1.0.5-beta.8",
-    "@openstfoundation/openst-notification": "1.0.3-beta.5",
-    "@openstfoundation/openst-storage": "1.0.1-beta.12",
+    "@openstfoundation/openst-base": "0.9.3-beta.2",
+    "@openstfoundation/openst-cache": "1.0.6-beta.1",
+    "@openstfoundation/openst-notification": "1.0.4-beta.1",
+    "@openstfoundation/openst-storage": "1.0.2-beta.1",
     "bignumber.js": "4.1.0",
     "mustache": "2.3.0",
     "mysql": "2.14.1",
