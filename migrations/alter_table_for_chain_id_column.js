@@ -45,13 +45,14 @@ const alterTables = {
   },
 
   getQueries: function() {
-    const args = process.argv,
-      chainId = args[2];
+
+    const args = process.argv;
+
+    let chainId = args[2];
 
     if (!chainId) {
-      logger.error('Chain id is NOT passed in the arguments.');
-      alterTables.usageDemo();
-      process.exit(1);
+      logger.info('Using chain id from config strategy.', configStrategy.OST_UTILITY_CHAIN_ID);
+      chainId = configStrategy.OST_UTILITY_CHAIN_ID;
     }
 
     const alterAirdropAllocationProofDetailsTable =
@@ -92,6 +93,7 @@ const alterTables = {
     logger.info('usage:', 'node ./migrations/alter_table_for_chain_id_column.js defaultChainId');
     logger.info('* provided chain id will be used as a default value for all the existing rows.');
   }
+
 };
 
 module.exports = alterTables;
