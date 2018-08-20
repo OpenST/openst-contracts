@@ -465,25 +465,72 @@ contract TokenHolder is MultiSigWallet {
     /* Private Functions */
 
     /**
-     * @notice Validate and update session lock.
+     * @notice Retrieve the public key of the signer.
      *
-     * @param _newSessionLock session lock to be verified and updated.
-     *
+     * @param prefixedMsgHash Message which was signed.
+     * @param v
      * @return success if _newSessionLock is consumed.
      */
     // TODO remove _newSessionLock and verify signed messages
     // TODO ECRecover logic needed here
-    function retrieveAddress(
-        bytes32 prefixedMsgHash,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
+    function validateAndExecuteEphemeralKey(
+        bytes32 _msgHash,
+        bytes _signature
     )
         private
         returns (bool /* success */)
     {
-        address publicKey = ecrecover(prefixedMsgHash, v, r, s);
-        require(publicKey == ephemeralKey);
+
+        bytes32 prefixedMsgHash = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", msgHash));
+        address retrievedKey = recover(msgHash, _signature);
+        //address publicKey = ecrecover(prefixedMsgHash, v, r, s);
+        return (retrievedKey == ephemeralKey);
+    }
+
+
+
+
+    /**
+   * @dev Recover signer address from a message by using their signature
+   * @param _hash bytes32 message, the hash is the signed message. What is recovered is the signer address.
+   * @param _signature bytes signature, the signature is generated using web3.eth.sign()
+   */
+    function recover(bytes32 _hash, bytes _signature)
+    internal
+    pure
+    returns (address)
+    {
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
+
+        // Check the signature length
+        if (_signature.length != 65) {
+            return (address(0));
+        }
+
+        // Divide the signature in r, s and v variables
+        // ecrecover takes the signature parameters, and the only way to get them
+        // currently is to use assembly.
+        // solium-disable-next-line security/no-inline-assembly
+        assembly {
+            r := mload(add(_signature, 32))
+            s := mload(add(_signature, 64))
+            v := byte(0, mload(add(_signature, 96)))
+        }
+
+        // Version of signature should be 27 or 28, but 0 and 1 are also possible versions
+        if (v < 27) {
+            v += 27;
+        }
+
+        // If the version is correct return the signer address
+        if (v != 27 && v != 28) {
+            return (address(0));
+        } else {
+            return ecrecover(_hash, v, r, s);
+        }
     }
 
     /**
