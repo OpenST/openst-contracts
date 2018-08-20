@@ -310,7 +310,7 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _hash,
         bytes _signature
     )
-        internal
+        private
         pure
         returns (address)
     {
