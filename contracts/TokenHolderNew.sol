@@ -273,35 +273,43 @@ contract TokenHolder is MultiSigWallet {
      * @param v
      * @return success if _newSessionLock is consumed.
      */
-    // TODO remove _newSessionLock and verify signed messages
-    // TODO ECRecover logic needed here
+    // TODO get the callPrefix from data
     function validateAndExecuteEphemeralKey(
         bytes32 _msgHash,
-        bytes _signature
+        bytes _signature,
+        bytes data,
+        address to,
+        bytes callPrefix
     )
         private
         returns (bool /* success */)
     {
-
         bytes32 prefixedMsgHash = keccak256(
             abi.encodePacked("\x19Ethereum Signed Message:\n32", msgHash));
-        address retrievedKey = recover(msgHash, _signature);
-        //address publicKey = ecrecover(prefixedMsgHash, v, r, s);
-        return (retrievedKey == ephemeralKey);
+        address retrievedKey = recover(prefixedMsgHash, _signature);
+        if(ephemeralKeys[retrievedKey].isPresent){
+            bytes32 constructedMsgHash = keccak256(abi.encodePacked(0, data, ephemeralKeys[retrievedKey].nonce, callPrefix, "CALL", ""));
+            if((retrievedKey == ephemeralKey) && (constructedMsgHash == _msgHash)){
+                // executing the message
+                return to.call.value(0)(data); // confirm the return type
+            }
+        }
     }
 
 
 
-
     /**
-   * @dev Recover signer address from a message by using their signature
-   * @param _hash bytes32 message, the hash is the signed message. What is recovered is the signer address.
-   * @param _signature bytes signature, the signature is generated using web3.eth.sign()
-   */
-    function recover(bytes32 _hash, bytes _signature)
-    internal
-    pure
-    returns (address)
+     * @dev Recover signer address from a message by using their signature
+     * @param _hash bytes32 message, the hash is the signed message. What is recovered is the signer address.
+     * @param _signature bytes signature, the signature is generated using web3.eth.sign()
+     */
+    function recover(
+        bytes32 _hash,
+        bytes _signature
+    )
+        internal
+        pure
+        returns (address)
     {
         bytes32 r;
         bytes32 s;
