@@ -271,10 +271,10 @@ contract TokenHolder is MultiSigWallet {
      *
      * @param prefixedMsgHash Message which was signed.
      * @param v
-     * @return success if _newSessionLock is consumed.
+     * @return success if successStatus is consumed.
      */
     // TODO get the callPrefix from data
-    function validateAndExecuteEphemeralKey(
+    function validateAndExecute(
         bytes32 _msgHash,
         bytes _signature,
         bytes data,
