@@ -42,17 +42,20 @@ contract TokenHolder is MultiSigWallet {
 
     /* Events */
 
+    // TODO EK in place of sessionLock
     event SessionAuthorized(
         address wallet,
         bytes32 sessionLock,
         uint256 spendingLimit
     );
 
+    // TODO EK in place of sessionLock
     event SessionRevoked(
         address wallet,
         bytes32 sessionLock
     );
     /** Event emitted whenever newSessionLock is consumed. */
+    // TODO We don't need
     event SessionLockUpdated(
         bytes32 oldSessionLock,
         bytes32 newSessionLock,
@@ -71,6 +74,7 @@ contract TokenHolder is MultiSigWallet {
       isPresent identifies if session lock is present in sessionLocks
       mapping or not.
      */
+    // TODO Rename below struct
     struct SessionLockData {
         uint256 spendingLimit;
         bool isPresent;
@@ -82,10 +86,12 @@ contract TokenHolder is MultiSigWallet {
     address public brandedToken;
     /** Co Gateway contract address for redeem functionality. */
     address public coGateway;
+    // TODO Rename mapping variable names
     /** Stores spending limit per session lock. */
-    mapping (bytes32 /* session lock */ => SessionLockData /* spending limit */) public sessionLocks;
+    mapping (bytes32 /* session lock */ => SessionLockData /* struct */) public sessionLocks;
     /** Token rules contract address read from BT contract. */
     address private tokenRules;
+    // TODO No need of below variable
     /** Max No of times spending session lock should be hashed for verification. */
     uint8 private maxFaultToleranceCount;
 
@@ -97,6 +103,7 @@ contract TokenHolder is MultiSigWallet {
      *
      * @dev msg.sender should be token rules contract address.
      */
+    // TODO Check if below modifier is needed in functions
     modifier onlyTokenRules() {
         require(
             msg.sender == tokenRules,
@@ -115,6 +122,7 @@ contract TokenHolder is MultiSigWallet {
      * @param _required No of requirements for multi sig wallet.
      * @param _wallets array of wallet addresses.
      */
+    // TODO _maxFaultToleranceCount not needed
     constructor(
         address _brandedToken,
         address _coGateway,
@@ -156,6 +164,7 @@ contract TokenHolder is MultiSigWallet {
      *
      * @return transactionId_ for the request.
      */
+    // TODO update below method with introduction of EK and remove _sessionLock
     function proposeOrConfirmAuthorizeSession(
         bytes32 _sessionLock,
         uint256 _spendingLimit,
@@ -207,6 +216,7 @@ contract TokenHolder is MultiSigWallet {
      *
      * @return transactionId_ for the request.
      */
+    // TODO update below method with introduction of EK and remove _sessionLock
     function proposeOrConfirmRevokeSession(
         bytes32 _sessionLock,
         bool _proposeOrConfirm
@@ -305,6 +315,7 @@ contract TokenHolder is MultiSigWallet {
      *
      * @return the success/failure status of transfer method
      */
+    // TODO remove _spendingSessionLock and introduce executable messages
     function transfer(
         address _to,
         uint256 _amount,
@@ -342,6 +353,7 @@ contract TokenHolder is MultiSigWallet {
      *
      * @return the success/failure status of transfer method
      */
+    // TODO remove _spendingSessionLock and introduce executable messages
     function requestRedemption(
         uint256 _amount,
         uint256 _fee,
@@ -377,6 +389,7 @@ contract TokenHolder is MultiSigWallet {
      *
      * @return final updated allowance which is approved.
      */
+    // TODO remove _spendingSessionLock and introduce executable messages
     function increaseAllowance(
         address _spender,
         uint256 _amount,
@@ -419,6 +432,7 @@ contract TokenHolder is MultiSigWallet {
      *
      * @return final updated allowance which is approved.
      */
+    // TODO remove _spendingSessionLock and introduce executable messages
     function decreaseAllowance(
         address _spender,
         uint256 _amount,
@@ -457,6 +471,8 @@ contract TokenHolder is MultiSigWallet {
      *
      * @return success if _newSessionLock is consumed.
      */
+    // TODO remove _newSessionLock and verify signed messages
+    // TODO ECRecover logic needed here
     function updateSessionLock(
         bytes32 _newSessionLock
     )
@@ -495,6 +511,7 @@ contract TokenHolder is MultiSigWallet {
      * @param _sessionLock session lock which need to be added in sessionLocks mapping.
      * @param _spendingLimit spending limit to be updated.
      */
+    // TODO check if we need below
     function setSessionLockData(
         bytes32 _sessionLock,
         uint256 _spendingLimit
