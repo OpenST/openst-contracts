@@ -278,8 +278,7 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _msgHash,
         bytes _signature,
         bytes data,
-        address to,
-        bytes callPrefix
+        address to
     )
         private
         returns (bool successStatus/* success */)
@@ -288,7 +287,7 @@ contract TokenHolder is MultiSigWallet {
             abi.encodePacked("\x19Ethereum Signed Message:\n32", msgHash));
         address retrievedKey = recover(prefixedMsgHash, _signature);
         if(ephemeralKeys[retrievedKey].isPresent){
-            bytes32 constructedMsgHash = keccak256(abi.encodePacked(0, data, ephemeralKeys[retrievedKey].nonce, callPrefix, "CALL", ""));
+            bytes32 constructedMsgHash = keccak256(abi.encodePacked(0, data, ephemeralKeys[retrievedKey].nonce, bytes4(data), "CALL", ""));
             if((retrievedKey == ephemeralKey) && (constructedMsgHash == _msgHash)){
                 // executing the message
                 assembly {
