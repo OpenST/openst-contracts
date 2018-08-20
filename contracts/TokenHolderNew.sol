@@ -263,47 +263,110 @@ contract TokenHolder is MultiSigWallet {
         return transactionId_;
     }
 
+    /**
+     * @notice Validate and execute signed messages.
+     *
+     * @dev nonce will be consumed irrespective of assembly call output.
+     *
+     * @param _inputMessageHash Message which was signed.
+     * @param _signature signed message.
+     * @param _data the bytecode to be executed.
+     * @param _to the target contract the transaction will be executed upon. e.g. BT in case of transferFrom.
+     * @param _gasLimit Estimated gas Limit from outside.
+     *
+     * @return transaction status is true/false.
+     */
+    // TODO event emit?
+    function validateAndExecute(
+        bytes32 _inputMessageHash,
+        bytes _signature,
+        bytes _data,
+        address _to,
+        uint256 _txGas
+    )
+        public
+        returns (bool status/* success */)
+    {
+        bytes32 prefixedInputMessageHash = keccak256(abi.encodePacked(
+                "\x19Ethereum Signed Message:\n32",
+                _inputMessageHash
+            ));
+
+        address _inputEphemeralKey = recover(prefixedInputMessageHash, _signature);
+        EphemeralKeyData ephemeralKeyData = ephemeralKeys[_inputEphemeralKey];
+        require(
+            ephemeralKeyData.isPresent,
+            "Input Ephemeral Key is not present!"
+        );
+
+        bytes32 messageHash = getHashedMessage(_to, _data, ephemeralKeyData.nonce + 1);
+        require(
+            _inputMessageHash == messageHash,
+            "Input message hash in invalid!"
+        );
+
+        // Assembly call to execute the message
+        assembly {
+            // Issue call, providing _txGas and 0 value to address _to
+            status := call(
+                        _txGas, // providing _txGas for call transaction.
+                        _to, // To addr
+                        0, // No value
+                        add(_data, 0x20),  // Removed first 32(0x20) bytes from _data.
+                        mload(_data), // Input _data length.
+                        0, // Store output over input (saves space).
+                        0) // Outputs are 32 bytes long.
+        }
+        // Consume the nonce irrespective of status value
+        nonce++;
+
+        return status;
+    }
+
 
     /* Private Functions */
 
     /**
-     * @notice Retrieve the public key of the signer.
+     *  @notice hash the data
      *
-     * @param prefixedMsgHash Message which was signed.
-     * @param v
-     * @return success if successStatus is consumed.
+     *  @param _to the target contract the transaction will be executed upon. e.g. BT in case of transfer.
+     *  @param _data the bytecode to be executed.
+     *  @param _nonce nonce or a timestamp.
+     *
+     *  @return bytes32 hashed data
      */
-    // TODO get the callPrefix from data
-    function validateAndExecute(
-        bytes32 _msgHash,
-        bytes _signature,
-        bytes data,
-        address to
+    // TODO byte(0x19) verify with test case. Test by passing bytes.
+    function getHashedMessage(
+        address _to,
+        bytes _data,
+        uint256 _nonce
     )
-        private
-        returns (bool successStatus/* success */)
+        internal
+        pure
+        returns (bytes32)
     {
-        bytes32 prefixedMsgHash = keccak256(
-            abi.encodePacked("\x19Ethereum Signed Message:\n32", msgHash));
-        address retrievedKey = recover(prefixedMsgHash, _signature);
-        if(ephemeralKeys[retrievedKey].isPresent){
-            bytes32 constructedMsgHash = keccak256(abi.encodePacked(0, data, ephemeralKeys[retrievedKey].nonce, bytes4(data), "CALL", ""));
-            if((retrievedKey == ephemeralKey) && (constructedMsgHash == _msgHash)){
-                // executing the message
-                assembly {
-                    successStatus := call(5000, to, value, add(data, 0x20), mload(data), 0, 0)
-                }
-            }
-        }
-        return successStatus;
+        return keccak256(abi.encodePacked(
+            byte(0x19), // Starting a transaction with byte(0x19) ensure the signed data from being a valid ethereum transaction.
+            byte(0), // The second argument is a version control byte.
+            address(this), // The from field will always be the contract executing the code.
+            _to,
+            0, // the amount in ether to be sent.
+            _data,
+            _nonce,
+            bytes4(data), // 4 byte standard prefix of the function to be called in the from contract.
+                         // This guarantees that a signed message can be only executed in a single instance.
+            0, // 0 for a standard call, 1 for a DelegateCall and 0 for a create opcode
+            '' // extraHash is always hashed at the end. This is done to increase future compatibility of the standard.
+        ));
     }
 
-
-
     /**
-     * @dev Recover signer address from a message by using their signature
+     * @notice Recover signer address from a message by using their signature.
+     *
      * @param _hash bytes32 message, the hash is the signed message. What is recovered is the signer address.
-     * @param _signature bytes signature, the signature is generated using web3.eth.sign()
+     * @param _signature bytes signature, the signature is generated using web3.eth.sign().
+     *
+     * @returns signer address.
      */
     function recover(
         bytes32 _hash,
