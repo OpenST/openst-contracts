@@ -310,12 +310,12 @@ contract TokenHolder is MultiSigWallet {
      *
      * @param _to address to whom BT amount needs to transfer.
      * @param _amount amount of tokens to transfer.
-     * @param _spendingephemeralKey session lock which will be spent for
+     * @param _spendingEphemeralKey session lock which will be spent for
      *        this transaction.
      *
      * @return the success/failure status of transfer method
      */
-    // TODO remove _spendingephemeralKey and introduce executable messages
+    // TODO remove _spendingEphemeralKey and introduce executable messages
     function transfer(
         address _to,
         uint256 _amount,
@@ -473,18 +473,40 @@ contract TokenHolder is MultiSigWallet {
      */
     // TODO remove _newSessionLock and verify signed messages
     // TODO ECRecover logic needed here
-    function updateSessionLock(
-        bytes32 _newSessionLock
+    function retrieveAddress(
+        bytes32 prefixedMsgHash,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
     )
         private
         returns (bool /* success */)
+    {
+        address publicKey = ecrecover(prefixedMsgHash, v, r, s);
+        require(publicKey == ephemeralKey);
+    }
+
+    /**
+     * @notice Validate and update session lock.
+     *
+     * @param _newSessionLock session lock to be verified and updated.
+     *
+     * @return success if _newSessionLock is consumed.
+     */
+    // TODO remove _newSessionLock and verify signed messages
+    // TODO Remove after ECRecover method needed
+    function updateSessionLock(
+        bytes32 _newSessionLock
+    )
+    private
+    returns (bool /* success */)
     {
         bytes32 oldSessionLock;
 
         for(uint8 i = 0; i < maxFaultToleranceCount; i++) {
             oldSessionLock = keccak256(abi.encodePacked(
                     _newSessionLock
-            ));
+                ));
             /** if entry exists in ephemeralKeys mapping */
             if (ephemeralKeys[oldSessionLock].isPresent) {
                 uint256 spendingLimit = ephemeralKeys[oldSessionLock].spendingLimit;
