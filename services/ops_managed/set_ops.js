@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  *
@@ -8,19 +8,20 @@
  *
  */
 
-const rootPrefix = '../..'
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , basicHelper = require(rootPrefix + '/helpers/basic_helper')
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , OpsManagedContractInteractKlass = require(rootPrefix + '/lib/contract_interact/ops_managed_contract')
-  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
-  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+const rootPrefix = '../..',
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  basicHelper = require(rootPrefix + '/helpers/basic_helper'),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/lib/contract_interact/ops_managed_contract');
 
 /**
  * Constructor to create object of set_ops
@@ -39,12 +40,19 @@ const errorConfig = {
  * @return {object}
  *
  */
-const SetOpsKlass = function (params) {
+const SetOpsKlass = function(params) {
   const oThis = this;
   params = params || {};
-  logger.debug("=======GetOpsKlass.params=======");
+  logger.debug('=======GetOpsKlass.params=======');
   // Don't log passphrase
-  logger.debug(params.contract_address, params.gas_price, params.chain_id, params.deployer_address, params.ops_address, params.options);
+  logger.debug(
+    params.contract_address,
+    params.gas_price,
+    params.chain_id,
+    params.deployer_address,
+    params.ops_address,
+    params.options
+  );
 
   oThis.contractAddress = params.contract_address;
   oThis.gasPrice = params.gas_price;
@@ -53,44 +61,53 @@ const SetOpsKlass = function (params) {
   oThis.deployerPassphrase = params.deployer_passphrase;
   oThis.opsAddress = params.ops_address;
   oThis.options = params.options;
-
 };
 
 SetOpsKlass.prototype = {
+  /**
+   * Perform
+   *
+   * @return {promise}
+   */
+  perform: function() {
+    const oThis = this;
+    return oThis.asyncPerform().catch(function(error) {
+      if (responseHelper.isCustomResult(error)) {
+        return error;
+      } else {
+        logger.error('openst-platform::services/ops_managed/set_ops.js::perform::catch');
+        logger.error(error);
+
+        return responseHelper.error({
+          internal_error_identifier: 's_om_so_perform_1',
+          api_error_identifier: 'unhandled_api_error',
+          error_config: errorConfig,
+          debug_options: { err: error }
+        });
+      }
+    });
+  },
 
   /**
-   * Perform method
+   * Async Perform
    *
    * @return {promise<result>}
-   *
    */
-  perform: async function () {
-    const oThis = this
-    ;
-    try {
-      var r = null;
+  asyncPerform: async function() {
+    const oThis = this;
 
-      r = await oThis.validateParams();
-      logger.debug("=======SetOpsKlass.validateParams.result=======");
-      logger.debug(r);
-      if (r.isFailure()) return r;
+    var r = null;
 
-      r = await oThis.setOps();
-      logger.debug("=======SetOpsKlass.setOps.result=======");
-      logger.debug(r);
+    r = await oThis.validateParams();
+    logger.debug('=======SetOpsKlass.validateParams.result=======');
+    logger.debug(r);
+    if (r.isFailure()) return r;
 
-      return r;
+    r = await oThis.setOps();
+    logger.debug('=======SetOpsKlass.setOps.result=======');
+    logger.debug(r);
 
-    } catch (err) {
-      let errorParams = {
-        internal_error_identifier: 's_om_go_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      return responseHelper.error(errorParams);
-    }
-
+    return r;
   },
 
   /**
@@ -99,12 +116,11 @@ SetOpsKlass.prototype = {
    * @return {result}
    *
    */
-  validateParams: function () {
-    const oThis = this
-    ;
+  validateParams: function() {
+    const oThis = this;
     if (!basicHelper.isAddressValid(oThis.contractAddress)) {
       let errorParams = {
-        internal_error_identifier: 's_om_go_validateParams_1',
+        internal_error_identifier: 's_om_so_validateParams_1',
         api_error_identifier: 'invalid_api_params',
         error_config: errorConfig,
         params_error_identifiers: ['invalid_contract_address'],
@@ -115,7 +131,7 @@ SetOpsKlass.prototype = {
 
     if (!oThis.gasPrice) {
       let errorParams = {
-        internal_error_identifier: 's_om_go_validateParams_2',
+        internal_error_identifier: 's_om_so_validateParams_2',
         api_error_identifier: 'invalid_api_params',
         error_config: errorConfig,
         params_error_identifiers: ['gas_price_invalid'],
@@ -126,7 +142,7 @@ SetOpsKlass.prototype = {
 
     if (!basicHelper.isValidChainId(oThis.chainId)) {
       let errorParams = {
-        internal_error_identifier: 's_om_go_validateParams_3',
+        internal_error_identifier: 's_om_so_validateParams_3',
         api_error_identifier: 'invalid_api_params',
         error_config: errorConfig,
         params_error_identifiers: ['chain_id_invalid'],
@@ -144,9 +160,9 @@ SetOpsKlass.prototype = {
    * @return {promise<result>}
    *
    */
-  setOps: function () {
-    const oThis = this
-    ;
+  setOps: function() {
+    const oThis = this,
+      OpsManagedContractInteractKlass = oThis.ic().getOpsManagedInteractClass();
 
     const OpsManagedContractInteractObject = new OpsManagedContractInteractKlass(
       oThis.contractAddress,
@@ -160,7 +176,8 @@ SetOpsKlass.prototype = {
       oThis.options
     );
   }
-
 };
+
+InstanceComposer.registerShadowableClass(SetOpsKlass, 'getSetOpsClass');
 
 module.exports = SetOpsKlass;

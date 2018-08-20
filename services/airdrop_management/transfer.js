@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  *
@@ -8,19 +8,21 @@
  *
  */
 
-const rootPrefix = '../..'
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , airdropAllocationProofDetailKlass = require(rootPrefix + '/app/models/airdrop_allocation_proof_detail')
-  , airdropContractInteract = require(rootPrefix + '/lib/contract_interact/airdrop')
-  , brandedTokenContractInteract = require(rootPrefix + '/lib/contract_interact/branded_token')
-  , BigNumber = require('bignumber.js')
-  , basicHelper = require(rootPrefix + '/helpers/basic_helper')
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
-  , BrandedTokenKlass = require(rootPrefix + '/lib/contract_interact/branded_token')
-  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
-  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+const BigNumber = require('bignumber.js');
+
+const rootPrefix = '../..',
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  basicHelper = require(rootPrefix + '/helpers/basic_helper'),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
+
+require(rootPrefix + '/app/models/airdrop_allocation_proof_detail');
+require(rootPrefix + '/lib/contract_interact/airdrop');
+require(rootPrefix + '/lib/contract_interact/branded_token');
+require(rootPrefix + '/lib/cache_management/airdrop_model');
+require(rootPrefix + '/lib/contract_interact/branded_token');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
@@ -47,9 +49,16 @@ const errorConfig = {
 const TransferKlass = function(params) {
   const oThis = this;
   params = params || {};
-  logger.debug("\n=========Transfer params=========");
+  logger.debug('\n=========Transfer params=========');
   // Don't log passphrase
-  logger.debug(params.sender_address, params.airdrop_contract_address, params.amount, params.gas_price, params.chain_id, params.options);
+  logger.debug(
+    params.sender_address,
+    params.airdrop_contract_address,
+    params.amount,
+    params.gas_price,
+    params.chain_id,
+    params.options
+  );
 
   oThis.senderAddress = params.sender_address;
   oThis.senderPassphrase = params.sender_passphrase;
@@ -60,44 +69,52 @@ const TransferKlass = function(params) {
   oThis.options = params.options;
   oThis.airdropBudgetHolder = null;
   oThis.brandedTokenContractAddress = null;
-
 };
 
 TransferKlass.prototype = {
+  /**
+   * Perform
+   *
+   * @return {promise}
+   */
+  perform: function() {
+    const oThis = this;
+    return oThis.asyncPerform().catch(function(error) {
+      if (responseHelper.isCustomResult(error)) {
+        return error;
+      } else {
+        logger.error('openst-platform::services/airdrop_management/transfer.js::perform::catch');
+        logger.error(error);
+
+        return responseHelper.error({
+          internal_error_identifier: 's_am_t_perform_1',
+          api_error_identifier: 'unhandled_api_error',
+          error_config: errorConfig,
+          debug_options: { err: error }
+        });
+      }
+    });
+  },
 
   /**
-   * Perform method
+   * Async Perform
    *
    * @return {promise<result>}
-   *
    */
-  perform: async function () {
-
+  asyncPerform: async function() {
     const oThis = this;
 
-    try {
-      var r = null;
+    var r = null;
 
-      r = await oThis.validateParams();
-      logger.debug("\n=========Transfer.validateParams.result=========");
-      logger.debug(r);
-      if(r.isFailure()) return r;
+    r = await oThis.validateParams();
+    logger.debug('\n=========Transfer.validateParams.result=========');
+    logger.debug(r);
+    if (r.isFailure()) return r;
 
-      r = oThis.doTransfer();
-      logger.debug("\n=========Transfer.doTransfer.result=========");
-      logger.debug(r);
-      return r;
-    } catch(err) {
-      let errorParams = {
-        internal_error_identifier: 's_am_t_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      logger.error(err.message);
-      return responseHelper.error(errorParams);
-    }
-
+    r = oThis.doTransfer();
+    logger.debug('\n=========Transfer.doTransfer.result=========');
+    logger.debug(r);
+    return r;
   },
 
   /**
@@ -107,9 +124,12 @@ TransferKlass.prototype = {
    *
    */
   validateParams: function() {
-    const oThis = this;
-    return new Promise(async function (onResolve, onReject) {
+    const oThis = this,
+      airdropContractInteract = oThis.ic().getAirdropInteractClass(),
+      AirdropModelCacheKlass = oThis.ic().getCacheManagementAirdropModelClass(),
+      BrandedTokenKlass = oThis.ic().getBrandedTokenInteractClass();
 
+    return new Promise(async function(onResolve, onReject) {
       if (!basicHelper.isAddressValid(oThis.senderAddress)) {
         let errorParams = {
           internal_error_identifier: 's_am_t_validateParams_1',
@@ -134,11 +154,13 @@ TransferKlass.prototype = {
 
       // Check if airdropContractAddress is registered or not
 
-      const airdropModelCacheObject = new AirdropModelCacheKlass({useObject: true, contractAddress: oThis.airdropContractAddress})
-        , airdropModelCacheResponse = await airdropModelCacheObject.fetch()
-      ;
+      const airdropModelCacheObject = new AirdropModelCacheKlass({
+          useObject: true,
+          contractAddress: oThis.airdropContractAddress
+        }),
+        airdropModelCacheResponse = await airdropModelCacheObject.fetch();
       oThis.airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
-      if (!oThis.airdropRecord){
+      if (!oThis.airdropRecord) {
         let errorParams = {
           internal_error_identifier: 's_am_t_validateParams_3',
           api_error_identifier: 'invalid_api_params',
@@ -152,8 +174,13 @@ TransferKlass.prototype = {
       const airdropContractInteractObject = new airdropContractInteract(oThis.airdropContractAddress, oThis.chainId);
       var result = await airdropContractInteractObject.brandedToken();
       oThis.brandedTokenContractAddress = result.data.brandedToken;
-      logger.debug("\n==========transfer.validateParams.brandedToken===========");
-      logger.debug("\nairdropContractInteractObject.brandedToken():", result,"\noThis.brandedTokenContractAddress:", oThis.brandedTokenContractAddress);
+      logger.debug('\n==========transfer.validateParams.brandedToken===========');
+      logger.debug(
+        '\nairdropContractInteractObject.brandedToken():',
+        result,
+        '\noThis.brandedTokenContractAddress:',
+        oThis.brandedTokenContractAddress
+      );
       if (!basicHelper.isAddressValid(oThis.brandedTokenContractAddress)) {
         let errorParams = {
           internal_error_identifier: 's_am_t_validateParams_4',
@@ -179,7 +206,7 @@ TransferKlass.prototype = {
       }
 
       const amountInBigNumber = new BigNumber(oThis.amount);
-      if (amountInBigNumber.isNaN() || !amountInBigNumber.isInteger()){
+      if (amountInBigNumber.isNaN() || !amountInBigNumber.isInteger()) {
         let errorParams = {
           internal_error_identifier: 's_am_t_validateParams_6',
           api_error_identifier: 'invalid_api_params',
@@ -216,12 +243,15 @@ TransferKlass.prototype = {
 
       const senderBalance = new BigNumber(senderBalanceResponse.data.balance);
       //logger.debug("senderBalance: "+senderBalance.toString(10), "amount to transfer: "+amountInBigNumber);
-      if (senderBalance.lt(amountInBigNumber)){
+      if (senderBalance.lt(amountInBigNumber)) {
         let errorParams = {
           internal_error_identifier: 's_am_t_validateParams_9',
           api_error_identifier: 'insufficient_funds',
           error_config: errorConfig,
-          debug_options: { senderBalance: senderBalance.toString(10), amountInBigNumber: amountInBigNumber.toString(10) }
+          debug_options: {
+            senderBalance: senderBalance.toString(10),
+            amountInBigNumber: amountInBigNumber.toString(10)
+          }
         };
         return onResolve(responseHelper.error(errorParams));
       }
@@ -249,9 +279,7 @@ TransferKlass.prototype = {
       }
 
       return onResolve(responseHelper.successWithData({}));
-
     });
-
   },
 
   /**
@@ -261,22 +289,30 @@ TransferKlass.prototype = {
    *
    */
   doTransfer: async function() {
-    const oThis = this;
+    const oThis = this,
+      airdropAllocationProofDetailKlass = oThis.ic().getAirdropAllocationProofDetailModelKlass(),
+      brandedTokenContractInteract = oThis.ic().getBrandedTokenInteractClass();
 
-    return new Promise(async function (onResolve, onReject) {
+    return new Promise(async function(onResolve, onReject) {
       // BrandedToken transfer
-      logger.debug("\n==========doTransfer.oThis.brandedTokenContractAddress===========");
+      logger.debug('\n==========doTransfer.oThis.brandedTokenContractAddress===========');
       logger.debug(oThis.brandedTokenContractAddress);
       var brandedTokenObject = new brandedTokenContractInteract(oThis.brandedTokenContractAddress, oThis.chainId);
-      const transactionResponse = await brandedTokenObject.transferToAirdropBudgetHolder(oThis.senderAddress,
+      const transactionResponse = await brandedTokenObject.transferToAirdropBudgetHolder(
+        oThis.senderAddress,
         oThis.senderPassphrase,
         oThis.airdropBudgetHolderAddress,
         oThis.amount,
         oThis.gasPrice,
-        oThis.options);
-      if (transactionResponse.isSuccess()){
+        oThis.options
+      );
+      if (transactionResponse.isSuccess()) {
         var airdropAllocationProofDetailModel = new airdropAllocationProofDetailKlass();
-        const airdropAllocationProofDetailCreateResult = await airdropAllocationProofDetailModel.createRecord(transactionResponse.data.transaction_hash, oThis.amount, 0);
+        const airdropAllocationProofDetailCreateResult = await airdropAllocationProofDetailModel.createRecord(
+          transactionResponse.data.transaction_hash,
+          oThis.amount,
+          0
+        );
         if (airdropAllocationProofDetailCreateResult.isFailure()) {
           return onResolve(airdropAllocationProofDetailCreateResult);
         }
@@ -284,8 +320,8 @@ TransferKlass.prototype = {
       return onResolve(transactionResponse);
     });
   }
-
 };
 
-module.exports = TransferKlass;
+InstanceComposer.registerShadowableClass(TransferKlass, 'getTransferClass');
 
+module.exports = TransferKlass;

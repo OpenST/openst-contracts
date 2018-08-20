@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  *
@@ -8,20 +8,22 @@
  *
  */
 
-const rootPrefix = '../..'
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , basicHelper = require(rootPrefix + '/helpers/basic_helper')
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , BigNumber = require('bignumber.js')
-  , WorkersContractInteractKlass = require(rootPrefix + '/lib/contract_interact/workers')
-  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
-  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+const BigNumber = require('bignumber.js');
+
+const rootPrefix = '../..',
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  basicHelper = require(rootPrefix + '/helpers/basic_helper'),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/lib/contract_interact/workers');
 
 /**
  * Constructor to create object of register
@@ -41,12 +43,20 @@ const errorConfig = {
  * @return {object}
  *
  */
-const SetWorkerKlass = function (params) {
+const SetWorkerKlass = function(params) {
   const oThis = this;
   params = params || {};
-  logger.debug("=======SetWorkerKlass.params=======");
+  logger.debug('=======SetWorkerKlass.params=======');
   // Don't log passphrase
-  logger.debug(params.workers_contract_address, params.sender_address, params.worker_address, params.deactivation_height, params.gas_price, params.chain_id, params.options);
+  logger.debug(
+    params.workers_contract_address,
+    params.sender_address,
+    params.worker_address,
+    params.deactivation_height,
+    params.gas_price,
+    params.chain_id,
+    params.options
+  );
 
   oThis.workersContractAddress = params.workers_contract_address;
   oThis.senderAddress = params.sender_address;
@@ -55,46 +65,54 @@ const SetWorkerKlass = function (params) {
   oThis.deactivationHeight = params.deactivation_height;
   oThis.gasPrice = params.gas_price;
   oThis.chainId = params.chain_id;
-  oThis.options = params.options
-
+  oThis.options = params.options;
 };
 
 SetWorkerKlass.prototype = {
+  /**
+   * Perform
+   *
+   * @return {promise}
+   */
+  perform: function() {
+    const oThis = this;
+    return oThis.asyncPerform().catch(function(error) {
+      if (responseHelper.isCustomResult(error)) {
+        return error;
+      } else {
+        logger.error('openst-platform::services/workers/set_worker.js::perform::catch');
+        logger.error(error);
+
+        return responseHelper.error({
+          internal_error_identifier: 's_w_sw_perform_1',
+          api_error_identifier: 'unhandled_api_error',
+          error_config: errorConfig,
+          debug_options: { err: error }
+        });
+      }
+    });
+  },
 
   /**
-   * Perform method
+   * Async Perform
    *
    * @return {promise<result>}
-   *
    */
-  perform: async function () {
-    const oThis = this
-    ;
+  asyncPerform: async function() {
+    const oThis = this;
 
-    try {
-      var r = null;
+    var r = null;
 
-      r = await oThis.validateParams();
-      logger.debug("=======SetWorkerKlass.validateParams.result=======");
-      logger.debug(r);
-      if (r.isFailure()) return r;
+    r = await oThis.validateParams();
+    logger.debug('=======SetWorkerKlass.validateParams.result=======');
+    logger.debug(r);
+    if (r.isFailure()) return r;
 
-      r = await oThis.setWorker();
-      logger.debug("=======SetWorkerKlass.setWorker.result=======");
-      logger.debug(r);
+    r = await oThis.setWorker();
+    logger.debug('=======SetWorkerKlass.setWorker.result=======');
+    logger.debug(r);
 
-      return r;
-
-    } catch (err) {
-      let errorParams = {
-        internal_error_identifier: 's_w_sw_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      return responseHelper.error(errorParams);
-    }
-
+    return r;
   },
 
   /**
@@ -103,7 +121,7 @@ SetWorkerKlass.prototype = {
    * @return {result}
    *
    */
-  validateParams: function () {
+  validateParams: function() {
     const oThis = this;
     if (!basicHelper.isAddressValid(oThis.workersContractAddress)) {
       let errorParams = {
@@ -198,14 +216,11 @@ SetWorkerKlass.prototype = {
    * @return {promise<result>}
    *
    */
-  setWorker: function () {
-    const oThis = this
-    ;
+  setWorker: function() {
+    const oThis = this,
+      WorkersContractInteractKlass = oThis.ic().getWorkersInteractClass();
 
-    const workersContractInteractObject = new WorkersContractInteractKlass(
-      oThis.workersContractAddress,
-      oThis.chainId
-    );
+    const workersContractInteractObject = new WorkersContractInteractKlass(oThis.workersContractAddress, oThis.chainId);
     return workersContractInteractObject.setWorker(
       oThis.senderAddress,
       oThis.senderPassphrase,
@@ -215,7 +230,8 @@ SetWorkerKlass.prototype = {
       oThis.options
     );
   }
-
 };
+
+InstanceComposer.registerShadowableClass(SetWorkerKlass, 'getSetWorkerClass');
 
 module.exports = SetWorkerKlass;

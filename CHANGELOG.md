@@ -1,4 +1,4 @@
-## OpenST-Payments v1.0.9-beta.7
+## OpenST-Payments v1.0.10
 Handled boolean status for transaction receipt in web3 version 1.0.0-beta.34
 
 ## OpenST-Payments v1.0.8 

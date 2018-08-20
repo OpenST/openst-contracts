@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  *
@@ -8,21 +8,22 @@
  *
  */
 
-const rootPrefix = '../..'
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , basicHelper = require(rootPrefix + '/helpers/basic_helper')
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , DeployerKlass = require(rootPrefix + '/services/deploy/deployer')
-  , web3Provider = require(rootPrefix + '/lib/web3/providers/rpc')
-  , gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit')
-  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
-  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+const rootPrefix = '../..',
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  basicHelper = require(rootPrefix + '/helpers/basic_helper'),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit'),
+  paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/lib/providers/web3_factory');
+require(rootPrefix + '/services/deploy/deployer');
 
 /**
  * Constructor to create object of airdrop
@@ -40,10 +41,10 @@ const errorConfig = {
  * @return {object}
  *
  */
-const DeployAirdropKlass = function (params) {
+const DeployAirdropKlass = function(params) {
   const oThis = this;
   params = params || {};
-  logger.debug("=======DeployAirdropKlass.params=======");
+  logger.debug('=======DeployAirdropKlass.params=======');
   logger.debug(params);
 
   oThis.contractName = 'airdrop';
@@ -58,40 +59,50 @@ const DeployAirdropKlass = function (params) {
 };
 
 DeployAirdropKlass.prototype = {
+  /**
+   * Perform
+   *
+   * @return {promise}
+   */
+  perform: function() {
+    const oThis = this;
+    return oThis.asyncPerform().catch(function(error) {
+      if (responseHelper.isCustomResult(error)) {
+        return error;
+      } else {
+        logger.error('openst-platform::services/deploy/airdrop.js::perform::catch');
+        logger.error(error);
+
+        return responseHelper.error({
+          internal_error_identifier: 's_d_a_perform_1',
+          api_error_identifier: 'unhandled_api_error',
+          error_config: errorConfig,
+          debug_options: { err: error }
+        });
+      }
+    });
+  },
 
   /**
-   * Perform method
+   * Async Perform
    *
    * @return {promise<result>}
-   *
    */
-  perform: async function () {
-    const oThis = this
-    ;
-    try {
-      var r = null;
+  asyncPerform: async function() {
+    const oThis = this;
 
-      r = await oThis.validateParams();
-      logger.debug("=======DeployAirdropKlass.validateParams.result=======");
-      logger.debug(r);
-      if (r.isFailure()) return r;
+    var r = null;
 
-      r = await oThis.deploy();
-      logger.debug("=======DeployAirdropKlass.setOps.result=======");
-      logger.debug(r);
+    r = await oThis.validateParams();
+    logger.debug('=======DeployAirdropKlass.validateParams.result=======');
+    logger.debug(r);
+    if (r.isFailure()) return r;
 
-      return r;
+    r = await oThis.deploy();
+    logger.debug('=======DeployAirdropKlass.setOps.result=======');
+    logger.debug(r);
 
-    } catch (err) {
-      let errorParams = {
-        internal_error_identifier: 's_d_a_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      return responseHelper.error(errorParams);
-    }
-
+    return r;
   },
 
   /**
@@ -100,9 +111,8 @@ DeployAirdropKlass.prototype = {
    * @return {result}
    *
    */
-  validateParams: function () {
-    const oThis = this
-    ;
+  validateParams: function() {
+    const oThis = this;
 
     if (!oThis.gasPrice) {
       let errorParams = {
@@ -179,9 +189,12 @@ DeployAirdropKlass.prototype = {
    * @return {promise<result>}
    *
    */
-  deploy: function () {
-    const oThis = this
-    ;
+  deploy: function() {
+    const oThis = this,
+      DeployerKlass = oThis.ic().getDeployerClass(),
+      web3ProviderFactory = oThis.ic().getWeb3ProviderFactory(),
+      web3Provider = web3ProviderFactory.getProvider(web3ProviderFactory.typeRPC);
+
     oThis.constructorArgs = [
       oThis.brandedTokenContractAddress,
       web3Provider.utils.asciiToHex(oThis.baseCurrency),
@@ -197,7 +210,8 @@ DeployAirdropKlass.prototype = {
     });
     return DeployerObject.perform();
   }
-
 };
+
+InstanceComposer.registerShadowableClass(DeployAirdropKlass, 'getAirdropDeployerClass');
 
 module.exports = DeployAirdropKlass;

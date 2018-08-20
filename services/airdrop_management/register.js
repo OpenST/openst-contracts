@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  *
@@ -8,21 +8,22 @@
  *
  */
 
-const rootPrefix = '../..'
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , airdropKlass = require(rootPrefix + '/app/models/airdrop')
-  , airdropContractInteract = require(rootPrefix + '/lib/contract_interact/airdrop')
-  , basicHelper = require(rootPrefix + '/helpers/basic_helper')
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
-  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
-  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+const rootPrefix = '../..',
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  basicHelper = require(rootPrefix + '/helpers/basic_helper'),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/lib/contract_interact/airdrop');
+require(rootPrefix + '/app/models/airdrop');
+require(rootPrefix + '/lib/cache_management/airdrop_model');
 
 /**
  * Constructor to create object of register
@@ -36,51 +37,60 @@ const errorConfig = {
  * @return {Object}
  *
  */
-const RegisterKlass = function (params) {
+const RegisterKlass = function(params) {
   const oThis = this;
   params = params || {};
-  logger.debug("=======register.params=======");
+  logger.debug('=======register.params=======');
   logger.debug(params);
 
   oThis.airdropContractAddress = params.airdrop_contract_address;
   oThis.chainId = params.chain_id;
-
 };
 
 RegisterKlass.prototype = {
+  /**
+   * Perform airdrop register
+   *
+   * @return {promise}
+   */
+  perform: function() {
+    const oThis = this;
+
+    return oThis.asyncPerform().catch(function(error) {
+      if (responseHelper.isCustomResult(error)) {
+        return error;
+      } else {
+        logger.error('openst-platform::services/airdrop_management/register.js::perform::catch');
+        logger.error(error);
+
+        return responseHelper.error({
+          internal_error_identifier: 's_am_r_perform_1',
+          api_error_identifier: 'unhandled_api_error',
+          error_config: errorConfig,
+          debug_options: { err: error }
+        });
+      }
+    });
+  },
 
   /**
-   * Perform method
+   * Async Perform
    *
    * @return {promise<result>}
-   *
    */
-  perform: async function () {
+  asyncPerform: async function() {
+    const oThis = this;
 
-    const oThis = this
-    ;
-    try {
-      var r = null;
+    var r = null;
+    r = await oThis.validateParams();
+    logger.debug('=======register.validateParams.result=======');
+    logger.debug(r);
+    if (r.isFailure()) return r;
 
-      r = await oThis.validateParams();
-      logger.debug("=======register.validateParams.result=======");
-      logger.debug(r);
-      if (r.isFailure()) return r;
-
-      r = await oThis.runRegister();
-      logger.debug("=======register.runRegister.result=======");
-      logger.debug(r);
-      return r;
-    } catch(err) {
-      let errorParams = {
-        internal_error_identifier: 's_am_r_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      return responseHelper.error(errorParams);
-    }
-
+    r = await oThis.runRegister();
+    logger.debug('=======register.runRegister.result=======');
+    logger.debug(r);
+    return r;
   },
 
   /**
@@ -89,10 +99,12 @@ RegisterKlass.prototype = {
    * @return {promise<result>}
    *
    */
-  validateParams: function () {
-    const oThis = this;
-    return new Promise(async function (onResolve, onReject) {
+  validateParams: function() {
+    const oThis = this,
+      airdropContractInteract = oThis.ic().getAirdropInteractClass(),
+      AirdropModelCacheKlass = oThis.ic().getCacheManagementAirdropModelClass();
 
+    return new Promise(async function(onResolve, onReject) {
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
         let errorParams = {
           internal_error_identifier: 's_am_r_validateParams_1',
@@ -130,10 +142,12 @@ RegisterKlass.prototype = {
       }
 
       // Check if airdropContractAddress is registered or not
-      const airdropModelCacheObject = new AirdropModelCacheKlass({useObject: true, contractAddress: oThis.airdropContractAddress})
-        , airdropModelCacheResponse = await airdropModelCacheObject.fetch()
-        , airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
-      ;
+      const airdropModelCacheObject = new AirdropModelCacheKlass({
+          useObject: true,
+          contractAddress: oThis.airdropContractAddress
+        }),
+        airdropModelCacheResponse = await airdropModelCacheObject.fetch(),
+        airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
       if (airdropRecord) {
         let errorParams = {
           internal_error_identifier: 's_am_r_validateParams_4',
@@ -166,24 +180,30 @@ RegisterKlass.prototype = {
    * @return {promise<result>}
    *
    */
-  runRegister: function () {
-    const oThis = this
-    ;
+  runRegister: function() {
+    const oThis = this,
+      airdropKlass = oThis.ic().getAirdropModelKlass(),
+      coreConstants = oThis.ic().getCoreConstants(),
+      AirdropModelCacheKlass = oThis.ic().getCacheManagementAirdropModelClass();
 
-    return new Promise(async function (onResolve, onReject) {
+    return new Promise(async function(onResolve, onReject) {
       try {
         const airdropModelObject = {
+          chain_id: coreConstants.OST_UTILITY_CHAIN_ID,
           contract_address: oThis.airdropContractAddress
         };
-        logger.debug("========register.runRegister.airdropModelObject=======");
+        logger.debug('========register.runRegister.airdropModelObject=======');
         logger.debug(airdropModelObject);
         var airdropModel = new airdropKlass();
-        const insertedRecord = await airdropModel.create(airdropModelObject);
-        logger.debug("========register.runRegister.insertedRecord=======");
+        const insertedRecord = await airdropModel.insert(airdropModelObject).fire();
+        logger.debug('========register.runRegister.insertedRecord=======');
         logger.debug(insertedRecord);
-        const airdropModelCacheObject = new AirdropModelCacheKlass({useObject: true, contractAddress: oThis.airdropContractAddress});
+        const airdropModelCacheObject = new AirdropModelCacheKlass({
+          useObject: true,
+          contractAddress: oThis.airdropContractAddress
+        });
         await airdropModelCacheObject.clear();
-        return onResolve(responseHelper.successWithData({insertId: insertedRecord.insertId}));
+        return onResolve(responseHelper.successWithData({ insertId: insertedRecord.insertId }));
       } catch (err) {
         let errorParams = {
           internal_error_identifier: 's_am_r_runRegister_1',
@@ -194,10 +214,9 @@ RegisterKlass.prototype = {
         return onResolve(responseHelper.error(errorParams));
       }
     });
-
   }
-
 };
 
-module.exports = RegisterKlass;
+InstanceComposer.registerShadowableClass(RegisterKlass, 'getRegisterAirdropClass');
 
+module.exports = RegisterKlass;

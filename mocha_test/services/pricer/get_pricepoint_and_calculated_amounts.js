@@ -1,20 +1,22 @@
-
 /* global describe, it */
 
-const chai = require('chai')
-  , assert = chai.assert;
+const chai = require('chai'),
+  assert = chai.assert;
 
-const rootPrefix = "../../.."
-  , constants = require(rootPrefix + '/mocha_test/lib/constants')
-  , utils = require(rootPrefix+'/mocha_test/lib/utils')
-  , pricer = require(rootPrefix + '/lib/contract_interact/pricer')
-  , pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId)
-  , pricerOstEur = new pricer(constants.pricerOstEurAddress, constants.chainId)
-;
+const rootPrefix = '../../..',
+  constants = require(rootPrefix + '/mocha_test/lib/constants'),
+  utils = require(rootPrefix + '/mocha_test/lib/utils'),
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  configStrategy = require(rootPrefix + '/mocha_test/scripts/config_strategy'),
+  instanceComposer = new InstanceComposer(configStrategy);
 
+require(rootPrefix + '/lib/contract_interact/pricer');
+
+const pricer = instanceComposer.getPricerInteractClass(),
+  pricerOstUsd = new pricer(constants.pricerOstUsdAddress, constants.chainId),
+  pricerOstEur = new pricer(constants.pricerOstEurAddress, constants.chainId);
 
 describe('Get price point and calculated amounts', function() {
-
   it('should pass the initial address checks', async function() {
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
@@ -33,7 +35,8 @@ describe('Get price point and calculated amounts', function() {
       constants.currencyUSD,
       constants.priceOracles.OST.USD,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response1);
@@ -53,7 +56,8 @@ describe('Get price point and calculated amounts', function() {
       constants.currencyEUR,
       constants.priceOracles.OST.EUR,
       constants.gasUsed,
-      constants.optionsReceipt);
+      constants.optionsReceipt
+    );
 
     // verify if the transaction receipt is valid
     utils.verifyTransactionReceipt(response2);
@@ -65,33 +69,27 @@ describe('Get price point and calculated amounts', function() {
     const poResult2 = await pricerOstEur.priceOracles(constants.currencyEUR);
     assert.equal(poResult2.isSuccess(), true);
     assert.equal(constants.priceOracles.OST.EUR, poResult2.data.priceOracles);
-
   });
 
-
   it('should fail when currency is 0', async function() {
-
     const response = await pricerOstUsd.getPricePointAndCalculatedAmounts(
       pricerOstUsd.toWei('1'),
       pricerOstUsd.toWei('0.5'),
-      constants.currencyBlank);
+      constants.currencyBlank
+    );
     assert.equal(response.isFailure(), true);
-
   });
 
   it('should fail when price point is 0', async function() {
-
     const response = await pricerOstUsd.getPricePointAndCalculatedAmounts(
-        pricerOstUsd.toWei('1'),
-        pricerOstUsd.toWei('0.5'),
-        constants.currencyINR);
-      assert.equal(response.isFailure(), true);
-
+      pricerOstUsd.toWei('1'),
+      pricerOstUsd.toWei('0.5'),
+      constants.currencyINR
+    );
+    assert.equal(response.isFailure(), true);
   });
 
-
   it('should pass when all parameters are valid and conversion rate is 5', async function() {
-
     const pricePointData = await pricerOstUsd.getPricePoint(constants.currencyUSD);
     assert.equal(pricePointData.isSuccess(), true);
     const pricePoint = pricePointData.data.pricePoint;
@@ -109,28 +107,26 @@ describe('Get price point and calculated amounts', function() {
     const conversionRate = conversionRateData.data.conversionRate;
     const conversionRateDecimals = conversionRateDecimalsData.data.conversionRateDecimals;
 
-    const conversionFactor = conversionRate/(10**conversionRateDecimals);
+    const conversionFactor = conversionRate / 10 ** conversionRateDecimals;
 
-    const amount = pricerOstUsd.toWei('1')
-      , commissionAmount = pricerOstUsd.toWei('0.5')
-      , calculatedAmount = (amount*conversionFactor*(10**decimal))/pricePoint
-      , calculatedCommisionAmount = (commissionAmount*conversionFactor*(10**decimal))/pricePoint;
+    const amount = pricerOstUsd.toWei('1'),
+      commissionAmount = pricerOstUsd.toWei('0.5'),
+      calculatedAmount = (amount * conversionFactor * 10 ** decimal) / pricePoint,
+      calculatedCommisionAmount = (commissionAmount * conversionFactor * 10 ** decimal) / pricePoint;
 
     const result = await pricerOstUsd.getPricePointAndCalculatedAmounts(
       amount,
       commissionAmount,
-      constants.currencyUSD);
+      constants.currencyUSD
+    );
     assert.equal(result.isSuccess(), true);
 
     assert.equal(result.data.pricePoint, pricePoint);
     assert.equal(result.data.tokenAmount, calculatedAmount);
     assert.equal(result.data.commissionTokenAmount, calculatedCommisionAmount);
-
   });
 
-
   it('should pass when all parameters are valid and conversion rate is 2', async function() {
-
     const pricePointData = await pricerOstEur.getPricePoint(constants.currencyEUR);
     assert.equal(pricePointData.isSuccess(), true);
     const pricePoint = pricePointData.data.pricePoint;
@@ -148,23 +144,22 @@ describe('Get price point and calculated amounts', function() {
     const conversionRate = conversionRateData.data.conversionRate;
     const conversionRateDecimals = conversionRateDecimalsData.data.conversionRateDecimals;
 
-    const conversionFactor = conversionRate/(10**conversionRateDecimals);
+    const conversionFactor = conversionRate / 10 ** conversionRateDecimals;
 
-    const amount = pricerOstEur.toWei('1')
-      , commissionAmount = pricerOstEur.toWei('0.5')
-      , calculatedAmount = (amount*conversionFactor*(10**decimal))/pricePoint
-      , calculatedCommisionAmount = (commissionAmount*conversionFactor*(10**decimal))/pricePoint;
+    const amount = pricerOstEur.toWei('1'),
+      commissionAmount = pricerOstEur.toWei('0.5'),
+      calculatedAmount = (amount * conversionFactor * 10 ** decimal) / pricePoint,
+      calculatedCommisionAmount = (commissionAmount * conversionFactor * 10 ** decimal) / pricePoint;
 
     const result = await pricerOstEur.getPricePointAndCalculatedAmounts(
       amount,
       commissionAmount,
-      constants.currencyEUR);
+      constants.currencyEUR
+    );
     assert.equal(result.isSuccess(), true);
 
     assert.equal(result.data.pricePoint, pricePoint);
     assert.equal(result.data.tokenAmount, calculatedAmount);
     assert.equal(result.data.commissionTokenAmount, calculatedCommisionAmount);
-
   });
-
 });

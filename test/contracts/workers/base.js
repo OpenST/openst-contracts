@@ -20,16 +20,15 @@
 // ----------------------------------------------------------------------------
 
 const workersUtils = require('./workers_utils.js'),
-      setIsWorker     = require('./set_is_worker.js');
-      removeWorker  = require('./remove_worker.js');
-      remove        = require('./remove.js')
-      ;
-      
+  setIsWorker = require('./set_is_worker.js');
+removeWorker = require('./remove_worker.js');
+remove = require('./remove.js');
+
 contract('Workers', function(accounts) {
   describe('Set/IsWorker', async () => setIsWorker.perform(accounts));
   describe('RemoveWorker', async () => removeWorker.perform(accounts));
   describe('Remove', async () => remove.perform(accounts));
-  
+
   after(async () => {
     workersUtils.utils.printGasStatistics();
     workersUtils.utils.clearReceipts();

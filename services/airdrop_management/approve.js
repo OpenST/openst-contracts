@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  *
@@ -8,17 +8,19 @@
  *
  */
 
-const rootPrefix = '../..'
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , airdropContractInteract = require(rootPrefix + '/lib/contract_interact/airdrop')
-  , brandedTokenContractInteract = require(rootPrefix + '/lib/contract_interact/branded_token')
-  , BigNumber = require('bignumber.js')
-  , basicHelper = require(rootPrefix + '/helpers/basic_helper')
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
-  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
-  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+const BigNumber = require('bignumber.js');
+
+const rootPrefix = '../..',
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  basicHelper = require(rootPrefix + '/helpers/basic_helper'),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
+
+require(rootPrefix + '/lib/contract_interact/airdrop');
+require(rootPrefix + '/lib/contract_interact/branded_token');
+require(rootPrefix + '/lib/cache_management/airdrop_model');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
@@ -43,7 +45,7 @@ const errorConfig = {
 const ApproveKlass = function(params) {
   const oThis = this;
   params = params || {};
-  logger.debug("=========Approve.params=========");
+  logger.debug('=========Approve.params=========');
   // Don't log passphrase
   logger.debug(params.airdrop_contract_address, params.gas_price, params.chain_id, params.options);
   oThis.airdropContractAddress = params.airdrop_contract_address;
@@ -59,40 +61,50 @@ const ApproveKlass = function(params) {
 };
 
 ApproveKlass.prototype = {
-
   /**
    * Perform approve by airdrop budget holder to contract
    *
-   * @return {promise<result>}
+   * @return {promise}
    *
    */
-  perform: async function () {
-
+  perform: function() {
     const oThis = this;
 
-    try {
-      var r = null;
+    return oThis.asyncPerform().catch(function(error) {
+      if (responseHelper.isCustomResult(error)) {
+        return error;
+      } else {
+        logger.error('openst-platform::services/airdrop_management/approve.js::perform::catch');
+        logger.error(error);
 
-      r = await oThis.validateParams();
-      logger.debug("\n=========Approve.validateParams.result=========");
-      logger.debug(r);
-      if(r.isFailure()) return r;
+        return responseHelper.error({
+          internal_error_identifier: 's_am_a_perform_1',
+          api_error_identifier: 'unhandled_api_error',
+          error_config: errorConfig,
+          debug_options: { err: error }
+        });
+      }
+    });
+  },
 
-      r = oThis.doApprove();
-      logger.debug("\n=========Approve.doApprove.result=========");
-      logger.debug(r);
-      return r;
-    } catch(err) {
-      let errorParams = {
-        internal_error_identifier: 's_am_a_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      logger.error(err.message);
-      return responseHelper.error(errorParams)
-    }
+  /**
+   * Async Perform
+   *
+   * @return {promise<result>}
+   */
+  asyncPerform: async function() {
+    const oThis = this;
 
+    var r = null;
+    r = await oThis.validateParams();
+    logger.debug('\n=========Approve.validateParams.result=========');
+    logger.debug(r);
+    if (r.isFailure()) return r;
+
+    r = oThis.doApprove();
+    logger.debug('\n=========Approve.doApprove.result=========');
+    logger.debug(r);
+    return r;
   },
 
   /**
@@ -101,10 +113,13 @@ ApproveKlass.prototype = {
    * @return {promise<result>}
    *
    */
-  validateParams: function(){
-    const oThis = this;
-    return new Promise(async function (onResolve, onReject) {
+  validateParams: function() {
+    const oThis = this,
+      airdropContractInteract = oThis.ic().getAirdropInteractClass(),
+      brandedTokenContractInteract = oThis.ic().getBrandedTokenInteractClass(),
+      AirdropModelCacheKlass = oThis.ic().getCacheManagementAirdropModelClass();
 
+    return new Promise(async function(onResolve, onReject) {
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
         let errorParams = {
           internal_error_identifier: 's_am_a_validateParams_1',
@@ -117,11 +132,13 @@ ApproveKlass.prototype = {
       }
 
       // Check if airdropContractAddress is registered or not
-      const airdropModelCacheObject = new AirdropModelCacheKlass({useObject: true, contractAddress: oThis.airdropContractAddress})
-        , airdropModelCacheResponse = await airdropModelCacheObject.fetch()
-       ;
+      const airdropModelCacheObject = new AirdropModelCacheKlass({
+          useObject: true,
+          contractAddress: oThis.airdropContractAddress
+        }),
+        airdropModelCacheResponse = await airdropModelCacheObject.fetch();
       oThis.airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
-      if (!oThis.airdropRecord){
+      if (!oThis.airdropRecord) {
         let errorParams = {
           internal_error_identifier: 's_am_a_validateParams_2',
           api_error_identifier: 'invalid_api_params',
@@ -163,7 +180,7 @@ ApproveKlass.prototype = {
       //result = await oThis.brandedTokenObject.getBalanceOf(oThis.airdropBudgetHolderAddress);
       oThis.amount = '250000000000000000000000'; //result.data.balance;
       const amountInBigNumber = new BigNumber(oThis.amount);
-      if (amountInBigNumber.isNaN() || !amountInBigNumber.isInteger()){
+      if (amountInBigNumber.isNaN() || !amountInBigNumber.isInteger()) {
         let errorParams = {
           internal_error_identifier: 's_am_a_validateParams_5',
           api_error_identifier: 'invalid_api_params',
@@ -197,9 +214,7 @@ ApproveKlass.prototype = {
       }
 
       return onResolve(responseHelper.successWithData({}));
-
     });
-
   },
 
   /**
@@ -208,23 +223,25 @@ ApproveKlass.prototype = {
    * @return {promise<result>}
    *
    */
-  doApprove: async function(){
+  doApprove: async function() {
     const oThis = this;
-    return new Promise(async function (onResolve, onReject) {
+    return new Promise(async function(onResolve, onReject) {
       // Approve to budget holder
-      const approveByBudgetHolderResponse = await oThis.brandedTokenObject.approveByBudgetHolder(oThis.airdropBudgetHolderAddress,
+      const approveByBudgetHolderResponse = await oThis.brandedTokenObject.approveByBudgetHolder(
+        oThis.airdropBudgetHolderAddress,
         oThis.airdropBudgetHolderPassphrase,
         oThis.airdropContractAddress,
         oThis.amount,
         oThis.gasPrice,
-        oThis.options);
-      logger.debug("\n=========Transfer.doApprove.response=========");
+        oThis.options
+      );
+      logger.debug('\n=========Transfer.doApprove.response=========');
       logger.debug(approveByBudgetHolderResponse);
       return onResolve(approveByBudgetHolderResponse);
     });
-
   }
-
 };
+
+InstanceComposer.registerShadowableClass(ApproveKlass, 'getApproveForAirdropClass');
 
 module.exports = ApproveKlass;

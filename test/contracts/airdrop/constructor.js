@@ -19,22 +19,20 @@
 //
 // ----------------------------------------------------------------------------
 
-const airdropUtils  = require('./airdrop_utils.js'),
-      Airdrop        = artifacts.require('./Airdrop.sol'),
-      EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol')
-      ;
+const airdropUtils = require('./airdrop_utils.js'),
+  Airdrop = artifacts.require('./Airdrop.sol'),
+  EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol');
 
 ///
 /// Test stories
-/// 
+///
 /// fails to deploy if workers is null
 /// fails to deploy if airdropBudgetHolder is null
 /// successfully deploys
 
 module.exports.perform = (accounts) => {
-  const workers             = accounts[2],
-        airdropBudgetHolder = accounts[3]
-        ;
+  const workers = accounts[2],
+    airdropBudgetHolder = accounts[3];
 
   var token = null;
 
@@ -43,7 +41,9 @@ module.exports.perform = (accounts) => {
   });
 
   it('fails to deploy if workers is null', async () => {
-    await airdropUtils.utils.expectThrow(Airdrop.new(token.address, airdropUtils.currencies.ost, 0, airdropBudgetHolder));
+    await airdropUtils.utils.expectThrow(
+      Airdrop.new(token.address, airdropUtils.currencies.ost, 0, airdropBudgetHolder)
+    );
   });
 
   it('fails to deploy if airdropBudgetHolder is null', async () => {
@@ -56,4 +56,4 @@ module.exports.perform = (accounts) => {
     assert.equal(await airdrop.airdropBudgetHolder.call(), airdropBudgetHolder);
     airdropUtils.utils.logTransaction(airdrop.transactionHash, 'Airdrop.constructor');
   });
-}
+};

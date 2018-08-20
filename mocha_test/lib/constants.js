@@ -1,9 +1,8 @@
-const rootPrefix = '../..'
-  , returnTypes = require(rootPrefix + "/lib/global_constant/return_types")
-;
+const rootPrefix = '../..',
+  returnTypes = require(rootPrefix + '/lib/global_constant/return_types');
 
 const constants = {
-  gasUsed: 0xBA43B7400,
+  gasUsed: 0xba43b7400,
   deployer: process.env.OST_UTILITY_DEPLOYER_ADDR,
   deployerPassphrase: process.env.OST_UTILITY_DEPLOYER_PASSPHRASE,
   ops: process.env.OST_UTILITY_OPS_ADDR,
@@ -18,10 +17,10 @@ const constants = {
   accountPassphrase4: process.env.OST_UTILITY_TEST_ACCOUNT4_PASSPHRASE,
   account5: process.env.OST_UTILITY_TEST_ACCOUNT5,
   accountPassphrase5: process.env.OST_UTILITY_TEST_ACCOUNT5_PASSPHRASE,
-  currencyUSD: "USD",
-  currencyEUR: "EUR",
-  currencyINR: "INR",
-  currencyBlank: "",
+  currencyUSD: 'USD',
+  currencyEUR: 'EUR',
+  currencyINR: 'INR',
+  currencyBlank: '',
   pricerOstUsdAddress: process.env.OST_UTILITY_TEST_PRICER_C5_ADDRESS,
   pricerOstEurAddress: process.env.OST_UTILITY_TEST_PRICER_C2_ADDRESS,
   pricerOstUsd10DecimalAddress: process.env.OST_UTILITY_TEST_PRICER_C3_ADDRESS,
@@ -33,9 +32,9 @@ const constants = {
   returnTypeUUID: returnTypes.transactionUuid(),
   returnTypeHash: returnTypes.transactionHash(),
   returnTypeReceipt: returnTypes.transactionReceipt(),
-  optionsUUID: {returnType: returnTypes.transactionUuid(), tag: returnTypes.transactionUuid()},
-  optionsHash: {returnType: returnTypes.transactionHash(), tag: returnTypes.transactionHash()},
-  optionsReceipt: {returnType: returnTypes.transactionReceipt(), tag: returnTypes.transactionReceipt()},
+  optionsUUID: { returnType: returnTypes.transactionUuid(), tag: returnTypes.transactionUuid() },
+  optionsHash: { returnType: returnTypes.transactionHash(), tag: returnTypes.transactionHash() },
+  optionsReceipt: { returnType: returnTypes.transactionReceipt(), tag: returnTypes.transactionReceipt() },
   // Worker specific constants
   workerAccount1: process.env.OST_WORKER_TEST_ACCOUNT1,
   workerAccountPassphrase1: process.env.OST_WORKER_TEST_ACCOUNT1_PASSPHRASE,
@@ -47,8 +46,8 @@ const constants = {
   account1InitialBrandedTokenBalance: '200001',
   airdropBudgetBrandedTokenBalance: '100000',
   airdropUsers: {
-    '0x934ebd34b2a4f16d4de16256df36a6013785557d': {airdropAmount: 50*10**18, expiryTimestamp: 0},
-    '0x934ebd34b2a4f16d4de16256df36a6013785557e': {airdropAmount: 50*10**18, expiryTimestamp: 0}
+    '0x934ebd34b2a4f16d4de16256df36a6013785557d': { airdropAmount: 50 * 10 ** 18, expiryTimestamp: 0 },
+    '0x934ebd34b2a4f16d4de16256df36a6013785557e': { airdropAmount: 50 * 10 ** 18, expiryTimestamp: 0 }
   }
 };
 module.exports = constants;

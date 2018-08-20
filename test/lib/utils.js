@@ -21,11 +21,10 @@
 
 const Assert = require('assert');
 
-const NullAddress = "0x0000000000000000000000000000000000000000";
-const rootPrefix = '../..'
-  , logger = require(rootPrefix + '/helpers/custom_console_logger'),
+const NullAddress = '0x0000000000000000000000000000000000000000';
+const rootPrefix = '../..',
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
   web3 = require('./web3');
-;
 /*
  *  Tracking Gas Usage
  */
@@ -45,42 +44,41 @@ module.exports.logReceipt = (receipt, description) => {
     receipt: receipt,
     description: description,
     response: null
-  })
+  });
 };
 
 module.exports.logTransaction = async (hash, description) => {
-  const receipt = await web3.eth.getTransactionReceipt(hash)
-  await this.logReceipt(receipt, description)
+  const receipt = await web3.eth.getTransactionReceipt(hash);
+  await this.logReceipt(receipt, description);
 };
 
 module.exports.printGasStatistics = () => {
   var totalGasUsed = 0;
 
-  logger.debug("      -----------------------------------------------------");
-  logger.debug("      Report gas usage\n");
+  logger.debug('      -----------------------------------------------------');
+  logger.debug('      Report gas usage\n');
 
   for (i = 0; i < receipts.length; i++) {
     const entry = receipts[i];
 
     totalGasUsed += entry.receipt.gasUsed;
 
-    logger.debug("      " + entry.description.padEnd(45) + entry.receipt.gasUsed)
+    logger.debug('      ' + entry.description.padEnd(45) + entry.receipt.gasUsed);
   }
 
-  logger.debug("      -----------------------------------------------------");
-  logger.debug("      " + "Total gas logged: ".padEnd(45) + totalGasUsed + "\n")
+  logger.debug('      -----------------------------------------------------');
+  logger.debug('      ' + 'Total gas logged: '.padEnd(45) + totalGasUsed + '\n');
 };
 
 module.exports.clearReceipts = () => {
   receipts.splice(0, receipts.length);
 };
 
-
 /*
  *  General event checks
  */
 module.exports.expectNoEvents = (result) => {
-  Assert.equal(result.receipt.logs.length, 0, "expected empty array of logs")
+  Assert.equal(result.receipt.logs.length, 0, 'expected empty array of logs');
 };
 
 /*
@@ -88,9 +86,9 @@ module.exports.expectNoEvents = (result) => {
  */
 
 /// @dev Compare to null address
-module.exports.isNullAddress = function (address) {
+module.exports.isNullAddress = function(address) {
   Assert.strictEqual(typeof address, 'string', `address must be of type 'string'`);
-  return (address == NullAddress);
+  return address == NullAddress;
 };
 
 /// @dev Expect failure from invalid opcode or out of gas,
@@ -111,31 +109,31 @@ module.exports.expectThrow = async (promise) => {
     return;
   }
 
-  Assert(false, "Did not throw as expected");
+  Assert(false, 'Did not throw as expected');
 };
 
 /// @dev Get account balance
-module.exports.getBalance = function (address) {
-  return new Promise(function (resolve, reject) {
-    web3.eth.getBalance(address, function (error, result) {
+module.exports.getBalance = function(address) {
+  return new Promise(function(resolve, reject) {
+    web3.eth.getBalance(address, function(error, result) {
       if (error) {
         reject(error);
       } else {
         resolve(result);
       }
-    })
-  })
+    });
+  });
 };
 
 /// @dev Get gas price
-module.exports.getGasPrice = function () {
-  return new Promise(function (resolve, reject) {
-    web3.eth.getGasPrice(function (error, result) {
+module.exports.getGasPrice = function() {
+  return new Promise(function(resolve, reject) {
+    web3.eth.getGasPrice(function(error, result) {
       if (error) {
         reject(error);
       } else {
         resolve(result);
       }
-    })
-  })
+    });
+  });
 };

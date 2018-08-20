@@ -19,43 +19,40 @@
 //
 // ----------------------------------------------------------------------------
 
-const Utils          = require('../../lib/utils.js'),
-      BigNumber      = require('bignumber.js'),
-      Workers        = artifacts.require('./Workers.sol'),
-      Airdrop        = artifacts.require('./Airdrop.sol'),
-      EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol'),
-      PriceOracle    = artifacts.require('./PriceOracleMock.sol'),
-      web3 = require('../../lib/web3') ;
+const Utils = require('../../lib/utils.js'),
+  BigNumber = require('bignumber.js'),
+  Workers = artifacts.require('./Workers.sol'),
+  Airdrop = artifacts.require('./Airdrop.sol'),
+  EIP20TokenMock = artifacts.require('./EIP20TokenMock.sol'),
+  PriceOracle = artifacts.require('./PriceOracleMock.sol'),
+  web3 = require('../../lib/web3');
 
 const ost = 'OST',
-      abc = 'ABC'
-      ;
+  abc = 'ABC';
 
 /// @dev Export common requires
-module.exports.utils     = Utils;
+module.exports.utils = Utils;
 module.exports.bigNumber = BigNumber;
 
 /// @dev Export constants
 module.exports.currencies = {
-  ost : ost,
-  abc : abc
-}
+  ost: ost,
+  abc: abc
+};
 
 /// @dev Deploy
 module.exports.deployAirdrop = async (artifacts, accounts) => {
-
-  const conversionRate         = 101,
-        conversionRateDecimals = 1,
-        token                  = await EIP20TokenMock.new(conversionRate, conversionRateDecimals, ost, 'name', 18),
-        TOKEN_DECIMALS         = 18,
-        opsAddress             = accounts[1],
-        worker                 = accounts[2],
-        airdropBudgetHolder    = accounts[3],
-        workers                = await Workers.new(),
-        airdrop                = await Airdrop.new(token.address, ost, workers.address, airdropBudgetHolder),
-        abcPrice               = new BigNumber(20 * 10**18),
-        abcPriceOracle         = await PriceOracle.new(ost, abc, abcPrice)
-        ;
+  const conversionRate = 101,
+    conversionRateDecimals = 1,
+    token = await EIP20TokenMock.new(conversionRate, conversionRateDecimals, ost, 'name', 18),
+    TOKEN_DECIMALS = 18,
+    opsAddress = accounts[1],
+    worker = accounts[2],
+    airdropBudgetHolder = accounts[3],
+    workers = await Workers.new(),
+    airdrop = await Airdrop.new(token.address, ost, workers.address, airdropBudgetHolder),
+    abcPrice = new BigNumber(20 * 10 ** 18),
+    abcPriceOracle = await PriceOracle.new(ost, abc, abcPrice);
 
   assert.ok(await workers.setOpsAddress(opsAddress));
   assert.ok(await airdrop.setOpsAddress(opsAddress));
@@ -64,7 +61,7 @@ module.exports.deployAirdrop = async (artifacts, accounts) => {
   assert.ok(await airdrop.setPriceOracle(abc, abcPriceOracle.address, { from: opsAddress }));
 
   return {
-    token          : token,
-    airdrop        : airdrop
+    token: token,
+    airdrop: airdrop
   };
 };

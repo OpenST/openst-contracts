@@ -23,23 +23,22 @@ const pricerUtils = require('./pricer_utils.js');
 
 ///
 /// Test stories
-/// 
+///
 /// fails to set acceptedMargin by non-ops
 /// successfully sets acceptedMargin
 
 module.exports.perform = (accounts) => {
   const opsAddress = accounts[1];
 
-  var contracts      = null,
-      pricer         = null,
-      abcPriceOracle = null,
-      acceptedMargin = null,
-      response       = null
-      ;
+  var contracts = null,
+    pricer = null,
+    abcPriceOracle = null,
+    acceptedMargin = null,
+    response = null;
 
   before(async () => {
-    contracts      = await pricerUtils.deployPricer(artifacts, accounts);
-    pricer         = contracts.pricer;
+    contracts = await pricerUtils.deployPricer(artifacts, accounts);
+    pricer = contracts.pricer;
     abcPriceOracle = contracts.abcPriceOracle;
     await pricer.setPriceOracle(pricerUtils.currencies.abc, abcPriceOracle.address, { from: opsAddress });
   });
@@ -65,14 +64,14 @@ module.exports.perform = (accounts) => {
     checkAcceptedMarginSetEvent(response.logs[0], pricerUtils.currencies.abc, acceptedMargin);
     pricerUtils.utils.logResponse(response, 'Pricer.setAcceptedMargin: ' + acceptedMargin);
 
-    acceptedMargin = new pricerUtils.bigNumber(7.778 * 10**17); // 10**17 to ease readability in gas usage output
+    acceptedMargin = new pricerUtils.bigNumber(7.778 * 10 ** 17); // 10**17 to ease readability in gas usage output
     assert.ok(await pricer.setAcceptedMargin.call(pricerUtils.currencies.abc, acceptedMargin, { from: opsAddress }));
     response = await pricer.setAcceptedMargin(pricerUtils.currencies.abc, acceptedMargin, { from: opsAddress });
     assert.equal((await pricer.acceptedMargins.call(pricerUtils.currencies.abc)).toNumber(), acceptedMargin.toNumber());
     checkAcceptedMarginSetEvent(response.logs[0], pricerUtils.currencies.abc, acceptedMargin);
     pricerUtils.utils.logResponse(response, 'Pricer.setAcceptedMargin: ' + acceptedMargin);
   });
-}
+};
 
 function checkAcceptedMarginSetEvent(event, _currency, _acceptedMargin) {
   assert.equal(event.event, 'AcceptedMarginSet');

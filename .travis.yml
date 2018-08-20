@@ -93,7 +93,6 @@ before_script:
   - nohup java -Djava.library.path=./dynamodb/DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb &
   - sleep 30
   - . ./mocha_test/scripts/set_env_vars.sh
-  - node tools/dynamo_db_init.js
 script:
   - truffle test  
   - cd mocha_test/scripts/  

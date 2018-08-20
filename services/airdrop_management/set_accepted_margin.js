@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  *
@@ -7,21 +7,24 @@
  * @module services/airdrop_management/set_accepted_margin
  *
  */
-const rootPrefix = '../..'
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , basicHelper = require(rootPrefix + '/helpers/basic_helper')
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , helper = require(rootPrefix + '/lib/contract_interact/helper')
-  , AirdropContractInteractKlass = require(rootPrefix + '/lib/contract_interact/airdrop')
-  , BigNumber = require('bignumber.js')
-  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
-  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+
+const BigNumber = require('bignumber.js');
+
+const rootPrefix = '../..',
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  basicHelper = require(rootPrefix + '/helpers/basic_helper'),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/lib/contract_interact/airdrop');
+require(rootPrefix + '/lib/contract_interact/helper');
 
 /**
  * Constructor to create object of SetAcceptedMarginKlass
@@ -41,13 +44,20 @@ const errorConfig = {
  * @return {Object}
  *
  */
-const SetAcceptedMarginKlass = function (params) {
+const SetAcceptedMarginKlass = function(params) {
   const oThis = this;
   params = params || {};
-  logger.debug("=======SetAcceptedMarginKlass.params=======");
+  logger.debug('=======SetAcceptedMarginKlass.params=======');
   // Don't log passphrase
-  logger.debug(params.airdrop_contract_address, params.chain_id, params.sender_address, params.currency,
-    params.accepted_margin, params.gas_price, params.options);
+  logger.debug(
+    params.airdrop_contract_address,
+    params.chain_id,
+    params.sender_address,
+    params.currency,
+    params.accepted_margin,
+    params.gas_price,
+    params.options
+  );
 
   oThis.airdropContractAddress = params.airdrop_contract_address;
   oThis.chainId = params.chain_id;
@@ -60,40 +70,51 @@ const SetAcceptedMarginKlass = function (params) {
 };
 
 SetAcceptedMarginKlass.prototype = {
+  /**
+   * Perform Set Accepted margins
+   *
+   * @return {promise}
+   */
+  perform: function() {
+    const oThis = this;
+
+    return oThis.asyncPerform().catch(function(error) {
+      if (responseHelper.isCustomResult(error)) {
+        return error;
+      } else {
+        logger.error('openst-platform::services/airdrop_management/set_accepted_margin.js::perform::catch');
+        logger.error(error);
+
+        return responseHelper.error({
+          internal_error_identifier: 's_am_sam_perform_1',
+          api_error_identifier: 'unhandled_api_error',
+          error_config: errorConfig,
+          debug_options: { err: error }
+        });
+      }
+    });
+  },
 
   /**
-   * Perform method
+   * Async Perform
    *
    * @return {promise<result>}
-   *
    */
-  perform: async function () {
-    const oThis = this
-    ;
-    try {
-      var r = null;
+  asyncPerform: async function() {
+    const oThis = this;
 
-      r = await oThis.validateParams();
-      logger.debug("=======SetAcceptedMarginKlass.validateParams.result=======");
-      logger.debug(r);
-      if (r.isFailure()) return r;
+    var r = null;
 
-      r = await oThis.setAcceptedMargin();
-      logger.debug("=======SetAcceptedMarginKlass.setAcceptedMargin.result=======");
-      logger.debug(r);
+    r = await oThis.validateParams();
+    logger.debug('=======SetAcceptedMarginKlass.validateParams.result=======');
+    logger.debug(r);
+    if (r.isFailure()) return r;
 
-      return r;
+    r = await oThis.setAcceptedMargin();
+    logger.debug('=======SetAcceptedMarginKlass.setAcceptedMargin.result=======');
+    logger.debug(r);
 
-    } catch (err) {
-      let errorParams = {
-        internal_error_identifier: 's_w_sam_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      return responseHelper.error(errorParams);
-    }
-
+    return r;
   },
 
   /**
@@ -102,9 +123,10 @@ SetAcceptedMarginKlass.prototype = {
    * @return {result}
    *
    */
-  validateParams: function () {
-    const oThis = this
-    ;
+  validateParams: function() {
+    const oThis = this,
+      helper = oThis.ic().getContractInteractHelper();
+
     if (!helper.isValidCurrency(oThis.currency, false)) {
       let errorParams = {
         internal_error_identifier: 's_am_sam_validateParams_1',
@@ -182,13 +204,11 @@ SetAcceptedMarginKlass.prototype = {
    * @return {promise<result>}
    *
    */
-  setAcceptedMargin: function () {
-    const oThis = this
-    ;
-    const AirdropContractInteractObject = new AirdropContractInteractKlass(
-      oThis.airdropContractAddress,
-      oThis.chainId
-    );
+  setAcceptedMargin: function() {
+    const oThis = this,
+      AirdropContractInteractKlass = oThis.ic().getAirdropInteractClass();
+
+    const AirdropContractInteractObject = new AirdropContractInteractKlass(oThis.airdropContractAddress, oThis.chainId);
     return AirdropContractInteractObject.setAcceptedMargin(
       oThis.senderAddress,
       oThis.senderPassphrase,
@@ -198,7 +218,8 @@ SetAcceptedMarginKlass.prototype = {
       oThis.options
     );
   }
-
 };
+
+InstanceComposer.registerShadowableClass(SetAcceptedMarginKlass, 'getSetAcceptedMarginClass');
 
 module.exports = SetAcceptedMarginKlass;
