@@ -88,4 +88,4 @@ node migrations/create_tables.js
 
 
 
-For complete documentation of all the services of OpenST Platform, please refer [Developer Guide](developer_guide.md).
+For complete documentation of all the services of OpenST Platform, please refer [Developer Guide](developer_guide.md). 
