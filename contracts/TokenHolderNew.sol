@@ -42,41 +42,26 @@ contract TokenHolder is MultiSigWallet {
 
     /* Events */
 
-    // TODO EK in place of ephemeralKey
     event SessionAuthorized(
         address wallet,
-        bytes32 ephemeralKey,
+        address ephemeralKey,
         uint256 spendingLimit
     );
 
-    // TODO EK in place of ephemeralKey
     event SessionRevoked(
         address wallet,
-        bytes32 ephemeralKey
-    );
-    /** Event emitted whenever newSessionLock is consumed. */
-    // TODO We don't need
-    event SessionLockUpdated(
-        bytes32 oldSessionLock,
-        bytes32 newSessionLock,
-        uint256 spendingLimit
-    );
-    /** Event emitted on increase allowance and decrease allowance. */
-    event AllowanceUpdated(
-        address spender,
-        uint256 existingAllowanceAmount,
-        uint256 updatedAllowanceAmount
+        address ephemeralKey
     );
 
     /* Structs */
 
     /**
-      isPresent identifies if session lock is present in sessionLocks
+      isPresent identifies if Ephemeral Key is present in ephemeralKeys
       mapping or not.
      */
-    // TODO Rename below struct
     struct EphemeralKeyData {
         uint256 spendingLimit;
+        uint256 nonce;
         bool isPresent;
     }
 
@@ -86,47 +71,23 @@ contract TokenHolder is MultiSigWallet {
     address public brandedToken;
     /** Co Gateway contract address for redeem functionality. */
     address public coGateway;
-    // TODO Rename mapping variable names
     /** Stores spending limit per ephemeral key. */
-    mapping (bytes32 /* Ephemeral Key */ => EphemeralKeyData /* struct */) public ephemeralKeys;
+    mapping (address /* Ephemeral Key */ => EphemeralKeyData /* struct */) public ephemeralKeys;
     /** Token rules contract address read from BT contract. */
     address private tokenRules;
-    // TODO No need of below variable
-    /** Max No of times spending session lock should be hashed for verification. */
-    uint8 private maxFaultToleranceCount;
 
-
-    /* Modifiers */
-
-    /**
-     * @notice onlyTokenRules modifier.
-     *
-     * @dev msg.sender should be token rules contract address.
-     */
-    // TODO Check if below modifier is needed in functions
-    modifier onlyTokenRules() {
-        require(
-            msg.sender == tokenRules,
-            "msg.sender should be token rules contract address!"
-        );
-        _;
-    }
 
     /**
      * @notice Contract constructor.
      *
      * @param _brandedToken erc20 contract address this user is part of.
      * @param _coGateway utility chain gateway contract address.
-     * @param _maxFaultToleranceCount Max No of times spending session lock
-     *        should be hashed for verification.
      * @param _required No of requirements for multi sig wallet.
      * @param _wallets array of wallet addresses.
      */
-    // TODO _maxFaultToleranceCount not needed
     constructor(
         address _brandedToken,
         address _coGateway,
-        uint8 _maxFaultToleranceCount,
         uint8 _required,
         address[] _wallets
     )
@@ -146,7 +107,6 @@ contract TokenHolder is MultiSigWallet {
         coGateway = _coGateway;
         // Needed for onlyTokenRules contract validation
         tokenRules = BrandedToken(brandedToken).tokenRules();
-        maxFaultToleranceCount = _maxFaultToleranceCount;
     }
 
 
@@ -164,9 +124,8 @@ contract TokenHolder is MultiSigWallet {
      *
      * @return transactionId_ for the request.
      */
-    // TODO update below method with introduction of EK and remove _ephemeralKey
     function proposeOrConfirmAuthorizeSession(
-        bytes32 _ephemeralKey,
+        address _ephemeralKey,
         uint256 _spendingLimit,
         bool _proposeOrConfirm
     )
@@ -175,7 +134,7 @@ contract TokenHolder is MultiSigWallet {
         returns (bytes32 transactionId_)
     {
         require(
-            _ephemeralKey != bytes32(0),
+            _ephemeralKey != address(0),
             "Ephemeral Key is invalid!"
         );
         require(
@@ -210,15 +169,14 @@ contract TokenHolder is MultiSigWallet {
     /**
      * @notice Revoke session method.
      *
-     * @param _ephemeralKey session lock to be revoked.
+     * @param _ephemeralKey Ephemeral Key to be revoked.
      * @param _proposeOrConfirm if true transaction will be proposed otherwise
      *        confirmation is done.
      *
      * @return transactionId_ for the request.
      */
-    // TODO update below method with introduction of EK and remove _ephemeralKey
     function proposeOrConfirmRevokeSession(
-        bytes32 _ephemeralKey,
+        address _ephemeralKey,
         bool _proposeOrConfirm
     )
         public
@@ -226,7 +184,7 @@ contract TokenHolder is MultiSigWallet {
         returns (bytes32 transactionId_)
     {
         require(
-            _ephemeralKey != bytes32(0),
+            _ephemeralKey != address(0),
             "Session lock is invalid!"
         );
         require(
@@ -248,7 +206,7 @@ contract TokenHolder is MultiSigWallet {
         } else {
             performConfirmTransaction(transactionId_);
             if(isTransactionExecuted(transactionId_)) {
-                // Remove session lock from the mapping
+                // Remove Ephemeral Key from the mapping
                 delete ephemeralKeys[_ephemeralKey];
                 emit SessionRevoked(msg.sender, _ephemeralKey);
             }
@@ -258,7 +216,7 @@ contract TokenHolder is MultiSigWallet {
     }
 
     /**
-     * @notice redeem multisigwallet operation.
+     * @notice redeem is a multisigwallet operation.
      *
      * @param _amount Amount to redeem.
      * @param _nonce incremental nonce.
@@ -303,162 +261,6 @@ contract TokenHolder is MultiSigWallet {
         }
 
         return transactionId_;
-    }
-
-    /**
-     * @notice TokenHolder transfer method.
-     *
-     * @param _to address to whom BT amount needs to transfer.
-     * @param _amount amount of tokens to transfer.
-     * @param _spendingEphemeralKey session lock which will be spent for
-     *        this transaction.
-     *
-     * @return the success/failure status of transfer method
-     */
-    // TODO remove _spendingEphemeralKey and introduce executable messages
-    function transfer(
-        address _to,
-        uint256 _amount,
-        bytes32 _spendingEphemeralKey
-    )
-        public
-        onlyTokenRules
-        returns (bool /** success */)
-    {
-        require(
-            _spendingEphemeralKey != bytes32(0),
-            "Ephemeral Key is invalid!"
-        );
-        require(updateEphemeralKey(_spendingEphemeralKey));
-
-        uint256 spendingLimit = ephemeralKeys[_spendingEphemeralKey].spendingLimit;
-        require(
-            _amount <= spendingLimit,
-            "Transfer amount should be less or equal to spending limit"
-        );
-
-        require(BrandedToken(brandedToken).transfer(_to, _amount));
-
-        return true;
-    }
-
-    /**
-     * @notice TokenHolder requestRedemption method.
-     *
-     * @param _amount amount of tokens to transfer.
-     * @param _fee Fee to be paid.
-     * @param _beneficiary address to whom amount needs to transfer.
-     * @param _spendingSessionLock session lock which will be spent
-     *        for this transaction.
-     *
-     * @return the success/failure status of transfer method
-     */
-    // TODO remove _spendingSessionLock and introduce executable messages
-    function requestRedemption(
-        uint256 _amount,
-        uint256 _fee,
-        address _beneficiary,
-        bytes32 _spendingSessionLock
-    )
-        public
-        onlyTokenRules
-        returns (bool /** success */)
-    {
-        require(
-            _spendingSessionLock != bytes32(0),
-            "Session lock is invalid!"
-        );
-        require(updateSessionLock(_spendingSessionLock));
-
-        // TODO Integration with CoGateway Interface
-
-        return true;
-    }
-
-    /**
-     * @notice TokenHolder increaseAllowance method.
-     *
-     * @dev Below method is needed so that BrandedToken.transferFrom can be called.
-     *      Amount can be approved to an escrow contract address for
-     *      BT.transferFrom to work.
-     *
-     * @param _spender address to whom allowance needs to increase.
-     * @param _amount amount of tokens to transfer.
-     * @param _spendingSessionLock session lock which will be spent for
-     *        this transaction.
-     *
-     * @return final updated allowance which is approved.
-     */
-    // TODO remove _spendingSessionLock and introduce executable messages
-    function increaseAllowance(
-        address _spender,
-        uint256 _amount,
-        bytes32 _spendingSessionLock
-    )
-        public
-        onlyTokenRules
-        returns (uint256 _updatedAllowanceAmount)
-    {
-        require(
-            _spendingSessionLock != bytes32(0),
-            "Session lock is invalid!"
-        );
-        require(updateSessionLock(_spendingSessionLock));
-
-        uint256 existingAllowanceAmount = BrandedToken(brandedToken).allowance(this, _spender);
-        _updatedAllowanceAmount = existingAllowanceAmount.add(_amount);
-        require(BrandedToken(brandedToken).approve(_spender, _updatedAllowanceAmount));
-
-        emit AllowanceUpdated(
-            _spender,
-            existingAllowanceAmount,
-            _updatedAllowanceAmount
-        );
-
-        return _updatedAllowanceAmount;
-    }
-
-    /**
-     * @notice TokenHolder decreaseAllowance method.
-     *
-     * @dev Below method is needed so that BrandedToken.transferFrom can be called.
-     *      Amount can be approved to an escrow contract address for
-     *      BT.transferFrom to work.
-     *
-     * @param _spender address to whom allowance needs to decrease.
-     * @param _amount amount of tokens to transfer.
-     * @param _spendingSessionLock session lock which will be spent
-     *        for this transaction.
-     *
-     * @return final updated allowance which is approved.
-     */
-    // TODO remove _spendingSessionLock and introduce executable messages
-    function decreaseAllowance(
-        address _spender,
-        uint256 _amount,
-        bytes32 _spendingSessionLock
-    )
-        public
-        onlyTokenRules
-        returns (uint256 _updatedAllowanceAmount)
-    {
-        require(
-            _spendingSessionLock != bytes32(0),
-            "Session lock is invalid!"
-        );
-        require(updateSessionLock(_spendingSessionLock));
-
-        uint256 existingAllowanceAmount = BrandedToken(brandedToken).allowance(this, _spender);
-        _updatedAllowanceAmount = existingAllowanceAmount.sub(_amount);
-        require(BrandedToken(brandedToken).approve(_spender, _updatedAllowanceAmount));
-
-        emit AllowanceUpdated(
-            _spender,
-            existingAllowanceAmount,
-            _updatedAllowanceAmount
-        );
-
-        return _updatedAllowanceAmount;
     }
 
 
@@ -534,61 +336,20 @@ contract TokenHolder is MultiSigWallet {
     }
 
     /**
-     * @notice Validate and update session lock.
-     *
-     * @param _newSessionLock session lock to be verified and updated.
-     *
-     * @return success if _newSessionLock is consumed.
-     */
-    // TODO remove _newSessionLock and verify signed messages
-    // TODO Remove after ECRecover method needed
-    function updateSessionLock(
-        bytes32 _newSessionLock
-    )
-    private
-    returns (bool /* success */)
-    {
-        bytes32 oldSessionLock;
-
-        for(uint8 i = 0; i < maxFaultToleranceCount; i++) {
-            oldSessionLock = keccak256(abi.encodePacked(
-                    _newSessionLock
-                ));
-            /** if entry exists in ephemeralKeys mapping */
-            if (ephemeralKeys[oldSessionLock].isPresent) {
-                uint256 spendingLimit = ephemeralKeys[oldSessionLock].spendingLimit;
-                setEphemeralKeyData(_newSessionLock, spendingLimit);
-                delete(ephemeralKeys[oldSessionLock]);
-
-                emit SessionLockUpdated(
-                    oldSessionLock,
-                    _newSessionLock,
-                    spendingLimit
-                );
-
-                return true;
-            }
-        }
-        // False is error condition in case _newSessionLock is not found in
-        // ephemeralKeys mapping.
-        return false;
-    }
-
-    /**
      * @notice private method to update ephemeralKeys mapping.
      *
      * @param _ephemeralKey Ephemeral Key which need to be added in ephemeralKeys mapping.
      * @param _spendingLimit spending limit to be updated.
      */
-    // TODO check if we need below
     function setEphemeralKeyData(
-        bytes32 _ephemeralKey,
+        address _ephemeralKey,
         uint256 _spendingLimit
     )
         private
     {
         ephemeralKeys[_ephemeralKey].spendingLimit = _spendingLimit;
         ephemeralKeys[_ephemeralKey].isPresent = true;
+        ephemeralKeys[_ephemeralKey].nonce = 0;
     }
 
 }
