@@ -35,7 +35,7 @@ contract MultiSigWallet {
 
     event Propose(
         address indexed _sender,
-        bytes32 _transactionId
+        bytes32 indexed _transactionId
     );
 
     event ConfirmationDone(
@@ -55,8 +55,8 @@ contract MultiSigWallet {
 
     event ReplaceWallet(
         address indexed _sender,
-        address _oldWallet,
-        address _newWallet
+        address indexed _oldWallet,
+        address indexed _newWallet
     );
 
     event WalletAddition(
@@ -194,7 +194,7 @@ contract MultiSigWallet {
         //  transactionId_ for same set of parameters in propose and
         //  confirm flow.
         transactionId_ = keccak256(
-            abi.encodePacked(_wallet, this, "addWallet")
+            abi.encodePacked(_wallet, address(this), "addWallet")
         );
 
         proposeTransaction(transactionId_);
@@ -231,13 +231,13 @@ contract MultiSigWallet {
         require(_wallet != 0, "Wallet address should not be null");
         require(
             isWallet[_wallet],
-            "Wallet should be added to proceed for this transaction"
+            "Wallet should be added to proceed for address(this) transaction"
         );
 
         //  transactionId_ for same set of parameters in propose and
         //  confirm flow.
         transactionId_ = keccak256(
-            abi.encodePacked(_wallet, this, "removeWallet")
+            abi.encodePacked(_wallet, address(this), "removeWallet")
         );
 
         proposeTransaction(transactionId_);
@@ -286,7 +286,7 @@ contract MultiSigWallet {
         //  transactionId_ for same set of parameters in propose and
         //  confirm flow.
         transactionId_ = keccak256(
-            abi.encodePacked(_oldWallet, _newWallet, this, "replaceWallet")
+            abi.encodePacked(_oldWallet, _newWallet, address(this), "replaceWallet")
         );
 
         proposeTransaction(transactionId_);
@@ -326,7 +326,7 @@ contract MultiSigWallet {
         //  transactionId_ for same set of parameters in propose and
         //  confirm flow.
         transactionId_ = keccak256(
-            abi.encodePacked(_required, this, "changeRequirement")
+            abi.encodePacked(_required, address(this), "changeRequirement")
         );
 
         proposeTransaction(transactionId_);
@@ -359,11 +359,11 @@ contract MultiSigWallet {
     {
         require(
             confirmations[_transactionId].status != 2,
-            "Cannot revoke this transaction because it is already executed"
+            "Cannot revoke address(this) transaction because it is already executed"
         );
         require(
             confirmations[_transactionId].isConfirmedBy[msg.sender],
-            "Transaction is not confirmed by this wallet"
+            "Transaction is not confirmed by address(this) wallet"
         );
 
         proposeTransaction(_transactionId);
@@ -434,7 +434,7 @@ contract MultiSigWallet {
      * @notice It is used to send the transaction to confirmation state by the
      *         wallet who has sent the transaction.
      *
-     * @param _transactionId It marks this transaction id as confirmed against
+     * @param _transactionId It marks address(this) transaction id as confirmed against
      *        the wallet which has sent the transaction.
      */
     function confirmTransaction(
