@@ -6,16 +6,16 @@ cd ../../node_modules/@ostdotcom/ost-price-oracle/
 echo "\n********* Done *************"
 
 echo "\n********* Deploying PO 1 *************"
-node ./tools/deploy/price_oracle.js OST USD 0x12A05F200 travis po1.txt
+node ./tools/deploy/price_oracle.js OST USD 0x12A05F200 travis po1.txt $CONFIG_STRATEGY_FILE_NAME
 echo "\n********* Done *************"
 echo "\n********* Deploying PO 2 *************"
-node ./tools/deploy/price_oracle.js OST EUR 0x12A05F200 travis po2.txt
+node ./tools/deploy/price_oracle.js OST EUR 0x12A05F200 travis po2.txt $CONFIG_STRATEGY_FILE_NAME
 echo "\n********* Done *************"
 echo "\n********* Deploying PO 3 *************"
-node ./tools/deploy/price_oracle.js OST INR 0x12A05F200 travis po3.txt
+node ./tools/deploy/price_oracle.js OST INR 0x12A05F200 travis po3.txt $CONFIG_STRATEGY_FILE_NAME
 echo "\n********* Done *************"
 echo "\n********* Deploying PO 4 *************"
-node ./tools/deploy/price_oracle.js ETH USD 0x12A05F200 travis po4.txt
+node ./tools/deploy/price_oracle.js ETH USD 0x12A05F200 travis po4.txt $CONFIG_STRATEGY_FILE_NAME
 echo "\n********* Done *************"
 
 export OST_UTILITY_PRICE_ORACLES="{\"OST\":{\"USD\":\"$(cat ./tools/deploy/po1.txt)\",\"EUR\":\"$(cat ./tools/deploy/po2.txt)\",\"INR\":\"$(cat ./tools/deploy/po3.txt)\"},\"ETH\":{\"USD\":\"$(cat ./tools/deploy/po4.txt)\"}}"
