@@ -35,7 +35,7 @@ import "./MultiSigWallet.sol";
  */
 // TODO Implement requestRedemption
 // TODO check messageBus code regarding r, s, v
-// TODO remove ephermal key when expired
+// TODO remove ephermal key when expired in executeRule
 contract TokenHolder is MultiSigWallet {
 
     /* Usings */
@@ -46,15 +46,19 @@ contract TokenHolder is MultiSigWallet {
     /* Events */
 
     event SessionAuthorized(
-        bytes32 _transactionId,
+        bytes32 indexed _transactionId,
         address _ephemeralKey,
         uint256 _spendingLimit,
         uint256 _expirationHeight
     );
 
     event SessionRevoked(
-        bytes32 _transactionId,
+        bytes32 indexed _transactionId,
         address _ephemeralKey
+    );
+
+    event EphemeralKeyExpired(
+        address indexed _ephemeralKey
     );
 
     event RuleExecuted(
@@ -79,8 +83,7 @@ contract TokenHolder is MultiSigWallet {
     address public brandedToken;
     /** Co Gateway contract address for redeem functionality. */
     address public coGateway;
-    /** Stores spending limit per ephemeral key. */
-    // TODO should not Cleanup expired ephemeralKey
+    /** Stores EphemeralKeyData per ephemeral key. */
     mapping (address /* Ephemeral Key */ => EphemeralKeyData /* struct */) public ephemeralKeys;
     /** Token rules contract address read from BT contract. */
     address private tokenRules;
@@ -94,7 +97,7 @@ contract TokenHolder is MultiSigWallet {
      * @param _required No of requirements for multi sig wallet.
      * @param _wallets array of wallet addresses.
      */
-    // TODO Review deployment flow and check if we need _brandedToken or _coGateway in constructor
+    // TODO Review protocol deployment flow and check if we need _brandedToken or _coGateway in constructor
     constructor(
         address _brandedToken,
         address _coGateway,
@@ -215,7 +218,7 @@ contract TokenHolder is MultiSigWallet {
         proposeTransaction(transactionId_);
         confirmTransaction(transactionId_);
         if(isTransactionExecuted(transactionId_)) {
-            // Remove Ephemeral Key from the mapping
+            // Remove ephemeral key from the mapping
             delete ephemeralKeys[_ephemeralKey];
             emit SessionRevoked(transactionId_, _ephemeralKey);
         }
@@ -302,21 +305,27 @@ contract TokenHolder is MultiSigWallet {
         );
         require(
             _data != bytes(0),
-            "data can't be 0."
+            "Data can't be 0."
         );
         // Construct hashed message.
         bytes32 messageHash = getHashedMessage(_to, _from, _data, _nonce);
         address signer = ecrecover(messageHash, _v, _r, _s);
-        ephemeralKeyData = ephemeralKeys[signer];
         require(
-            ephemeralKeyData.spendingLimit > 0,
+            isAuthorizedEphemeralKey(signer),
             "Invalid ephemeral key!"
         );
+        ephemeralKeyData = ephemeralKeys[signer];
+        if (ephemeralKeyData.expirationHeight < block.number) {
+            // cleanup expired ephemeral key
+            delete ephemeralKeys[signer];
+            emit EphemeralKeyExpired(signer);
+            return false;
+        }
         require(
             ephemeralKeyData.expirationHeight >= block.number,
             "ephemeral key has expired!"
         );
-
+        // Consume the nonce
         ephemeralKeyData.nonce = ephemeralKeyData.nonce + 1;
         require(
             ephemeralKeyData.nonce == _nonce,
@@ -324,12 +333,12 @@ contract TokenHolder is MultiSigWallet {
         );
 
         BrandedToken(brandedToken).approve(
-            tokenRules,
+            address(tokenRules),
             ephemeralKeyData.spendingLimit
         );
         executionResult_ = address(_to).call(_data);
         emit RuleExecuted(_to, executionResult_, _nonce);
-        BrandedToken(brandedToken).approve(tokenRules, 0);
+        BrandedToken(brandedToken).approve(address(tokenRules), 0);
 
         return executionResult_;
     }
@@ -354,8 +363,7 @@ contract TokenHolder is MultiSigWallet {
         bytes _data,
         uint256 _nonce
     )
-        internal
-        pure
+        private
         returns (bytes32)
     {
         return keccak256(abi.encodePacked(
@@ -395,7 +403,7 @@ contract TokenHolder is MultiSigWallet {
     /**
      * @notice private method to check if valid ephemeral key.
      *
-     * @param _ephemeralKey Ephemeral Key which need to be added in ephemeralKeys mapping.
+     * @param _ephemeralKey Ephemeral Key which need to be checked in ephemeralKeys mapping.
      *
      * @return status is true/false.
      */
@@ -408,7 +416,5 @@ contract TokenHolder is MultiSigWallet {
     {
         return ephemeralKeys[_ephemeralKey].spendingLimit > 0;
     }
-
-
 
 }
