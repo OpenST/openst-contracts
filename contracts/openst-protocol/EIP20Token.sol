@@ -170,6 +170,17 @@ contract EIP20Token is EIP20Interface {
         return true;
     }
 
+    function clearAllowance(address _approver)
+        public
+        returns (bool)
+    {
+        allowed[_approver][msg.sender] = 0;
+
+        emit Approval(_approver, msg.sender, 0);
+
+        return true;
+    }
+
     /**
      *  @notice Internal function claimEIP20.
      *
