@@ -33,6 +33,8 @@ import "./MultiSigWallet.sol";
  *         scalable key management solutions for mainstream apps.
  *
  */
+// TODO handle 0 spending limit.
+// TODO support expiration height.
 contract TokenHolder is MultiSigWallet {
 
     /* Usings */
@@ -43,7 +45,7 @@ contract TokenHolder is MultiSigWallet {
     /* Events */
 
     event SessionAuthorized(
-        address wallet,
+        address wallet, // TODO transaction id is needed
         address ephemeralKey,
         uint256 spendingLimit
     );
@@ -59,6 +61,8 @@ contract TokenHolder is MultiSigWallet {
       isPresent identifies if Ephemeral Key is present in ephemeralKeys
       mapping or not.
      */
+    // TODO support expiration height
+    // TODO remove 0 spending limit logic
     struct EphemeralKeyData {
         uint256 spendingLimit;
         uint256 nonce;
@@ -72,6 +76,8 @@ contract TokenHolder is MultiSigWallet {
     /** Co Gateway contract address for redeem functionality. */
     address public coGateway;
     /** Stores spending limit per ephemeral key. */
+    // TODO cant Cleanup expired ephemeralKey
+    // TODO check if we ever cleanup confirmations
     mapping (address /* Ephemeral Key */ => EphemeralKeyData /* struct */) public ephemeralKeys;
     /** Token rules contract address read from BT contract. */
     address private tokenRules;
@@ -87,6 +93,7 @@ contract TokenHolder is MultiSigWallet {
      */
     constructor(
         address _brandedToken,
+        // TODO fetch from _brandedToken
         address _coGateway,
         uint8 _required,
         address[] _wallets
@@ -124,6 +131,7 @@ contract TokenHolder is MultiSigWallet {
      *
      * @return transactionId_ for the request.
      */
+    // TODO no need of two step process
     function proposeOrConfirmAuthorizeSession(
         address _ephemeralKey,
         uint256 _spendingLimit,
@@ -276,7 +284,10 @@ contract TokenHolder is MultiSigWallet {
      *
      * @return transaction status is true/false.
      */
-    // TODO event emit?
+    // TODO emit event?
+    // TODO _txGas either estinmate from outside or use gasLeft method
+    // TODO never ever use or/and
+    // TODO execute rule
     function validateAndExecute(
         bytes32 _inputMessageHash,
         bytes _signature,
@@ -318,7 +329,7 @@ contract TokenHolder is MultiSigWallet {
                         0) // Outputs are 32 bytes long.
         }
         // Consume the nonce irrespective of status value
-        nonce++;
+        ephemeralKeyData.nonce++;
 
         return status;
     }
@@ -335,7 +346,8 @@ contract TokenHolder is MultiSigWallet {
      *
      *  @return bytes32 hashed data
      */
-    // TODO byte(0x19) verify with test case. Test by passing bytes.
+    // TODO byte(0x19) verify with test case. Test by passing bytes as argument.
+    // TODO does metamask, trezor include etheeum signed message
     function getHashedMessage(
         address _to,
         bytes _data,

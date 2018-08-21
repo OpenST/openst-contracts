@@ -112,7 +112,7 @@ contract MultiSigWallet {
      */
     modifier onlyWallet() {
         require(
-            isWallet[msg.sender] == true,
+            isWallet[msg.sender],
             "Transaction should be done by valid wallet!"
         );
         _;
@@ -144,6 +144,7 @@ contract MultiSigWallet {
      * @param _wallets List of initial wallets.
      * @param _required Number of required confirmations.
      */
+    // TODO remove == check
     constructor(
         address[] _wallets,
         uint8 _required
@@ -443,6 +444,8 @@ contract MultiSigWallet {
             if (count == required)
                 return true;
         }
+
+        return false;
     }
 
 
