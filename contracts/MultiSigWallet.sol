@@ -443,7 +443,7 @@ contract MultiSigWallet {
         internal
     {
         require(
-            confirmations[_transactionId].status == 0,
+            confirmations[_transactionId].status == 1,
             "Please first propose the transaction"
         );
         require(
