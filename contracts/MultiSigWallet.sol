@@ -290,7 +290,7 @@ contract MultiSigWallet {
         );
 
         proposeTransaction(transactionId_);
-        performConfirmTransaction(transactionId_);
+        confirmTransaction(transactionId_);
         // old wallet is deleted and new wallet entry is done.
         if(isTransactionExecuted(transactionId_)){
             for (uint8 i = 0; i < wallets.length; i++)
@@ -330,7 +330,7 @@ contract MultiSigWallet {
         );
 
         proposeTransaction(transactionId_);
-        performConfirmTransaction(transactionId_);
+        confirmTransaction(transactionId_);
 
         if(isTransactionExecuted(transactionId_)) {
             // Old requirements i.e. number of required confirmations for
@@ -367,7 +367,7 @@ contract MultiSigWallet {
         );
 
         proposeTransaction(_transactionId);
-        performConfirmTransaction(_transactionId);
+        confirmTransaction(_transactionId);
         if(isTransactionExecuted(_transactionId)){
             confirmations[_transactionId].isConfirmedBy[msg.sender] = false;
             emit Revocation(
@@ -419,7 +419,7 @@ contract MultiSigWallet {
     )
         internal
     {
-        if (isAlreadyProposedTransaction(transactionId_)){
+        if (isAlreadyProposedTransaction(_transactionId)){
             return;
         }
         confirmations[_transactionId].status = 1;
