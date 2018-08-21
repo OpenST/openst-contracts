@@ -187,6 +187,9 @@ contract TokenHolderNew is MultiSigWallet {
     /**
      * @notice Revoke session method.
      *
+     * @dev spendingLimit 0 is not allowed. So spending limit 0 means
+     *      ephemeralKey is invalid.
+     *
      * @param _ephemeralKey Ephemeral Key to be revoked.
      *
      * @return transactionId_ for the request.
@@ -216,7 +219,7 @@ contract TokenHolderNew is MultiSigWallet {
         proposeTransaction(transactionId_);
         confirmTransaction(transactionId_);
         if(isTransactionExecuted(transactionId_)) {
-            revokeEphemeralKey(_ephemeralKey);
+            ephemeralKeys[_ephemeralKey].spendingLimit = 0;
             emit SessionRevoked(transactionId_, _ephemeralKey);
         }
 
@@ -413,22 +416,6 @@ contract TokenHolderNew is MultiSigWallet {
         returns (bool /** success status */)
     {
         return ephemeralKeys[_ephemeralKey].spendingLimit > 0;
-    }
-
-    /**
-     * @notice private method to revoke ephemeral key.
-     *
-     * @dev 0 spendingLimit 0 is not allowed. So spending limit 0 means
-     *      ephemeralKey is invalid.
-     *
-     * @param _ephemeralKey Ephemeral key to revoke.
-     */
-    function revokeEphemeralKey(
-        address _ephemeralKey
-    )
-        private
-    {
-        ephemeralKeys[_ephemeralKey].spendingLimit = 0;
     }
 
 }
