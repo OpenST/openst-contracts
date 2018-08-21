@@ -34,23 +34,23 @@ contract MultiSigWallet {
     /* Events */
 
     event Propose(
-        address indexed _sender,
-        bytes32 indexed _transactionId
+        bytes32 indexed _transactionId,
+        address indexed _sender
     );
 
     event ConfirmationDone(
-        address indexed _sender,
-        bytes32 indexed _transactionId
+        bytes32 indexed _transactionId,
+        address indexed _sender
     );
 
     event Revocation(
-        address indexed _sender,
-        bytes32 indexed _transactionId
+        bytes32 indexed _transactionId,
+        address indexed _sender
     );
 
     event Execution(
-        address indexed _sender,
-        bytes32 indexed _transactionId
+        bytes32 indexed _transactionId,
+        address indexed _sender
     );
 
     event ReplaceWallet(
