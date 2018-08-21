@@ -29,7 +29,6 @@ pragma solidity ^0.4.23;
  *         It is inherited by TokenHolder.sol.
  *
  */
-// TODO remove and or in method parameter names
 contract MultiSigWallet {
 
     /* Events */
@@ -61,12 +60,12 @@ contract MultiSigWallet {
     );
 
     event WalletAddition(
-        address indexed _sender,
+        bytes32 indexed _transactionId,
         address indexed _wallet
     );
 
     event WalletRemoval(
-        address indexed _sender,
+        bytes32 indexed _transactionId,
         address indexed _wallet
     );
 
@@ -192,8 +191,8 @@ contract MultiSigWallet {
     {
         require(_wallet != 0, "Wallet address should not be null");
         require(!isWallet[_wallet], "Wallet address already exist");
-
-        //  transactionId construction parameters are same for propose and confirm flow.
+        //  transactionId_ for same set of parameters in propose and
+        //  confirm flow.
         transactionId_ = keccak256(
             abi.encodePacked(_wallet, this, "addWallet")
         );
@@ -235,7 +234,8 @@ contract MultiSigWallet {
             "Wallet should be added to proceed for this transaction"
         );
 
-        //  transactionId_ for same set of parameters in propose and confirm flow.
+        //  transactionId_ for same set of parameters in propose and
+        //  confirm flow.
         transactionId_ = keccak256(
             abi.encodePacked(_wallet, this, "removeWallet")
         );
@@ -258,7 +258,7 @@ contract MultiSigWallet {
                 required = uint8(wallets.length);
                 emit RequirementChange(uint8(wallets.length));
             }
-            emit WalletRemoval(msg.sender, _wallet);
+            emit WalletRemoval(transactionId_, _wallet);
         }
 
         return transactionId_;
@@ -283,7 +283,8 @@ contract MultiSigWallet {
     {
         require(!isWallet[_oldWallet], "Wallet address doesn't exist");
 
-        // transactionId for same set of parameters in propose and confirm flow.
+        //  transactionId_ for same set of parameters in propose and
+        //  confirm flow.
         transactionId_ = keccak256(
             abi.encodePacked(_oldWallet, _newWallet, this, "replaceWallet")
         );
@@ -322,7 +323,8 @@ contract MultiSigWallet {
         validRequirement(uint8(wallets.length), _required)
         returns(bytes32 transactionId_)
     {
-        // transactionId_ for same set of parameters in propose and confirm flow.
+        //  transactionId_ for same set of parameters in propose and
+        //  confirm flow.
         transactionId_ = keccak256(
             abi.encodePacked(_required, this, "changeRequirement")
         );
