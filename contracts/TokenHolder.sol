@@ -83,7 +83,7 @@ contract TokenHolder is MultiSigWallet {
     /** Co Gateway contract address for redeem functionality. */
     address public coGateway;
     /** Stores spending limit per session lock. */
-    mapping (bytes32 /* session lock */ => SessionLockData /* spending limit */) public sessionLocks;
+    mapping (bytes32 /* session lock */ => SessionLockData /* struct */) public sessionLocks;
     /** Token rules contract address read from BT contract. */
     address private tokenRules;
     /** Max No of times spending session lock should be hashed for verification. */
