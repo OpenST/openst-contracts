@@ -29,6 +29,7 @@ pragma solidity ^0.4.23;
  *         It is inherited by TokenHolder.sol.
  *
  */
+// TODO remove and or in method parameter names
 contract MultiSigWallet {
 
     /* Events */
@@ -144,7 +145,6 @@ contract MultiSigWallet {
      * @param _wallets List of initial wallets.
      * @param _required Number of required confirmations.
      */
-    // TODO remove == check
     constructor(
         address[] _wallets,
         uint8 _required

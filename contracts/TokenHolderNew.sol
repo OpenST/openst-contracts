@@ -33,8 +33,7 @@ import "./MultiSigWallet.sol";
  *         scalable key management solutions for mainstream apps.
  *
  */
-// TODO handle 0 spending limit.
-// TODO support expiration height.
+// TODO remove and or in method parameter names.
 contract TokenHolder is MultiSigWallet {
 
     /* Usings */
@@ -45,28 +44,24 @@ contract TokenHolder is MultiSigWallet {
     /* Events */
 
     event SessionAuthorized(
-        address wallet, // TODO transaction id is needed
-        address ephemeralKey,
-        uint256 spendingLimit
+        bytes32 _transactionId,
+        address _ephemeralKey,
+        uint256 _spendingLimit,
+        uint256 _expirationHeight
     );
 
     event SessionRevoked(
-        address wallet,
-        address ephemeralKey
+        bytes32 _transactionId,
+        address _ephemeralKey
     );
 
     /* Structs */
 
-    /**
-      isPresent identifies if Ephemeral Key is present in ephemeralKeys
-      mapping or not.
-     */
-    // TODO support expiration height
-    // TODO remove 0 spending limit logic
+    /** expirationHeight is block at which EphemeralKey expires. */
     struct EphemeralKeyData {
         uint256 spendingLimit;
         uint256 nonce;
-        bool isPresent;
+        uint256 expirationHeight;
     }
 
 
@@ -76,8 +71,7 @@ contract TokenHolder is MultiSigWallet {
     /** Co Gateway contract address for redeem functionality. */
     address public coGateway;
     /** Stores spending limit per ephemeral key. */
-    // TODO cant Cleanup expired ephemeralKey
-    // TODO check if we ever cleanup confirmations
+    // TODO should not Cleanup expired ephemeralKey
     mapping (address /* Ephemeral Key */ => EphemeralKeyData /* struct */) public ephemeralKeys;
     /** Token rules contract address read from BT contract. */
     address private tokenRules;
@@ -92,7 +86,7 @@ contract TokenHolder is MultiSigWallet {
      * @param _wallets array of wallet addresses.
      */
     constructor(
-        address _brandedToken,
+        address _brandedToken, // TODO can we get this from coGateway
         // TODO fetch from _brandedToken
         address _coGateway,
         uint8 _required,
@@ -120,22 +114,20 @@ contract TokenHolder is MultiSigWallet {
     /* Public Functions */
 
     /**
-     * @notice propose or confirm authorize session method.
+     * @notice Authorize session method.
      *
-     * @dev 0 spendingLimit is a valid transfer amount.
+     * @dev 0 spendingLimit is not a valid amount.
      *
      * @param _ephemeralKey session lock to be authorized.
      * @param _spendingLimit max tokens user can spend at a time.
-     * @param _proposeOrConfirm if true transaction will be proposed
-     *        otherwise confirmation is done.
+     * @param _expirationHeight expiration height of Ephemeral Key.
      *
      * @return transactionId_ for the request.
      */
-    // TODO no need of two step process
-    function proposeOrConfirmAuthorizeSession(
+    function authorizeSession(
         address _ephemeralKey,
         uint256 _spendingLimit,
-        bool _proposeOrConfirm
+        uint256 _expirationHeight
     )
         public
         onlyWallet
@@ -146,29 +138,41 @@ contract TokenHolder is MultiSigWallet {
             "Ephemeral Key is invalid!"
         );
         require(
-            !ephemeralKeys[_ephemeralKey].isPresent,
-            "Ephemeral Key is already authorized"
+            (ephemeralKeys[_ephemeralKey].spendingLimit == 0),
+            "Input ephemeralKey should not be authorized!"
+        );
+        require(
+            _spendingLimit != uint256(0),
+            "0 spending limit is not allowed!"
+        );
+        require(
+            _expirationHeight != uint256(0),
+            "0 expiration Height is not allowed!"
+        );
+        require(
+            _expirationHeight > block.number,
+            "Expiration Height should be greater than current block number!"
         );
 
         transactionId_ = keccak256(abi.encodePacked(
                 _ephemeralKey,
                 _spendingLimit,
+                _expirationHeight,
                 this,
                 "authorizeSession"
         ));
-        if (_proposeOrConfirm) {
-            require(
-                !isAlreadyProposedTransaction(transactionId_),
-                "Transaction is already proposed!"
-            );
-            performProposeTransaction(transactionId_);
-        } else {
-            performConfirmTransaction(transactionId_);
-            if(isTransactionExecuted(transactionId_)) {
-                setEphemeralKeyData(_ephemeralKey, _spendingLimit);
 
-                emit SessionAuthorized(msg.sender, _ephemeralKey, _spendingLimit);
-            }
+        proposeTransaction(transactionId_);
+        performConfirmTransaction(transactionId_);
+        // Add wallet code
+        if(isTransactionExecuted(transactionId_)) {
+            setEphemeralKeyData(_ephemeralKey, _spendingLimit, _expirationHeight);
+            emit SessionAuthorized(
+                transactionId_,
+                _ephemeralKey,
+                _spendingLimit,
+                _expirationHeight
+            );
         }
 
         return transactionId_;
@@ -178,14 +182,11 @@ contract TokenHolder is MultiSigWallet {
      * @notice Revoke session method.
      *
      * @param _ephemeralKey Ephemeral Key to be revoked.
-     * @param _proposeOrConfirm if true transaction will be proposed otherwise
-     *        confirmation is done.
      *
      * @return transactionId_ for the request.
      */
-    function proposeOrConfirmRevokeSession(
-        address _ephemeralKey,
-        bool _proposeOrConfirm
+    function revokeSession(
+        address _ephemeralKey
     )
         public
         onlyWallet
@@ -193,10 +194,10 @@ contract TokenHolder is MultiSigWallet {
     {
         require(
             _ephemeralKey != address(0),
-            "Session lock is invalid!"
+            "Ephemeral Key is invalid!"
         );
         require(
-            ephemeralKeys[_ephemeralKey].isPresent,
+            ephemeralKeys[_ephemeralKey].spendingLimit > 0,
             "Input ephemeralKey is not authorized!"
         );
 
@@ -205,19 +206,13 @@ contract TokenHolder is MultiSigWallet {
                 this,
                 "revokeSession"
         ));
-        if (_proposeOrConfirm) {
-            require(
-                !isAlreadyProposedTransaction(transactionId_),
-                "Transaction is already proposed!"
-            );
-            performProposeTransaction(transactionId_);
-        } else {
-            performConfirmTransaction(transactionId_);
-            if(isTransactionExecuted(transactionId_)) {
-                // Remove Ephemeral Key from the mapping
-                delete ephemeralKeys[_ephemeralKey];
-                emit SessionRevoked(msg.sender, _ephemeralKey);
-            }
+
+        proposeTransaction(transactionId_);
+        confirmTransaction(transactionId_);
+        if(isTransactionExecuted(transactionId_)) {
+            // Remove Ephemeral Key from the mapping
+            delete ephemeralKeys[_ephemeralKey];
+            emit SessionRevoked(transactionId_, _ephemeralKey);
         }
 
         return transactionId_;
@@ -231,17 +226,14 @@ contract TokenHolder is MultiSigWallet {
      * @param _beneficiary beneficiary address who will get redeemed amount.
      * @param _hashLock hash lock. Secret will be used during redeem process
      *        to unlock the secret.
-     * @param _proposeOrConfirm if true transaction will be proposed
-     *        otherwise confirmation is done.
      *
      * @return transactionId_ for the request.
      */
-    function proposeOrConfirmReedem(
+    function reedem(
         bytes32 _amount,
         uint256 _nonce,
         address _beneficiary,
-        bytes32 _hashLock,
-        bool _proposeOrConfirm
+        bytes32 _hashLock
     )
         public
         onlyWallet
@@ -255,17 +247,11 @@ contract TokenHolder is MultiSigWallet {
                 this,
                 "redeem"
         ));
-        if (_proposeOrConfirm) {
-            require(
-                !isAlreadyProposedTransaction(transactionId_),
-                "Transaction is already proposed!"
-            );
-            performProposeTransaction(transactionId_);
-        } else {
-            performConfirmTransaction(transactionId_);
-            if(isTransactionExecuted(transactionId_)) {
-                // TODO Redeem Integration with CoGateway Interface
-            }
+
+        proposeTransaction(transactionId_);
+        confirmTransaction(transactionId_);
+        if(isTransactionExecuted(transactionId_)) {
+            // TODO Redeem Integration with CoGateway Interface
         }
 
         return transactionId_;
@@ -288,7 +274,7 @@ contract TokenHolder is MultiSigWallet {
     // TODO _txGas either estinmate from outside or use gasLeft method
     // TODO never ever use or/and
     // TODO execute rule
-    function validateAndExecute(
+    function executeRule(
         bytes32 _inputMessageHash,
         bytes _signature,
         bytes _data,
@@ -306,7 +292,7 @@ contract TokenHolder is MultiSigWallet {
         address _inputEphemeralKey = recover(prefixedInputMessageHash, _signature);
         EphemeralKeyData ephemeralKeyData = ephemeralKeys[_inputEphemeralKey];
         require(
-            ephemeralKeyData.isPresent,
+            ephemeralKeyData.spendingLimit > 0,
             "Input Ephemeral Key is not present!"
         );
 
@@ -425,16 +411,20 @@ contract TokenHolder is MultiSigWallet {
      *
      * @param _ephemeralKey Ephemeral Key which need to be added in ephemeralKeys mapping.
      * @param _spendingLimit spending limit to be updated.
+     * @param _expirationHeight block height at which Ephemeral Key is expired.
      */
     function setEphemeralKeyData(
         address _ephemeralKey,
-        uint256 _spendingLimit
+        uint256 _spendingLimit,
+        uint256 _expirationHeight
     )
         private
     {
         ephemeralKeys[_ephemeralKey].spendingLimit = _spendingLimit;
-        ephemeralKeys[_ephemeralKey].isPresent = true;
         ephemeralKeys[_ephemeralKey].nonce = 0;
+        ephemeralKeys[_ephemeralKey].expirationHeight = _expirationHeight;
     }
+
+
 
 }
