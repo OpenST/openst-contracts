@@ -270,10 +270,13 @@ contract TokenHolderNew is MultiSigWallet {
      *
      * @dev nonce will be consumed irrespective of assembly call output.
      *      v, r, s are the values for the transaction signature.
-     *      They are used to get public key of any ethereum account..
+     *      They are used to get public key of any ethereum account.
      *
-     * @param _to the target contract the transaction will be executed upon. e.g. Airdrop in case for Airdrop.pay.
-     * @param _from it will always be the contract executing the code. It needs to be tokenholder contract address.
+     * @param _to the target contract the transaction will be executed upon.
+     *        e.g. Airdrop in case for Airdrop.pay.
+     * @param _from it will always be the contract executing the code.
+     *        It needs to be tokenholder contract address.
+     *        from enforces TH address to be stored in wallet.
      * @param _nonce incremental nonce.
      * @param _data the bytecode to be executed.
      *         Use web3 getData method to construct _data.
@@ -283,6 +286,7 @@ contract TokenHolderNew is MultiSigWallet {
      *
      * @return transaction status is true/false.
      */
+    // TODO _v, _r, _s or signature
     function executeRule(
         address _to,
         address _from,
@@ -304,8 +308,8 @@ contract TokenHolderNew is MultiSigWallet {
             "From should be tokenholder contract address"
         );
         require(
-            _data != bytes(0),
-            "Data can't be 0."
+            _data.length != 0,
+            "Data length can't be 0."
         );
 
         // Construct hashed message.
@@ -341,6 +345,40 @@ contract TokenHolderNew is MultiSigWallet {
         return executionResult_;
     }
 
+    // hash lock as parameter
+    /**
+     * @notice TokenHolder requestRedemption method.
+     *
+     * @param _amount amount of tokens to transfer.
+     * @param _fee Fee to be paid.
+     * @param _beneficiary address to whom amount needs to transfer.
+     * @param _spendingSessionLock session lock which will be spent
+     *        for this transaction.
+     *
+     * @return the success/failure status of transfer method
+     */
+    // TODO Integration with CoGateway Interface
+    function requestRedemption(
+        uint256 _amount,
+        uint256 _fee,
+        address _beneficiary
+    )
+        public
+        returns (bool /** success */)
+    {
+
+        BrandedToken(brandedToken).approve(
+            address(coGateway),
+            ephemeralKeyData.spendingLimit
+        );
+        require(CoGateway(coGateway).redeem());
+        BrandedToken(brandedToken).approve(
+            address(coGateway),
+            0
+        );
+
+    }
+
 
     /* Private Functions */
 
@@ -355,6 +393,7 @@ contract TokenHolderNew is MultiSigWallet {
      *  @return bytes32 hashed data
      */
     // TODO byte(0x19) verify with test case. Test by passing bytes as argument.
+    // TODO data should be bytes or bytes32
     function getHashedMessage(
         address _to,
         address _from,
@@ -372,6 +411,9 @@ contract TokenHolderNew is MultiSigWallet {
             0, // the amount in ether to be sent.
             _data,
             _nonce,
+            0, // gasPrice
+            0, // gasLimit
+            0, // gasToken
             bytes4(data), // 4 byte standard call prefix of the function to be called in the from contract.
                          // This guarantees that a signed message can be only executed in a single instance.
             0, // 0 for a standard call, 1 for a DelegateCall and 0 for a create opcode
