@@ -35,8 +35,7 @@ import "./MultiSigWallet.sol";
  */
 // TODO Implement requestRedemption
 // TODO check messageBus code regarding r, s, v
-// TODO remove ephermal key when expired in executeRule
-contract TokenHolder is MultiSigWallet {
+contract TokenHolderNew is MultiSigWallet {
 
     /* Usings */
 
@@ -218,8 +217,7 @@ contract TokenHolder is MultiSigWallet {
         proposeTransaction(transactionId_);
         confirmTransaction(transactionId_);
         if(isTransactionExecuted(transactionId_)) {
-            // Remove ephemeral key from the mapping
-            delete ephemeralKeys[_ephemeralKey];
+            revokeEphemeralKey(_ephemeralKey);
             emit SessionRevoked(transactionId_, _ephemeralKey);
         }
 
@@ -316,8 +314,7 @@ contract TokenHolder is MultiSigWallet {
         );
         ephemeralKeyData = ephemeralKeys[signer];
         if (ephemeralKeyData.expirationHeight < block.number) {
-            // cleanup expired ephemeral key
-            delete ephemeralKeys[signer];
+            revokeEphemeralKey(signer);
             emit EphemeralKeyExpired(signer);
             return false;
         }
@@ -403,6 +400,9 @@ contract TokenHolder is MultiSigWallet {
     /**
      * @notice private method to check if valid ephemeral key.
      *
+     * @dev 0 spendingLimit 0 is not allowed. So spending limit greater than 0 means
+     *      ephemeralKey is present.
+     *
      * @param _ephemeralKey Ephemeral Key which need to be checked in ephemeralKeys mapping.
      *
      * @return status is true/false.
@@ -415,6 +415,22 @@ contract TokenHolder is MultiSigWallet {
         returns (bool /** success status */)
     {
         return ephemeralKeys[_ephemeralKey].spendingLimit > 0;
+    }
+
+    /**
+     * @notice private method to revoke ephemeral key.
+     *
+     * @dev 0 spendingLimit 0 is not allowed. So spending limit 0 means
+     *      ephemeralKey is invalid.
+     *
+     * @param _ephemeralKey Ephemeral key to revoke.
+     */
+    function revokeEphemeralKey(
+        address _ephemeralKey
+    )
+        private
+    {
+        ephemeralKeys[_ephemeralKey].spendingLimit = 0;
     }
 
 }
