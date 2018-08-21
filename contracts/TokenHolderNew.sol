@@ -34,7 +34,6 @@ import "./MultiSigWallet.sol";
  *
  */
 // TODO Implement requestRedemption
-// TODO check messageBus code regarding r, s, v
 contract TokenHolderNew is MultiSigWallet {
 
     /* Usings */
@@ -69,7 +68,7 @@ contract TokenHolderNew is MultiSigWallet {
 
     /* Structs */
 
-    /** expirationHeight is block at which EphemeralKey expires. */
+    /** expirationHeight is block number at which ephemeralKey expires. */
     struct EphemeralKeyData {
         uint256 spendingLimit;
         uint256 nonce;
@@ -305,6 +304,7 @@ contract TokenHolderNew is MultiSigWallet {
             _data != bytes(0),
             "Data can't be 0."
         );
+
         // Construct hashed message.
         bytes32 messageHash = getHashedMessage(_to, _from, _data, _nonce);
         address signer = ecrecover(messageHash, _v, _r, _s);
@@ -313,11 +313,6 @@ contract TokenHolderNew is MultiSigWallet {
             "Invalid ephemeral key!"
         );
         ephemeralKeyData = ephemeralKeys[signer];
-        if (ephemeralKeyData.expirationHeight < block.number) {
-            revokeEphemeralKey(signer);
-            emit EphemeralKeyExpired(signer);
-            return false;
-        }
         require(
             ephemeralKeyData.expirationHeight >= block.number,
             "ephemeral key has expired!"
@@ -335,7 +330,10 @@ contract TokenHolderNew is MultiSigWallet {
         );
         executionResult_ = address(_to).call(_data);
         emit RuleExecuted(_to, executionResult_, _nonce);
-        BrandedToken(brandedToken).approve(address(tokenRules), 0);
+        BrandedToken(brandedToken).approve(
+            address(tokenRules),
+            0
+        );
 
         return executionResult_;
     }
