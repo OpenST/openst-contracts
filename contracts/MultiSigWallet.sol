@@ -194,7 +194,7 @@ contract MultiSigWallet {
         //  transactionId_ for same set of parameters in propose and
         //  confirm flow.
         transactionId_ = keccak256(
-            abi.encodePacked(_wallet, this, "addWallet")
+            abi.encodePacked(_wallet, address(this), "addWallet")
         );
 
         proposeTransaction(transactionId_);
@@ -237,7 +237,7 @@ contract MultiSigWallet {
         //  transactionId_ for same set of parameters in propose and
         //  confirm flow.
         transactionId_ = keccak256(
-            abi.encodePacked(_wallet, this, "removeWallet")
+            abi.encodePacked(_wallet, address(this), "removeWallet")
         );
 
         proposeTransaction(transactionId_);
@@ -286,7 +286,7 @@ contract MultiSigWallet {
         //  transactionId_ for same set of parameters in propose and
         //  confirm flow.
         transactionId_ = keccak256(
-            abi.encodePacked(_oldWallet, _newWallet, this, "replaceWallet")
+            abi.encodePacked(_oldWallet, _newWallet, address(this), "replaceWallet")
         );
 
         proposeTransaction(transactionId_);
@@ -326,7 +326,7 @@ contract MultiSigWallet {
         //  transactionId_ for same set of parameters in propose and
         //  confirm flow.
         transactionId_ = keccak256(
-            abi.encodePacked(_required, this, "changeRequirement")
+            abi.encodePacked(_required, address(this), "changeRequirement")
         );
 
         proposeTransaction(transactionId_);
@@ -443,7 +443,7 @@ contract MultiSigWallet {
         internal
     {
         require(
-            confirmations[_transactionId].status == 0,
+            confirmations[_transactionId].status == 1,
             "Please first propose the transaction"
         );
         require(

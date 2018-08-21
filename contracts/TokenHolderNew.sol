@@ -33,7 +33,9 @@ import "./MultiSigWallet.sol";
  *         scalable key management solutions for mainstream apps.
  *
  */
-// TODO remove and or in method parameter names.
+// TODO Implement requestRedemption
+// TODO check messageBus code regarding r, s, v
+// TODO remove ephermal key when expired
 contract TokenHolder is MultiSigWallet {
 
     /* Usings */
@@ -54,6 +56,13 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _transactionId,
         address _ephemeralKey
     );
+
+    event RuleExecuted(
+        address _to,
+        uint256 _nonce,
+        bool _status
+    );
+
 
     /* Structs */
 
@@ -85,9 +94,9 @@ contract TokenHolder is MultiSigWallet {
      * @param _required No of requirements for multi sig wallet.
      * @param _wallets array of wallet addresses.
      */
+    // TODO Review deployment flow and check if we need _brandedToken or _coGateway in constructor
     constructor(
-        address _brandedToken, // TODO can we get this from coGateway
-        // TODO fetch from _brandedToken
+        address _brandedToken,
         address _coGateway,
         uint8 _required,
         address[] _wallets
@@ -135,19 +144,15 @@ contract TokenHolder is MultiSigWallet {
     {
         require(
             _ephemeralKey != address(0),
-            "Ephemeral Key is invalid!"
+            "Ephemeral key is invalid!"
         );
         require(
-            (ephemeralKeys[_ephemeralKey].spendingLimit == 0),
-            "Input ephemeralKey should not be authorized!"
+            !isAuthorizedEphemeralKey(_ephemeralKey),
+            "Input ephemeral key should not be authorized!"
         );
         require(
             _spendingLimit != uint256(0),
             "0 spending limit is not allowed!"
-        );
-        require(
-            _expirationHeight != uint256(0),
-            "0 expiration Height is not allowed!"
         );
         require(
             _expirationHeight > block.number,
@@ -158,13 +163,13 @@ contract TokenHolder is MultiSigWallet {
                 _ephemeralKey,
                 _spendingLimit,
                 _expirationHeight,
-                this,
+                address(this),
                 "authorizeSession"
         ));
 
         proposeTransaction(transactionId_);
-        performConfirmTransaction(transactionId_);
-        // Add wallet code
+        confirmTransaction(transactionId_);
+        // Add ephemeral key
         if(isTransactionExecuted(transactionId_)) {
             setEphemeralKeyData(_ephemeralKey, _spendingLimit, _expirationHeight);
             emit SessionAuthorized(
@@ -197,13 +202,13 @@ contract TokenHolder is MultiSigWallet {
             "Ephemeral Key is invalid!"
         );
         require(
-            ephemeralKeys[_ephemeralKey].spendingLimit > 0,
+            isAuthorizedEphemeralKey(_ephemeralKey),
             "Input ephemeralKey is not authorized!"
         );
 
         transactionId_ = keccak256(abi.encodePacked(
                 _ephemeralKey,
-                this,
+                address(this),
                 "revokeSession"
         ));
 
@@ -244,7 +249,7 @@ contract TokenHolder is MultiSigWallet {
                 _nonce,
                 _beneficiary,
                 _hashLock,
-                this,
+                address(this),
                 "redeem"
         ));
 
@@ -258,66 +263,75 @@ contract TokenHolder is MultiSigWallet {
     }
 
     /**
-     * @notice Validate and execute signed messages.
+     * @notice Validate and execute signed messages as per EIP 1077.
      *
      * @dev nonce will be consumed irrespective of assembly call output.
+     *      v, r, s are the values for the transaction signature.
+     *      They are used to get public key of any ethereum account..
      *
-     * @param _inputMessageHash Message which was signed.
-     * @param _signature signed message.
+     * @param _to the target contract the transaction will be executed upon. e.g. Airdrop in case for Airdrop.pay.
+     * @param _from it will always be the contract executing the code. It needs to be tokenholder contract address.
+     * @param _nonce incremental nonce.
      * @param _data the bytecode to be executed.
-     * @param _to the target contract the transaction will be executed upon. e.g. BT in case of transferFrom.
-     * @param _gasLimit Estimated gas Limit from outside.
+     *         Use web3 getData method to construct _data.
+     * @param _v It's the recovery id.
+     * @param _r It's the output of an ECDSA signature.
+     * @param _s It's also the output of an ECDSA signature.
      *
      * @return transaction status is true/false.
      */
-    // TODO emit event?
-    // TODO _txGas either estinmate from outside or use gasLeft method
-    // TODO never ever use or/and
-    // TODO execute rule
     function executeRule(
-        bytes32 _inputMessageHash,
-        bytes _signature,
-        bytes _data,
         address _to,
-        uint256 _txGas
+        address _from,
+        uint256 _nonce,
+        bytes _data,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
     )
         public
-        returns (bool status/* success */)
+        returns (bool executionResult_ /* success */)
     {
-        bytes32 prefixedInputMessageHash = keccak256(abi.encodePacked(
-                "\x19Ethereum Signed Message:\n32",
-                _inputMessageHash
-            ));
-
-        address _inputEphemeralKey = recover(prefixedInputMessageHash, _signature);
-        EphemeralKeyData ephemeralKeyData = ephemeralKeys[_inputEphemeralKey];
+        require(
+            _to != address(0),
+            "to address can't be 0"
+        );
+        require(
+            _from == address(this),
+            "From should be tokenholder contract address"
+        );
+        require(
+            _data != bytes(0),
+            "data can't be 0."
+        );
+        // Construct hashed message.
+        bytes32 messageHash = getHashedMessage(_to, _from, _data, _nonce);
+        address signer = ecrecover(messageHash, _v, _r, _s);
+        ephemeralKeyData = ephemeralKeys[signer];
         require(
             ephemeralKeyData.spendingLimit > 0,
-            "Input Ephemeral Key is not present!"
+            "Invalid ephemeral key!"
         );
-
-        bytes32 messageHash = getHashedMessage(_to, _data, ephemeralKeyData.nonce + 1);
         require(
-            _inputMessageHash == messageHash,
-            "Input message hash in invalid!"
+            ephemeralKeyData.expirationHeight >= block.number,
+            "ephemeral key has expired!"
         );
 
-        // Assembly call to execute the message
-        assembly {
-            // Issue call, providing _txGas and 0 value to address _to
-            status := call(
-                        _txGas, // providing _txGas for call transaction.
-                        _to, // To addr
-                        0, // No value
-                        add(_data, 0x20),  // Removed first 32(0x20) bytes from _data.
-                        mload(_data), // Input _data length.
-                        0, // Store output over input (saves space).
-                        0) // Outputs are 32 bytes long.
-        }
-        // Consume the nonce irrespective of status value
-        ephemeralKeyData.nonce++;
+        ephemeralKeyData.nonce = ephemeralKeyData.nonce + 1;
+        require(
+            ephemeralKeyData.nonce == _nonce,
+            "Invalid nonce!"
+        );
 
-        return status;
+        BrandedToken(brandedToken).approve(
+            tokenRules,
+            ephemeralKeyData.spendingLimit
+        );
+        executionResult_ = address(_to).call(_data);
+        emit RuleExecuted(_to, executionResult_, _nonce);
+        BrandedToken(brandedToken).approve(tokenRules, 0);
+
+        return executionResult_;
     }
 
 
@@ -327,15 +341,16 @@ contract TokenHolder is MultiSigWallet {
      *  @notice hash the data
      *
      *  @param _to the target contract the transaction will be executed upon. e.g. BT in case of transfer.
+     *  @param _from it will always be the contract executing the code. It needs to be tokenholder contract address.
      *  @param _data the bytecode to be executed.
      *  @param _nonce nonce or a timestamp.
      *
      *  @return bytes32 hashed data
      */
     // TODO byte(0x19) verify with test case. Test by passing bytes as argument.
-    // TODO does metamask, trezor include etheeum signed message
     function getHashedMessage(
         address _to,
+        address _from,
         bytes _data,
         uint256 _nonce
     )
@@ -346,64 +361,16 @@ contract TokenHolder is MultiSigWallet {
         return keccak256(abi.encodePacked(
             byte(0x19), // Starting a transaction with byte(0x19) ensure the signed data from being a valid ethereum transaction.
             byte(0), // The second argument is a version control byte.
-            address(this), // The from field will always be the contract executing the code.
+            _from, // The from field will always be the contract executing the code.
             _to,
             0, // the amount in ether to be sent.
             _data,
             _nonce,
-            bytes4(data), // 4 byte standard prefix of the function to be called in the from contract.
+            bytes4(data), // 4 byte standard call prefix of the function to be called in the from contract.
                          // This guarantees that a signed message can be only executed in a single instance.
             0, // 0 for a standard call, 1 for a DelegateCall and 0 for a create opcode
             '' // extraHash is always hashed at the end. This is done to increase future compatibility of the standard.
         ));
-    }
-
-    /**
-     * @notice Recover signer address from a message by using their signature.
-     *
-     * @param _hash bytes32 message, the hash is the signed message. What is recovered is the signer address.
-     * @param _signature bytes signature, the signature is generated using web3.eth.sign().
-     *
-     * @returns signer address.
-     */
-    function recover(
-        bytes32 _hash,
-        bytes _signature
-    )
-        private
-        pure
-        returns (address)
-    {
-        bytes32 r;
-        bytes32 s;
-        uint8 v;
-
-        // Check the signature length
-        if (_signature.length != 65) {
-            return (address(0));
-        }
-
-        // Divide the signature in r, s and v variables
-        // ecrecover takes the signature parameters, and the only way to get them
-        // currently is to use assembly.
-        // solium-disable-next-line security/no-inline-assembly
-        assembly {
-            r := mload(add(_signature, 32))
-            s := mload(add(_signature, 64))
-            v := byte(0, mload(add(_signature, 96)))
-        }
-
-        // Version of signature should be 27 or 28, but 0 and 1 are also possible versions
-        if (v < 27) {
-            v += 27;
-        }
-
-        // If the version is correct return the signer address
-        if (v != 27 && v != 28) {
-            return (address(0));
-        } else {
-            return ecrecover(_hash, v, r, s);
-        }
     }
 
     /**
@@ -423,6 +390,23 @@ contract TokenHolder is MultiSigWallet {
         ephemeralKeys[_ephemeralKey].spendingLimit = _spendingLimit;
         ephemeralKeys[_ephemeralKey].nonce = 0;
         ephemeralKeys[_ephemeralKey].expirationHeight = _expirationHeight;
+    }
+
+    /**
+     * @notice private method to check if valid ephemeral key.
+     *
+     * @param _ephemeralKey Ephemeral Key which need to be added in ephemeralKeys mapping.
+     *
+     * @return status is true/false.
+     */
+    function isAuthorizedEphemeralKey(
+        address _ephemeralKey
+    )
+        private
+        pure
+        returns (bool /** success status */)
+    {
+        return ephemeralKeys[_ephemeralKey].spendingLimit > 0;
     }
 
 
