@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "\n********* Preparing price oracle deployment *************"
-npm install @ostdotcom/ost-price-oracle@1.0.5-beta.3 --save-dev
+npm install @ostdotcom/ost-price-oracle@1.0.5-beta.4 --save-dev
 cd ../../node_modules/@ostdotcom/ost-price-oracle/
 echo "\n********* Done *************"
 
@@ -22,9 +22,9 @@ export OST_UTILITY_PRICE_ORACLES="{\"OST\":{\"USD\":\"$(cat ./tools/deploy/po1.t
 echo '\nexport OST_UTILITY_PRICE_ORACLES='\'$OST_UTILITY_PRICE_ORACLES\'>>../../../mocha_test/scripts/env_vars.sh
 echo OST_UTILITY_PRICE_ORACLES=$OST_UTILITY_PRICE_ORACLES
 
-node ./test/scripts/set_price.js OST USD 0.5 0x12A05F200
-node ./test/scripts/set_price.js OST EUR 0.2 0x12A05F200
-node ./test/scripts/set_price.js ETH USD 20.2 0x12A05F200
+node ./test/scripts/set_price.js OST USD 0.5 0x12A05F200 $PRICE_ORACLE_CONFIG_STRATEGY_FILE_NAME
+node ./test/scripts/set_price.js OST EUR 0.2 0x12A05F200 $PRICE_ORACLE_CONFIG_STRATEGY_FILE_NAME
+node ./test/scripts/set_price.js ETH USD 20.2 0x12A05F200 $PRICE_ORACLE_CONFIG_STRATEGY_FILE_NAME
 
 rm ./tools/deploy/po1.txt
 rm ./tools/deploy/po2.txt
