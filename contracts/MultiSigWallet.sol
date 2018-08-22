@@ -130,8 +130,8 @@ contract MultiSigWallet {
 
         require(
             _required <= _walletCount &&
-        _required != 0 &&
-        _walletCount != 0,
+            _required != 0 &&
+            _walletCount != 0,
             "Requirement to be set is incorrect"
         );
         _;
