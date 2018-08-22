@@ -60,7 +60,7 @@ contract TokenHolderNew is MultiSigWallet {
     );
 
     event RuleExecuted(
-        address _to,
+        address indexed _to,
         uint256 _nonce,
         bool _status
     );
