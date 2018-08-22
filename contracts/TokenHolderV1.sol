@@ -122,8 +122,8 @@ contract TokenHolderV1 is MultiSigWalletV1 {
         uint8 _required,
         address[] _wallets
     )
-    public
-    MultiSigWalletV1(_wallets, _required)
+        public
+        MultiSigWalletV1(_wallets, _required)
     {
         require(
             _brandedToken != address(0),
@@ -161,9 +161,9 @@ contract TokenHolderV1 is MultiSigWalletV1 {
         uint256 _spendingLimit,
         bool _proposeOrConfirm
     )
-    public
-    onlyWallet
-    returns (bytes32 transactionId_)
+        public
+        onlyWallet
+        returns (bytes32 transactionId_)
     {
         require(
             _sessionLock != bytes32(0),
@@ -211,9 +211,9 @@ contract TokenHolderV1 is MultiSigWalletV1 {
         bytes32 _sessionLock,
         bool _proposeOrConfirm
     )
-    public
-    onlyWallet
-    returns (bytes32 transactionId_)
+        public
+        onlyWallet
+        returns (bytes32 transactionId_)
     {
         require(
             _sessionLock != bytes32(0),
@@ -267,9 +267,9 @@ contract TokenHolderV1 is MultiSigWalletV1 {
         bytes32 _hashLock,
         bool _proposeOrConfirm
     )
-    public
-    onlyWallet
-    returns (bytes32 transactionId_)
+        public
+        onlyWallet
+        returns (bytes32 transactionId_)
     {
         transactionId_ = keccak256(abi.encodePacked(
                 _amount,
@@ -310,9 +310,9 @@ contract TokenHolderV1 is MultiSigWalletV1 {
         uint256 _amount,
         bytes32 _spendingSessionLock
     )
-    public
-    onlyTokenRules
-    returns (bool /** success */)
+        public
+        onlyTokenRules
+        returns (bool /** success */)
     {
         require(
             _spendingSessionLock != bytes32(0),
@@ -348,9 +348,9 @@ contract TokenHolderV1 is MultiSigWalletV1 {
         address _beneficiary,
         bytes32 _spendingSessionLock
     )
-    public
-    onlyTokenRules
-    returns (bool /** success */)
+        public
+        onlyTokenRules
+        returns (bool /** success */)
     {
         require(
             _spendingSessionLock != bytes32(0),
@@ -382,9 +382,9 @@ contract TokenHolderV1 is MultiSigWalletV1 {
         uint256 _amount,
         bytes32 _spendingSessionLock
     )
-    public
-    onlyTokenRules
-    returns (uint256 _updatedAllowanceAmount)
+        public
+        onlyTokenRules
+        returns (uint256 _updatedAllowanceAmount)
     {
         require(
             _spendingSessionLock != bytes32(0),
@@ -424,9 +424,9 @@ contract TokenHolderV1 is MultiSigWalletV1 {
         uint256 _amount,
         bytes32 _spendingSessionLock
     )
-    public
-    onlyTokenRules
-    returns (uint256 _updatedAllowanceAmount)
+        public
+        onlyTokenRules
+        returns (uint256 _updatedAllowanceAmount)
     {
         require(
             _spendingSessionLock != bytes32(0),
@@ -460,8 +460,8 @@ contract TokenHolderV1 is MultiSigWalletV1 {
     function updateSessionLock(
         bytes32 _newSessionLock
     )
-    private
-    returns (bool /* success */)
+        private
+        returns (bool /* success */)
     {
         bytes32 oldSessionLock;
 
@@ -499,7 +499,7 @@ contract TokenHolderV1 is MultiSigWalletV1 {
         bytes32 _sessionLock,
         uint256 _spendingLimit
     )
-    private
+        private
     {
         sessionLocks[_sessionLock].spendingLimit = _spendingLimit;
         sessionLocks[_sessionLock].isPresent = true;

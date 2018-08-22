@@ -102,8 +102,8 @@ contract TokenHolder is MultiSigWallet {
         uint8 _required,
         address[] _wallets
     )
-    public
-    MultiSigWallet(_wallets, _required)
+        public
+        MultiSigWallet(_wallets, _required)
     {
         require(
             _brandedToken != address(0),
@@ -139,9 +139,9 @@ contract TokenHolder is MultiSigWallet {
         uint256 _spendingLimit,
         uint256 _expirationHeight
     )
-    public
-    onlyWallet
-    returns (bytes32 transactionId_)
+        public
+        onlyWallet
+        returns (bytes32 transactionId_)
     {
         require(
             _ephemeralKey != address(0),
@@ -197,9 +197,9 @@ contract TokenHolder is MultiSigWallet {
     function revokeSession(
         address _ephemeralKey
     )
-    public
-    onlyWallet
-    returns (bytes32 transactionId_)
+        public
+        onlyWallet
+        returns (bytes32 transactionId_)
     {
         require(
             _ephemeralKey != address(0),
@@ -243,9 +243,9 @@ contract TokenHolder is MultiSigWallet {
         address _beneficiary,
         bytes32 _hashLock
     )
-    public
-    onlyWallet
-    returns (bytes32 transactionId_)
+        public
+        onlyWallet
+        returns (bytes32 transactionId_)
     {
         transactionId_ = keccak256(abi.encodePacked(
                 _amount,
@@ -295,8 +295,8 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _r,
         bytes32 _s
     )
-    public
-    returns (bool executionResult_ /* success */)
+        public
+        returns (bool executionResult_ /* success */)
     {
         require(
             _to != address(0),
@@ -361,8 +361,8 @@ contract TokenHolder is MultiSigWallet {
         uint256 _fee,
         address _beneficiary
     )
-    public
-    returns (bool /** success */)
+        public
+        returns (bool /** success */)
     {
 
         //        BrandedToken(brandedToken).approve(
@@ -398,8 +398,8 @@ contract TokenHolder is MultiSigWallet {
         bytes _data,
         uint256 _nonce
     )
-    private
-    returns (bytes32)
+        private
+        returns (bytes32)
     {
         bytes4 callPrefix;
         assembly{
@@ -436,7 +436,7 @@ contract TokenHolder is MultiSigWallet {
         uint256 _spendingLimit,
         uint256 _expirationHeight
     )
-    private
+        private
     {
         ephemeralKeys[_ephemeralKey].spendingLimit = _spendingLimit;
         ephemeralKeys[_ephemeralKey].nonce = 0;
@@ -456,8 +456,8 @@ contract TokenHolder is MultiSigWallet {
     function isAuthorizedEphemeralKey(
         address _ephemeralKey
     )
-    private
-    returns (bool /** success status */)
+        private
+        returns (bool /** success status */)
     {
         return ephemeralKeys[_ephemeralKey].spendingLimit > 0;
     }

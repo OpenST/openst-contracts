@@ -149,8 +149,8 @@ contract MultiSigWalletV1 {
         address[] _wallets,
         uint8 _required
     )
-    public
-    validRequirement(uint8(_wallets.length), _required)
+        public
+        validRequirement(uint8(_wallets.length), _required)
     {
         require(_wallets.length > 0,"Wallets cannot be empty");
         require(_required > 0,"Atleast one confirmation is required");
@@ -188,10 +188,10 @@ contract MultiSigWalletV1 {
         address _wallet,
         bool _proposeOrConfirm
     )
-    onlyWallet
-    validRequirement(uint8(wallets.length + 1), required)
-    public
-    returns (bytes32 transactionId_)
+        onlyWallet
+        validRequirement(uint8(wallets.length + 1), required)
+        public
+        returns (bytes32 transactionId_)
     {
         require(_wallet != 0, "Wallet address should not be null");
         require(!isWallet[_wallet], "Wallet address doesnt exist");
@@ -235,10 +235,10 @@ contract MultiSigWalletV1 {
         address _wallet,
         bool _proposeOrConfirm
     )
-    onlyWallet
-    validRequirement(uint8(wallets.length - 1), required)
-    public
-    returns (bytes32 transactionId_)
+        onlyWallet
+        validRequirement(uint8(wallets.length - 1), required)
+        public
+        returns (bytes32 transactionId_)
     {
         require(_wallet != 0, "Wallet address should not be null");
         require(
@@ -297,9 +297,9 @@ contract MultiSigWalletV1 {
         address _newWallet,
         bool _proposeOrConfirm
     )
-    public
-    onlyWallet
-    returns(bytes32 transactionId_)
+        public
+        onlyWallet
+        returns(bytes32 transactionId_)
     {
         require(!isWallet[_oldWallet], "Wallet address doesn't exist");
 
@@ -348,10 +348,10 @@ contract MultiSigWalletV1 {
         uint8 _required,
         bool _proposeOrConfirm
     )
-    public
-    onlyWallet
-    validRequirement(uint8(wallets.length), _required)
-    returns(bytes32 transactionId_)
+        public
+        onlyWallet
+        validRequirement(uint8(wallets.length), _required)
+        returns(bytes32 transactionId_)
     {
         //_proposeOrConfirm is not used in encode to ensure we get same
         // transactionId_ for same set of parameters in propose and confirm flow.
@@ -391,9 +391,9 @@ contract MultiSigWalletV1 {
         bytes32 _transactionId,
         bool _proposeOrConfirm
     )
-    public
-    onlyWallet
-    returns(bool /*success*/)
+        public
+        onlyWallet
+        returns(bool /*success*/)
     {
         require(
             confirmations[_transactionId].status != 2,
@@ -433,9 +433,9 @@ contract MultiSigWalletV1 {
      */
     function isConfirmed(
         bytes32 _transactionId)
-    public
-    view
-    returns (bool)
+        public
+        view
+        returns (bool)
     {
         uint8 count = 0;
         for (uint8 i = 0; i < wallets.length; i++) {
@@ -462,7 +462,7 @@ contract MultiSigWalletV1 {
     function performProposeTransaction(
         bytes32 _transactionId
     )
-    internal
+        internal
     {
         confirmations[_transactionId].status = 1;
 
@@ -482,7 +482,7 @@ contract MultiSigWalletV1 {
     function performConfirmTransaction(
         bytes32 _transactionId
     )
-    internal
+        internal
     {
         require(
             confirmations[_transactionId].status == 0,
@@ -517,9 +517,9 @@ contract MultiSigWalletV1 {
     function isAlreadyProposedTransaction(
         bytes32 _transactionId
     )
-    internal
-    view
-    returns (bool /* success */)
+        internal
+        view
+        returns (bool /* success */)
     {
         return (confirmations[_transactionId].status == 1);
     }
@@ -535,9 +535,9 @@ contract MultiSigWalletV1 {
     function isTransactionExecuted(
         bytes32 _transactionId
     )
-    internal
-    view
-    returns(bool /* success */)
+        internal
+        view
+        returns(bool /* success */)
     {
         return (confirmations[_transactionId].status == 2);
     }
