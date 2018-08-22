@@ -29,43 +29,43 @@ pragma solidity ^0.4.23;
  *         It is inherited by TokenHolder.sol.
  *
  */
-contract MultiSigWallet {
+contract MultiSigWalletV1 {
 
     /* Events */
 
     event Propose(
-        address indexed _sender,
-        bytes32 _transactionId
+        bytes32 indexed _transactionId,
+        address indexed _sender
     );
 
     event ConfirmationDone(
-        address indexed _sender,
-        bytes32 indexed _transactionId
+        bytes32 indexed _transactionId,
+        address indexed _sender
     );
 
     event Revocation(
-        address indexed _sender,
-        bytes32 indexed _transactionId
+        bytes32 indexed _transactionId,
+        address indexed _sender
     );
 
     event Execution(
-        address indexed _sender,
-        bytes32 indexed _transactionId
+        bytes32 indexed _transactionId,
+        address indexed _sender
     );
 
     event ReplaceWallet(
         address indexed _sender,
-        address _oldWallet,
-        address _newWallet
+        address indexed _oldWallet,
+        address indexed _newWallet
     );
 
     event WalletAddition(
-        address indexed _sender,
+        bytes32 indexed _transactionId,
         address indexed _wallet
     );
 
     event WalletRemoval(
-        address indexed _sender,
+        bytes32 indexed _transactionId,
         address indexed _wallet
     );
 
@@ -215,7 +215,7 @@ contract MultiSigWallet {
             if (isTransactionExecuted(transactionId_)) {
                 isWallet[_wallet] = true;
                 wallets.push(_wallet);
-                emit WalletAddition(msg.sender, _wallet);
+                emit WalletAddition(transactionId_, _wallet);
             }
         }
         return transactionId_;
@@ -275,7 +275,7 @@ contract MultiSigWallet {
                     required = uint8(wallets.length);
                     emit RequirementChange(uint8(wallets.length));
                 }
-                emit WalletRemoval(msg.sender, _wallet);
+                emit WalletRemoval(transactionId_, _wallet);
             }
         }
         return transactionId_;
@@ -416,8 +416,8 @@ contract MultiSigWallet {
             if(isTransactionExecuted(_transactionId)){
                 confirmations[_transactionId].isConfirmedBy[msg.sender] = false;
                 emit Revocation(
-                    msg.sender,
-                    _transactionId
+                    _transactionId,
+                    msg.sender
                 );
             }
         }
@@ -467,8 +467,8 @@ contract MultiSigWallet {
         confirmations[_transactionId].status = 1;
 
         emit Propose(
-            msg.sender,
-            _transactionId
+            _transactionId,
+            msg.sender
         );
     }
 
@@ -495,8 +495,8 @@ contract MultiSigWallet {
 
         confirmations[_transactionId].isConfirmedBy[msg.sender] = true;
         emit ConfirmationDone(
-            msg.sender,
-            _transactionId
+            _transactionId,
+            msg.sender
         );
         if (isAlreadyProposedTransaction(_transactionId)) {
             if (isConfirmed(_transactionId)) {

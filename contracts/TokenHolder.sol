@@ -34,7 +34,7 @@ import "./MultiSigWallet.sol";
  *
  */
 // TODO Implement requestRedemption
-contract TokenHolderNew is MultiSigWallet {
+contract TokenHolder is MultiSigWallet {
 
     /* Usings */
 
@@ -102,8 +102,8 @@ contract TokenHolderNew is MultiSigWallet {
         uint8 _required,
         address[] _wallets
     )
-        public
-        MultiSigWallet(_wallets, _required)
+    public
+    MultiSigWallet(_wallets, _required)
     {
         require(
             _brandedToken != address(0),
@@ -139,9 +139,9 @@ contract TokenHolderNew is MultiSigWallet {
         uint256 _spendingLimit,
         uint256 _expirationHeight
     )
-        public
-        onlyWallet
-        returns (bytes32 transactionId_)
+    public
+    onlyWallet
+    returns (bytes32 transactionId_)
     {
         require(
             _ephemeralKey != address(0),
@@ -166,7 +166,7 @@ contract TokenHolderNew is MultiSigWallet {
                 _expirationHeight,
                 address(this),
                 "authorizeSession"
-        ));
+            ));
 
         proposeTransaction(transactionId_);
         confirmTransaction(transactionId_);
@@ -197,9 +197,9 @@ contract TokenHolderNew is MultiSigWallet {
     function revokeSession(
         address _ephemeralKey
     )
-        public
-        onlyWallet
-        returns (bytes32 transactionId_)
+    public
+    onlyWallet
+    returns (bytes32 transactionId_)
     {
         require(
             _ephemeralKey != address(0),
@@ -214,7 +214,7 @@ contract TokenHolderNew is MultiSigWallet {
                 _ephemeralKey,
                 address(this),
                 "revokeSession"
-        ));
+            ));
 
         proposeTransaction(transactionId_);
         confirmTransaction(transactionId_);
@@ -243,9 +243,9 @@ contract TokenHolderNew is MultiSigWallet {
         address _beneficiary,
         bytes32 _hashLock
     )
-        public
-        onlyWallet
-        returns (bytes32 transactionId_)
+    public
+    onlyWallet
+    returns (bytes32 transactionId_)
     {
         transactionId_ = keccak256(abi.encodePacked(
                 _amount,
@@ -254,7 +254,7 @@ contract TokenHolderNew is MultiSigWallet {
                 _hashLock,
                 address(this),
                 "redeem"
-        ));
+            ));
 
         proposeTransaction(transactionId_);
         confirmTransaction(transactionId_);
@@ -295,8 +295,8 @@ contract TokenHolderNew is MultiSigWallet {
         bytes32 _r,
         bytes32 _s
     )
-        public
-        returns (bool executionResult_ /* success */)
+    public
+    returns (bool executionResult_ /* success */)
     {
         require(
             _to != address(0),
@@ -318,7 +318,7 @@ contract TokenHolderNew is MultiSigWallet {
             isAuthorizedEphemeralKey(signer),
             "Invalid ephemeral key!"
         );
-        ephemeralKeyData = ephemeralKeys[signer];
+        EphemeralKeyData storage ephemeralKeyData = ephemeralKeys[signer];
         require(
             ephemeralKeyData.expirationHeight >= block.number,
             "ephemeral key has expired!"
@@ -335,7 +335,7 @@ contract TokenHolderNew is MultiSigWallet {
             ephemeralKeyData.spendingLimit
         );
         executionResult_ = address(_to).call(_data);
-        emit RuleExecuted(_to, executionResult_, _nonce);
+        emit RuleExecuted(_to, _nonce, executionResult_);
         BrandedToken(brandedToken).approve(
             address(tokenRules),
             0
@@ -351,8 +351,7 @@ contract TokenHolderNew is MultiSigWallet {
      * @param _amount amount of tokens to transfer.
      * @param _fee Fee to be paid.
      * @param _beneficiary address to whom amount needs to transfer.
-     * @param _spendingSessionLock session lock which will be spent
-     *        for this transaction.
+     *
      *
      * @return the success/failure status of transfer method
      */
@@ -362,19 +361,19 @@ contract TokenHolderNew is MultiSigWallet {
         uint256 _fee,
         address _beneficiary
     )
-        public
-        returns (bool /** success */)
+    public
+    returns (bool /** success */)
     {
 
-        BrandedToken(brandedToken).approve(
-            address(coGateway),
-            ephemeralKeyData.spendingLimit
-        );
-        require(CoGateway(coGateway).redeem());
-        BrandedToken(brandedToken).approve(
-            address(coGateway),
-            0
-        );
+        //        BrandedToken(brandedToken).approve(
+        //            address(coGateway),
+        //            ephemeralKeyData.spendingLimit
+        //        );
+        //        require(CoGateway(coGateway).redeem());
+        //        BrandedToken(brandedToken).approve(
+        //            address(coGateway),
+        //            0
+        //        );
 
     }
 
@@ -399,25 +398,30 @@ contract TokenHolderNew is MultiSigWallet {
         bytes _data,
         uint256 _nonce
     )
-        private
-        returns (bytes32)
+    private
+    returns (bytes32)
     {
+        bytes4 callPrefix;
+        assembly{
+            callPrefix := mload(add(_data, 4))
+        }
+
         return keccak256(abi.encodePacked(
-            byte(0x19), // Starting a transaction with byte(0x19) ensure the signed data from being a valid ethereum transaction.
-            byte(0), // The second argument is a version control byte.
-            _from, // The from field will always be the contract executing the code.
-            _to,
-            0, // the amount in ether to be sent.
-            _data,
-            _nonce,
-            0, // gasPrice
-            0, // gasLimit
-            0, // gasToken
-            bytes4(data), // 4 byte standard call prefix of the function to be called in the from contract.
-                         // This guarantees that a signed message can be only executed in a single instance.
-            0, // 0 for a standard call, 1 for a DelegateCall and 0 for a create opcode
-            '' // extraHash is always hashed at the end. This is done to increase future compatibility of the standard.
-        ));
+                byte(0x19), // Starting a transaction with byte(0x19) ensure the signed data from being a valid ethereum transaction.
+                byte(0), // The second argument is a version control byte.
+                _from, // The from field will always be the contract executing the code.
+                _to,
+                uint8(0), // the amount in ether to be sent.
+                _data,
+                _nonce,
+                uint8(0), // gasPrice
+                uint8(0), // gasLimit
+                uint8(0), // gasToken
+                callPrefix, // 4 byte standard call prefix of the function to be called in the from contract.
+            // This guarantees that a signed message can be only executed in a single instance.
+                uint8(0), // 0 for a standard call, 1 for a DelegateCall and 0 for a create opcode
+                '' // extraHash is always hashed at the end. This is done to increase future compatibility of the standard.
+            ));
     }
 
     /**
@@ -432,7 +436,7 @@ contract TokenHolderNew is MultiSigWallet {
         uint256 _spendingLimit,
         uint256 _expirationHeight
     )
-        private
+    private
     {
         ephemeralKeys[_ephemeralKey].spendingLimit = _spendingLimit;
         ephemeralKeys[_ephemeralKey].nonce = 0;
@@ -452,9 +456,8 @@ contract TokenHolderNew is MultiSigWallet {
     function isAuthorizedEphemeralKey(
         address _ephemeralKey
     )
-        private
-        pure
-        returns (bool /** success status */)
+    private
+    returns (bool /** success status */)
     {
         return ephemeralKeys[_ephemeralKey].spendingLimit > 0;
     }

@@ -130,8 +130,8 @@ contract MultiSigWallet {
 
         require(
             _required <= _walletCount &&
-            _required != 0 &&
-            _walletCount != 0,
+        _required != 0 &&
+        _walletCount != 0,
             "Requirement to be set is incorrect"
         );
         _;
@@ -148,8 +148,8 @@ contract MultiSigWallet {
         address[] _wallets,
         uint8 _required
     )
-        public
-        validRequirement(uint8(_wallets.length), _required)
+    public
+    validRequirement(uint8(_wallets.length), _required)
     {
         require(_wallets.length > 0,"Wallets cannot be empty");
         require(_required > 0,"Atleast one confirmation is required");
@@ -184,10 +184,10 @@ contract MultiSigWallet {
     function addWallet(
         address _wallet
     )
-        onlyWallet
-        validRequirement(uint8(wallets.length + 1), required)
-        public
-        returns (bytes32 transactionId_)
+    onlyWallet
+    validRequirement(uint8(wallets.length + 1), required)
+    public
+    returns (bytes32 transactionId_)
     {
         require(_wallet != 0, "Wallet address should not be null");
         require(!isWallet[_wallet], "Wallet address already exist");
@@ -223,10 +223,10 @@ contract MultiSigWallet {
     function removeWallet(
         address _wallet
     )
-        onlyWallet
-        validRequirement(uint8(wallets.length - 1), required)
-        public
-        returns (bytes32 transactionId_)
+    onlyWallet
+    validRequirement(uint8(wallets.length - 1), required)
+    public
+    returns (bytes32 transactionId_)
     {
         require(_wallet != 0, "Wallet address should not be null");
         require(
@@ -277,9 +277,9 @@ contract MultiSigWallet {
         address _oldWallet,
         address _newWallet
     )
-        public
-        onlyWallet
-        returns(bytes32 transactionId_)
+    public
+    onlyWallet
+    returns(bytes32 transactionId_)
     {
         require(!isWallet[_oldWallet], "Wallet address doesn't exist");
 
@@ -318,10 +318,10 @@ contract MultiSigWallet {
     function changeRequirement(
         uint8 _required
     )
-        public
-        onlyWallet
-        validRequirement(uint8(wallets.length), _required)
-        returns(bytes32 transactionId_)
+    public
+    onlyWallet
+    validRequirement(uint8(wallets.length), _required)
+    returns(bytes32 transactionId_)
     {
         //  transactionId_ for same set of parameters in propose and
         //  confirm flow.
@@ -353,9 +353,9 @@ contract MultiSigWallet {
     function revokeConfirmation(
         bytes32 _transactionId
     )
-        public
-        onlyWallet
-        returns(bool /*success*/)
+    public
+    onlyWallet
+    returns(bool /*success*/)
     {
         require(
             confirmations[_transactionId].status != 2,
@@ -371,8 +371,8 @@ contract MultiSigWallet {
         if(isTransactionExecuted(_transactionId)){
             confirmations[_transactionId].isConfirmedBy[msg.sender] = false;
             emit Revocation(
-                msg.sender,
-                _transactionId
+                _transactionId,
+                msg.sender
             );
         }
 
@@ -388,9 +388,9 @@ contract MultiSigWallet {
      */
     function isRequirementAchieved(
         bytes32 _transactionId)
-        public
-        view
-        returns (bool)
+    public
+    view
+    returns (bool)
     {
         uint8 count = 0;
         for (uint8 i = 0; i < wallets.length; i++) {
@@ -417,7 +417,7 @@ contract MultiSigWallet {
     function proposeTransaction(
         bytes32 _transactionId
     )
-        internal
+    internal
     {
         if (isAlreadyProposedTransaction(_transactionId)){
             return;
@@ -425,8 +425,8 @@ contract MultiSigWallet {
         confirmations[_transactionId].status = 1;
 
         emit Propose(
-            msg.sender,
-            _transactionId
+            _transactionId,
+            msg.sender
         );
     }
 
@@ -440,7 +440,7 @@ contract MultiSigWallet {
     function confirmTransaction(
         bytes32 _transactionId
     )
-        internal
+    internal
     {
         require(
             confirmations[_transactionId].status == 1,
@@ -453,8 +453,9 @@ contract MultiSigWallet {
 
         confirmations[_transactionId].isConfirmedBy[msg.sender] = true;
         emit ConfirmationDone(
-            msg.sender,
-            _transactionId
+            _transactionId,
+            msg.sender
+
         );
 
         if (isAlreadyProposedTransaction(_transactionId)) {
@@ -476,9 +477,9 @@ contract MultiSigWallet {
     function isAlreadyProposedTransaction(
         bytes32 _transactionId
     )
-        internal
-        view
-        returns (bool /* success */)
+    internal
+    view
+    returns (bool /* success */)
     {
         return (confirmations[_transactionId].status == 1);
     }
@@ -494,9 +495,9 @@ contract MultiSigWallet {
     function isTransactionExecuted(
         bytes32 _transactionId
     )
-        internal
-        view
-        returns(bool /* success */)
+    internal
+    view
+    returns(bool /* success */)
     {
         return (confirmations[_transactionId].status == 2);
     }

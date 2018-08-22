@@ -23,7 +23,7 @@ pragma solidity ^0.4.23;
 
 import "./SafeMath.sol";
 import "./BrandedToken.sol";
-import "./MultiSigWallet.sol";
+import "./MultiSigWalletV1.sol";
 
 
 /**
@@ -33,7 +33,7 @@ import "./MultiSigWallet.sol";
  *         scalable key management solutions for mainstream apps.
  *
  */
-contract TokenHolder is MultiSigWallet {
+contract TokenHolderV1 is MultiSigWalletV1 {
 
     /* Usings */
 
@@ -122,8 +122,8 @@ contract TokenHolder is MultiSigWallet {
         uint8 _required,
         address[] _wallets
     )
-        public
-        MultiSigWallet(_wallets, _required)
+    public
+    MultiSigWalletV1(_wallets, _required)
     {
         require(
             _brandedToken != address(0),
@@ -161,9 +161,9 @@ contract TokenHolder is MultiSigWallet {
         uint256 _spendingLimit,
         bool _proposeOrConfirm
     )
-        public
-        onlyWallet
-        returns (bytes32 transactionId_)
+    public
+    onlyWallet
+    returns (bytes32 transactionId_)
     {
         require(
             _sessionLock != bytes32(0),
@@ -179,7 +179,7 @@ contract TokenHolder is MultiSigWallet {
                 _spendingLimit,
                 this,
                 "authorizeSession"
-        ));
+            ));
         if (_proposeOrConfirm) {
             require(
                 !isAlreadyProposedTransaction(transactionId_),
@@ -211,9 +211,9 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _sessionLock,
         bool _proposeOrConfirm
     )
-        public
-        onlyWallet
-        returns (bytes32 transactionId_)
+    public
+    onlyWallet
+    returns (bytes32 transactionId_)
     {
         require(
             _sessionLock != bytes32(0),
@@ -228,7 +228,7 @@ contract TokenHolder is MultiSigWallet {
                 _sessionLock,
                 this,
                 "revokeSession"
-        ));
+            ));
         if (_proposeOrConfirm) {
             require(
                 !isAlreadyProposedTransaction(transactionId_),
@@ -267,9 +267,9 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _hashLock,
         bool _proposeOrConfirm
     )
-        public
-        onlyWallet
-        returns (bytes32 transactionId_)
+    public
+    onlyWallet
+    returns (bytes32 transactionId_)
     {
         transactionId_ = keccak256(abi.encodePacked(
                 _amount,
@@ -278,7 +278,7 @@ contract TokenHolder is MultiSigWallet {
                 _hashLock,
                 this,
                 "redeem"
-        ));
+            ));
         if (_proposeOrConfirm) {
             require(
                 !isAlreadyProposedTransaction(transactionId_),
@@ -310,9 +310,9 @@ contract TokenHolder is MultiSigWallet {
         uint256 _amount,
         bytes32 _spendingSessionLock
     )
-        public
-        onlyTokenRules
-        returns (bool /** success */)
+    public
+    onlyTokenRules
+    returns (bool /** success */)
     {
         require(
             _spendingSessionLock != bytes32(0),
@@ -348,9 +348,9 @@ contract TokenHolder is MultiSigWallet {
         address _beneficiary,
         bytes32 _spendingSessionLock
     )
-        public
-        onlyTokenRules
-        returns (bool /** success */)
+    public
+    onlyTokenRules
+    returns (bool /** success */)
     {
         require(
             _spendingSessionLock != bytes32(0),
@@ -382,9 +382,9 @@ contract TokenHolder is MultiSigWallet {
         uint256 _amount,
         bytes32 _spendingSessionLock
     )
-        public
-        onlyTokenRules
-        returns (uint256 _updatedAllowanceAmount)
+    public
+    onlyTokenRules
+    returns (uint256 _updatedAllowanceAmount)
     {
         require(
             _spendingSessionLock != bytes32(0),
@@ -424,9 +424,9 @@ contract TokenHolder is MultiSigWallet {
         uint256 _amount,
         bytes32 _spendingSessionLock
     )
-        public
-        onlyTokenRules
-        returns (uint256 _updatedAllowanceAmount)
+    public
+    onlyTokenRules
+    returns (uint256 _updatedAllowanceAmount)
     {
         require(
             _spendingSessionLock != bytes32(0),
@@ -460,15 +460,15 @@ contract TokenHolder is MultiSigWallet {
     function updateSessionLock(
         bytes32 _newSessionLock
     )
-        private
-        returns (bool /* success */)
+    private
+    returns (bool /* success */)
     {
         bytes32 oldSessionLock;
 
         for(uint8 i = 0; i < maxFaultToleranceCount; i++) {
             oldSessionLock = keccak256(abi.encodePacked(
                     _newSessionLock
-            ));
+                ));
             /** if entry exists in sessionLocks mapping */
             if (sessionLocks[oldSessionLock].isPresent) {
                 uint256 spendingLimit = sessionLocks[oldSessionLock].spendingLimit;
@@ -499,7 +499,7 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _sessionLock,
         uint256 _spendingLimit
     )
-        private
+    private
     {
         sessionLocks[_sessionLock].spendingLimit = _spendingLimit;
         sessionLocks[_sessionLock].isPresent = true;
