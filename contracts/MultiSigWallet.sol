@@ -231,7 +231,7 @@ contract MultiSigWallet {
         require(_wallet != 0, "Wallet address should not be null");
         require(
             isWallet[_wallet],
-            "Wallet should be added to proceed for address(this) transaction"
+            "Wallet should be added to proceed for this transaction"
         );
 
         //  transactionId_ for same set of parameters in propose and
