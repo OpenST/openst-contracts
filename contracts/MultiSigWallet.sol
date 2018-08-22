@@ -34,29 +34,29 @@ contract MultiSigWallet {
     /* Events */
 
     event Propose(
-        address indexed _sender,
-        bytes32 _transactionId
+        bytes32 indexed _transactionId,
+        address indexed _sender
     );
 
     event ConfirmationDone(
-        address indexed _sender,
-        bytes32 indexed _transactionId
+        bytes32 indexed _transactionId,
+        address indexed _sender
     );
 
     event Revocation(
-        address indexed _sender,
-        bytes32 indexed _transactionId
+        bytes32 indexed _transactionId,
+        address indexed _sender
     );
 
     event Execution(
-        address indexed _sender,
-        bytes32 indexed _transactionId
+        bytes32 indexed _transactionId,
+        address indexed _sender
     );
 
     event ReplaceWallet(
         address indexed _sender,
-        address _oldWallet,
-        address _newWallet
+        address indexed _oldWallet,
+        address indexed _newWallet
     );
 
     event WalletAddition(
@@ -290,7 +290,7 @@ contract MultiSigWallet {
         );
 
         proposeTransaction(transactionId_);
-        performConfirmTransaction(transactionId_);
+        confirmTransaction(transactionId_);
         // old wallet is deleted and new wallet entry is done.
         if(isTransactionExecuted(transactionId_)){
             for (uint8 i = 0; i < wallets.length; i++)
@@ -330,7 +330,7 @@ contract MultiSigWallet {
         );
 
         proposeTransaction(transactionId_);
-        performConfirmTransaction(transactionId_);
+        confirmTransaction(transactionId_);
 
         if(isTransactionExecuted(transactionId_)) {
             // Old requirements i.e. number of required confirmations for
@@ -359,15 +359,15 @@ contract MultiSigWallet {
     {
         require(
             confirmations[_transactionId].status != 2,
-            "Cannot revoke this transaction because it is already executed"
+            "Cannot revoke address(this) transaction because it is already executed"
         );
         require(
             confirmations[_transactionId].isConfirmedBy[msg.sender],
-            "Transaction is not confirmed by this wallet"
+            "Transaction is not confirmed by address(this) wallet"
         );
 
         proposeTransaction(_transactionId);
-        performConfirmTransaction(_transactionId);
+        confirmTransaction(_transactionId);
         if(isTransactionExecuted(_transactionId)){
             confirmations[_transactionId].isConfirmedBy[msg.sender] = false;
             emit Revocation(
@@ -419,7 +419,7 @@ contract MultiSigWallet {
     )
         internal
     {
-        if (isAlreadyProposedTransaction(transactionId_)){
+        if (isAlreadyProposedTransaction(_transactionId)){
             return;
         }
         confirmations[_transactionId].status = 1;
@@ -434,7 +434,7 @@ contract MultiSigWallet {
      * @notice It is used to send the transaction to confirmation state by the
      *         wallet who has sent the transaction.
      *
-     * @param _transactionId It marks this transaction id as confirmed against
+     * @param _transactionId It marks address(this) transaction id as confirmed against
      *        the wallet which has sent the transaction.
      */
     function confirmTransaction(
