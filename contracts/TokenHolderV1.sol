@@ -179,7 +179,7 @@ contract TokenHolderV1 is MultiSigWalletV1 {
                 _spendingLimit,
                 this,
                 "authorizeSession"
-            ));
+        ));
         if (_proposeOrConfirm) {
             require(
                 !isAlreadyProposedTransaction(transactionId_),
@@ -228,7 +228,7 @@ contract TokenHolderV1 is MultiSigWalletV1 {
                 _sessionLock,
                 this,
                 "revokeSession"
-            ));
+        ));
         if (_proposeOrConfirm) {
             require(
                 !isAlreadyProposedTransaction(transactionId_),
@@ -278,7 +278,7 @@ contract TokenHolderV1 is MultiSigWalletV1 {
                 _hashLock,
                 this,
                 "redeem"
-            ));
+        ));
         if (_proposeOrConfirm) {
             require(
                 !isAlreadyProposedTransaction(transactionId_),
@@ -468,7 +468,7 @@ contract TokenHolderV1 is MultiSigWalletV1 {
         for(uint8 i = 0; i < maxFaultToleranceCount; i++) {
             oldSessionLock = keccak256(abi.encodePacked(
                     _newSessionLock
-                ));
+            ));
             /** if entry exists in sessionLocks mapping */
             if (sessionLocks[oldSessionLock].isPresent) {
                 uint256 spendingLimit = sessionLocks[oldSessionLock].spendingLimit;
