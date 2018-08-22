@@ -309,7 +309,7 @@ contract TokenHolder is MultiSigWallet {
      *        e.g. Airdrop in case for Airdrop.pay.
      * @param _from it will always be the contract executing the code.
      *        It needs to be tokenholder contract address.
-     *        from enforces TH address to be stored in wallet.
+     *        from enforces TH address to be stored in wallet by sdk.
      * @param _nonce incremental nonce.
      * @param _data the bytecode to be executed.
      *         Use web3 getData method to construct _data.
