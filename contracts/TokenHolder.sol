@@ -391,7 +391,7 @@ contract TokenHolder is MultiSigWallet {
      *  @return bytes32 hashed data
      */
     // TODO byte(0x19) verify with test case. Test by passing bytes as argument.
-    // TODO data should be bytes or bytes32
+    // TODO should _data be hashed
     function getHashedMessage(
         address _to,
         address _from,
