@@ -126,9 +126,9 @@ contract TokenHolderNew is MultiSigWallet {
     /**
      * @notice Authorize session method.
      *
-     * @dev 0 spendingLimit is not a valid amount.
+     * @dev 0 spendingLimit is not allowed.
      *
-     * @param _ephemeralKey session lock to be authorized.
+     * @param _ephemeralKey Ephemeral key to be authorized.
      * @param _spendingLimit max tokens user can spend at a time.
      * @param _expirationHeight expiration height of Ephemeral Key.
      *
@@ -286,7 +286,6 @@ contract TokenHolderNew is MultiSigWallet {
      *
      * @return transaction status is true/false.
      */
-    // TODO _v, _r, _s or signature
     function executeRule(
         address _to,
         address _from,
