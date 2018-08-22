@@ -239,8 +239,9 @@ contract TokenHolderNew is MultiSigWallet {
      */
     function reedem(
         bytes32 _amount,
-        uint256 _nonce,
         address _beneficiary,
+        uint256 _fee,
+        uint256 _nonce,
         bytes32 _hashLock
     )
         public
@@ -263,6 +264,41 @@ contract TokenHolderNew is MultiSigWallet {
         }
 
         return transactionId_;
+    }
+
+    /**
+     * @notice TokenHolder requestRedemption method.
+     *
+     * @param _amount amount of tokens to transfer.
+     * @param _fee Fee to be paid.
+     * @param _beneficiary address to whom amount needs to transfer.
+     * @param _spendingSessionLock session lock which will be spent
+     *        for this transaction.
+     *
+     * @return the success/failure status of transfer method
+     */
+    // TODO Integration with CoGateway Interface
+    function requestRedemption(
+        bytes32 _amount,
+        address _beneficiary,
+        uint256 _fee,
+        uint256 _nonce,
+        bytes32 _hashLock
+    )
+        public
+        returns (bool /** success */)
+    {
+
+        BrandedToken(brandedToken).approve(
+            address(coGateway),
+            ephemeralKeyData.spendingLimit
+        );
+        require(CoGateway(coGateway).redeem());
+        BrandedToken(brandedToken).approve(
+            address(coGateway),
+            0
+        );
+
     }
 
     /**
@@ -342,40 +378,6 @@ contract TokenHolderNew is MultiSigWallet {
         );
 
         return executionResult_;
-    }
-
-    // hash lock as parameter
-    /**
-     * @notice TokenHolder requestRedemption method.
-     *
-     * @param _amount amount of tokens to transfer.
-     * @param _fee Fee to be paid.
-     * @param _beneficiary address to whom amount needs to transfer.
-     * @param _spendingSessionLock session lock which will be spent
-     *        for this transaction.
-     *
-     * @return the success/failure status of transfer method
-     */
-    // TODO Integration with CoGateway Interface
-    function requestRedemption(
-        uint256 _amount,
-        uint256 _fee,
-        address _beneficiary
-    )
-        public
-        returns (bool /** success */)
-    {
-
-        BrandedToken(brandedToken).approve(
-            address(coGateway),
-            ephemeralKeyData.spendingLimit
-        );
-        require(CoGateway(coGateway).redeem());
-        BrandedToken(brandedToken).approve(
-            address(coGateway),
-            0
-        );
-
     }
 
 
