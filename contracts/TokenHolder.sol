@@ -33,7 +33,6 @@ import "./MultiSigWallet.sol";
  *         scalable key management solutions for mainstream apps.
  *
  */
-// TODO Implement requestRedemption
 contract TokenHolder is MultiSigWallet {
 
     /* Usings */
@@ -272,8 +271,6 @@ contract TokenHolder is MultiSigWallet {
      * @param _amount amount of tokens to transfer.
      * @param _fee Fee to be paid.
      * @param _beneficiary address to whom amount needs to transfer.
-     * @param _spendingSessionLock session lock which will be spent
-     *        for this transaction.
      *
      * @return the success/failure status of transfer method
      */
@@ -289,15 +286,15 @@ contract TokenHolder is MultiSigWallet {
         returns (bool /** success */)
     {
 
-        BrandedToken(brandedToken).approve(
-            address(coGateway),
-            ephemeralKeyData.spendingLimit
-        );
-        require(CoGateway(coGateway).redeem());
-        BrandedToken(brandedToken).approve(
-            address(coGateway),
-            0
-        );
+//        BrandedToken(brandedToken).approve(
+//            address(coGateway),
+//            ephemeralKeyData.spendingLimit
+//        );
+//        require(CoGateway(coGateway).redeem());
+//        BrandedToken(brandedToken).approve(
+//            address(coGateway),
+//            0
+//        );
 
     }
 
@@ -401,6 +398,7 @@ contract TokenHolder is MultiSigWallet {
         bytes _data,
         uint256 _nonce
     )
+        view
         private
         returns (bytes32)
     {
@@ -459,6 +457,7 @@ contract TokenHolder is MultiSigWallet {
     function isAuthorizedEphemeralKey(
         address _ephemeralKey
     )
+        view
         private
         returns (bool /** success status */)
     {
