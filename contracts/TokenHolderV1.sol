@@ -23,7 +23,7 @@ pragma solidity ^0.4.23;
 
 import "./SafeMath.sol";
 import "./BrandedToken.sol";
-import "./MultiSigWallet.sol";
+import "./MultiSigWalletV1.sol";
 
 
 /**
@@ -33,7 +33,7 @@ import "./MultiSigWallet.sol";
  *         scalable key management solutions for mainstream apps.
  *
  */
-contract TokenHolder is MultiSigWallet {
+contract TokenHolderV1 is MultiSigWalletV1 {
 
     /* Usings */
 
@@ -123,7 +123,7 @@ contract TokenHolder is MultiSigWallet {
         address[] _wallets
     )
         public
-        MultiSigWallet(_wallets, _required)
+        MultiSigWalletV1(_wallets, _required)
     {
         require(
             _brandedToken != address(0),
