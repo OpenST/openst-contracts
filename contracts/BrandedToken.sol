@@ -127,7 +127,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
             "to address is invalid economy actor!"
         );
 
-        EIP20Token.transfer(_to, _value);
+        super.transfer(_to, _value);
     }
 
     /**
@@ -152,7 +152,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
             "to is invalid economy actor!"
         );
 
-        EIP20Token.transferFrom(_from, _to, _value);
+        super.transferFrom(_from, _to, _value);
     }
 
     /**
@@ -175,7 +175,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
             "spender is invalid economy actor!"
         );
 
-        EIP20Token.approve(_spender, _value);
+        super.approve(_spender, _value);
     }
 
     /**
