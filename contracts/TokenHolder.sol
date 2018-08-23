@@ -301,7 +301,6 @@ contract TokenHolder is MultiSigWallet {
      *
      * @return Redeem execution result is success/failure.
      */
-    // TODO Should fix bounty check will fail the transaction?
     function requestRedemption(
         address _from,
         uint256 _nonce,
@@ -420,7 +419,7 @@ contract TokenHolder is MultiSigWallet {
      *
      *  @return bytes32 hashed data
      */
-    // TODO byte(0x19) verify with test case. Test by passing bytes as argument.
+    // TODO byte(0x19) verify it with test case. Test by passing bytes as argument.
     function getHashedMessage(
         address _from,
         address _to,
