@@ -34,6 +34,7 @@ import "./CoGatewayInterface.sol";
  *         scalable key management solutions for mainstream apps.
  *
  */
+// TODO Import finalized complete coGateway Interface
 contract TokenHolder is MultiSigWallet {
 
     /* Usings */

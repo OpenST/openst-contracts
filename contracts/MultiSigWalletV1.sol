@@ -144,7 +144,6 @@ contract MultiSigWalletV1 {
      * @param _wallets List of initial wallets.
      * @param _required Number of required confirmations.
      */
-    // TODO remove == check
     constructor(
         address[] _wallets,
         uint8 _required
