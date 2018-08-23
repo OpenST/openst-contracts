@@ -226,56 +226,16 @@ contract TokenHolder is MultiSigWallet {
     }
 
     /**
-     * @notice redeem is a multisigwallet operation.
-     *
-     * @param _amount Amount to redeem.
-     * @param _nonce incremental nonce.
-     * @param _beneficiary beneficiary address who will get redeemed amount.
-     * @param _hashLock hash lock. Secret will be used during redeem process
-     *        to unlock the secret.
-     *
-     * @return transactionId_ for the request.
-     */
-    function reedem(
-        bytes32 _amount,
-        address _beneficiary,
-        uint256 _fee,
-        uint256 _nonce,
-        bytes32 _hashLock
-    )
-        public
-        onlyWallet
-        returns (bytes32 transactionId_)
-    {
-        transactionId_ = keccak256(abi.encodePacked(
-                _amount,
-                _nonce,
-                _beneficiary,
-                _hashLock,
-                address(this),
-                "redeem"
-        ));
-
-        proposeTransaction(transactionId_);
-        confirmTransaction(transactionId_);
-        if(isTransactionExecuted(transactionId_)) {
-            // TODO Redeem Integration with CoGateway Interface
-        }
-
-        return transactionId_;
-    }
-
-    /**
      * @notice TokenHolder requestRedemption method.
      *
      * @param _amount amount of tokens to transfer.
      * @param _fee Fee to be paid.
      * @param _beneficiary address to whom amount needs to transfer.
      *
-     * @return the success/failure status of transfer method
+     * @return the success/failure status of transfer method.
      */
     // TODO Integration with CoGateway Interface
-    function requestRedemption(
+    function redeem(
         bytes32 _amount,
         address _beneficiary,
         uint256 _fee,
