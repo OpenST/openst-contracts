@@ -123,11 +123,11 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(
-            isInternalActor[_to] == true,
+            isInternalActor[_to],
             "to address is invalid economy actor!"
         );
 
-        EIP20Token.transfer(_to, _value);
+        super.transfer(_to, _value);
     }
 
     /**
@@ -148,11 +148,11 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(
-            isInternalActor[_to] == true,
+            isInternalActor[_to],
             "to is invalid economy actor!"
         );
 
-        EIP20Token.transferFrom(_from, _to, _value);
+        super.transferFrom(_from, _to, _value);
     }
 
     /**
@@ -171,11 +171,11 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(
-            isInternalActor[_spender] == true,
+            isInternalActor[_spender],
             "spender is invalid economy actor!"
         );
 
-        EIP20Token.approve(_spender, _value);
+        super.approve(_spender, _value);
     }
 
     /**
@@ -198,7 +198,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(
-            (isInternalActor[_beneficiary] == true),
+            (isInternalActor[_beneficiary]),
             "beneficiary is invalid economy actor!"
         );
 

@@ -246,54 +246,54 @@ contract TokenHolderV1 is MultiSigWalletV1 {
 
         return transactionId_;
     }
-
-    /**
-     * @notice redeem multisigwallet operation.
-     *
-     * @param _amount Amount to redeem.
-     * @param _nonce incremental nonce.
-     * @param _beneficiary beneficiary address who will get redeemed amount.
-     * @param _hashLock hash lock. Secret will be used during redeem process
-     *        to unlock the secret.
-     * @param _proposeOrConfirm if true transaction will be proposed
-     *        otherwise confirmation is done.
-     *
-     * @return transactionId_ for the request.
-     */
-    function proposeOrConfirmReedem(
-        bytes32 _amount,
-        uint256 _nonce,
-        address _beneficiary,
-        bytes32 _hashLock,
-        bool _proposeOrConfirm
-    )
-        public
-        onlyWallet
-        returns (bytes32 transactionId_)
-    {
-        transactionId_ = keccak256(abi.encodePacked(
-                _amount,
-                _nonce,
-                _beneficiary,
-                _hashLock,
-                this,
-                "redeem"
-        ));
-        if (_proposeOrConfirm) {
-            require(
-                !isAlreadyProposedTransaction(transactionId_),
-                "Transaction is already proposed!"
-            );
-            performProposeTransaction(transactionId_);
-        } else {
-            performConfirmTransaction(transactionId_);
-            if(isTransactionExecuted(transactionId_)) {
-                // TODO Redeem Integration with CoGateway Interface
-            }
-        }
-
-        return transactionId_;
-    }
+//
+//    /**
+//     * @notice redeem multisigwallet operation.
+//     *
+//     * @param _amount Amount to redeem.
+//     * @param _nonce incremental nonce.
+//     * @param _beneficiary beneficiary address who will get redeemed amount.
+//     * @param _hashLock hash lock. Secret will be used during redeem process
+//     *        to unlock the secret.
+//     * @param _proposeOrConfirm if true transaction will be proposed
+//     *        otherwise confirmation is done.
+//     *
+//     * @return transactionId_ for the request.
+//     */
+//    function proposeOrConfirmReedem(
+//        bytes32 _amount,
+//        uint256 _nonce,
+//        address _beneficiary,
+//        bytes32 _hashLock,
+//        bool _proposeOrConfirm
+//    )
+//        public
+//        onlyWallet
+//        returns (bytes32 transactionId_)
+//    {
+//        transactionId_ = keccak256(abi.encodePacked(
+//                _amount,
+//                _nonce,
+//                _beneficiary,
+//                _hashLock,
+//                this,
+//                "redeem"
+//        ));
+//        if (_proposeOrConfirm) {
+//            require(
+//                !isAlreadyProposedTransaction(transactionId_),
+//                "Transaction is already proposed!"
+//            );
+//            performProposeTransaction(transactionId_);
+//        } else {
+//            performConfirmTransaction(transactionId_);
+//            if(isTransactionExecuted(transactionId_)) {
+//                // TODO Redeem Integration with CoGateway Interface
+//            }
+//        }
+//
+//        return transactionId_;
+//    }
 
     /**
      * @notice TokenHolder transfer method.
@@ -331,37 +331,38 @@ contract TokenHolderV1 is MultiSigWalletV1 {
         return true;
     }
 
-    /**
-     * @notice TokenHolder requestRedemption method.
-     *
-     * @param _amount amount of tokens to transfer.
-     * @param _fee Fee to be paid.
-     * @param _beneficiary address to whom amount needs to transfer.
-     * @param _spendingSessionLock session lock which will be spent
-     *        for this transaction.
-     *
-     * @return the success/failure status of transfer method
-     */
-    function requestRedemption(
-        uint256 _amount,
-        uint256 _fee,
-        address _beneficiary,
-        bytes32 _spendingSessionLock
-    )
-        public
-        onlyTokenRules
-        returns (bool /** success */)
-    {
-        require(
-            _spendingSessionLock != bytes32(0),
-            "Session lock is invalid!"
-        );
-        require(updateSessionLock(_spendingSessionLock));
-
-        // TODO Integration with CoGateway Interface
-
-        return true;
-    }
+//
+//    /**
+//     * @notice TokenHolder requestRedemption method.
+//     *
+//     * @param _amount amount of tokens to transfer.
+//     * @param _fee Fee to be paid.
+//     * @param _beneficiary address to whom amount needs to transfer.
+//     * @param _spendingSessionLock session lock which will be spent
+//     *        for this transaction.
+//     *
+//     * @return the success/failure status of transfer method
+//     */
+//    function requestRedemption(
+//        uint256 _amount,
+//        uint256 _fee,
+//        address _beneficiary,
+//        bytes32 _spendingSessionLock
+//    )
+//        public
+//        onlyTokenRules
+//        returns (bool /** success */)
+//    {
+//        require(
+//            _spendingSessionLock != bytes32(0),
+//            "Session lock is invalid!"
+//        );
+//        require(updateSessionLock(_spendingSessionLock));
+//
+//        // TODO Integration with CoGateway Interface
+//
+//        return true;
+//    }
 
     /**
      * @notice TokenHolder increaseAllowance method.
