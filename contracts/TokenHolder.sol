@@ -24,6 +24,7 @@ pragma solidity ^0.4.23;
 import "./SafeMath.sol";
 import "./BrandedToken.sol";
 import "./MultiSigWallet.sol";
+import "./CoGatewayInterface.sol";
 
 
 /**
@@ -59,6 +60,7 @@ contract TokenHolder is MultiSigWallet {
     );
 
     event RuleExecuted(
+        address indexed _from,
         address indexed _to,
         uint256 _nonce,
         bool _status
@@ -226,50 +228,17 @@ contract TokenHolder is MultiSigWallet {
     }
 
     /**
-     * @notice TokenHolder requestRedemption method.
-     *
-     * @param _amount amount of tokens to transfer.
-     * @param _fee Fee to be paid.
-     * @param _beneficiary address to whom amount needs to transfer.
-     *
-     * @return the success/failure status of transfer method.
-     */
-    // TODO Integration with CoGateway Interface
-    function redeem(
-        bytes32 _amount,
-        address _beneficiary,
-        uint256 _fee,
-        uint256 _nonce,
-        bytes32 _hashLock
-    )
-        public
-        returns (bool /** success */)
-    {
-
-//        BrandedToken(brandedToken).approve(
-//            address(coGateway),
-//            ephemeralKeyData.spendingLimit
-//        );
-//        require(CoGateway(coGateway).redeem());
-//        BrandedToken(brandedToken).approve(
-//            address(coGateway),
-//            0
-//        );
-
-    }
-
-    /**
      * @notice Validate and execute signed messages as per EIP 1077.
      *
      * @dev nonce will be consumed irrespective of assembly call output.
      *      v, r, s are the values for the transaction signature.
      *      They are used to get public key of any ethereum account.
      *
-     * @param _to the target contract the transaction will be executed upon.
-     *        e.g. Airdrop in case for Airdrop.pay.
      * @param _from it will always be the contract executing the code.
      *        It needs to be tokenholder contract address.
      *        from enforces TH address to be stored in wallet by sdk.
+     * @param _to the target contract the transaction will be executed upon.
+     *        e.g. Airdrop in case for Airdrop.pay.
      * @param _nonce incremental nonce.
      * @param _data the bytecode to be executed.
      *         Use web3 getData method to construct _data.
@@ -277,11 +246,11 @@ contract TokenHolder is MultiSigWallet {
      * @param _r It's the output of an ECDSA signature.
      * @param _s It's also the output of an ECDSA signature.
      *
-     * @return transaction status is true/false.
+     * @return Execution result is true/false.
      */
     function executeRule(
-        address _to,
         address _from,
+        address _to,
         uint256 _nonce,
         bytes _data,
         uint8 _v,
@@ -291,36 +260,14 @@ contract TokenHolder is MultiSigWallet {
         public
         returns (bool executionResult_ /* success */)
     {
-        require(
-            _to != address(0),
-            "to address can't be 0"
-        );
-        require(
-            _from == address(this),
-            "From should be tokenholder contract address"
-        );
-        require(
-            _data.length != 0,
-            "Data length can't be 0."
-        );
-
-        // Construct hashed message.
-        bytes32 messageHash = getHashedMessage(_to, _from, _data, _nonce);
-        address signer = ecrecover(messageHash, _v, _r, _s);
-        require(
-            isAuthorizedEphemeralKey(signer),
-            "Invalid ephemeral key!"
-        );
-        EphemeralKeyData storage ephemeralKeyData = ephemeralKeys[signer];
-        require(
-            ephemeralKeyData.expirationHeight >= block.number,
-            "ephemeral key has expired!"
-        );
-        // Consume the nonce
-        ephemeralKeyData.nonce = ephemeralKeyData.nonce + 1;
-        require(
-            ephemeralKeyData.nonce == _nonce,
-            "Invalid nonce!"
+        EphemeralKeyData storage ephemeralKeyData = verifySignature(
+            _from,
+            _to,
+            _nonce,
+            _data,
+            _v,
+            _r,
+            _s
         );
 
         BrandedToken(brandedToken).approve(
@@ -328,7 +275,7 @@ contract TokenHolder is MultiSigWallet {
             ephemeralKeyData.spendingLimit
         );
         executionResult_ = address(_to).call(_data);
-        emit RuleExecuted(_to, _nonce, executionResult_);
+        emit RuleExecuted(_from, _to, _nonce, executionResult_);
         BrandedToken(brandedToken).approve(
             address(tokenRules),
             0
@@ -337,8 +284,131 @@ contract TokenHolder is MultiSigWallet {
         return executionResult_;
     }
 
+    /**
+     * @notice redeem after validating signature.
+     *
+     * @dev requestRedemption will call coGateway redeem.
+     *      coGateway redeem is a payable function so that bounty is deducted from msg.sender.
+     *      msg.sender is workers here.
+     *
+     * @param _from it enforces wallet to store TH address.
+     * @param _nonce incremental nonce.
+     * @param _data the bytecode to be executed.
+     *        It's the bytecode CoGateway redeem function.
+     * @param _v It's the recovery id.
+     * @param _r It's the output of an ECDSA signature.
+     * @param _s It's also the output of an ECDSA signature.
+     *
+     * @return Redeem execution result is success/failure.
+     */
+    // TODO Should fix bounty check will fail the transaction?
+    function requestRedemption(
+        address _from,
+        uint256 _nonce,
+        bytes _data,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    )
+        public
+        payable
+        returns (bool executionResult_ /* success */)
+    {
+        EphemeralKeyData storage ephemeralKeyData = verifySignature(
+            _from,
+            address(coGateway),
+            _nonce,
+            _data,
+            _v,
+            _r,
+            _s
+        );
+
+        BrandedToken(brandedToken).approve(
+            address(coGateway),
+            ephemeralKeyData.spendingLimit
+        );
+        // coGateway.redeem is a payable function.
+        executionResult_ = address(coGateway).call.value(msg.value)(_data);
+        emit RuleExecuted(_from, address(coGateway), _nonce, executionResult_);
+        BrandedToken(brandedToken).approve(
+            address(coGateway),
+            0
+        );
+
+        return executionResult_;
+    }
+
 
     /* Private Functions */
+
+    /**
+     * @notice Validate executable message signature.
+     *
+     * @param _from it will always be the contract executing the code.
+     *        It needs to be tokenholder contract address.
+     *        _from enforces TH address to be stored in wallet by sdk.
+     * @param _to the target contract the transaction will be executed upon.
+     *        e.g. Airdrop in case for Airdrop.pay.
+     * @param _nonce incremental nonce.
+     * @param _data the bytecode to be executed.
+     *         Use web3 getData method to construct _data.
+     * @param _v It's the recovery id.
+     * @param _r It's the output of an ECDSA signature.
+     * @param _s It's also the output of an ECDSA signature.
+     *
+     * @return result is true/false.
+     */
+    function verifySignature(
+        address _from,
+        address _to,
+        uint256 _nonce,
+        bytes _data,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    )
+        private
+        returns (EphemeralKeyData storage ephemeralKeyData_)
+    {
+        require(
+            _from == address(this),
+            "From should be tokenholder contract address"
+        );
+        require(
+            _to != address(0),
+            "to address can't be 0"
+        );
+        require(
+            _nonce != 0,
+            "Nonce can't be 0."
+        );
+        require(
+            _data.length != 0,
+            "Data length can't be 0."
+        );
+
+        // Construct hashed message.
+        bytes32 messageHash = getHashedMessage(_from, _to, _data, _nonce);
+        address signer = ecrecover(messageHash, _v, _r, _s);
+        require(
+            isAuthorizedEphemeralKey(signer),
+            "Invalid ephemeral key!"
+        );
+        ephemeralKeyData_ = ephemeralKeys[signer];
+        require(
+            ephemeralKeyData_.expirationHeight >= block.number,
+            "ephemeral key has expired!"
+        );
+        // Consume the nonce
+        ephemeralKeyData_.nonce = ephemeralKeyData_.nonce + 1;
+        require(
+            ephemeralKeyData_.nonce == _nonce,
+            "Invalid nonce!"
+        );
+
+        return ephemeralKeyData_;
+    }
 
     /**
      *  @notice hash the data
@@ -351,18 +421,18 @@ contract TokenHolder is MultiSigWallet {
      *  @return bytes32 hashed data
      */
     // TODO byte(0x19) verify with test case. Test by passing bytes as argument.
-    // TODO should _data be hashed
     function getHashedMessage(
-        address _to,
         address _from,
+        address _to,
         bytes _data,
         uint256 _nonce
     )
-        view
+        pure
         private
         returns (bytes32)
     {
         bytes4 callPrefix;
+        // Extract the first 4 bytes from _data.
         assembly{
             callPrefix := mload(add(_data, 4))
         }
