@@ -123,7 +123,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(
-            isInternalActor[_to] == true,
+            isInternalActor[_to],
             "to address is invalid economy actor!"
         );
 
@@ -148,7 +148,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(
-            isInternalActor[_to] == true,
+            isInternalActor[_to],
             "to is invalid economy actor!"
         );
 
@@ -171,7 +171,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(
-            isInternalActor[_spender] == true,
+            isInternalActor[_spender],
             "spender is invalid economy actor!"
         );
 
@@ -198,7 +198,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(
-            (isInternalActor[_beneficiary] == true),
+            (isInternalActor[_beneficiary]),
             "beneficiary is invalid economy actor!"
         );
 
