@@ -288,7 +288,7 @@ contract TokenHolder is MultiSigWallet {
     /**
      * @notice redeem after validating signature.
      *
-     * @dev requestRedemption will call coGateway redeem.
+     * @dev requestRedeem will call coGateway redeem.
      *      coGateway redeem is a payable function so that bounty is deducted from msg.sender.
      *      msg.sender is workers here.
      *
@@ -302,7 +302,7 @@ contract TokenHolder is MultiSigWallet {
      *
      * @return Redeem execution result is success/failure.
      */
-    function requestRedemption(
+    function requestRedeem(
         address _from,
         uint256 _nonce,
         bytes _data,
