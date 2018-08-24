@@ -35,6 +35,7 @@ import "./CoGatewayInterface.sol";
  *
  */
 // TODO Import finalized complete coGateway Interface
+// TODO Implement revertRedemption
 contract TokenHolder is MultiSigWallet {
 
     /* Usings */
@@ -420,7 +421,7 @@ contract TokenHolder is MultiSigWallet {
      *
      *  @return bytes32 hashed data
      */
-    // TODO byte(0x19) verify it with test case. Test by passing bytes as argument.
+    // TODO byte(0x19) verify it with test cases. Test with bytes as argument.
     function getHashedMessage(
         address _from,
         address _to,
