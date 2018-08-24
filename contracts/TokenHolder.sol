@@ -468,10 +468,13 @@ contract TokenHolder is MultiSigWallet {
         uint256 _expirationHeight
     )
         private
+        returns (bool)
     {
         ephemeralKeys[_ephemeralKey].spendingLimit = _spendingLimit;
         ephemeralKeys[_ephemeralKey].nonce = 0;
         ephemeralKeys[_ephemeralKey].expirationHeight = _expirationHeight;
+
+        return true;
     }
 
     /**
