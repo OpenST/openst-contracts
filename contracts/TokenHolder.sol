@@ -292,6 +292,7 @@ contract TokenHolder is MultiSigWallet {
      * @dev requestRedeem will call coGateway redeem.
      *      coGateway redeem is a payable function so that bounty is deducted from msg.sender.
      *      msg.sender is workers here.
+     *      It's TokenRule 0, CoGateway is fixed rule. e.g. Airdrop is TR.
      *
      * @param _from it enforces wallet to store TH address.
      * @param _nonce incremental nonce.
@@ -303,7 +304,7 @@ contract TokenHolder is MultiSigWallet {
      *
      * @return Redeem execution result is success/failure.
      */
-    function requestRedeem(
+    function redeem(
         address _from,
         uint256 _nonce,
         bytes _data,
