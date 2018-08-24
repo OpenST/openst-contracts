@@ -295,6 +295,8 @@ contract TokenHolder is MultiSigWallet {
      *      It's TokenRule 0, CoGateway is fixed rule. e.g. Airdrop is TR.
      *
      * @param _from it enforces wallet to store TH address.
+     * @param _to the target contract the transaction will be executed upon.
+     *        e.g. CoGateway in case for CoGateway.redeem.
      * @param _nonce incremental nonce.
      * @param _data the bytecode to be executed.
      *        It's the bytecode CoGateway redeem function.
@@ -306,6 +308,7 @@ contract TokenHolder is MultiSigWallet {
      */
     function redeem(
         address _from,
+        address _to,
         uint256 _nonce,
         bytes _data,
         uint8 _v,
@@ -318,12 +321,16 @@ contract TokenHolder is MultiSigWallet {
     {
         EphemeralKeyData storage ephemeralKeyData = verifySignature(
             _from,
-            coGateway,
+            _to,
             _nonce,
             _data,
             _v,
             _r,
             _s
+        );
+        require(
+            _to == coGateway,
+            "to should be coGateway address."
         );
 
         BrandedToken(brandedToken).approve(
