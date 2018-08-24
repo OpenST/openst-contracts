@@ -272,13 +272,13 @@ contract TokenHolder is MultiSigWallet {
         );
 
         BrandedToken(brandedToken).approve(
-            address(tokenRules),
+            tokenRules,
             ephemeralKeyData.spendingLimit
         );
-        executionResult_ = address(_to).call(_data);
+        executionResult_ = _to.call(_data);
         emit RuleExecuted(_from, _to, _nonce, executionResult_);
         BrandedToken(brandedToken).approve(
-            address(tokenRules),
+            tokenRules,
             0
         );
 
@@ -316,7 +316,7 @@ contract TokenHolder is MultiSigWallet {
     {
         EphemeralKeyData storage ephemeralKeyData = verifySignature(
             _from,
-            address(coGateway),
+            coGateway,
             _nonce,
             _data,
             _v,
@@ -325,14 +325,14 @@ contract TokenHolder is MultiSigWallet {
         );
 
         BrandedToken(brandedToken).approve(
-            address(coGateway),
+            coGateway,
             ephemeralKeyData.spendingLimit
         );
         // coGateway.redeem is a payable function.
-        executionResult_ = address(coGateway).call.value(msg.value)(_data);
-        emit RuleExecuted(_from, address(coGateway), _nonce, executionResult_);
+        executionResult_ = coGateway.call.value(msg.value)(_data);
+        emit RuleExecuted(_from, coGateway, _nonce, executionResult_);
         BrandedToken(brandedToken).approve(
-            address(coGateway),
+            coGateway,
             0
         );
 
