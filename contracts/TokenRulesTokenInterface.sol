@@ -1,5 +1,4 @@
-pragma solidity ^0.4.24;
-
+pragma solidity ^0.4.23;
 
 // Copyright 2018 OpenST Ltd.
 //
@@ -15,22 +14,11 @@ pragma solidity ^0.4.24;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+interface TokenRulesTokenInterface
+{
+    function clearAllowance(address _approver) external returns (bool);
 
-library SharedStructs {
-
-    /* Structs */
-
-    struct TokenRule {
-        string ruleName;
-        address ruleAddress;
-    }
-
-    struct TokenRuleConstraint {
-        address constraintAddress;
-    }
-
-    struct TokenRuleTransfer {
-        address to;
-        uint256 amount;
-    }
+    function transferFrom(
+        address _from, address _to, uint256 _amount
+    ) external returns (bool);
 }

@@ -26,6 +26,7 @@ import "./SafeMath.sol";
 import "./openst-protocol/EIP20Token.sol";
 import "./openst-protocol/UtilityTokenAbstract.sol";
 import "./Internal.sol";
+import "./TokenRulesTokenInterface.sol";
 
 
 /**
@@ -44,7 +45,8 @@ import "./Internal.sol";
  *        on Ethereum (before v1.0).
  *
  */
-contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
+contract BrandedToken
+    is EIP20Token, UtilityTokenAbstract, TokenRulesTokenInterface, Internal {
 
      /* Usings */
 
@@ -178,6 +180,16 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         EIP20Token.approve(_spender, _value);
     }
 
+    function clearAllowance(address _approver) public returns (bool)
+    {
+        allowed[_approver][msg.sender] = 0;
+
+        emit Approval(_approver, msg.sender, 0);
+
+        return true;
+
+    }
+
     /**
      * @notice Public function mintEIP20.
      *
@@ -198,7 +210,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(
-            (isInternalActor[_beneficiary] == true),
+            isInternalActor[_beneficiary] == true,
             "beneficiary is invalid economy actor!"
         );
 

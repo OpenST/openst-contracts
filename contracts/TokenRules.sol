@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.4.23;
 pragma experimental ABIEncoderV2;
 
 // Copyright 2018 OpenST Ltd.
@@ -15,8 +15,8 @@ pragma experimental ABIEncoderV2;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "./BrandedToken.sol";
 import "./SharedStructs.sol";
+import "./TokenRulesTokenInterface.sol";
 import "./SafeMath.sol";
 
 
@@ -29,9 +29,11 @@ contract TokenRules {
 
     /* Events */
 
-    event RuleAdded(address _sender, address _ruleAddress);
-
-    event RuleRemoved(address _sender, address _ruleAddress);
+    event RuleRegistered(
+        address _sender,
+        string _ruleName,
+        address _ruleAddress
+    );
 
     event ConstraintAdded(address _sender, address _constraintAddress);
 
@@ -40,12 +42,14 @@ contract TokenRules {
 
     /* Variables */
 
-    mapping (address => SharedStructs.TokenRule) public rules;
+    SharedStructs.TokenRule[] public rules;
+    mapping (string => SharedStructs.TokenRule) public rulesByName;
+    mapping (address => SharedStructs.TokenRule) public rulesByAddress;
 
     SharedStructs.TokenRuleConstraint[] public constraints;
 
     address public organization;
-    BrandedToken public brandedToken;
+    address public token;
 
 
     /* Modifiers */
@@ -60,7 +64,7 @@ contract TokenRules {
 
     modifier onlyRule {
         require (
-            rules[msg.sender].ruleAddress != address(0),
+            rulesByAddress[msg.sender].ruleAddress != address(0),
             "Only registered rule is allowed to call");
         _;
     }
@@ -70,68 +74,60 @@ contract TokenRules {
 
     constructor (
         address _organization,
-        BrandedToken _brandedToken
+        address _token
     )
         public
     {
+        require(_organization != address(0), "Organization address is null.");
+        require(_token != address(0), "Token address is null.");
+
         organization = _organization;
-        brandedToken = _brandedToken;
+        token = _token;
     }
 
     /**
-     * @param _rule The address of rule to add.
-     *
-     * \pre Rule to add is not null.
-     * \pre Rule to add does not exist.
+     * @param _ruleName The name of a rule to register.
+     * @param _ruleAddress The address of a rule to register.
      *
      * @return true in case of success, otherwise false.
      */
-    function addRule (
+    function registerRule (
+        string _ruleName,
         address _ruleAddress
     )
         external
         onlyOrganization
         returns (bool)
     {
-        require(_ruleAddress != address(0), "Rule to add is null.");
+        require(bytes(_ruleName).length != 0, "Rule name is empty.");
+        require(_ruleAddress != address(0), "Rule address is null.");
         require (
-            rules[_ruleAddress].ruleAddress == address(0),
-            "Rule to add exists."
+            rulesByName[_ruleName].ruleAddress == address(0),
+            "Rule name exists."
+        );
+        require (
+            rulesByAddress[_ruleAddress].ruleAddress == address(0),
+            "Rule address exists."
         );
 
-        rules[_ruleAddress].ruleAddress = _ruleAddress;
+        SharedStructs.TokenRule memory rule;
+        rule.ruleName = _ruleName;
+        rule.ruleAddress = _ruleAddress;
 
-        emit RuleAdded(msg.sender, _ruleAddress);
+        rulesByName[_ruleName] = rule;
+        rulesByAddress[_ruleAddress] = rule;
+        rules.push(rule);
+
+        emit RuleRegistered(msg.sender, _ruleName, _ruleAddress);
 
         return true;
     }
-
-    function removeRule (
-        address _ruleAddress
-    )
-        external
-        onlyOrganization
-        returns (bool)
-    {
-        require (
-            rules[_ruleAddress].ruleAddress != address(0),
-            "Rule to remove does not exist."
-        );
-
-        delete rules[_ruleAddress];
-
-        emit RuleRemoved(msg.sender, _ruleAddress);
-
-        return true;
-    }
-
 
     function executeTransfers (
         address _from,
         SharedStructs.TokenRuleTransfer[] _transfers
     )
         external
-        view
         onlyRule
         returns (bool)
     {
@@ -141,18 +137,18 @@ contract TokenRules {
 
         require (
             checkConstraints(_from, _transfers),
-            "Constraints do not fullfilled."
+            "Constraints not fullfilled."
         );
 
         for (uint256 i = 0; i < _transfers.length; ++i) {
-            brandedToken.transferFrom(
+            TokenRulesTokenInterface(token).transferFrom(
                 _from,
                 _transfers[i].to,
                 _transfers[i].amount
             );
         }
 
-        brandedToken.clearAllowance(_from);
+        TokenRulesTokenInterface(token).clearAllowance(_from);
 
         return true;
     }

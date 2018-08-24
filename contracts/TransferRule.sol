@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.4.23;
 
 
 // Copyright 2018 OpenST Ltd.
@@ -18,24 +18,25 @@ pragma solidity ^0.4.24;
 import "./TokenRules.sol";
 import "./SharedStructs.sol";
 
-contract SimpleTransferRule {
+contract TransferRule {
 
     /* Variables */
 
-    TokenRules tokenRules;
+    address tokenRules;
 
 
     /* Functions */
 
     constructor (
-        TokenRules _tokenRules
+        address _tokenRules
     )
         public
     {
+        require (_tokenRules != address(0), "Token rules address is null.");
         tokenRules = _tokenRules;
     }
 
-    function execute (
+    function transferFrom (
         address _from,
         address _to,
         uint256 _amount
@@ -48,7 +49,7 @@ contract SimpleTransferRule {
         transfers[0].to = _to;
         transfers[0].amount = _amount;
 
-        tokenRules.executeTransfers(_from, transfers);
+        TokenRules(tokenRules).executeTransfers(_from, transfers);
 
         return true;
     }
