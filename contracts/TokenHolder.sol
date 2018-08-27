@@ -34,7 +34,7 @@ import "./MultiSigWallet.sol";
  *
  */
 // TODO Implement requestRedemption
-contract TokenHolderNew is MultiSigWallet {
+contract TokenHolder is MultiSigWallet {
 
     /* Usings */
 
@@ -318,7 +318,7 @@ contract TokenHolderNew is MultiSigWallet {
             isAuthorizedEphemeralKey(signer),
             "Invalid ephemeral key!"
         );
-        ephemeralKeyData = ephemeralKeys[signer];
+        EphemeralKeyData ephemeralKeyData = ephemeralKeys[signer];
         require(
             ephemeralKeyData.expirationHeight >= block.number,
             "ephemeral key has expired!"
@@ -335,7 +335,7 @@ contract TokenHolderNew is MultiSigWallet {
             ephemeralKeyData.spendingLimit
         );
         executionResult_ = address(_to).call(_data);
-        emit RuleExecuted(_to, executionResult_, _nonce);
+        emit RuleExecuted(_to, _nonce, executionResult_);
         BrandedToken(brandedToken).approve(
             address(tokenRules),
             0
@@ -366,15 +366,15 @@ contract TokenHolderNew is MultiSigWallet {
         returns (bool /** success */)
     {
 
-        BrandedToken(brandedToken).approve(
-            address(coGateway),
-            ephemeralKeyData.spendingLimit
-        );
-        require(CoGateway(coGateway).redeem());
-        BrandedToken(brandedToken).approve(
-            address(coGateway),
-            0
-        );
+//        BrandedToken(brandedToken).approve(
+//            address(coGateway),
+//            ephemeralKeyData.spendingLimit
+//        );
+//        require(CoGateway(coGateway).redeem());
+//        BrandedToken(brandedToken).approve(
+//            address(coGateway),
+//            0
+//        );
 
     }
 
@@ -413,7 +413,7 @@ contract TokenHolderNew is MultiSigWallet {
             0, // gasPrice
             0, // gasLimit
             0, // gasToken
-            bytes4(data), // 4 byte standard call prefix of the function to be called in the from contract.
+            bytes4(_data), // 4 byte standard call prefix of the function to be called in the from contract.
                          // This guarantees that a signed message can be only executed in a single instance.
             0, // 0 for a standard call, 1 for a DelegateCall and 0 for a create opcode
             '' // extraHash is always hashed at the end. This is done to increase future compatibility of the standard.

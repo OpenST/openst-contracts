@@ -29,7 +29,7 @@ pragma solidity ^0.4.23;
  *         It is inherited by TokenHolder.sol.
  *
  */
-contract MultiSigWallet {
+contract MultiSigWalletV1 {
 
     /* Events */
 
