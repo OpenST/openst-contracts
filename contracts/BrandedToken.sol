@@ -81,7 +81,6 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         uint256 _chainIdUtility,
         uint256 _conversionRate,
         uint8 _conversionRateDecimals,
-        address _tokenRules,
         address _organization
     )
         public
@@ -100,8 +99,6 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
             _tokenRules != address(0),
             "Token rules contracts address is invalid!"
         );
-
-        tokenRules = _tokenRules;
      }
 
 
