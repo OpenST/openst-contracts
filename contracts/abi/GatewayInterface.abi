@@ -1,0 +1,1 @@
+[{"constant":false,"inputs":[{"name":"","type":"uint256"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"bytes32"}],"name":"redeem","outputs":[{"name":"","type":"bool"}],"payable":true,"stateMutability":"payable","type":"function"}]
