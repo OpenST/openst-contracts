@@ -70,7 +70,6 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @param _chainIdUtility Chain id of the utility chain.
      * @param _conversionRate Conversion rate of the token.
      * @param _conversionRateDecimals Decimal places of conversion rate of token.
-     * @param _tokenRules tokenRules contract address.
      */
     constructor(
         bytes32 _uuid,
@@ -94,12 +93,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         _chainIdUtility,
         _conversionRate,
         _conversionRateDecimals)
-     {
-        require(
-            _tokenRules != address(0),
-            "Token rules contracts address is invalid!"
-        );
-     }
+     {}
 
 
     /* Public functions */
