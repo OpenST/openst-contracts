@@ -371,8 +371,8 @@ contract MultiSigWallet {
         if(isTransactionExecuted(_transactionId)){
             confirmations[_transactionId].isConfirmedBy[msg.sender] = false;
             emit Revocation(
-                msg.sender,
-                _transactionId
+                _transactionId,
+                msg.sender
             );
         }
 
@@ -425,8 +425,8 @@ contract MultiSigWallet {
         confirmations[_transactionId].status = 1;
 
         emit Propose(
-            msg.sender,
-            _transactionId
+            _transactionId,
+            msg.sender
         );
     }
 
@@ -453,8 +453,9 @@ contract MultiSigWallet {
 
         confirmations[_transactionId].isConfirmedBy[msg.sender] = true;
         emit ConfirmationDone(
-            msg.sender,
-            _transactionId
+            _transactionId,
+            msg.sender
+
         );
 
         if (isAlreadyProposedTransaction(_transactionId)) {
