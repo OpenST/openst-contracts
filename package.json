@@ -1,5 +1,5 @@
 {
-  "name": "@openstfoundation/openst-payments",
+  "name": "@openstfoundation/openst-contracts",
   "version": "1.0.10-beta.3",
   "description": "Payment infrastructure on top of the OpenST network.",
   "keywords": [
@@ -13,10 +13,10 @@
   "license": "LGPL-3.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenSTFoundation/openst-payments.git"
+    "url": "https://github.com/OpenSTFoundation/openst-contracts.git"
   },
   "bugs": {
-    "url": "https://github.com/OpenSTFoundation/openst-payments/issues"
+    "url": "https://github.com/OpenSTFoundation/openst-contracts/issues"
   },
   "scripts": {
     "make-docs": "node_modules/.bin/jsdoc -c .jsdoc.json",

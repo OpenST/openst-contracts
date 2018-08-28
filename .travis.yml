@@ -70,7 +70,6 @@ matrix:
 services:
   - mysql
 before_install:
-  - mysql -e 'CREATE DATABASE payment_development;'
   - sudo apt-get update 
   - sudo apt-get install nodejs 
   - sudo apt-get install npm  
@@ -87,18 +86,7 @@ before_script:
   - geth makedag 0 ~/.ethash
   - nohup sh tools/runGanacheCli.sh </dev/null >/dev/null 2>&1 &
   - bash contracts/compile.sh
-  - mkdir -p dynamodb
-  - wget https://s3.ap-south-1.amazonaws.com/dynamodb-local-mumbai/dynamodb_local_latest.zip -O ./dynamodb/dynamodb_local_latest.zip
-  - unzip ./dynamodb/dynamodb_local_latest.zip
-  - nohup java -Djava.library.path=./dynamodb/DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb &
-  - sleep 30
-  - . ./mocha_test/scripts/set_env_vars.sh
 script:
-  - truffle test  
-  - cd mocha_test/scripts/  
-  - bash travis_test.sh  
+  - truffle test
 after_script:
   - kill $(ps aux | grep 'testrpc' | awk '{print $2}')
-  - kill $(ps aux | grep 'geth' | awk '{print $2}')
-  - kill $(ps aux | grep 'DynamoDBLocal.jar' | awk '{print $2}')
-  - rm -rf dynamodb
