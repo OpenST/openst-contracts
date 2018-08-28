@@ -23,8 +23,8 @@ pragma solidity ^0.4.23;
 
 
 import "./SafeMath.sol";
-import "./EIP20Token.sol";
-import "./UtilityTokenAbstract.sol";
+import "./openst-protocol/EIP20Token.sol";
+import "./openst-protocol/UtilityTokenAbstract.sol";
 import "./Internal.sol";
 
 

@@ -22,8 +22,8 @@ pragma solidity ^0.4.23;
 //
 // ----------------------------------------------------------------------------
 
-import "./SafeMath.sol";
-import "./Hasher.sol";
+import "./../SafeMath.sol";
+import "./../Hasher.sol";
 import "./ProtocolVersioned.sol";
 
 /** utility chain contracts */

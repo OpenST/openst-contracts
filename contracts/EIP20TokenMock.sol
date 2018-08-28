@@ -23,7 +23,7 @@ pragma solidity ^0.4.23;
 // ----------------------------------------------------------------------------
 
 
-import "./EIP20Token.sol";
+import "./openst-protocol/EIP20Token.sol";
 
 
 /// @title EIP20TokenMock - Provides EIP20Token with mock functionality to facilitate testing payments 
