@@ -35,9 +35,15 @@ module.exports.perform = (accounts) => {
     name = 'name',
     organizationAddress = accounts[1];
 
-  beforeEach(async () => {
+  beforeEach(async () => {});
+
+  it('deploys branded token', async () => {
+    //   let a = {};
+    //   a.push(accounts[5]);
+    // token.registerInternalActor(a);
     const hasher = await Hasher.new();
-    const tokenRules = hasher.address;
+    const tokenRules = accounts[0];
+    const valueToken = accounts[1];
     const UUID = await hasher.hashUuid.call(
       symbol,
       name,
@@ -48,14 +54,19 @@ module.exports.perform = (accounts) => {
       conversionRateDecimals
     );
     console.log('UUID:', UUID);
-    //token = await brandedToken.new(UUID, symbol, name, 18, chainIDValue, chainIDUtility, conversionRate, conversionRateDecimals, tokenRules, organizationAddress,{ from: openSTProtocol });
-    token = await brandedToken.new(UUID, symbol, name, 18, chainIDValue, chainIDUtility, { from: openSTProtocol });
+    token = await brandedToken.new(
+      valueToken,
+      symbol,
+      name,
+      18,
+      chainIDValue,
+      chainIDUtility,
+      conversionRate,
+      conversionRateDecimals,
+      tokenRules,
+      organizationAddress,
+      { from: openSTProtocol }
+    );
     console.log('token:', token.address);
-  });
-
-  it('register internal actors', async () => {
-    //   let a = {};
-    //   a.push(accounts[5]);
-    // token.registerInternalActor(a);
   });
 };

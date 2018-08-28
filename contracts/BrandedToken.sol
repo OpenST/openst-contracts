@@ -55,6 +55,8 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
 
     /** Token rules contract address  */
     address public tokenRules;
+    /** Value token contract address  */
+    address public valueToken;
 
     /**
      * @notice Contract constructor.
@@ -62,7 +64,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @dev Creates an EIP20Token and a UtilityTokenAbstract contract with
      *      arguments passed in the contract constructor.
      *
-     * @param _uuid UUID of the token.
+     * @param _valueToken value chain contract address.
      * @param _symbol Symbol of the token.
      * @param _name Name of the token.
      * @param _decimals Decimal places of the token.
@@ -73,9 +75,9 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @param _tokenRules tokenRules contract address.
      */
     constructor(
-        bytes32 _uuid,
-        string _symbol,
-        string _name,
+        address _valueToken,
+        string memory _symbol,
+        string memory _name,
         uint8 _decimals,
         uint256 _chainIdValue,
         uint256 _chainIdUtility,
@@ -88,20 +90,22 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         Internal(_organization)
         EIP20Token(_symbol, _name, _decimals)
         UtilityTokenAbstract(
-        _uuid,
-        _symbol,
-        _name,
         _chainIdValue,
         _chainIdUtility,
         _conversionRate,
         _conversionRateDecimals)
     {
         require(
+            _valueToken != address(0),
+            "Value token contracts address is invalid!"
+        );
+        require(
             _tokenRules != address(0),
             "Token rules contracts address is invalid!"
         );
 
         tokenRules = _tokenRules;
+        valueToken = _valueToken;
     }
 
 
