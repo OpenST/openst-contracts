@@ -23,8 +23,8 @@ pragma solidity ^0.4.23;
 // ----------------------------------------------------------------------------
 
 
-import "./openst-protocol/EIP20Interface.sol";
-import "./openst-protocol/UtilityTokenInterface.sol";
+import "./EIP20Interface.sol";
+import "./UtilityTokenInterface.sol";
 import "./PriceOracleInterface.sol";
 import "./OpsManaged.sol";
 import "./SafeMath.sol";
