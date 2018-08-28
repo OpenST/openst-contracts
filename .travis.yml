@@ -14,59 +14,6 @@ notifications:
     on_failure: always
 node_js:
   - "8"
-env:
-  - GETH_VERSION=1.7.2
-matrix:
-  include:
-    - if: branch =~ ^master
-      env: GETH_VERSION=1.7.2
-      node_js: "8"
-    - if: branch =~ ^master
-      env: GETH_VERSION=1.8.3
-      node_js: "8"
-    - if: branch =~ ^master
-      env: GETH_VERSION=1.8.8
-      node_js: "8"
-    - if: branch =~ ^master
-      env: GETH_VERSION=1.8.12
-      node_js: "8"
-    - if: branch =~ ^develop
-      env: GETH_VERSION=1.7.2
-      node_js: "8"
-    - if: branch =~ ^develop
-      env: GETH_VERSION=1.8.3
-      node_js: "8"
-    - if: branch =~ ^develop
-      env: GETH_VERSION=1.8.8
-      node_js: "8"
-    - if: branch =~ ^develop
-      env: GETH_VERSION=1.8.12
-      node_js: "8"
-    - if: branch =~ ^master
-      env: GETH_VERSION=1.7.2
-      node_js: "9"
-    - if: branch =~ ^master
-      env: GETH_VERSION=1.8.3
-      node_js: "9"
-    - if: branch =~ ^master
-      env: GETH_VERSION=1.8.8
-      node_js: "9"
-    - if: branch =~ ^master
-      env: GETH_VERSION=1.8.12
-      node_js: "9"
-    - if: branch =~ ^develop
-      env: GETH_VERSION=1.7.2
-      node_js: "9"
-    - if: branch =~ ^develop
-      env: GETH_VERSION=1.8.3
-      node_js: "9"
-    - if: branch =~ ^develop
-      env: GETH_VERSION=1.8.8
-      node_js: "9"
-    - if: branch =~ ^develop
-      env: GETH_VERSION=1.8.12
-      node_js: "9"
-
 services:
   - mysql
 before_install:
@@ -77,8 +24,6 @@ before_install:
   - sudo add-apt-repository -y ppa:ethereum/ethereum
   - sudo apt-get update
   - sudo apt-get --allow-unauthenticated install solc
-  - sudo bash mocha_test/scripts/install_geth_$GETH_VERSION.sh
-  - geth version
 install: 
   - npm install 
 before_script:
