@@ -42,15 +42,6 @@ module.exports.perform = (accounts) => {
     const hasher = await Hasher.new();
     const tokenRules = accounts[0];
     const valueToken = accounts[1];
-    const UUID = await hasher.hashUuid.call(
-      symbol,
-      name,
-      chainIDValue,
-      chainIDUtility,
-      openSTProtocol,
-      conversionRate,
-      conversionRateDecimals
-    );
     brandedTokenInstance = await brandedToken.new(
       valueToken,
       symbol,
@@ -60,7 +51,6 @@ module.exports.perform = (accounts) => {
       chainIDUtility,
       conversionRate,
       conversionRateDecimals,
-      tokenRules,
       organizationAddress,
       { from: openSTProtocol }
     );
@@ -77,7 +67,9 @@ module.exports.perform = (accounts) => {
   });
 
   it('should add wallet', async () => {
-    let tokenHolderInstance = await tokenHolder.new(brandedTokenInstance.address, accounts[3], 1, [accounts[7]]);
+    let tokenHolderInstance = await tokenHolder.new(brandedTokenInstance.address, accounts[3], accounts[2], 1, [
+      accounts[7]
+    ]);
     await tokenHolderInstance.addWallet(accounts[2], { from: accounts[7] });
     assert.equal(await tokenHolderInstance.isWallet(accounts[2]), true);
     assert.equal(await tokenHolderInstance.isWallet(accounts[4]), false);

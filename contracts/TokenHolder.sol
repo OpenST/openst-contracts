@@ -34,8 +34,6 @@ import "./CoGatewayInterface.sol";
  *         scalable key management solutions for mainstream apps.
  *
  */
-// TODO Import finalized complete coGateway Interface
-// TODO Implement revertRedemption
 contract TokenHolder is MultiSigWallet {
 
     /* Usings */
@@ -99,7 +97,6 @@ contract TokenHolder is MultiSigWallet {
      * @param _required No of requirements for multi sig wallet.
      * @param _wallets array of wallet addresses.
      */
-    // TODO Review protocol deployment flow and check if we need _brandedToken or _coGateway in constructor
     constructor(
         address _brandedToken,
         address _coGateway,
@@ -435,7 +432,6 @@ contract TokenHolder is MultiSigWallet {
      *
      *  @return bytes32 hashed data
      */
-    // TODO byte(0x19) verify it with test cases. Test with bytes as argument.
     function getHashedMessage(
         address _from,
         address _to,

@@ -21,8 +21,6 @@ pragma solidity ^0.4.23;
 //
 // ----------------------------------------------------------------------------
 
-
-import "./SafeMath.sol";
 import "./openst-protocol/EIP20Token.sol";
 import "./openst-protocol/UtilityTokenAbstract.sol";
 import "./Internal.sol";
@@ -46,15 +44,10 @@ import "./Internal.sol";
  */
 contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
 
-     /* Usings */
-
-    using SafeMath for uint256;
-
-
     /* Storage */
 
     /** Value chain ERC20 contract address  */
-    address public erc20Address;
+    address public token;
 
     /**
      * @notice Contract constructor.
@@ -62,7 +55,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @dev Creates an EIP20Token and a UtilityTokenAbstract contract with
      *      arguments passed in the contract constructor.
      *
-     * @param _erc20Address value chain contract address.
+     * @param _token value chain ERC20 contract address. It act as identifier.
      * @param _symbol Symbol of the token.
      * @param _name Name of the token.
      * @param _decimals Decimal places of the token.
@@ -72,7 +65,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @param _conversionRateDecimals Decimal places of conversion rate of token.
      */
     constructor(
-        address _erc20Address,
+        address _token,
         string memory _symbol,
         string memory _name,
         uint8 _decimals,
@@ -92,10 +85,10 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         _conversionRateDecimals)
     {
         require(
-            _erc20Address != address(0),
-            "Value token contracts address is invalid!"
+            _token != address(0),
+            "Value chain token contracts address can't be 0."
         );
-        erc20Address = _erc20Address;
+        token = _token;
     }
 
 
