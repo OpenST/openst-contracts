@@ -41,7 +41,8 @@ module.exports.perform = (accounts) => {
 	});
 
   it('deploys branded token', async () => {
-  	const hasher = await Hasher.new();
+
+    const hasher = await Hasher.new();
     const tokenRules = accounts[0];
     const valueToken = accounts[1];
     brandedTokenInstance = await brandedToken.new(
