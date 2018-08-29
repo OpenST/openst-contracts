@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * This is script for deploying Pricer contract on any chain.<br><br>
@@ -17,28 +17,21 @@
  * @module tools/deploy/pricer
  */
 
-const readline = require('readline')
-  , rootPrefix = '../..'
-  , coreAddresses = require(rootPrefix + '/config/core_addresses')
-  , prompts = readline.createInterface(process.stdin, process.stdout)
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , returnTypes = require(rootPrefix + "/lib/global_constant/return_types")
-  , helper = require(rootPrefix + "/tools/deploy/helper")
-  , openstPayment = require(rootPrefix + '/index')
-  , SetOpsKlass = openstPayment.services.opsManaged.setOps
-  , GetOpsKlass = openstPayment.services.opsManaged.getOps
-  , DeployAirdropKlass = openstPayment.services.deploy.airdrop
-;
+const readline = require('readline');
+
+const rootPrefix = '../..',
+  prompts = readline.createInterface(process.stdin, process.stdout),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  returnTypes = require(rootPrefix + '/lib/global_constant/return_types'),
+  InstanceComposer = require(rootPrefix + '/instance_composer');
 
 // Different addresses used for deployment
-const deployerName = "deployer"
-  , deployerAddress = coreAddresses.getAddressForUser(deployerName)
-  , deployerPassphrase = coreAddresses.getPassphraseForUser(deployerName)
-;
+const deployerName = 'deployer',
+  opsName = 'ops';
 
-const opsName = "ops";
-const opsAddress = coreAddresses.getAddressForUser(opsName);
-
+require(rootPrefix + '/config/core_addresses');
+require(rootPrefix + '/services/manifest');
+require(rootPrefix + '/tools/deploy/helper');
 
 /**
  * Validation Method
@@ -49,27 +42,32 @@ const opsAddress = coreAddresses.getAddressForUser(opsName);
  */
 function validate(argv) {
   if (!argv[2]) {
-    logger.error("brandedTokenAddress is mandatory!");
+    logger.error('brandedTokenAddress is mandatory!');
     process.exit(0);
   }
   if (!argv[3]) {
-    logger.error("Base currency is mandatory!");
+    logger.error('Base currency is mandatory!');
     process.exit(0);
   }
   if (!argv[4]) {
-    logger.error("Worker Contract Address is mandatory!");
+    logger.error('Worker Contract Address is mandatory!');
     process.exit(0);
   }
   if (!argv[5]) {
-    logger.error("airdropbudgetholder is mandatory!");
+    logger.error('airdropbudgetholder is mandatory!');
     process.exit(0);
   }
   if (!argv[6]) {
-    logger.error("gas price is mandatory!");
+    logger.error('gas price is mandatory!');
     process.exit(0);
   }
   if (!argv[7]) {
-    logger.error("chainId is mandatory!");
+    logger.error('chainId is mandatory!');
+    process.exit(0);
+  }
+
+  if (!argv[8]) {
+    logger.error('Config strategy file is mandatory!');
     process.exit(0);
   }
 }
@@ -82,7 +80,6 @@ function validate(argv) {
  * @return {}
  */
 async function performer(argv) {
-
   validate(argv);
   const brandedTokenAddress = argv[2].trim();
   const baseCurrency = argv[3].trim();
@@ -91,43 +88,62 @@ async function performer(argv) {
   const gasPrice = argv[6].trim();
   const chainId = argv[7].trim();
   var isTravisCIEnabled = false;
-  if (argv[8] !== undefined) {
-    isTravisCIEnabled = argv[8].trim() === 'travis';
+
+  const fileForConfigStrategy = argv[8] !== undefined ? argv[8].trim() : '';
+
+  if (argv[9] !== undefined) {
+    isTravisCIEnabled = argv[9].trim() === 'travis';
   }
-  const fileForContractAddress = (argv[9] !== undefined) ? argv[9].trim() : '';
+  const fileForContractAddress = argv[10] !== undefined ? argv[10].trim() : '';
 
-  logger.debug("Deployer Address: " + deployerAddress);
-  logger.debug("Ops Address: " + opsAddress);
-  logger.debug("Branded Token Address: " + brandedTokenAddress);
-  logger.debug("Base currency: " + baseCurrency);
-  logger.debug("Worker Contract Address: " + workerContractAddress);
-  logger.debug("Airdrop Budget Holder: " + airdropBudgetHolder);
-  logger.debug("Gas price: " + gasPrice);
-  logger.debug("chainId: " + chainId);
-  logger.debug("Travis CI enabled Status: " + isTravisCIEnabled);
-  logger.debug("File to write For ContractAddress: "+fileForContractAddress);
+  if (!fileForConfigStrategy) {
+    logger.error('Exiting airdrop deployment script. Invalid fileForConfigStrategy', fileForConfigStrategy);
+    process.exit(1);
+  }
 
-  if (isTravisCIEnabled === false ) {
-    await new Promise(
-      function (onResolve, onReject) {
-        prompts.question("Please verify all above details. Do you want to proceed? [Y/N]", function (intent) {
-          if (intent === 'Y') {
-            logger.debug('Great! Proceeding deployment.');
-            prompts.close();
-            onResolve();
-          } else {
-            logger.error('Exiting deployment scripts. Change the enviroment variables and re-run.');
-            process.exit(1);
-          }
-        });
-      }
-    );
+  logger.debug('Branded Token Address: ' + brandedTokenAddress);
+  logger.debug('Base currency: ' + baseCurrency);
+  logger.debug('Worker Contract Address: ' + workerContractAddress);
+  logger.debug('Airdrop Budget Holder: ' + airdropBudgetHolder);
+  logger.debug('Gas price: ' + gasPrice);
+  logger.debug('chainId: ' + chainId);
+  logger.debug('Travis CI enabled Status: ' + isTravisCIEnabled);
+  logger.debug('File to write For ContractAddress: ' + fileForContractAddress);
+  logger.debug('fileForConfigStrategy: ' + fileForConfigStrategy);
+
+  if (isTravisCIEnabled === false) {
+    await new Promise(function(onResolve, onReject) {
+      prompts.question('Please verify all above details. Do you want to proceed? [Y/N]', function(intent) {
+        if (intent === 'Y') {
+          logger.debug('Great! Proceeding deployment.');
+          prompts.close();
+          onResolve();
+        } else {
+          logger.error('Exiting deployment scripts. Change the enviroment variables and re-run.');
+          process.exit(1);
+        }
+      });
+    });
   } else {
     prompts.close();
   }
 
-  const deployOptions = {returnType: returnTypes.transactionReceipt()}
-  ;
+  const configStrategy = require(rootPrefix + fileForConfigStrategy),
+    instanceComposer = new InstanceComposer(configStrategy),
+    helper = instanceComposer.getDeployHelper(),
+    manifest = instanceComposer.getServiceManifest(),
+    SetOpsKlass = manifest.opsManaged.setOps,
+    GetOpsKlass = manifest.opsManaged.getOps,
+    DeployAirdropKlass = manifest.deploy.airdrop,
+    coreAddresses = instanceComposer.getCoreAddresses(),
+    deployerAddress = coreAddresses.getAddressForUser(deployerName),
+    deployerPassphrase = coreAddresses.getPassphraseForUser(deployerName),
+    opsAddress = coreAddresses.getAddressForUser(opsName);
+
+  logger.debug('Deployer Address: ' + deployerAddress);
+  logger.debug('Ops Address: ' + opsAddress);
+
+  const deployOptions = { returnType: returnTypes.transactionReceipt() };
   const DeployAirdropObject = new DeployAirdropKlass({
     branded_token_contract_address: brandedTokenAddress,
     base_currency: baseCurrency,
@@ -136,11 +152,11 @@ async function performer(argv) {
     gas_price: gasPrice,
     options: deployOptions
   });
-  const deployResult =  await DeployAirdropObject.perform();
+  const deployResult = await DeployAirdropObject.perform();
 
   if (deployResult.isSuccess()) {
     const contractAddress = deployResult.data.transaction_receipt.contractAddress;
-    logger.win("contractAddress: " + contractAddress);
+    logger.win('contractAddress: ' + contractAddress);
     if (fileForContractAddress !== '') {
       helper.writeContractAddressToFile(fileForContractAddress, contractAddress);
     }
@@ -149,7 +165,7 @@ async function performer(argv) {
       returnType: returnTypes.transactionReceipt(),
       tag: ''
     };
-    logger.debug("Setting Ops Address to: " + opsAddress);
+    logger.debug('Setting Ops Address to: ' + opsAddress);
     const SetOpsObject = new SetOpsKlass({
       contract_address: contractAddress,
       gas_price: gasPrice,
@@ -169,14 +185,13 @@ async function performer(argv) {
     });
     const getOpsResult = await GetOpsObject.perform();
     const contractOpsAddress = getOpsResult.data.opsAddress;
-    logger.debug("Ops Address Set to: " + contractOpsAddress);
-
+    logger.debug('Ops Address Set to: ' + contractOpsAddress);
   } else {
-    logger.error("Error deploying contract");
+    logger.error('Error deploying contract');
     logger.error(deployResult);
   }
   process.exit(0);
 }
 
-// node tools/deploy/airdrop.js brandedTokenContractAddress baseCurrency workerContractAddress airdropBudgetHolder gasPrice chainId <travis> <fileToWrite>
+// node tools/deploy/airdrop.js brandedTokenContractAddress baseCurrency workerContractAddress airdropBudgetHolder gasPrice chainId <travis> <fileToWrite> <strategyFilePath>
 performer(process.argv);

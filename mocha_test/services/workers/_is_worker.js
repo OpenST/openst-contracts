@@ -1,20 +1,24 @@
 /* global describe, it */
 
-const chai = require('chai')
-  , assert = chai.assert;
+const chai = require('chai'),
+  assert = chai.assert;
 
-const rootPrefix      = "../../.."
-    , constants       = require(rootPrefix + '/mocha_test/lib/constants')
-    , openstPayment = require(rootPrefix + '/index')
-    , IsWorkerKlass = openstPayment.services.workers.isWorker
-    , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+const rootPrefix = '../../..',
+  constants = require(rootPrefix + '/mocha_test/lib/constants'),
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  configStrategy = require(rootPrefix + '/mocha_test/scripts/config_strategy'),
+  instanceComposer = new InstanceComposer(configStrategy);
+
+require(rootPrefix + '/services/manifest');
+
+const manifest = instanceComposer.getServiceManifest(),
+  IsWorkerKlass = manifest.workers.isWorker,
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
 
 describe('Is worker', function() {
-	// Success mode is tested in `set_worker.js`
+  // Success mode is tested in `set_worker.js`
 
   it('should fail when worker address is not valid', async function() {
-
     // eslint-disable-next-line no-invalid-this
     this.timeout(100000);
 
@@ -28,6 +32,5 @@ describe('Is worker', function() {
     // confirm failure reponse and message
     assert.equal(response.isFailure(), true);
     assert.equal(response.toHash().err.msg, apiErrorConfig['invalid_api_params'].message);
-
   });
 });

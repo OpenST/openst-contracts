@@ -19,14 +19,12 @@
 //
 // ----------------------------------------------------------------------------
 
-const Utils          = require('../../lib/utils.js'),
-      BigNumber      = require('bignumber.js'),
-      Workers        = artifacts.require('./Workers.sol')
-      ;
-
+const Utils = require('../../lib/utils.js'),
+  BigNumber = require('bignumber.js'),
+  Workers = artifacts.require('./Workers.sol');
 
 /// @dev Export common requires
-module.exports.utils     = Utils;
+module.exports.utils = Utils;
 module.exports.bigNumber = BigNumber;
 
 function checkWorkerSetEvent(event, deactivationHeight, remainingHeight) {
@@ -42,4 +40,3 @@ function checkWorkerRemovedEvent(event, worker, existed) {
   assert.equal(event.args._existed, existed);
 }
 module.exports.checkWorkerRemovedEvent = checkWorkerRemovedEvent;
-

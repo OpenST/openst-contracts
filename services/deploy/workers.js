@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  *
@@ -8,19 +8,20 @@
  *
  */
 
-const rootPrefix = '../..'
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , DeployerKlass = require(rootPrefix + '/services/deploy/deployer')
-  , gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit')
-  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
-  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+const rootPrefix = '../..',
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit'),
+  paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/services/deploy/deployer');
 
 /**
  * Constructor to create object of worker
@@ -33,10 +34,10 @@ const errorConfig = {
  * @constructor
  *
  */
-const DeployWorkerKlass = function (params) {
+const DeployWorkerKlass = function(params) {
   const oThis = this;
   params = params || {};
-  logger.debug("=======DeployWorkerKlass.params=======");
+  logger.debug('=======DeployWorkerKlass.params=======');
   // Don't log passphrase
   logger.debug(params);
 
@@ -48,40 +49,50 @@ const DeployWorkerKlass = function (params) {
 };
 
 DeployWorkerKlass.prototype = {
+  /**
+   * Perform
+   *
+   * @return {promise}
+   */
+  perform: function() {
+    const oThis = this;
+    return oThis.asyncPerform().catch(function(error) {
+      if (responseHelper.isCustomResult(error)) {
+        return error;
+      } else {
+        logger.error('openst-platform::services/deploy/workers.js::perform::catch');
+        logger.error(error);
+
+        return responseHelper.error({
+          internal_error_identifier: 's_d_w_perform_1',
+          api_error_identifier: 'unhandled_api_error',
+          error_config: errorConfig,
+          debug_options: { err: error }
+        });
+      }
+    });
+  },
 
   /**
-   * Perform method
+   * Async Perform
    *
    * @return {promise<result>}
-   *
    */
-  perform: async function () {
-    const oThis = this
-    ;
-    try {
-      var r = null;
+  asyncPerform: async function() {
+    const oThis = this;
 
-      r = await oThis.validateParams();
-      logger.debug("=======DeployWorkerKlass.validateParams.result=======");
-      logger.debug(r);
-      if (r.isFailure()) return r;
+    var r = null;
 
-      r = await oThis.deploy();
-      logger.debug("=======DeployWorkerKlass.setOps.result=======");
-      logger.debug(r);
+    r = await oThis.validateParams();
+    logger.debug('=======DeployWorkerKlass.validateParams.result=======');
+    logger.debug(r);
+    if (r.isFailure()) return r;
 
-      return r;
+    r = await oThis.deploy();
+    logger.debug('=======DeployWorkerKlass.setOps.result=======');
+    logger.debug(r);
 
-    } catch (err) {
-      let errorParams = {
-        internal_error_identifier: 's_d_w_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      return responseHelper.error(errorParams);
-    }
-
+    return r;
   },
 
   /**
@@ -90,9 +101,8 @@ DeployWorkerKlass.prototype = {
    * @return {result}
    *
    */
-  validateParams: function () {
-    const oThis = this
-    ;
+  validateParams: function() {
+    const oThis = this;
 
     if (!oThis.gasPrice) {
       let errorParams = {
@@ -125,9 +135,10 @@ DeployWorkerKlass.prototype = {
    * @return {promise<result>}
    *
    */
-  deploy: function () {
-    const oThis = this
-    ;
+  deploy: function() {
+    const oThis = this,
+      DeployerKlass = oThis.ic().getDeployerClass();
+
     const DeployerObject = new DeployerKlass({
       contract_name: oThis.contractName,
       constructor_args: oThis.constructorArgs,
@@ -137,7 +148,8 @@ DeployWorkerKlass.prototype = {
     });
     return DeployerObject.perform();
   }
-
 };
+
+InstanceComposer.registerShadowableClass(DeployWorkerKlass, 'getWorkerDeployerClass');
 
 module.exports = DeployWorkerKlass;

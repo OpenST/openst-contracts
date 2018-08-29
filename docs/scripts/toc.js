@@ -45,7 +45,7 @@
 
     // some browsers move the offset after changing location.
     // also catch external links coming in
-    $(window).on("hashchange", scrollToHash.bind(null, false));
+    $(window).on('hashchange', scrollToHash.bind(null, false));
     $(scrollToHash.bind(null, true));
   }
 
@@ -63,7 +63,7 @@
     var headings = $(opts.selectors, container);
     var headingOffsets = [];
     var activeClassName = 'active';
-    var ANCHOR_PREFIX = "__anchor";
+    var ANCHOR_PREFIX = '__anchor';
     var maxScrollTo;
     var visibleHeight;
     var headerHeight = 10; // so if the header is readable, its counted as shown
@@ -72,7 +72,7 @@
     var scrollTo = function(e) {
       e.preventDefault();
       var target = $(e.target);
-      if (target.prop('tagName').toLowerCase() !== "a") {
+      if (target.prop('tagName').toLowerCase() !== 'a') {
         target = target.parent();
       }
       var elScrollToId = target.attr('href').replace(/^#/, '') + ANCHOR_PREFIX;
@@ -89,18 +89,18 @@
     };
 
     var calcHadingOffsets = function() {
-      maxScrollTo = $("body").height() - $(window).height();
+      maxScrollTo = $('body').height() - $(window).height();
       visibleHeight = $(window).height() - navbarHeight;
       headingOffsets = [];
       headings.each(function(i, heading) {
-        var anchorSpan = $(heading).prev("span");
+        var anchorSpan = $(heading).prev('span');
         var top = 0;
         if (anchorSpan.length) {
           top = elOffset(anchorSpan);
         }
         headingOffsets.push(top > 0 ? top : 0);
       });
-    }
+    };
 
     //highlight on scroll
     var timeout;
@@ -121,7 +121,7 @@
             return;
           }
           // if we have got to the first heading or the heading is the first one visible
-          if (i === 0 || (headingOffsets[i] + headerHeight >= top && (headingOffsets[i - 1] + headerHeight <= top))) {
+          if (i === 0 || (headingOffsets[i] + headerHeight >= top && headingOffsets[i - 1] + headerHeight <= top)) {
             // in the case that a heading takes up more than the visible height e.g. we are showing
             // only the one above, highlight the one above
             if (i > 0 && headingOffsets[i] - visibleHeight >= top) {
@@ -153,10 +153,11 @@
       headings.each(function(i, heading) {
         var $h = $(heading);
 
-        var anchor = $('<span/>').attr('id', opts.anchorName(i, heading, opts.prefix) + ANCHOR_PREFIX).insertBefore($h);
+        var anchor = $('<span/>')
+          .attr('id', opts.anchorName(i, heading, opts.prefix) + ANCHOR_PREFIX)
+          .insertBefore($h);
 
-        var span = $('<span/>')
-          .text(opts.headerText(i, heading, $h));
+        var span = $('<span/>').text(opts.headerText(i, heading, $h));
 
         //build TOC item
         var a = $('<a class="list-group-item"/>')
@@ -177,27 +178,24 @@
 
       calcHadingOffsets();
     });
-};
+  };
 
-
-jQuery.fn.toc.defaults = {
-  container: 'body',
-  selectors: 'h1,h2,h3',
-  smoothScrolling: true,
-  prefix: 'toc',
-  onHighlight: function() {},
-  highlightOnScroll: true,
-  navbarOffset: 0,
-  anchorName: function(i, heading, prefix) {
-    return prefix+i;
-  },
-  headerText: function(i, heading, $heading) {
-    return $heading.text();
-  },
-  itemClass: function(i, heading, $heading, prefix) {
-    return prefix + '-' + $heading[0].tagName.toLowerCase();
-  }
-
-};
-
+  jQuery.fn.toc.defaults = {
+    container: 'body',
+    selectors: 'h1,h2,h3',
+    smoothScrolling: true,
+    prefix: 'toc',
+    onHighlight: function() {},
+    highlightOnScroll: true,
+    navbarOffset: 0,
+    anchorName: function(i, heading, prefix) {
+      return prefix + i;
+    },
+    headerText: function(i, heading, $heading) {
+      return $heading.text();
+    },
+    itemClass: function(i, heading, $heading, prefix) {
+      return prefix + '-' + $heading[0].tagName.toLowerCase();
+    }
+  };
 })(jQuery);

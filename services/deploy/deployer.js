@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * This is script for deploying any contract.<br><br>
@@ -6,24 +6,25 @@
  * @module services/deploy/deployer
  */
 
-const uuid = require('uuid')
-  , rootPrefix = '../..'
-  , web3Provider = require(rootPrefix + '/lib/web3/providers/ws')
-  , coreConstants = require(rootPrefix + '/config/core_constants')
-  , coreAddresses = require(rootPrefix + '/config/core_addresses')
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , basicHelper = require(rootPrefix + '/helpers/basic_helper')
-  , deployerName = 'deployer'
-  , gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit')
-  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
-  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+const uuid = require('uuid');
+
+const rootPrefix = '../..',
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  basicHelper = require(rootPrefix + '/helpers/basic_helper'),
+  deployerName = 'deployer',
+  gasLimitGlobalConstant = require(rootPrefix + '/lib/global_constant/gas_limit'),
+  paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/lib/providers/web3_factory');
+require(rootPrefix + '/config/core_addresses');
 
 /**
  * Constructor to create object of deployer
@@ -41,7 +42,7 @@ const errorConfig = {
 const DeployerKlass = function(params) {
   const oThis = this;
   params = params || {};
-  logger.debug("\n=========deployer params=========");
+  logger.debug('\n=========deployer params=========');
   logger.debug(params);
 
   oThis.contractName = params.contract_name;
@@ -52,55 +53,65 @@ const DeployerKlass = function(params) {
 };
 
 DeployerKlass.prototype = {
-
   /**
-   * Perform method
+   * Perform
    *
-   * @return {promise<result>} - returns a promise which resolves to an object of kind Result
-   *
+   * @return {promise}
    */
-  perform: async function () {
-
+  perform: function() {
     const oThis = this;
+    return oThis.asyncPerform().catch(function(error) {
+      if (responseHelper.isCustomResult(error)) {
+        return error;
+      } else {
+        logger.error('openst-platform::services/deploy/deployer.js::perform::catch');
+        logger.error(error);
 
-    try {
-      var r = null;
-
-      r = await oThis.validateParams();
-      logger.debug("\n=========Deployer.validateParams.result=========");
-      logger.debug(r);
-      if(r.isFailure()) return r;
-
-      r = oThis.deploy();
-      logger.debug("\n=========Deployer.deploy.result=========");
-      logger.debug(r);
-      return r;
-    } catch(err) {
-      let errorParams = {
-        internal_error_identifier: 's_am_ub_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      return responseHelper.error(errorParams);
-    }
-
+        return responseHelper.error({
+          internal_error_identifier: 's_d_d_perform_1',
+          api_error_identifier: 'unhandled_api_error',
+          error_config: errorConfig,
+          debug_options: { err: error }
+        });
+      }
+    });
   },
 
   /**
-  * Validate deploy parameters
-  *
-  * @return {result} - returns object of kind Result
-  *
-  */
-  validateParams: function() {
-
+   * Async Perform
+   *
+   * @return {promise<result>}
+   */
+  asyncPerform: async function() {
     const oThis = this;
 
+    var r = null;
+
+    r = await oThis.validateParams();
+    logger.debug('\n=========Deployer.validateParams.result=========');
+    logger.debug(r);
+    if (r.isFailure()) return r;
+
+    r = oThis.deploy();
+    logger.debug('\n=========Deployer.deploy.result=========');
+    logger.debug(r);
+    return r;
+  },
+
+  /**
+   * Validate deploy parameters
+   *
+   * @return {result} - returns object of kind Result
+   *
+   */
+  validateParams: function() {
+    const oThis = this,
+      coreAddresses = oThis.ic().getCoreAddresses();
+
     if (!oThis.contractName) {
-      logger.error("Error: Contract name is mandatory");
+      logger.error('Error: Contract name is mandatory');
       let errorParams = {
-        internal_error_identifier: 'l_d_1',
+        internal_error_identifier: 's_d_d_validateParams_1',
         api_error_identifier: 'invalid_api_params',
         error_config: errorConfig,
         params_error_identifiers: ['contract_name_invalid'],
@@ -111,78 +122,77 @@ DeployerKlass.prototype = {
 
     if (!oThis.gasPrice) {
       let errorParams = {
-        internal_error_identifier: 'l_d_2',
+        internal_error_identifier: 's_d_d_validateParams_2',
         api_error_identifier: 'invalid_api_params',
         error_config: errorConfig,
         params_error_identifiers: ['gas_price_invalid'],
         debug_options: {}
       };
-      logger.error("%Error - Gas price is mandatory");
+      logger.error('%Error - Gas price is mandatory');
       return responseHelper.paramValidationError(errorParams);
     }
 
     if (!oThis.gasLimit) {
       let errorParams = {
-        internal_error_identifier: 'l_d_3',
+        internal_error_identifier: 's_d_d_validateParams_3',
         api_error_identifier: 'invalid_api_params',
         error_config: errorConfig,
         params_error_identifiers: ['gas_limit_invalid'],
         debug_options: {}
       };
-      logger.error("%Error - Gas limit is mandatory");
+      logger.error('%Error - Gas limit is mandatory');
       return responseHelper.paramValidationError(errorParams);
     }
 
     const deployerAddress = coreAddresses.getAddressForUser(deployerName);
     if (!deployerAddress) {
       let errorParams = {
-        internal_error_identifier: 'l_d_4',
+        internal_error_identifier: 's_d_d_validateParams_4',
         api_error_identifier: 'invalid_api_params',
         error_config: errorConfig,
         params_error_identifiers: ['deployer_invalid'],
         debug_options: {}
       };
-      logger.error("%Error - Deployer address is invalid");
+      logger.error('%Error - Deployer address is invalid');
       return responseHelper.paramValidationError(errorParams);
     }
 
     const deployerAddrPassphrase = coreAddresses.getPassphraseForUser(deployerName);
     if (!deployerAddrPassphrase) {
       let errorParams = {
-        internal_error_identifier: 'l_d_5',
+        internal_error_identifier: 's_d_d_validateParams_5',
         api_error_identifier: 'invalid_deployer_passphrase',
         error_config: errorConfig,
         debug_options: {}
       };
-      logger.error("Error: Deployer passphrase is invalid");
+      logger.error('Error: Deployer passphrase is invalid');
       return responseHelper.error(errorParams);
     }
 
     return responseHelper.successWithData({});
-
   },
 
   /**
-  * Deploy contract
-  *
-  * @return {promise<result>} - returns a promise which resolves to an object of kind Result
-  *
-  */
+   * Deploy contract
+   *
+   * @return {promise<result>} - returns a promise which resolves to an object of kind Result
+   *
+   */
   deploy: function() {
+    const oThis = this,
+      web3ProviderFactory = oThis.ic().getWeb3ProviderFactory(),
+      coreAddresses = oThis.ic().getCoreAddresses(),
+      web3Provider = web3ProviderFactory.getProvider(web3ProviderFactory.typeWS);
 
-    const oThis = this;
-
-    return new Promise(function (onResolve, onReject) {
-
-      logger.debug("Contract name: " + oThis.contractName);
-      logger.debug("Gas price: " + oThis.gasPrice);
-      logger.debug("Constructor arguments: " + oThis.constructorArgs);
+    return new Promise(function(onResolve, onReject) {
+      logger.debug('Contract name: ' + oThis.contractName);
+      logger.debug('Gas price: ' + oThis.gasPrice);
+      logger.debug('Constructor arguments: ' + oThis.constructorArgs);
 
       const txUUID = uuid.v4();
       const returnType = basicHelper.getReturnType(oThis.options.returnType);
 
-      const asyncPerform = function () {
-
+      const asyncPerform = function() {
         const deployerAddress = coreAddresses.getAddressForUser(deployerName);
         const deployerAddrPassphrase = coreAddresses.getPassphraseForUser(deployerName);
 
@@ -191,7 +201,7 @@ DeployerKlass.prototype = {
 
         const txParams = {
           from: deployerAddress,
-          data: (web3Provider.utils.isHexStrict(contractBin) ? "" : "0x") + contractBin,
+          data: (web3Provider.utils.isHexStrict(contractBin) ? '' : '0x') + contractBin,
           gasPrice: oThis.gasPrice,
           gas: oThis.gasLimit
         };
@@ -200,66 +210,63 @@ DeployerKlass.prototype = {
           txParams.arguments = oThis.constructorArgs;
         }
 
-        var contract = new web3Provider.eth.Contract(
-          contractAbi,
-          null,
-          txParams
-        );
+        var contract = new web3Provider.eth.Contract(contractAbi, null, txParams);
 
         // this is needed since the contract object
         //contract.setProvider(web3Provider.currentProvider);
 
         // Unlock account
-        web3Provider.eth.personal.unlockAccount(
-          deployerAddress,
-          deployerAddrPassphrase)
+        web3Provider.eth.personal
+          .unlockAccount(deployerAddress, deployerAddrPassphrase)
           .then(function() {
             const encodeABI = contract.deploy(txParams).encodeABI();
             txParams.data = encodeABI;
 
-            web3Provider.eth.sendTransaction(txParams)
+            web3Provider.eth
+              .sendTransaction(txParams)
               .on('transactionHash', function(transactionHash) {
                 logger.debug(`Transaction hash received for ${txUUID} :${transactionHash}`);
                 if (basicHelper.isReturnTypeTxHash(returnType)) {
                   return onResolve(
-                    responseHelper.successWithData(
-                      {
-                        transaction_uuid: txUUID,
-                        transaction_hash: transactionHash,
-                        transaction_receipt: {}
-                      }));
+                    responseHelper.successWithData({
+                      transaction_uuid: txUUID,
+                      transaction_hash: transactionHash,
+                      transaction_receipt: {}
+                    })
+                  );
                 }
               })
               .once('receipt', function(receipt) {
-
                 const contractAddress = receipt.contractAddress;
-                web3Provider.eth.getCode(contractAddress).then(function(code) {
-                  if (code.length <= 2) {
-                    if (basicHelper.isReturnTypeTxReceipt(returnType)) {
-                      let errorParams = {
-                        internal_error_identifier: 'l_d_6',
-                        api_error_identifier: 'contract_deploy_failed',
-                        error_config: errorConfig,
-                        debug_options: {}
-                      };
-                      return onResolve(responseHelper.error(errorParams));
-                    }
-                  } else if (basicHelper.isReturnTypeTxReceipt(returnType)) {
-                    logger.debug(`Contract deployment success: ${txUUID}`);
-                    return onResolve(
-                      responseHelper.successWithData(
-                        {
+                web3Provider.eth
+                  .getCode(contractAddress)
+                  .then(function(code) {
+                    if (code.length <= 2) {
+                      if (basicHelper.isReturnTypeTxReceipt(returnType)) {
+                        let errorParams = {
+                          internal_error_identifier: 's_d_d_deploy_1',
+                          api_error_identifier: 'contract_deploy_failed',
+                          error_config: errorConfig,
+                          debug_options: {}
+                        };
+                        return onResolve(responseHelper.error(errorParams));
+                      }
+                    } else if (basicHelper.isReturnTypeTxReceipt(returnType)) {
+                      logger.debug(`Contract deployment success: ${txUUID}`);
+                      return onResolve(
+                        responseHelper.successWithData({
                           transaction_uuid: txUUID,
                           transaction_hash: receipt.transactionHash,
                           transaction_receipt: receipt
-                        }));
-                  }
-                })
+                        })
+                      );
+                    }
+                  })
                   .catch(function(reason) {
-                    logger.error("%Error - Contract deployment failed. Reason", reason);
+                    logger.error('%Error - Contract deployment failed. Reason', reason);
                     if (basicHelper.isReturnTypeTxReceipt(returnType)) {
                       let errorParams = {
-                        internal_error_identifier: 'l_d_7',
+                        internal_error_identifier: 's_d_d_deploy_2',
                         api_error_identifier: 'unhandled_api_error',
                         error_config: errorConfig,
                         debug_options: {}
@@ -270,9 +277,9 @@ DeployerKlass.prototype = {
               })
               .catch(function(reason) {
                 if (basicHelper.isReturnTypeTxReceipt(returnType)) {
-                  logger.error("%Error - Contract deployment failed. Reason: ", reason);
+                  logger.error('%Error - Contract deployment failed. Reason: ', reason);
                   let errorParams = {
-                    internal_error_identifier: 'l_d_8',
+                    internal_error_identifier: 's_d_d_deploy_3',
                     api_error_identifier: 'unhandled_api_error',
                     error_config: errorConfig,
                     debug_options: {}
@@ -283,7 +290,7 @@ DeployerKlass.prototype = {
           })
           .catch(function(reason) {
             let errorParams = {
-              internal_error_identifier: 'l_d_5',
+              internal_error_identifier: 's_d_d_deploy_4',
               api_error_identifier: 'unhandled_api_error',
               error_config: errorConfig,
               debug_options: {}
@@ -291,25 +298,23 @@ DeployerKlass.prototype = {
             logger.error('%Error - Transaction failed. Reason:', reason);
             return onResolve(responseHelper.error(errorParams));
           });
-
       };
       if (basicHelper.isReturnTypeUUID(returnType)) {
         asyncPerform();
         return onResolve(
-          responseHelper.successWithData(
-            {
-              transaction_uuid: txUUID,
-              transaction_hash: "",
-              transaction_receipt: {}
-            }));
+          responseHelper.successWithData({
+            transaction_uuid: txUUID,
+            transaction_hash: '',
+            transaction_receipt: {}
+          })
+        );
       } else {
         return asyncPerform();
       }
-
     });
   }
-
 };
 
-module.exports = DeployerKlass;
+InstanceComposer.registerShadowableClass(DeployerKlass, 'getDeployerClass');
 
+module.exports = DeployerKlass;

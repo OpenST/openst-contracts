@@ -1,38 +1,118 @@
-"use strict";
+'use strict';
 
-const path = require('path')
-  , rootPrefix = ".."
-;
-
-/*
- * Constants file: Load constants from environment variables
+/**
+ * Load all the core constants from config strategy OR define them as literals here and export them.
+ *
+ * @module config/core_constants
  *
  */
 
-function define(name, value) {
-  Object.defineProperty(exports, name, {
-    value: value,
-    enumerable: true
-  });
-}
-//Cache engine
-define('CACHING_ENGINE', process.env.OST_CACHING_ENGINE);
+const rootPrefix = '..',
+  InstanceComposer = require(rootPrefix + '/instance_composer');
 
-// Geth
-define('OST_UTILITY_GETH_RPC_PROVIDER', process.env.OST_UTILITY_GETH_RPC_PROVIDER);
-define('OST_UTILITY_GETH_WS_PROVIDER', process.env.OST_UTILITY_GETH_WS_PROVIDER);
+/**
+ * Constructor for core constants
+ *
+ * @constructor
+ */
+const CoreConstants = function(configStrategy, instanceComposer) {
+  const oThis = this;
 
-// MySQL details
-define("MYSQL_HOST", process.env.OP_MYSQL_HOST);
-define("MYSQL_USER", process.env.OP_MYSQL_USER);
-define("MYSQL_PASSWORD", process.env.OP_MYSQL_PASSWORD);
-define("MYSQL_DATABASE", process.env.OP_MYSQL_DATABASE);
-define("MYSQL_CONNECTION_POOL_SIZE", process.env.OP_MYSQL_CONNECTION_POOL_SIZE);
-define("STANDALONE_MODE", process.env.OST_STANDALONE_MODE);
+  // Geth
+  oThis.OST_UTILITY_GETH_RPC_PROVIDER = configStrategy.OST_UTILITY_GETH_RPC_PROVIDER;
+  oThis.OST_UTILITY_GETH_WS_PROVIDER = configStrategy.OST_UTILITY_GETH_WS_PROVIDER;
+  oThis.OST_UTILITY_CHAIN_ID = configStrategy.OST_UTILITY_CHAIN_ID;
 
+  // MySQL details
+  oThis.MYSQL_HOST = process.env.OP_MYSQL_HOST;
+  oThis.MYSQL_USER = process.env.OP_MYSQL_USER;
+  oThis.MYSQL_PASSWORD = process.env.OP_MYSQL_PASSWORD;
+  oThis.MYSQL_DATABASE = process.env.OP_MYSQL_DATABASE;
+  oThis.MYSQL_CONNECTION_POOL_SIZE = process.env.OP_MYSQL_CONNECTION_POOL_SIZE;
 
-//Debug level
-define('DEBUG_ENABLED', process.env.OST_DEBUG_ENABLED || false);
+  oThis.OST_STANDALONE_MODE = configStrategy.OST_STANDALONE_MODE;
 
-//Environment
-define("AUTO_SCALE_DYNAMO", process.env.AUTO_SCALE_DYNAMO);
+  //Debug level
+  oThis.DEBUG_ENABLED = configStrategy.DEBUG_ENABLED || false;
+
+  //Environment
+  oThis.AUTO_SCALE_DYNAMO = configStrategy.AUTO_SCALE_DYNAMO;
+};
+
+CoreConstants.prototype = {
+  /**
+   * utility chain id.<br><br>
+   *
+   * @constant {integer}
+   *
+   */
+  OST_UTILITY_CHAIN_ID: null,
+
+  /**
+   * utility geth rpc endpoint.<br><br>
+   *
+   * @constant {string}
+   *
+   */
+  OST_UTILITY_GETH_RPC_PROVIDER: null,
+
+  /**
+   * Mysql DB endpoint.<br><br>
+   *
+   * @constant {string}
+   *
+   */
+  MYSQL_HOST: null,
+
+  /**
+   * user name for Mysql. <br><br>
+   *
+   * @constant {string}
+   *
+   */
+  MYSQL_USER: null,
+
+  /**
+   * Mysql database name. <br><br>
+   *
+   * @constant {string}
+   *
+   */
+  MYSQL_DATABASE: null,
+
+  /**
+   * Mysql connection pool size.<br><br>
+   *
+   * @constant {string}
+   *
+   */
+  MYSQL_CONNECTION_POOL_SIZE: null,
+
+  /**
+   * is payments running in standalone mode. <br><br>
+   *
+   * @constant {string}
+   *
+   */
+  OST_STANDALONE_MODE: null,
+
+  /**
+   * is debug enabled.<br><br>
+   *
+   * @constant {string}
+   *
+   */
+  DEBUG_ENABLED: null,
+
+  /**
+   * is autoscaling enabled for DynamoDb. <br><br>
+   *
+   * @constant {string}
+   *
+   */
+  AUTO_SCALE_DYNAMO: null
+};
+
+InstanceComposer.register(CoreConstants, 'getCoreConstants', true);
+
+module.exports = CoreConstants;

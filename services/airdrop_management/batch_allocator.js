@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  *
@@ -8,24 +8,26 @@
  *
  */
 
-const rootPrefix = '../..'
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , userAirdropDetailKlass = require(rootPrefix + '/app/models/user_airdrop_detail')
-  , airdropAllocationProofDetailKlass = require(rootPrefix + '/app/models/airdrop_allocation_proof_detail')
-  , airdropConstants = require(rootPrefix + '/lib/global_constant/airdrop')
-  , BigNumber = require('bignumber.js')
-  , basicHelper = require(rootPrefix + '/helpers/basic_helper')
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , userAirdropDetailCacheKlass = require(rootPrefix + '/lib/cache_multi_management/user_airdrop_detail')
-  , AirdropModelCacheKlass = require(rootPrefix + '/lib/cache_management/airdrop_model')
-  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
-  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+const BigNumber = require('bignumber.js');
+
+const rootPrefix = '../..',
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  airdropConstants = require(rootPrefix + '/lib/global_constant/airdrop'),
+  basicHelper = require(rootPrefix + '/helpers/basic_helper'),
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
+
+require(rootPrefix + '/app/models/user_airdrop_detail');
+require(rootPrefix + '/app/models/airdrop_allocation_proof_detail');
+require(rootPrefix + '/lib/cache_multi_management/user_airdrop_detail');
+require(rootPrefix + '/lib/cache_management/airdrop_model');
 
 /**
  * Constructor to create object of batch allocator
@@ -43,7 +45,7 @@ const errorConfig = {
 const BatchAllocatorKlass = function(params) {
   const oThis = this;
   params = params || {};
-  logger.debug("\n=========batchAllocator.params=========");
+  logger.debug('\n=========batchAllocator.params=========');
   logger.debug(params);
   oThis.airdropContractAddress = params.airdrop_contract_address;
   oThis.transactionHash = params.transaction_hash;
@@ -61,41 +63,48 @@ const BatchAllocatorKlass = function(params) {
 };
 
 BatchAllocatorKlass.prototype = {
-
   /**
    * Perform batch allocation to airdrop users
    *
-   * @return {promise<result>}
+   * @return {promise}
    *
    */
-  perform: async function () {
-
+  perform: function() {
     const oThis = this;
 
-    try {
+    return oThis.asyncPerform().catch(function(error) {
+      if (responseHelper.isCustomResult(error)) {
+        return error;
+      } else {
+        logger.error('openst-platform::services/airdrop_management/batch_allocator.js::perform::catch');
+        logger.error(error);
 
-      var r = null;
+        return responseHelper.error({
+          internal_error_identifier: 's_am_ba_perform_1',
+          api_error_identifier: 'unhandled_api_error',
+          error_config: errorConfig,
+          debug_options: { err: error }
+        });
+      }
+    });
+  },
+  /**
+   * Async Perform
+   *
+   * @return {promise<result>}
+   */
+  asyncPerform: async function() {
+    const oThis = this;
+    var r = null;
+    r = await oThis.validateParams();
+    logger.debug('\n=========batchAllocator.validateParams.result=========');
+    logger.debug(r);
+    if (r.isFailure()) return r;
 
-      r = await oThis.validateParams();
-      logger.debug("\n=========batchAllocator.validateParams.result=========");
-      logger.debug(r);
-      if(r.isFailure()) return r;
-
-      r = await oThis.allocateAirdropAmountToUsers();
-      logger.debug("\n=========batchAllocator.allocateAirdropAmountToUsers.result=========");
-      logger.debug(r);
-      return r;
-
-    } catch(err){
-      let errorParams = {
-        internal_error_identifier: 's_am_ba_perform_1',
-        api_error_identifier: 'unhandled_api_error',
-        error_config: errorConfig,
-        debug_options: { err: err }
-      };
-      logger.error(err.message);
-      return responseHelper.error(errorParams)
-    }
+    r = await oThis.allocateAirdropAmountToUsers();
+    logger.debug('\n=========batchAllocator.allocateAirdropAmountToUsers.result=========');
+    logger.debug(r);
+    return r;
   },
 
   /**
@@ -105,9 +114,11 @@ BatchAllocatorKlass.prototype = {
    *
    */
   validateParams: function() {
-    const oThis = this;
-    return new Promise(async function (onResolve, onReject) {
+    const oThis = this,
+      airdropAllocationProofDetailKlass = oThis.ic().getAirdropAllocationProofDetailModelKlass(),
+      AirdropModelCacheKlass = oThis.ic().getCacheManagementAirdropModelClass();
 
+    return new Promise(async function(onResolve, onReject) {
       if (!basicHelper.isAddressValid(oThis.airdropContractAddress)) {
         let errorParams = {
           internal_error_identifier: 's_am_ba_validateParams_1',
@@ -131,9 +142,11 @@ BatchAllocatorKlass.prototype = {
       }
 
       // Check if airdropContractAddress is registered or not
-      const airdropModelCacheObject = new AirdropModelCacheKlass({useObject: true, contractAddress: oThis.airdropContractAddress})
-        , airdropModelCacheResponse = await airdropModelCacheObject.fetch()
-      ;
+      const airdropModelCacheObject = new AirdropModelCacheKlass({
+          useObject: true,
+          contractAddress: oThis.airdropContractAddress
+        }),
+        airdropModelCacheResponse = await airdropModelCacheObject.fetch();
       oThis.airdropRecord = airdropModelCacheResponse.data[oThis.airdropContractAddress];
       if (!oThis.airdropRecord) {
         let errorParams = {
@@ -154,11 +167,15 @@ BatchAllocatorKlass.prototype = {
           error_config: errorConfig,
           debug_options: {}
         };
-        logger.error('%Error - Invalid transactionHash. Given airdropAllocationProofDetailRecord is not present in DB')
+        logger.error('%Error - Invalid transactionHash. Given airdropAllocationProofDetailRecord is not present in DB');
         return onResolve(responseHelper.error(errorParams));
       }
 
-      if (new BigNumber(oThis.airdropAllocationProofDetailRecord.airdrop_allocated_amount).gte(new BigNumber(oThis.airdropAllocationProofDetailRecord.airdrop_amount))) {
+      if (
+        new BigNumber(oThis.airdropAllocationProofDetailRecord.airdrop_allocated_amount).gte(
+          new BigNumber(oThis.airdropAllocationProofDetailRecord.airdrop_amount)
+        )
+      ) {
         let errorParams = {
           internal_error_identifier: 's_am_ba_validateParams_5',
           api_error_identifier: 'invalid_amount',
@@ -168,7 +185,7 @@ BatchAllocatorKlass.prototype = {
         return onResolve(responseHelper.error(errorParams));
       }
 
-      if(!oThis.airdropUsers || !(typeof oThis.airdropUsers === "object")) {
+      if (!oThis.airdropUsers || !(typeof oThis.airdropUsers === 'object')) {
         let errorParams = {
           internal_error_identifier: 's_am_ba_validateParams_6',
           api_error_identifier: 'invalid_object',
@@ -189,12 +206,11 @@ BatchAllocatorKlass.prototype = {
         return onResolve(responseHelper.error(errorParams));
       }
 
-      var value = null
-        , userAddress = ''
-        , userAirdropAmount = 0
-        , expiryTimestamp = 0
-        , insertData = []
-      ;
+      var value = null,
+        userAddress = '',
+        userAirdropAmount = 0,
+        expiryTimestamp = 0,
+        insertData = [];
       for (var userAddress in oThis.airdropUsers) {
         value = oThis.airdropUsers[userAddress];
 
@@ -244,20 +260,16 @@ BatchAllocatorKlass.prototype = {
         }
 
         oThis.totalInputAirdropAmount = oThis.totalInputAirdropAmount.plus(userAirdropAmount);
-        insertData = [
-          userAddress,
-          oThis.airdropRecord.id,
-          userAirdropAmount.toString(10),
-          expiryTimestamp.toNumber()
-        ];
+        insertData = [userAddress, oThis.airdropRecord.id, userAirdropAmount.toString(10), expiryTimestamp.toNumber()];
         oThis.userAddresses.push(userAddress);
         oThis.bulkInsertData.push(insertData);
       }
 
       // Calculate totalAmountToAllocate after adding input amount
-      oThis.totalAmountAfterAllocatingInputAmount = (new BigNumber(oThis.airdropAllocationProofDetailRecord.airdrop_allocated_amount)).
-        plus(oThis.totalInputAirdropAmount);
-      const airdropAmountBigNumber = new BigNumber(oThis.airdropAllocationProofDetailRecord.airdrop_amount);      
+      oThis.totalAmountAfterAllocatingInputAmount = new BigNumber(
+        oThis.airdropAllocationProofDetailRecord.airdrop_allocated_amount
+      ).plus(oThis.totalInputAirdropAmount);
+      const airdropAmountBigNumber = new BigNumber(oThis.airdropAllocationProofDetailRecord.airdrop_amount);
       if (oThis.totalAmountAfterAllocatingInputAmount.gt(airdropAmountBigNumber)) {
         let errorParams = {
           internal_error_identifier: 's_am_ba_validateParams_12',
@@ -280,9 +292,7 @@ BatchAllocatorKlass.prototype = {
       }
 
       return onResolve(responseHelper.successWithData({}));
-
     });
-
   },
 
   /**
@@ -292,9 +302,11 @@ BatchAllocatorKlass.prototype = {
    *
    */
   allocateAirdropAmountToUsers: async function() {
-    const oThis = this;
+    const oThis = this,
+      userAirdropDetailKlass = oThis.ic().getUserAirdropDetailModelClass(),
+      airdropAllocationProofDetailKlass = oThis.ic().getAirdropAllocationProofDetailModelKlass();
 
-    return new Promise(async function (onResolve, onReject) {
+    return new Promise(async function(onResolve, onReject) {
       try {
         // Allocate and update Amount in db
         var airdropAllocationProofDetailModel = new airdropAllocationProofDetailKlass();
@@ -303,34 +315,31 @@ BatchAllocatorKlass.prototype = {
           oThis.totalAmountAfterAllocatingInputAmount.toString(10)
         );
 
-        logger.debug("=========allocateAirdropAmountToUsers.airdropAllocationProofDetailModel===========");
+        logger.debug('=========allocateAirdropAmountToUsers.airdropAllocationProofDetailModel===========');
         logger.debug(r);
-        if(r.isFailure()) return r;
+        if (r.isFailure()) return r;
         var userAirdropDetailModel = new userAirdropDetailKlass();
         await userAirdropDetailModel.insertMultiple(oThis.tableFields, oThis.bulkInsertData).fire();
         oThis.clearCache();
         return onResolve(responseHelper.successWithData({}));
-
-      } catch(err){
+      } catch (err) {
         // If it fails rollback allocated amount
         r = await airdropAllocationProofDetailModel.updateAllocatedAmount(
           oThis.airdropAllocationProofDetailRecord.id,
-          (oThis.totalAmountAfterAllocatingInputAmount.minus(oThis.totalInputAirdropAmount)).toString(10)
+          oThis.totalAmountAfterAllocatingInputAmount.minus(oThis.totalInputAirdropAmount).toString(10)
         );
-        logger.debug("=========allocateAirdropAmountToUsers.airdropAllocationProofDetailModel===========");
+        logger.debug('=========allocateAirdropAmountToUsers.airdropAllocationProofDetailModel===========');
         logger.debug(r);
 
         let errorParams = {
-          internal_error_identifier: 'l_am_ba_vp_13',
+          internal_error_identifier: 's_am_ba_allocate_1',
           api_error_identifier: 'unhandled_api_error',
           error_config: errorConfig,
           debug_options: { err: err, transactionHash: oThis.transactionHash }
         };
         return onResolve(responseHelper.error(errorParams));
       }
-
     });
-
   },
 
   /**
@@ -339,7 +348,9 @@ BatchAllocatorKlass.prototype = {
    *
    */
   clearCache: async function() {
-    const oThis = this;
+    const oThis = this,
+      userAirdropDetailCacheKlass = oThis.ic().getMultiCacheManagementUserAirdropDetailKlass();
+
     const userAirdropDetailCacheKlassObject = new userAirdropDetailCacheKlass({
       chainId: oThis.chainId,
       airdropId: oThis.airdropRecord.id,
@@ -347,7 +358,8 @@ BatchAllocatorKlass.prototype = {
     });
     await userAirdropDetailCacheKlassObject.clear();
   }
-
 };
+
+InstanceComposer.registerShadowableClass(BatchAllocatorKlass, 'getAirdropBatchAllocatorClass');
 
 module.exports = BatchAllocatorKlass;

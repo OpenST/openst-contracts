@@ -19,15 +19,18 @@ export OP_MYSQL_PASSWORD=''
 export OP_MYSQL_DATABASE='payment_development'
 export OP_MYSQL_CONNECTION_POOL_SIZE='5'
 
-export OST_CACHING_ENGINE='memcached'
+export OST_CACHING_ENGINE='none'
 export OST_DEBUG_ENABLED=1
-
+export CONFIG_STRATEGY_FILE_NAME='/mocha_test/scripts/config_strategy.js'
+export PRICE_ORACLE_CONFIG_STRATEGY_FILE_NAME='../../../../../mocha_test/scripts/config_strategy.js'
 
 export OS_DYNAMODB_API_VERSION='2012-08-10'
 export OS_DYNAMODB_ACCESS_KEY_ID='x'
 export OS_DYNAMODB_SECRET_ACCESS_KEY='x'
 export OS_DYNAMODB_REGION='localhost'
 export OS_DYNAMODB_ENDPOINT='http://localhost:8000'
+export OS_DYNAMODB_SSL_ENABLED='0'
+export OS_DYNAMODB_LOGGING_ENABLED='0'
 
 export OS_AUTOSCALING_API_VERSION='2016-02-06'
 export OS_AUTOSCALING_ACCESS_KEY_ID='x'

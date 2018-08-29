@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 /**
  *
  * This is a model file which would be used querying airdrop_allocation_proof_details model.<br><br>
@@ -6,35 +6,30 @@
  * @module app/models/airdrop_allocation_proof_detail
  *
  */
-const rootPrefix = '../..'
-  , coreConstants = require(rootPrefix + '/config/core_constants')
-  , QueryDBKlass = require(rootPrefix + '/app/models/queryDb')
-  , ModelBaseKlass = require(rootPrefix + '/app/models/base')
-  , responseHelper = require(rootPrefix + '/lib/formatter/response')
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , paramErrorConfig = require(rootPrefix + '/config/param_error_config')
-  , apiErrorConfig = require(rootPrefix + '/config/api_error_config')
-;
+const rootPrefix = '../..',
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  ModelBaseKlass = require(rootPrefix + '/app/models/base'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  paramErrorConfig = require(rootPrefix + '/config/param_error_config'),
+  apiErrorConfig = require(rootPrefix + '/config/api_error_config');
+
+require(rootPrefix + '/config/core_constants');
 
 const errorConfig = {
   param_error_config: paramErrorConfig,
   api_error_config: apiErrorConfig
 };
 
-const dbName = coreConstants.MYSQL_DATABASE
-  , QueryDBObj = new QueryDBKlass(dbName)
-;
+const AirdropAllocationProofDetailKlass = function() {
+  const oThis = this,
+    coreConstants = oThis.ic().getCoreConstants();
 
-const AirdropAllocationProofDetailKlass = function () {
-  ModelBaseKlass.call(this, {dbName: dbName});
+  ModelBaseKlass.call(this, { dbName: coreConstants.MYSQL_DATABASE });
 };
 
 AirdropAllocationProofDetailKlass.prototype = Object.create(ModelBaseKlass.prototype);
 
 const AirdropAllocationProofDetailKlassPrototype = {
-
-  QueryDB: QueryDBObj,
-
   tableName: 'airdrop_allocation_proof_details',
 
   /**
@@ -45,9 +40,14 @@ const AirdropAllocationProofDetailKlassPrototype = {
    * @return {Promise}
    *
    */
-  getByTransactionHash: function (transactionHash) {
-    var oThis = this;
-    return oThis.select().where(["transaction_hash=?", transactionHash]).fire();
+  getByTransactionHash: function(transactionHash) {
+    const oThis = this,
+      coreConstants = oThis.ic().getCoreConstants();
+
+    return oThis
+      .select()
+      .where(['transaction_hash=? AND chain_id=?', transactionHash, coreConstants.OST_UTILITY_CHAIN_ID])
+      .fire();
   },
 
   /**
@@ -60,25 +60,29 @@ const AirdropAllocationProofDetailKlassPrototype = {
    * @return {Promise}
    *
    */
-  createRecord: async function(transactionHash, airdropAmount, airdropAllocatedAmount=0) {
-    var oThis = this;
-      try {
-        const insertedRecord = await oThis.create({
+  createRecord: async function(transactionHash, airdropAmount, airdropAllocatedAmount = 0) {
+    const oThis = this,
+      coreConstants = oThis.ic().getCoreConstants();
+
+    try {
+      const insertedRecord = await oThis
+        .insert({
           transaction_hash: transactionHash,
           airdrop_amount: airdropAmount,
-          airdrop_allocated_amount: airdropAllocatedAmount
-        });
-        return responseHelper.successWithData({response: insertedRecord});
-      } catch(err){
-        let errorParams = {
-          internal_error_identifier: 'l_aapd_cr_1',
-          api_error_identifier: 'entry_creation_failed',
-          error_config: errorConfig,
-          debug_options: { err: err }
-        };
-        return responseHelper.error(errorParams);
-      }
-
+          airdrop_allocated_amount: airdropAllocatedAmount,
+          chain_id: coreConstants.OST_UTILITY_CHAIN_ID
+        })
+        .fire();
+      return responseHelper.successWithData({ response: insertedRecord });
+    } catch (err) {
+      let errorParams = {
+        internal_error_identifier: 'l_aapd_cr_1',
+        api_error_identifier: 'entry_creation_failed',
+        error_config: errorConfig,
+        debug_options: { err: err }
+      };
+      return responseHelper.error(errorParams);
+    }
   },
 
   /**
@@ -90,14 +94,16 @@ const AirdropAllocationProofDetailKlassPrototype = {
    * @return {Promise}
    *
    */
-  updateAllocatedAmount: async function(id, allocatedAmount){
-    const oThis = this
-    ;
+  updateAllocatedAmount: async function(id, allocatedAmount) {
+    const oThis = this;
 
     try {
-      await oThis.update({airdrop_allocated_amount: allocatedAmount}).where(["id=?", id]).fire();
+      await oThis
+        .update({ airdrop_allocated_amount: allocatedAmount })
+        .where(['id=?', id])
+        .fire();
       return responseHelper.successWithData({});
-    } catch(err){
+    } catch (err) {
       let errorParams = {
         internal_error_identifier: 'l_a_m_aapd_1',
         api_error_identifier: 'entry_updation_failed',
@@ -106,10 +112,14 @@ const AirdropAllocationProofDetailKlassPrototype = {
       };
       return responseHelper.error(errorParams);
     }
-  },
-
+  }
 };
 
 Object.assign(AirdropAllocationProofDetailKlass.prototype, AirdropAllocationProofDetailKlassPrototype);
+
+InstanceComposer.registerShadowableClass(
+  AirdropAllocationProofDetailKlass,
+  'getAirdropAllocationProofDetailModelKlass'
+);
 
 module.exports = AirdropAllocationProofDetailKlass;

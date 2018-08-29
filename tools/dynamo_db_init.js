@@ -1,38 +1,38 @@
-"use strict";
+'use strict';
 /**
  * Dynamo DB init
  *
  * @module tools/dynamo_db_init
  */
-const openSTStorage = require('@openstfoundation/openst-storage')
-;
 
-const rootPrefix = '..'
-  , logger = require(rootPrefix + '/helpers/custom_console_logger')
-  , ddbServiceObj = require(rootPrefix + '/lib/dynamo_db_service')
-  , autoScalingServiceObj = require(rootPrefix + '/lib/auto_scaling_service')
-;
+const rootPrefix = '..',
+  logger = require(rootPrefix + '/helpers/custom_console_logger'),
+  InstanceComposer = require(rootPrefix + '/instance_composer'),
+  configStrategy = require(rootPrefix + '/mocha_test/scripts/config_strategy');
+
+require(rootPrefix + '/lib/providers/storage');
 
 /**
  * Dynamo db init
  *
  * @constructor
  */
-const DynamoDBInit = function () {};
+const DynamoDBInit = function() {};
 
 DynamoDBInit.prototype = {
-  perform: async function () {
+  perform: async function() {
+    const oThis = this,
+      instanceComposer = new InstanceComposer(configStrategy),
+      storageProvider = instanceComposer.getStorageProvider(),
+      openSTStorage = storageProvider.getInstance();
     // run migrations
     logger.info('* Running DynamoDB initial migrations for shard management.');
-    let shardMgmtObj = ddbServiceObj.shardManagement();
-    await shardMgmtObj.runShardMigration(ddbServiceObj, null);
+    let shardMgmtObj = openSTStorage.dynamoDBService.shardManagement();
+    await shardMgmtObj.runShardMigration();
 
     // createAndRegisterShard
     logger.info('* Creating and registering shard for token balance model.');
-    await new openSTStorage.TokenBalanceModel({
-      ddb_service: ddbServiceObj,
-      auto_scaling: autoScalingServiceObj,
-    }).createAndRegisterShard('tokenBalancesShard1')
+    await new openSTStorage.model.TokenBalance({}).createAndRegisterShard('tokenBalancesShard1');
   }
 };
 

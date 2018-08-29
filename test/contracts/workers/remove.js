@@ -21,8 +21,7 @@
 
 const workersUtils = require('./workers_utils.js'),
   Workers = artifacts.require('./Workers.sol'),
-  web3 = require('../../lib/web3') ;
-
+  web3 = require('../../lib/web3');
 
 ///
 /// Test stories
@@ -33,52 +32,40 @@ const workersUtils = require('./workers_utils.js'),
 
 module.exports.perform = (accounts) => {
   const opsAddress = accounts[1],
-    adminAddress = accounts[2]
-  ;
+    adminAddress = accounts[2];
 
   var workers = null,
-    response = null
-  ;
+    response = null;
 
   beforeEach(async () => {
-
     workers = await Workers.new();
     assert.ok(await workers.setOpsAddress(opsAddress));
     assert.ok(await workers.setAdminAddress(adminAddress));
-
   });
 
   it('fails to remove when sender is neither opsAddress nor adminAddress', async () => {
-
-    await workersUtils.utils.expectThrow(workers.remove.call({from: accounts[3]}));
-
+    await workersUtils.utils.expectThrow(workers.remove.call({ from: accounts[3] }));
   });
 
   it('successfully removes when sender is opsAddress', async () => {
-
     // call remove
-    assert.ok(await workers.remove.call({from: opsAddress}));
-    response = await workers.remove({from: opsAddress});
+    assert.ok(await workers.remove.call({ from: opsAddress }));
+    response = await workers.remove({ from: opsAddress });
     workersUtils.utils.logResponse(response, 'Workers.remove (ops)');
 
     // check if contract is removed
     let code = await web3.eth.getCode(workers.address);
     assert.equal(code, 0x0);
-
   });
 
   it('successfully removes when sender is adminAddress', async () => {
-
     // call remove from admin address
-    assert.ok(await workers.remove.call({from: adminAddress}));
-    response = await workers.remove({from: adminAddress});
+    assert.ok(await workers.remove.call({ from: adminAddress }));
+    response = await workers.remove({ from: adminAddress });
     workersUtils.utils.logResponse(response, 'Workers.remove (admin)');
 
     // check if contract is removed
     let code = await web3.eth.getCode(workers.address);
     assert.equal(code, 0x0);
-
   });
-}
-
-
+};
