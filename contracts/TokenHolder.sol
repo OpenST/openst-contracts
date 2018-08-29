@@ -25,7 +25,7 @@ pragma solidity ^0.4.23;
 import "./SafeMath.sol";
 import "./BrandedToken.sol";
 import "./MultiSigWallet.sol";
-import "./CoGatewayInterface.sol";
+import "./GatewayRedeemInterface.sol";
 
 
 /**

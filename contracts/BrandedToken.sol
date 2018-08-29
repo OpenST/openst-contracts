@@ -34,7 +34,8 @@ import "./Internal.sol";
  * @notice Branded Token is an EIP20 token minted by staking Simple Token
  *         on Ethereum mainnet.
  *
- * @dev Branded tokens are designed to be used within a (decentralised) application and support:
+ * @dev Branded tokens are designed to be used within a (decentralised) application
+ *      and support:
  *      - Smart contract controlled password reset for users who don't
  *        yet (hard-spoon FTW) manage their own private keys (+v0.9.2).
  *      - Soft-exit for a user to redeem their equivalent part of the
@@ -211,7 +212,8 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @notice Public function burn.
      *
      * @dev Only callable by openSTProtocol contract. Implements a burn function
-     *      to permit msg.sender to reduce its balance, which also reduces tokenTotalSupply.
+     *      to permit msg.sender to reduce its balance, which also reduces
+     *      tokenTotalSupply.
      *
      * @param _burner Address of token burner.
      * @param _amount Amount of tokens to burn.
