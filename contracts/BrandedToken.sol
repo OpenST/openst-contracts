@@ -21,8 +21,6 @@ pragma solidity ^0.4.23;
 //
 // ----------------------------------------------------------------------------
 
-
-import "./SafeMath.sol";
 import "./openst-protocol/EIP20Token.sol";
 import "./openst-protocol/UtilityTokenAbstract.sol";
 import "./Internal.sol";
@@ -47,15 +45,10 @@ import "./Internal.sol";
  */
 contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
 
-     /* Usings */
-
-    using SafeMath for uint256;
-
-
     /* Storage */
 
-    /** Token rules contract address  */
-    address public tokenRules;
+    /** Value chain ERC20 contract address  */
+    address public token;
 
     /**
      * @notice Contract constructor.
@@ -63,7 +56,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @dev Creates an EIP20Token and a UtilityTokenAbstract contract with
      *      arguments passed in the contract constructor.
      *
-     * @param _uuid UUID of the token.
+     * @param _token value chain ERC20 contract address. It act as identifier.
      * @param _symbol Symbol of the token.
      * @param _name Name of the token.
      * @param _decimals Decimal places of the token.
@@ -71,39 +64,33 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @param _chainIdUtility Chain id of the utility chain.
      * @param _conversionRate Conversion rate of the token.
      * @param _conversionRateDecimals Decimal places of conversion rate of token.
-     * @param _tokenRules tokenRules contract address.
      */
     constructor(
-        bytes32 _uuid,
-        string _symbol,
-        string _name,
+        address _token,
+        string memory _symbol,
+        string memory _name,
         uint8 _decimals,
         uint256 _chainIdValue,
         uint256 _chainIdUtility,
         uint256 _conversionRate,
         uint8 _conversionRateDecimals,
-        address _tokenRules,
         address _organization
     )
         public
         Internal(_organization)
         EIP20Token(_symbol, _name, _decimals)
         UtilityTokenAbstract(
-        _uuid,
-        _symbol,
-        _name,
         _chainIdValue,
         _chainIdUtility,
         _conversionRate,
         _conversionRateDecimals)
-     {
+    {
         require(
-            _tokenRules != address(0),
-            "Token rules contracts address is invalid!"
+            _token != address(0),
+            "Value chain token contracts address can't be 0."
         );
-
-        tokenRules = _tokenRules;
-     }
+        token = _token;
+    }
 
 
     /* Public functions */

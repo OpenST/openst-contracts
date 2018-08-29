@@ -1,4 +1,3 @@
-
 pragma solidity ^0.4.23;
 
 // Copyright 2017 OpenST Ltd.
@@ -35,8 +34,6 @@ import "./GatewayRedeemInterface.sol";
  *         scalable key management solutions for mainstream apps.
  *
  */
-// TODO Import finalized complete coGateway Interface
-// TODO Implement revertRedemption
 contract TokenHolder is MultiSigWallet {
 
     /* Usings */
@@ -96,13 +93,14 @@ contract TokenHolder is MultiSigWallet {
      *
      * @param _brandedToken erc20 contract address this user is part of.
      * @param _coGateway utility chain gateway contract address.
+     * @param _tokenRules Token rules contract address.
      * @param _required No of requirements for multi sig wallet.
      * @param _wallets array of wallet addresses.
      */
-    // TODO Review protocol deployment flow and check if we need _brandedToken or _coGateway in constructor
     constructor(
         address _brandedToken,
         address _coGateway,
+        address _tokenRules,
         uint8 _required,
         address[] _wallets
     )
@@ -117,11 +115,15 @@ contract TokenHolder is MultiSigWallet {
             _coGateway != address(0),
             "Co gateway contract address is 0"
         );
+        require(
+            _tokenRules != address(0),
+            "TokenRules contract address is 0"
+        );
 
         brandedToken = _brandedToken;
         coGateway = _coGateway;
         // Needed for onlyTokenRules contract validation
-        tokenRules = BrandedToken(brandedToken).tokenRules();
+        tokenRules = _tokenRules;
     }
 
 
@@ -430,7 +432,6 @@ contract TokenHolder is MultiSigWallet {
      *
      *  @return bytes32 hashed data
      */
-    // TODO byte(0x19) verify it with test cases. Test with bytes as argument.
     function getHashedMessage(
         address _from,
         address _to,
@@ -508,4 +509,3 @@ contract TokenHolder is MultiSigWallet {
     }
 
 }
-

@@ -44,27 +44,22 @@ contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterfac
      *  Minted utility tokens still need to be claimed by anyone to transfer
      *  them to the beneficiary.
      */
-    event Minted(bytes32 indexed _uuid, address indexed _beneficiary,
+    event Minted(address indexed _beneficiary,
         uint256 _amount, uint256 _unclaimed, uint256 _totalSupply);
 
-    event Burnt(bytes32 indexed _uuid, address indexed _account,
+    event Burnt(address indexed _account,
         uint256 _amount, uint256 _totalSupply);
 
     /** Storage */
 
-    /** UUID for the utility token */
-    bytes32 private tokenUuid;
     /** totalSupply holds the total supply of utility tokens */
     uint256 private totalTokenSupply;
     /** conversion rate for the utility token */
     uint256 private tokenConversionRate;
     /** conversion rate decimal factor */
     uint8 private tokenConversionRateDecimals;
-    /** tokenChainIdValue is an invariant in the tokenUuid calculation */
     uint256 private tokenChainIdValue;
-    /** tokenChainIdUtility is an invariant in the tokenUuid calculation */
     uint256 private tokenChainIdUtility;
-    /** tokenOpenSTUtility is an invariant in the tokenUuid calculation */
     address private tokenOpenSTUtility;
     /** claims is follows EIP20 allowance pattern but */
     /** for a staker to stake the utility token for a beneficiary */
@@ -77,18 +72,12 @@ contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterfac
      *
      *  @dev Sets ProtocolVersioned with msg.sender address.
      *
-     *  @param _uuid UUID of the token.
-     *  @param _symbol Symbol of the token.
-     *  @param _name Name of the token.
      *  @param _chainIdValue Chain id of the value chain.
      *  @param _chainIdUtility Chain id of the utility chain.
      *  @param _conversionRate Conversion rate of the token.
      *  @param _conversionRateDecimals Decimal places of conversion rate of token.
      */
     constructor(
-        bytes32 _uuid,
-        string _symbol,
-        string _name,
         uint256 _chainIdValue,
         uint256 _chainIdUtility,
         uint256 _conversionRate,
@@ -96,17 +85,6 @@ contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterfac
         public
         ProtocolVersioned(msg.sender)
     {
-        tokenUuid = hashUuid(
-            _symbol,
-            _name,
-            _chainIdValue,
-            _chainIdUtility,
-            msg.sender,
-            _conversionRate,
-            _conversionRateDecimals);
-
-        require(tokenUuid == _uuid);
-
         totalTokenSupply = 0;
         tokenConversionRate = _conversionRate;
         tokenConversionRateDecimals = _conversionRateDecimals;
@@ -128,21 +106,6 @@ contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterfac
         returns (uint256)
     {
         return totalTokenSupply;
-    }
-
-    /**
-     *  @notice Public view function uuid.
-     *
-     *  @dev Get tokenUuid as view so that child cannot edit.
-     *
-     *  @return bytes32 Token UUID.
-     */
-    function uuid()
-        public
-        view
-        returns (bytes32)
-    {
-        return tokenUuid;
     }
 
     /**
@@ -280,7 +243,7 @@ contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterfac
         totalTokenSupply = totalTokenSupply.add(_amount);
         claims[_beneficiary] = claims[_beneficiary].add(_amount);
 
-        emit Minted(tokenUuid, _beneficiary, _amount, claims[_beneficiary], totalTokenSupply);
+        emit Minted(_beneficiary, _amount, claims[_beneficiary], totalTokenSupply);
 
         return true;
     }
@@ -304,7 +267,7 @@ contract UtilityTokenAbstract is Hasher, ProtocolVersioned, UtilityTokenInterfac
     {
         totalTokenSupply = totalTokenSupply.sub(_amount);
 
-        emit Burnt(tokenUuid, _burner, _amount, totalTokenSupply);
+        emit Burnt(_burner, _amount, totalTokenSupply);
 
         return true;
     }
