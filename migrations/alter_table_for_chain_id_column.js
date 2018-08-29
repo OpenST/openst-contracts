@@ -45,7 +45,6 @@ const alterTables = {
   },
 
   getQueries: function() {
-
     const args = process.argv;
 
     let chainId = args[2];
@@ -93,7 +92,6 @@ const alterTables = {
     logger.info('usage:', 'node ./migrations/alter_table_for_chain_id_column.js defaultChainId');
     logger.info('* provided chain id will be used as a default value for all the existing rows.');
   }
-
 };
 
 module.exports = alterTables;

@@ -58,10 +58,8 @@ const AirdropKlassPrototype = {
    *
    */
   getByContractAddress: function(airdropContractAddress) {
-
-    const oThis = this
-      , coreConstants = oThis.ic().getCoreConstants()
-    ;
+    const oThis = this,
+      coreConstants = oThis.ic().getCoreConstants();
 
     return oThis
       .select()
