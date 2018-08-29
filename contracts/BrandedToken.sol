@@ -53,10 +53,8 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
 
     /* Storage */
 
-    /** Token rules contract address  */
-    address public tokenRules;
-    /** Value token contract address  */
-    address public valueToken;
+    /** Value chain ERC20 contract address  */
+    address public erc20Address;
 
     /**
      * @notice Contract constructor.
@@ -64,7 +62,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @dev Creates an EIP20Token and a UtilityTokenAbstract contract with
      *      arguments passed in the contract constructor.
      *
-     * @param _valueToken value chain contract address.
+     * @param _erc20Address value chain contract address.
      * @param _symbol Symbol of the token.
      * @param _name Name of the token.
      * @param _decimals Decimal places of the token.
@@ -72,10 +70,9 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @param _chainIdUtility Chain id of the utility chain.
      * @param _conversionRate Conversion rate of the token.
      * @param _conversionRateDecimals Decimal places of conversion rate of token.
-     * @param _tokenRules tokenRules contract address.
      */
     constructor(
-        address _valueToken,
+        address _erc20Address,
         string memory _symbol,
         string memory _name,
         uint8 _decimals,
@@ -83,7 +80,6 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         uint256 _chainIdUtility,
         uint256 _conversionRate,
         uint8 _conversionRateDecimals,
-        address _tokenRules,
         address _organization
     )
         public
@@ -96,16 +92,10 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         _conversionRateDecimals)
     {
         require(
-            _valueToken != address(0),
+            _erc20Address != address(0),
             "Value token contracts address is invalid!"
         );
-        require(
-            _tokenRules != address(0),
-            "Token rules contracts address is invalid!"
-        );
-
-        tokenRules = _tokenRules;
-        valueToken = _valueToken;
+        erc20Address = _erc20Address;
     }
 
 

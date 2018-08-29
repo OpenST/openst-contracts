@@ -95,6 +95,7 @@ contract TokenHolder is MultiSigWallet {
      *
      * @param _brandedToken erc20 contract address this user is part of.
      * @param _coGateway utility chain gateway contract address.
+     * @param _tokenRules Token rules contract address.
      * @param _required No of requirements for multi sig wallet.
      * @param _wallets array of wallet addresses.
      */
@@ -102,6 +103,7 @@ contract TokenHolder is MultiSigWallet {
     constructor(
         address _brandedToken,
         address _coGateway,
+        address _tokenRules,
         uint8 _required,
         address[] _wallets
     )
@@ -116,11 +118,15 @@ contract TokenHolder is MultiSigWallet {
             _coGateway != address(0),
             "Co gateway contract address is 0"
         );
+        require(
+            _tokenRules != address(0),
+            "TokenRules contract address is 0"
+        );
 
         brandedToken = _brandedToken;
         coGateway = _coGateway;
         // Needed for onlyTokenRules contract validation
-        tokenRules = BrandedToken(brandedToken).tokenRules();
+        tokenRules = _tokenRules;
     }
 
 
