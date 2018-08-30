@@ -60,8 +60,6 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @param _symbol Symbol of the token.
      * @param _name Name of the token.
      * @param _decimals Decimal places of the token.
-     * @param _chainIdValue Chain id of the value chain.
-     * @param _chainIdUtility Chain id of the utility chain.
      * @param _conversionRate Conversion rate of the token.
      * @param _conversionRateDecimals Decimal places of conversion rate of token.
      */
@@ -70,8 +68,6 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         string memory _symbol,
         string memory _name,
         uint8 _decimals,
-        uint256 _chainIdValue,
-        uint256 _chainIdUtility,
         uint256 _conversionRate,
         uint8 _conversionRateDecimals,
         address _organization
@@ -80,8 +76,6 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         Internal(_organization)
         EIP20Token(_symbol, _name, _decimals)
         UtilityTokenAbstract(
-        _chainIdValue,
-        _chainIdUtility,
         _conversionRate,
         _conversionRateDecimals)
     {
