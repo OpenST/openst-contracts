@@ -13,7 +13,7 @@
   ],
   "recurseDepth": 5,
   "templates": {
-    "systemName"            : "OpenST Payments",
+    "systemName"            : "openst-contracts",
     "footer"                : "<style>.copyright, .jsdoc-message, footer { color: #555555;} footer { border-color:#eeeeee;} }</style>",
     "copyright"             : "OpenST Foundation Ltd.",
     "includeDate"           : false,

@@ -23,7 +23,6 @@ const Assert = require('assert');
 
 const NullAddress = '0x0000000000000000000000000000000000000000';
 const rootPrefix = '../..',
-  logger = require(rootPrefix + '/helpers/custom_console_logger'),
   web3 = require('./web3');
 /*
  *  Tracking Gas Usage
@@ -55,19 +54,19 @@ module.exports.logTransaction = async (hash, description) => {
 module.exports.printGasStatistics = () => {
   var totalGasUsed = 0;
 
-  logger.debug('      -----------------------------------------------------');
-  logger.debug('      Report gas usage\n');
+  console.log('      -----------------------------------------------------');
+  console.log('      Report gas usage\n');
 
   for (i = 0; i < receipts.length; i++) {
     const entry = receipts[i];
 
     totalGasUsed += entry.receipt.gasUsed;
 
-    logger.debug('      ' + entry.description.padEnd(45) + entry.receipt.gasUsed);
+    console.log('      ' + entry.description.padEnd(45) + entry.receipt.gasUsed);
   }
 
-  logger.debug('      -----------------------------------------------------');
-  logger.debug('      ' + 'Total gas logged: '.padEnd(45) + totalGasUsed + '\n');
+  console.log('      -----------------------------------------------------');
+  console.log('      ' + 'Total gas logged: '.padEnd(45) + totalGasUsed + '\n');
 };
 
 module.exports.clearReceipts = () => {
