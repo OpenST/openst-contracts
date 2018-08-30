@@ -35,10 +35,13 @@ module.exports.perform = (accounts) => {
     name = 'name',
     organizationAddress = accounts[1],
     token = null;
-  let brandedTokenInstance;
-  beforeEach(async () => {});
+    let brandedTokenInstance,tokenHolderInstance;
+  	beforeEach(async () => {
+  	
+	});
 
   it('deploys branded token', async () => {
+
     const hasher = await Hasher.new();
     const tokenRules = accounts[0];
     const valueToken = accounts[1];
@@ -55,23 +58,17 @@ module.exports.perform = (accounts) => {
       { from: openSTProtocol }
     );
   });
-
-  it('should register internal actor', async () => {
-    let internalActor = [];
-    internalActor.push(accounts[4]);
-
-    await brandedTokenInstance.registerInternalActor(internalActor, { from: organizationAddress });
-
-    assert.equal(await brandedTokenInstance.isInternalActor(accounts[4]), true);
-    assert.equal(await brandedTokenInstance.isInternalActor(accounts[3]), false);
-  });
-
-  it('should add wallet', async () => {
-    let tokenHolderInstance = await tokenHolder.new(brandedTokenInstance.address, accounts[3], accounts[2], 1, [
-      accounts[7]
-    ]);
-    await tokenHolderInstance.addWallet(accounts[2], { from: accounts[7] });
-    assert.equal(await tokenHolderInstance.isWallet(accounts[2]), true);
-    assert.equal(await tokenHolderInstance.isWallet(accounts[4]), false);
-  });
+	
+	it('should register internal actor',async () => {
+		
+		let internalActor = [];
+		internalActor.push(accounts[4]);
+		
+		await brandedTokenInstance.registerInternalActor(internalActor, {from: organizationAddress});
+		
+        assert.equal(await brandedTokenInstance.isInternalActor(accounts[4]),true);
+		assert.equal(await brandedTokenInstance.isInternalActor(accounts[3]),false);
+        
+	});
+	
 };
