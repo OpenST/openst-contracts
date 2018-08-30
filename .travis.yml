@@ -29,7 +29,7 @@ before_script:
   - mkdir -p ~/.ethash
   - geth makedag 0 ~/.ethash
   - nohup sh tools/runGanacheCli.sh </dev/null >/dev/null 2>&1 &
-  - bash contracts/compile.sh
+  - bash tools/compile.sh
 script:
   - truffle test
 after_script:
