@@ -33,43 +33,38 @@ contract MultiSigWallet {
 
     /* Events */
 
-    event Propose(
+    event Proposed(
         bytes32 indexed _transactionId,
         address indexed _sender
     );
 
-    event ConfirmationDone(
+    event Confirmed(
         bytes32 indexed _transactionId,
         address indexed _sender
     );
 
-    event Revocation(
+    event Revoked(
         bytes32 indexed _transactionId,
         address indexed _sender
     );
 
-    event Execution(
-        bytes32 indexed _transactionId,
-        address indexed _sender
-    );
-
-    event ReplaceWallet(
+    event WalletReplaced(
         address indexed _sender,
         address indexed _oldWallet,
         address indexed _newWallet
     );
 
-    event WalletAddition(
+    event WalletAdded(
         bytes32 indexed _transactionId,
         address indexed _wallet
     );
 
-    event WalletRemoval(
+    event WalletRemoved(
         bytes32 indexed _transactionId,
         address indexed _wallet
     );
 
-    event RequirementChange(
+    event RequirementChanged(
         uint8 _required
     );
 
@@ -203,7 +198,7 @@ contract MultiSigWallet {
         if (isTransactionExecuted(transactionId_)) {
             isWallet[_wallet] = true;
             wallets.push(_wallet);
-            emit WalletAddition(transactionId_, _wallet);
+            emit WalletAdded(transactionId_, _wallet);
         }
 
         return transactionId_;
@@ -256,9 +251,9 @@ contract MultiSigWallet {
             // confirmations then set it to current number of wallets.
             if (required > wallets.length){
                 required = uint8(wallets.length);
-                emit RequirementChange(uint8(wallets.length));
+                emit RequirementChanged(uint8(wallets.length));
             }
-            emit WalletRemoval(transactionId_, _wallet);
+            emit WalletRemoved(transactionId_, _wallet);
         }
 
         return transactionId_;
@@ -300,7 +295,7 @@ contract MultiSigWallet {
                 }
             delete isWallet[_oldWallet];
             isWallet[_newWallet] = true;
-            emit ReplaceWallet(msg.sender, _oldWallet, _newWallet);
+            emit WalletReplaced(msg.sender, _oldWallet, _newWallet);
         }
 
         return transactionId_;
@@ -336,7 +331,7 @@ contract MultiSigWallet {
             // Old requirements i.e. number of required confirmations for
             // an transaction to be executed is being changed. */
             required = _required;
-            emit RequirementChange(_required);
+            emit RequirementChanged(_required);
         }
 
         return transactionId_;
@@ -370,7 +365,7 @@ contract MultiSigWallet {
         confirmTransaction(_transactionId);
         if(isTransactionExecuted(_transactionId)){
             confirmations[_transactionId].isConfirmedBy[msg.sender] = false;
-            emit Revocation(
+            emit Revoked(
                 _transactionId,
                 msg.sender
             );
@@ -424,7 +419,7 @@ contract MultiSigWallet {
         }
         confirmations[_transactionId].status = 1;
 
-        emit Propose(
+        emit Proposed(
             _transactionId,
             msg.sender
         );
@@ -452,7 +447,7 @@ contract MultiSigWallet {
         );
 
         confirmations[_transactionId].isConfirmedBy[msg.sender] = true;
-        emit ConfirmationDone(
+        emit Confirmed(
             _transactionId,
             msg.sender
 
