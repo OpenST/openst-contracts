@@ -446,7 +446,7 @@ contract TokenHolder is MultiSigWallet {
         uint256 _nonce,
         bytes _callPrefix
     )
-
+        pure
         private
         returns (bytes32)
     {
