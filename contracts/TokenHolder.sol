@@ -315,11 +315,11 @@ contract TokenHolder is MultiSigWallet {
         address _from,
         address _to,
         uint256 _nonce,
+        bytes _callPrefix,
         bytes _data,
         uint8 _v,
         bytes32 _r,
-        bytes32 _s,
-        bytes _callPrefix
+        bytes32 _s
     )
         public
         payable
@@ -330,10 +330,10 @@ contract TokenHolder is MultiSigWallet {
             _to,
             _nonce,
             _data,
+            _callPrefix,
             _v,
             _r,
-            _s,
-            _callPrefix
+            _s
         );
         require(
             _to == coGateway,
