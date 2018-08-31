@@ -258,10 +258,10 @@ contract TokenHolder is MultiSigWallet {
         address _to,
         uint256 _nonce,
         bytes _data,
+        bytes _callPrefix,
         uint8 _v,
         bytes32 _r,
-        bytes32 _s,
-        bytes callPrefix
+        bytes32 _s
     )
         public
         returns (bool executionResult_ /* success */)
@@ -271,10 +271,10 @@ contract TokenHolder is MultiSigWallet {
             _to,
             _nonce,
             _data,
+            _callPrefix,
             _v,
             _r,
-            _s,
-            callPrefix
+            _s
         );
 
         BrandedToken(brandedToken).approve(
@@ -380,10 +380,10 @@ contract TokenHolder is MultiSigWallet {
         address _to,
         uint256 _nonce,
         bytes _data,
+        bytes _callPrefix,
         uint8 _v,
         bytes32 _r,
-        bytes32 _s,
-        bytes _callPrefix
+        bytes32 _s
     )
         private
         returns (EphemeralKeyData storage ephemeralKeyData_)
