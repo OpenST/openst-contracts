@@ -409,7 +409,7 @@ contract TokenHolder is MultiSigWallet {
         bytes32 messageHash = getHashedMessage(_from, _to, _data, _nonce, _callPrefix);
         bytes32 hashWithPrefix = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32",messageHash));
         address signer = ecrecover(hashWithPrefix, _v, _r, _s);
-        emit signerBhai(signer);
+
         require(
             isAuthorizedEphemeralKey(signer),
             "Invalid ephemeral key!"
