@@ -351,6 +351,26 @@ contract TokenHolder is MultiSigWallet {
         return executionResult_;
     }
 
+    /**
+     * @notice public method to check if valid ephemeral key.
+     *
+     * @dev 0 spendingLimit 0 is not allowed. So spending limit greater than 0 means
+     *      ephemeralKey is present.
+     *
+     * @param _ephemeralKey Ephemeral Key which need to be checked in ephemeralKeys mapping.
+     *
+     * @return status is true/false.
+     */
+    function isAuthorizedEphemeralKey(
+        address _ephemeralKey
+    )
+        view
+        public
+        returns (bool /** success status */)
+    {
+        return ephemeralKeys[_ephemeralKey].spendingLimit > 0;
+    }
+
 
     /* Private Functions */
 
@@ -486,26 +506,6 @@ contract TokenHolder is MultiSigWallet {
         ephemeralKeys[_ephemeralKey].expirationHeight = _expirationHeight;
 
         return true;
-    }
-
-    /**
-     * @notice private method to check if valid ephemeral key.
-     *
-     * @dev 0 spendingLimit 0 is not allowed. So spending limit greater than 0 means
-     *      ephemeralKey is present.
-     *
-     * @param _ephemeralKey Ephemeral Key which need to be checked in ephemeralKeys mapping.
-     *
-     * @return status is true/false.
-     */
-    function isAuthorizedEphemeralKey(
-        address _ephemeralKey
-    )
-        view
-        private
-        returns (bool /** success status */)
-    {
-        return ephemeralKeys[_ephemeralKey].spendingLimit > 0;
     }
 
 }
