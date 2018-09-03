@@ -21,114 +21,91 @@ pragma solidity ^0.4.23;
 //
 // ----------------------------------------------------------------------------
 
-/**
- * @title Internal contract
- *
- * @notice Implements properties and actions performed by an economy internal actors.
- *
- */
+
+ /**
+  * @notice Contract implements internal actors interfaces.
+  *
+  * @dev Contract implements internal actors registration interface.
+  *      Registration is done by an organization that is specified during
+  *      contract construction. De-registration of internal actors (even by
+  *      organization) is prohibited.
+  */
 contract Internal {
 
     /* Events */
 
-    event InternalActorRegistered(
-        uint16 newlyRegisteredActorCount,
-        uint16 alreadyRegisteredActorCount
+    event InternalActorRegistered (
+        address indexed _organization,
+        address _actor
     );
+
 
     /* Storage */
 
-    /** max accepted internal actors in registerInternalActor method */
-    uint16 private constant MAX_INTERNAL_ACTORS = 100;
-    /** organization/company address who will be deploying branded token contract */
-    address private organization;
-    /**
-        stores internal actor and checks if internal actor exists or not.
-        If actor is not present in isInternalActor, it returns false else
-        returns true.
-     */
-    mapping (address /* internal actor */ => bool) public isInternalActor;
+    address internal organization;
+
+    mapping (address /* internal actor */ => bool) private internalActors;
 
 
     /* Modifiers */
 
-    /**
-     * @notice Modifier onlyOrganization.
-     *
-     * @dev Checks if msg.sender is organization address or not.
-     */
+    /** @dev Checks if msg.sender is the organization address or not. */
     modifier onlyOrganization() {
         require(
             organization == msg.sender,
-            "msg.sender should be organization."
+            "Only organization is allowed to call."
         );
         _;
     }
 
 
-    /* Public functions */
+    /* Special Functions */
 
-    /**
-     * @notice contract constructor.
-     *
-     * @dev it sets msg.sender as organization/company address.
-     */
-    constructor(
-        address _organization
-    )
+    /** @dev Sets msg.sender as an organization address. */
+    constructor(address _organization)
         public
     {
+        require (
+            _organization != address(0),
+            "Organization address is null."
+        );
+
         organization = _organization;
     }
 
+
+    /* External Functions */
+
     /**
-     * @notice public function registerInternalActor.
+     * @notice Registers internal actors.
      *
-     * @dev there is max limit on how many internal actors who can register
-     *      at once.
+     * @param _internalActors Array of addresses of the internal actors
+     *        to register.
      *
-     * @param _internalActors Array of addresses of the internal actor which
-     *         needs to be registered.
-     *
-     * @return total count of registered actors.
+     * @return True in case of success, otherwise false.
      */
-    function registerInternalActor(
-        address[] _internalActors)
-        public
+    function registerInternalActor(address[] _internalActors)
+        external
         onlyOrganization
-        returns (
-            uint16 newlyRegisteredActorCount,
-            uint16 alreadyRegisteredActorCount
-        )
+        returns (bool)
     {
-        require(_internalActors.length != 0, "Internal actors length is 0");
+        for (uint256 i = 0; i < _internalActors.length; i++) {
 
-        require(
-            _internalActors.length <= MAX_INTERNAL_ACTORS,
-            "Internal actors max length exceeded!!!"
-        );
-
-        for (uint16 i=0; i<_internalActors.length; i++) {
-            // address 0 transfer is allowed in EIP20
-            address internalActor = _internalActors[i];
-            // If actor is not present in isInternalActor, returns false else
-            // returns true.
-            if (isInternalActor[internalActor]){
-                // If internalActor is already registered,
-                // he will be part of alreadyRegisteredActorCount.
-                alreadyRegisteredActorCount++;
-            } else {
-                isInternalActor[internalActor] = true;
-                newlyRegisteredActorCount++;
+            if  (isInternalActor(_internalActors[i]) == false) {
+                internalActors[_internalActors[i]] = true;
+                emit InternalActorRegistered(organization, _internalActors[i]);
             }
         }
 
-        emit InternalActorRegistered(
-            newlyRegisteredActorCount,
-            alreadyRegisteredActorCount
-        );
+        return true;
+    }
 
-        return (newlyRegisteredActorCount, alreadyRegisteredActorCount);
+    function isInternalActor(address _internalActor)
+        public
+        view
+        returns (bool)
+    {
+        return internalActors[_internalActor];
     }
 
 }
