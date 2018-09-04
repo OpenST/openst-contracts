@@ -50,7 +50,8 @@ contract TokenRules {
     /* Variables */
 
     TokenRule[] public rules;
-    mapping (address => TokenRule) private rulesByAddress;
+    mapping (address => TokenRule) public rulesByAddress;
+    mapping (bytes32 => TokenRule) public rulesByNameHash;
 
     address[] public constraints;
 
@@ -107,7 +108,11 @@ contract TokenRules {
     {
         require(bytes(_ruleName).length != 0, "Rule name is empty.");
         require(_ruleAddress != address(0), "Rule address is null.");
-        require (ruleExistsByName(_ruleName) == false, "Rule name exists.");
+        bytes32 ruleNameHash = keccak256(abi.encodePacked(_ruleName));
+        require (
+            rulesByNameHash[ruleNameHash].ruleAddress == address(0),
+            "Rule name exists."
+        );
         require (
             rulesByAddress[_ruleAddress].ruleAddress == address(0),
             "Rule address exists."
@@ -118,6 +123,7 @@ contract TokenRules {
         rule.ruleAddress = _ruleAddress;
 
         rulesByAddress[_ruleAddress] = rule;
+        rulesByNameHash[ruleNameHash] = rule;
         rules.push(rule);
 
         emit RuleRegistered(msg.sender, _ruleName, _ruleAddress);
@@ -258,32 +264,5 @@ contract TokenRules {
         --constraints.length;
 
         return true;
-    }
-
-    function ruleExistsByName(string ruleName)
-        private
-        view
-        returns (bool exists_)
-    {
-        exists_ = false;
-
-        for (uint256 i = 0; i < rules.length; ++i) {
-            if (stringIsEqual(rules[i].ruleName, ruleName)) {
-                exists_ = true;
-                return;
-            }
-        }
-    }
-
-    function stringIsEqual(
-        string s1,
-        string s2
-    )
-        private
-        pure
-        returns(bool)
-    {
-        return bytes(s1).length == bytes(s2).length &&
-            keccak256(abi.encodePacked(s1)) == keccak256(abi.encodePacked(s2));
     }
 }
