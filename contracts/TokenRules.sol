@@ -14,9 +14,9 @@ pragma solidity ^0.4.23;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "./TokenRulesTokenInterface.sol";
 import "./ConstraintInterface.sol";
 import "./SafeMath.sol";
+import "./openst-protocol/EIP20Interface.sol";
 
 
 contract TokenRules {
@@ -58,6 +58,7 @@ contract TokenRules {
     address public organization;
     address public token;
 
+    mapping (address => bool) private allowedTransfers;
 
     /* Modifiers */
 
@@ -131,6 +132,24 @@ contract TokenRules {
         return true;
     }
 
+    function allowTransfers ()
+        external
+        returns (bool)
+    {
+        allowedTransfers[msg.sender] = true;
+
+        return true;
+    }
+
+    function disallowTransfers ()
+        external
+        returns (bool)
+    {
+        allowedTransfers[msg.sender] = false;
+
+        return true;
+    }
+
     function executeTransfers (
         address _from,
         address[] _transfersTo,
@@ -140,7 +159,12 @@ contract TokenRules {
         onlyRule
         returns (bool)
     {
-        require(
+        require (
+            allowedTransfers[_from] == true,
+            "Transfers from the address are not allowed."
+        );
+
+        require (
             _transfersTo.length == _transfersAmount.length,
             "'to' and 'amount' transfer arrays' lengths are not equal."
         );
@@ -151,14 +175,14 @@ contract TokenRules {
         );
 
         for (uint256 i = 0; i < _transfersTo.length; ++i) {
-            TokenRulesTokenInterface(token).transferFrom(
+            EIP20Interface(token).transferFrom(
                 _from,
                 _transfersTo[i],
                 _transfersAmount[i]
             );
         }
 
-        TokenRulesTokenInterface(token).clearAllowance(_from);
+        allowedTransfers[_from] = false;
 
         return true;
     }

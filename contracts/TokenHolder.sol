@@ -25,6 +25,7 @@ import "./SafeMath.sol";
 import "./BrandedToken.sol";
 import "./MultiSigWallet.sol";
 import "./GatewayRedeemInterface.sol";
+import "./TokenRules.sol";
 
 
 /**
@@ -275,16 +276,23 @@ contract TokenHolder is MultiSigWallet {
             _s
         );
 
+        TokenRules(tokenRules).allowTransfers();
+
         BrandedToken(brandedToken).approve(
             tokenRules,
             ephemeralKeyData.spendingLimit
         );
+
         executionResult_ = _to.call(_data);
-        emit RuleExecuted(_from, _to, _nonce, executionResult_);
+
         BrandedToken(brandedToken).approve(
             tokenRules,
             0
         );
+
+        TokenRules(tokenRules).disallowTransfers();
+
+        emit RuleExecuted(_from, _to, _nonce, executionResult_);
 
         return executionResult_;
     }
