@@ -29,8 +29,6 @@ module.exports.perform = (accounts) => {
   const openSTProtocol = accounts[0],
     conversionRateDecimals = 5,
     conversionRate = new BigNumber(10 * 10 ** conversionRateDecimals),
-    chainIDValue = 3,
-    chainIDUtility = 1410,
     symbol = 'symbol',
     name = 'name',
     organizationAddress = accounts[1],
