@@ -55,10 +55,6 @@ contract TokenHolder is MultiSigWallet {
         address _ephemeralKey
     );
 
-    event EphemeralKeyExpired(
-        address indexed _ephemeralKey
-    );
-
     event RuleExecuted(
         address indexed _from,
         address indexed _to,
@@ -163,7 +159,7 @@ contract TokenHolder is MultiSigWallet {
         );
         require(
             _expirationHeight > block.number,
-            "Expiration Height should be greater than current block number!"
+            "Expiration height should be greater than current block number!"
         );
 
         transactionId_ = keccak256(abi.encodePacked(
@@ -333,7 +329,7 @@ contract TokenHolder is MultiSigWallet {
         );
         require(
             _to == coGateway,
-            "to should be coGateway address."
+            "to is not coGateway address."
         );
 
         BrandedToken(brandedToken).approve(
@@ -341,7 +337,7 @@ contract TokenHolder is MultiSigWallet {
             ephemeralKeyData.spendingLimit
         );
         // coGateway.redeem is a payable function.
-        executionResult_ = coGateway.call.value(msg.value)(_data);
+        executionResult_ = _to.call.value(msg.value)(_data);
         emit RuleExecuted(_from, coGateway, _nonce, executionResult_);
         BrandedToken(brandedToken).approve(
             coGateway,
@@ -430,7 +426,7 @@ contract TokenHolder is MultiSigWallet {
         ephemeralKeyData_ = ephemeralKeys[signer];
         require(
             ephemeralKeyData_.expirationHeight >= block.number,
-            "ephemeral key has expired!"
+            "Ephemeral key has expired!"
         );
         // Consume the nonce
         ephemeralKeyData_.nonce = ephemeralKeyData_.nonce + 1;

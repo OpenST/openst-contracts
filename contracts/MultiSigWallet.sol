@@ -15,7 +15,7 @@ pragma solidity ^0.4.23;
 // limitations under the License.
 //
 // ----------------------------------------------------------------------------
-// Utility Chain: Token Holder
+// Utility Chain: MultiSigWallet
 //
 // http://www.simpletoken.org/
 //

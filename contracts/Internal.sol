@@ -71,13 +71,17 @@ contract Internal {
     /**
      * @notice contract constructor.
      *
-     * @dev it sets msg.sender as organization/company address.
+     * @dev it sets _organization as organization/company address.
      */
     constructor(
         address _organization
     )
         public
     {
+        require(
+            _organization != address(0),
+            "organization address is null."
+        );
         organization = _organization;
     }
 
@@ -101,7 +105,10 @@ contract Internal {
             uint16 alreadyRegisteredActorCount
         )
     {
-        require(_internalActors.length != 0, "Internal actors length is 0");
+        require(
+            _internalActors.length != 0,
+            "Internal actors count is 0."
+        );
 
         require(
             _internalActors.length <= MAX_INTERNAL_ACTORS,

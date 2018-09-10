@@ -14,16 +14,16 @@ contract GatewayRedeemInterface {
         uint256 _nonce,
         bytes32 _hashLock
     )
-    public
-    payable
-    returns (bytes32 messageHash_);
+        public
+        payable
+        returns (bytes32 messageHash_);
 
     function processRedemption(
         bytes32 _messageHash,
         bytes32 _unlockSecret
     )
-    external
-    returns (uint256 redeemAmount);
+        external
+        returns (uint256 redeemAmount_);
 
     function processRedemptionWithProof(
         bytes32 _messageHash,
@@ -31,26 +31,26 @@ contract GatewayRedeemInterface {
         uint256 _blockHeight,
         uint256 _messageStatus
     )
-    external
-    returns (uint256 redeemAmount);
+        external
+        returns (uint256 redeemAmount_);
 
     function revertRedemption(
         bytes32 _messageHash
     )
-    external
-    returns (
-        address redeemer_,
-        bytes32 intentHash_,
-        uint256 nonce_,
-        uint256 gasPrice_
-    );
+        external
+        returns (
+            address redeemer_,
+            bytes32 intentHash_,
+            uint256 nonce_,
+            uint256 gasPrice_
+        );
 
     function processRevertRedemption(
         bytes32 _messageHash,
         uint256 _blockHeight,
         bytes _rlpEncodedParentNodes
     )
-    external
-    returns (bool /*TBD*/);
+        external
+        returns (bool /*TBD*/);
 
 }

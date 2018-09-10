@@ -47,7 +47,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
 
     /* Storage */
 
-    /** Value chain ERC20 contract address  */
+    /** Value chain EIP20 contract address  */
     address public token;
 
     /**
@@ -56,7 +56,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      * @dev Creates an EIP20Token and a UtilityTokenAbstract contract with
      *      arguments passed in the contract constructor.
      *
-     * @param _token value chain ERC20 contract address. It act as identifier.
+     * @param _token value chain EIP20 contract address. It acts as identifier.
      * @param _symbol Symbol of the token.
      * @param _name Name of the token.
      * @param _decimals Decimal places of the token.
@@ -65,8 +65,8 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
      */
     constructor(
         address _token,
-        string memory _symbol,
-        string memory _name,
+        string _symbol,
+        string _name,
         uint8 _decimals,
         uint256 _conversionRate,
         uint8 _conversionRateDecimals,
@@ -81,7 +81,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     {
         require(
             _token != address(0),
-            "Value chain token contracts address can't be 0."
+            "Token address is null."
         );
         token = _token;
     }
@@ -106,7 +106,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     {
         require(
             isInternalActor[_to],
-            "to address is invalid economy actor!"
+            "To address is not an internal actor."
         );
 
         return super.transfer(_to, _value);
@@ -131,7 +131,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     {
         require(
             isInternalActor[_to],
-            "to is invalid economy actor!"
+            "To address is not an internal actor."
         );
 
         return super.transferFrom(_from, _to, _value);
@@ -154,7 +154,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     {
         require(
             isInternalActor[_spender],
-            "spender is invalid economy actor!"
+            "spender is not an internal actor."
         );
 
         return super.approve(_spender, _value);
@@ -181,7 +181,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     {
         require(
             (isInternalActor[_beneficiary]),
-            "beneficiary is invalid economy actor!"
+            "beneficiary is not an economy actor."
         );
 
         mintEIP20(_amount);
@@ -211,7 +211,8 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         // force non-payable, as only ST" handles in base tokens.
-        require(msg.value == 0, "msg.value should be 0");
+        // ST" burn is not allowed from this function. Only BT Burn can be done from here.
+        require(msg.value == 0, "msg.value is not 0");
 
         burnEIP20(_amount);
 
