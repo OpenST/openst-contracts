@@ -211,7 +211,6 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         // force non-payable, as only ST" handles in base tokens.
-        // ST" burn is not allowed from this function. Only BT Burn can be done from here.
         require(msg.value == 0, "msg.value is not 0");
 
         burnEIP20(_amount);
