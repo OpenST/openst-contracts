@@ -505,7 +505,7 @@ The suggested order for variables' declarations is:
 
 - public variables
 - internal variables
-- internal variables
+- private variables
 
 Within a grouping, place the `view` and `pure` functions last.
 
@@ -1638,8 +1638,8 @@ function commitStateRoot(uint256 _blockHeight, bytes32 _stateRoot)
 
 ### Alignment
 
-Align @param and @return tag documentation including parameter name and named
-return param name.
+Align `@param` and `@return` tags' documentations including parameter name and
+named return param name.
 
 `Good`
 
