@@ -87,7 +87,7 @@ contract TokenHolder is MultiSigWallet {
     /**
      * @notice Contract constructor.
      *
-     * @param _brandedToken erc20 contract address this user is part of.
+     * @param _brandedToken eip20 contract address this user is part of.
      * @param _coGateway utility chain gateway contract address.
      * @param _tokenRules Token rules contract address.
      * @param _required No of requirements for multi sig wallet.
