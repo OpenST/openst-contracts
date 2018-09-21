@@ -29,14 +29,14 @@ contract TokenRules {
     /* Events */
 
     event RuleRegistered(
-        address _sender,
         string _ruleName,
-        address _ruleAddress
+        address _ruleAddress,
+        bytes _ruleAbi
     );
 
-    event ConstraintAdded(address _sender, address _constraintAddress);
+    event GlobalConstraintAdded(address _globalConstraintAddress);
 
-    event ConstraintRemoved(address _sender, address _constraintAddress);
+    event GlobalConstraintRemoved(address _globalConstraintAddress);
 
 
     /* Structs */
@@ -44,21 +44,35 @@ contract TokenRules {
     struct TokenRule {
         string ruleName;
         address ruleAddress;
+        bytes ruleAbi;
     }
 
 
-    /* Variables */
+    /* Storage */
 
+    /** Contains all registered rule in the order of registration. */
     TokenRule[] public rules;
-    mapping (address => TokenRule) public rulesByAddress;
-    mapping (bytes32 => TokenRule) public rulesByNameHash;
 
-    address[] public constraints;
+    /** Mapping from a rule address to the index in the `rules` array. */
+    mapping (address => uint256) public rulesByAddress;
+
+    /** Mapping from a rule name hash to the index in the `rules` array. */
+    mapping (bytes32 => uint256) public rulesByNameHash;
+
+    /** Contains a list of all registered global constraints. */
+    address[] public globalConstraints;
 
     address public organization;
     address public token;
 
-    mapping (address => bool) private allowedTransfers;
+    /**
+     * TokenHolder contract before a rule execution will set the flag
+     * on (true) for itself. TokenRules.executeTransfers will set the flag to
+     * off (false) for _from (TokenHolder) after execution. This will restrict
+     * a rule to make a call to TokenRules.executeTransfers only *once*.
+     */
+    mapping (address => bool) public allowedTransfers;
+
 
     /* Modifiers */
 
@@ -72,15 +86,20 @@ contract TokenRules {
 
     modifier onlyRule {
         require (
-            rulesByAddress[msg.sender].ruleAddress != address(0),
+            rules[rulesByAddress[msg.sender]].ruleAddress != address(0),
             "Only registered rule is allowed to call");
         _;
     }
 
 
-    /* Functions */
+    /* Special Functions */
 
-    constructor (
+    /**
+     * @dev Function requires:
+     *          - Organization address is not null.
+     *          - Token address is not null.
+     */
+    constructor(
         address _organization,
         address _token
     )
@@ -93,84 +112,109 @@ contract TokenRules {
         token = _token;
     }
 
+
+    /* External Functions */
+
     /**
+     * @dev Function requires:
+     *          - Only organization can call.
+     *          - Rule name is not empty.
+     *          - Rule with the specified name does not exist.
+     *          - Rule address is not null.
+     *          - Rule with the specified address does not exist.
+     *          - Rule abi is not empty.
+     *
      * @param _ruleName The name of a rule to register.
      * @param _ruleAddress The address of a rule to register.
-     *
-     * @return true in case of success, otherwise false.
+     * @param _ruleAbi The abi of the rule to register.
      */
-    function registerRule (
+    function registerRule(
         string _ruleName,
-        address _ruleAddress
+        address _ruleAddress,
+        bytes _ruleAbi
     )
         external
         onlyOrganization
-        returns (bool)
     {
         require(bytes(_ruleName).length != 0, "Rule name is empty.");
         require(_ruleAddress != address(0), "Rule address is null.");
+        require(_ruleAbi.length != 0, "Rule ABI is empty.");
+
         bytes32 ruleNameHash = keccak256(abi.encodePacked(_ruleName));
-        require (
-            rulesByNameHash[ruleNameHash].ruleAddress == address(0),
-            "Rule name exists."
+
+        require(
+            rules[rulesByNameHash[ruleNameHash]].ruleAddress == address(0),
+            "Rule with the specified name already exists."
         );
-        require (
-            rulesByAddress[_ruleAddress].ruleAddress == address(0),
-            "Rule address exists."
+        require(
+            rules[rulesByAddress[_ruleAddress]].ruleAddress == address(0),
+            "Rule with the specified address already exists."
         );
 
-        TokenRule memory rule;
-        rule.ruleName = _ruleName;
-        rule.ruleAddress = _ruleAddress;
+        TokenRule memory rule = TokenRule({
+            ruleName: _ruleName,
+            ruleAddress: _ruleAddress,
+            ruleAbi: _ruleAbi
+        });
 
-        rulesByAddress[_ruleAddress] = rule;
-        rulesByNameHash[ruleNameHash] = rule;
+        rulesByAddress[_ruleAddress] = rules.length;
+        rulesByNameHash[ruleNameHash] = rules.length;
         rules.push(rule);
 
-        emit RuleRegistered(msg.sender, _ruleName, _ruleAddress);
-
-        return true;
+        emit RuleRegistered(_ruleName, _ruleAddress, _ruleAbi);
     }
 
-    function allowTransfers ()
+    /** @dev See documentation for allowedTransfers storage variable. */
+    function allowTransfers()
         external
-        returns (bool)
     {
         allowedTransfers[msg.sender] = true;
-
-        return true;
     }
 
-    function disallowTransfers ()
+    /** @dev See documentation for allowedTransfers storage variable. */
+    function disallowTransfers()
         external
-        returns (bool)
     {
         allowedTransfers[msg.sender] = false;
-
-        return true;
     }
 
-    function executeTransfers (
+    /**
+     * @dev Transfers from the specified account to all beneficiary
+     *      accounts corresponding amounts.
+     *      Function requires:
+     *          - Only registered rule can call.
+     *          - An account from which (_from) transfer will be done should
+     *            allow this transfer by calling to TokenRules.allowTransfers().
+     *            TokenRules will set this allowance back, hence, only
+     *            one call is allowed per execution session.
+     *          - _transfersTo and _transfersAmount arrays length should match.
+     *          - All globally registered constraints should satisfy before
+     *            execution.
+     *
+     * @param _from An address from which transfer is done.
+     * @param _transfersTo List of addresses to transfer.
+     * @param _transfersAmount List of amounts to transfer.
+     */
+    function executeTransfers(
         address _from,
         address[] _transfersTo,
         uint256[] _transfersAmount
     )
         external
         onlyRule
-        returns (bool)
     {
-        require (
-            allowedTransfers[_from] == true,
+        require(
+            allowedTransfers[_from],
             "Transfers from the address are not allowed."
         );
 
-        require (
+        require(
             _transfersTo.length == _transfersAmount.length,
             "'to' and 'amount' transfer arrays' lengths are not equal."
         );
 
-        require (
-            checkConstraints(_from, _transfersTo, _transfersAmount) == true,
+        require(
+            checkGlobalConstraints(_from, _transfersTo, _transfersAmount),
             "Constraints not fullfilled."
         );
 
@@ -183,11 +227,71 @@ contract TokenRules {
         }
 
         allowedTransfers[_from] = false;
-
-        return true;
     }
 
-    function checkConstraints (
+    /**
+     * @notice Registers a constraint to check globally before
+     *         executing transfers.
+     *
+     * @dev Function requires:
+     *          - Only organization can call.
+     *          - Constraint address is not null.
+     *          - Constraint is not registered.
+     */
+    function addGlobalConstraint(
+        address _globalConstraintAddress
+    )
+        external
+        onlyOrganization
+    {
+        require(
+            _globalConstraintAddress != address(0),
+            "Constraint to add is null."
+        );
+
+        uint256 index = findGlobalConstraintIndex(_globalConstraintAddress);
+
+        require (
+            index == globalConstraints.length,
+            "Constraint to add already exists."
+        );
+
+        globalConstraints.push(_globalConstraintAddress);
+
+        emit GlobalConstraintAdded(_globalConstraintAddress);
+    }
+
+    /**
+     * @dev Function requires:
+     *          - Only organization can call.
+     *          - Constraint address is not null.
+     *          - Constraint exists.
+     */
+    function removeGlobalConstraint (
+        address _globalConstraintAddress
+    )
+        external
+        onlyOrganization
+    {
+        require(
+            _globalConstraintAddress != address(0),
+            "Constraint to remvoe is null."
+        );
+
+        uint256 index = findGlobalConstraintIndex(_globalConstraintAddress);
+
+        require(
+            index != globalConstraints.length,
+            "Constraint to remove does not exist."
+        );
+
+        removeGlobalConstraintByIndex(index);
+    }
+
+
+    /* Public Functions */
+
+    function checkGlobalConstraints(
         address _from,
         address[] _transfersTo,
         uint256[] _transfersAmount
@@ -198,8 +302,8 @@ contract TokenRules {
     {
         _passed = true;
 
-        for (uint256 i = 0; i < constraints.length && _passed; ++i) {
-            _passed = ConstraintInterface(constraints[i]).check(
+        for (uint256 i = 0; i < globalConstraints.length && _passed; ++i) {
+            _passed = ConstraintInterface(globalConstraints[i]).check(
                 _from,
                 _transfersTo,
                 _transfersAmount
@@ -207,52 +311,8 @@ contract TokenRules {
         }
     }
 
-    function addConstraint (
-        address _constraintAddress
-    )
-        external
-        onlyOrganization
-        returns (bool)
-    {
-        require(_constraintAddress != address(0), "Constraint to add is null.");
 
-        uint256 index = findConstraintIndex(_constraintAddress);
-
-        require (
-            index == constraints.length,
-            "Constraint to add already exists."
-        );
-
-        constraints.push(_constraintAddress);
-
-        emit ConstraintAdded(msg.sender, _constraintAddress);
-
-        return true;
-    }
-
-    function removeConstraint (
-        address _constraintAddress
-    )
-        external
-        onlyOrganization
-        returns (bool)
-    {
-        require (
-            _constraintAddress != address(0),
-            "Constraint to remvoe is null."
-        );
-
-        uint256 index = findConstraintIndex(_constraintAddress);
-
-        require (
-            index != constraints.length,
-            "Constraint to remove does not exist."
-        );
-
-        removeConstraintByIndex(index);
-
-        return true;
-    }
+    /* Private Functions */
 
     /**
      * @dev Finds index of constraint.
@@ -262,31 +322,28 @@ contract TokenRules {
      * @return index_ Returns index of the constraint if exists,
      *                otherwise returns constraints.length.
      */
-    function findConstraintIndex(address _constraint)
+    function findGlobalConstraintIndex(address _constraint)
         private
         view
         returns (uint256 index_)
     {
         index_ = 0;
         while (
-            index_ < constraints.length &&
-            constraints[index_] != _constraint
+            index_ < globalConstraints.length &&
+            globalConstraints[index_] != _constraint
         )
         {
             ++index_;
         }
     }
 
-    // solium-disable-next-line security/no-assign-params
-    function removeConstraintByIndex(uint256 _index)
+    function removeGlobalConstraintByIndex(uint256 _index)
         private
-        returns (bool)
     {
-        require (_index < constraints.length, "Index is out of range.");
+        require (_index < globalConstraints.length, "Index is out of range.");
 
-        constraints[_index] = constraints[constraints.length - 1];
-        --constraints.length;
-
-        return true;
+        uint256 lastElementIndex = globalConstraints.length - 1;
+        globalConstraints[_index] = globalConstraints[lastElementIndex];
+        --globalConstraints.length;
     }
 }
