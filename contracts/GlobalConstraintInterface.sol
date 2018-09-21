@@ -14,7 +14,7 @@ pragma solidity ^0.4.23;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-interface ConstraintInterface
+interface GlobalConstraintInterface
 {
     function check(
         address _from,

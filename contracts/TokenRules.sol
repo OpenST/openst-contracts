@@ -14,7 +14,7 @@ pragma solidity ^0.4.23;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "./ConstraintInterface.sol";
+import "./GlobalConstraintInterface.sol";
 import "./SafeMath.sol";
 import "./openst-protocol/EIP20Interface.sol";
 
@@ -303,7 +303,7 @@ contract TokenRules {
         _passed = true;
 
         for (uint256 i = 0; i < globalConstraints.length && _passed; ++i) {
-            _passed = ConstraintInterface(globalConstraints[i]).check(
+            _passed = GlobalConstraintInterface(globalConstraints[i]).check(
                 _from,
                 _transfersTo,
                 _transfersAmount
