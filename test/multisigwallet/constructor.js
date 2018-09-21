@@ -19,7 +19,7 @@
 //
 // ----------------------------------------------------------------------------
 
-const utils = require('../lib/utils.js');
+const utils = require('../test_lib/utils.js');
 
 const MultiSigWallet = artifacts.require('MultiSigWallet');
 

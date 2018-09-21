@@ -20,9 +20,9 @@
 // ----------------------------------------------------------------------------
 
 const BN = require('bn.js');
-const web3 = require('../lib/web3.js');
-const utils = require('../lib/utils.js');
-const { Event } = require('../lib/event_decoder');
+const web3 = require('../test_lib/web3.js');
+const utils = require('../test_lib/utils.js');
+const { Event } = require('../test_lib/event_decoder');
 
 const MultiSigWallet = artifacts.require('MultiSigWallet');
 

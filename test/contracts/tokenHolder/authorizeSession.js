@@ -19,7 +19,7 @@
 //
 // ----------------------------------------------------------------------------
 
-const web3 = require('../../lib/web3'),
+const web3 = require('../../test_lib/web3'),
   BigNumber = require('bignumber.js'),
   Hasher = artifacts.require('./Hasher.sol'),
   brandedToken = artifacts.require('./BrandedToken.sol');
