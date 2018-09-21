@@ -121,7 +121,6 @@ contract MultiSigWallet {
     /** Submitted transaction count. */
     uint256 public transactionCount;
 
-
     /* Modifiers */
 
     /**
@@ -301,7 +300,6 @@ contract MultiSigWallet {
      *      Function requires:
      *          - Only registered wallet can call.
      *          - Wallet to remove exists.
-     *          - Requirement validity held.
      *
      * @return Newly created transaction id.
      */
@@ -311,6 +309,11 @@ contract MultiSigWallet {
         walletExists(_wallet)
         returns (uint256 transactionID_)
     {
+        require(
+            wallets.length > 1,
+            "Last wallet cannot be submitted for removal."
+        );
+
         transactionID_ = addTransaction(
             address(this),
             abi.encodeWithSelector(REMOVE_WALLET_CALLPREFIX, _wallet)
@@ -562,7 +565,7 @@ contract MultiSigWallet {
      *
      * @return transactionId_ of the proposal.
      */
-    function changeRequirement (
+    function changeRequirement(
         uint256 _required
     )
         public
@@ -571,6 +574,18 @@ contract MultiSigWallet {
     {
         required = _required;
     }
+
+    /** @notice Returns the number of registered wallets. */
+    function walletCount()
+        public
+        view
+        returns(uint256)
+    {
+        return wallets.length;
+    }
+
+
+    /* Internal Functions */
 
     /**
      * @notice Returns the confirmation status of a transaction.
@@ -586,7 +601,7 @@ contract MultiSigWallet {
      *         false.
      */
     function isTransactionConfirmed(uint256 _transactionID)
-        public
+        internal
         view
         transactionExists(_transactionID)
         returns (bool)
@@ -603,9 +618,6 @@ contract MultiSigWallet {
 
         return false;
     }
-
-
-    /* Internal Functions */
 
     /**
      * @dev Adds a new transaction into transactions mapping.
