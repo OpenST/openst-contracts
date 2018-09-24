@@ -41,6 +41,7 @@
         5. [English Sentence](#english-sentence)
         6. [Grouping](#grouping)
         7. [Alignment](#alignment)
+        8. [Sections](#sections)
   5. [Comments](#comments)
 
 *The current style guide is mostly based on [Ethereum Solidity Style Guide](http://solidity.readthedocs.io/en/v0.4.24/style-guide.html)
@@ -500,14 +501,21 @@ Hence, functions should be grouped according to their visibility and ordered:
 - internal functions
 - private functions
 
+The suggested order for variables' declarations is:
+
+- public variables
+- internal variables
+- private variables
+
 Within a grouping, place the `view` and `pure` functions last.
 
 To read contract top down the following order is suggested:
 
-- using
-- event
-- enum
-- struct
+- usings
+- events
+- constants
+- enums
+- structs
 - public variables
 - internal variables
 - private variables
@@ -1630,6 +1638,47 @@ function commitStateRoot(uint256 _blockHeight, bytes32 _stateRoot)
 
 ### Alignment
 
+Align `@param` and `@return` tags' documentations including parameter name and
+named return param name.
+
+`Good`
+
+```solidity
+/**
+ * @dev Allow _spender to withdraw from your account, multiple times, up to the
+ *      _value amount. If this function is called again it overwrites the current
+ *      allowance with _value.
+ *
+ * @param _spender Address to approve
+ *                 to withdraw.
+ * @param _value Amount to approve for
+ *               withdrawal.
+ *
+ * @return success_ True in case of success, otherwise
+ *                  throws an exception.
+ */
+function approve(address _spender, uint256 _value) returns (bool success_);
+```
+
+`Bad`
+
+```solidity
+/**
+ * @dev Allow _spender to withdraw from your account, multiple times, up to the
+ *      _value amount. If this function is called again it overwrites the current
+ *      allowance with _value.
+ *
+ * @param _spender Address to approve
+ *        to withdraw.
+ * @param _value Amount to approve for
+ *        withdrawal.
+ *
+ * @return success_ True in case of success, otherwise
+ *        throws an exception.
+ */
+function approve(address _spender, uint256 _value) returns (bool success_);
+```
+
 Align documentation within same tag (not group).
 
 `Good`
@@ -1643,9 +1692,9 @@ Align documentation within same tag (not group).
  * @param _spender Address to approve to withdraw.
  * @param _value Amount to approve for withdrawal.
  *
- * @return bool true in case of success, otherwise throws an exception.
+ * @return success_ True in case of success, otherwise throws an exception.
  */
-function approve(address _spender, uint256 _value) returns (bool success);
+function approve(address _spender, uint256 _value) returns (bool success_);
 ```
 
 `Bad`
@@ -1659,7 +1708,7 @@ function approve(address _spender, uint256 _value) returns (bool success);
  * @param _spender Address to approve to withdraw.
  * @param _value Amount to approve for withdrawal.
  *
- * @return bool true in case of success, otherwise throws an exception.
+ * @return True in case of success, otherwise throws an exception.
  */
 function approve(address _spender, uint256 _value) returns (bool success);
 
@@ -1708,6 +1757,28 @@ function arithmetics(uint _a, uint _b)
 `NOTE` No blank line between documentation of individual input parameters.
 
 `NOTE` Return parameter alignment should be the same as for function arguments.
+
+### Sections
+
+Please, separate documentation into the following sections:
+
+```solidity
+/* Usings */
+/* Events */
+/* Constants */
+/* Enums */
+/* Structs */
+/* Storage */
+/* Modifiers */
+/* Special Functions */
+/* External Functions */
+/* Public Functions */
+/* Internal Functions */
+/* Private Functions */
+```
+
+Order in each section is going to be kept according to
+[Order of Declarations](#order-of-declarations).
 
 ## Comments
 
