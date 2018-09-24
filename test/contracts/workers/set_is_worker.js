@@ -21,7 +21,7 @@
 
 const workersUtils = require('./workers_utils.js'),
   Workers = artifacts.require('./Workers.sol'),
-  web3 = require('../../lib/web3');
+  web3 = require('../../test_lib/web3');
 
 ///
 /// Test stories

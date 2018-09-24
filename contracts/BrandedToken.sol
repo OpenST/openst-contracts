@@ -154,7 +154,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
     {
         require(
             isInternalActor[_spender],
-            "spender is not an internal actor."
+            "Spender is not an internal actor."
         );
 
         return super.approve(_spender, _value);
@@ -180,8 +180,8 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(
-            (isInternalActor[_beneficiary]),
-            "beneficiary is not an economy actor."
+            isInternalActor[_beneficiary],
+            "Beneficiary is not an internal actor."
         );
 
         mintEIP20(_amount);
