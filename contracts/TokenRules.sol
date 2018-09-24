@@ -19,6 +19,24 @@ import "./SafeMath.sol";
 import "./openst-protocol/EIP20Interface.sol";
 
 
+/**
+ * @notice Register of whitelisted rules that are allowed to initiate transfers
+ *         from a token holder accounts.
+ *
+ * @dev TokenHolder.executeRule() function will execute any rule that are
+ *      signed by an authorized and non-expired ephemeral key.
+ *      However, only the rules, that are registered in TokenRules
+ *      can initiate transfers of token from TokenHolder to other beneficiaries.
+ *      TokenHolder is going to allow TokenRules as a spender before
+ *      execution of the rule (amount is limited by spendingLimit registered
+ *      during an authorizaiton of an ephemeral key.). TokenHolder will
+ *      clear this allowance after execution.
+ *      Before execution of transfers from TokenHolder, TokenRules will
+ *      check that all global constraints are satisified.
+ *      During a execution, rule can call TokenRules.executeTransfers()
+ *      function only once. This allows global constraints to be checked
+ *      on complete list of transfers.
+ */
 contract TokenRules {
 
      /* Usings */
@@ -30,8 +48,7 @@ contract TokenRules {
 
     event RuleRegistered(
         string _ruleName,
-        address _ruleAddress,
-        bytes _ruleAbi
+        address _ruleAddress
     );
 
     event GlobalConstraintAdded(address _globalConstraintAddress);
@@ -44,7 +61,7 @@ contract TokenRules {
     struct TokenRule {
         string ruleName;
         address ruleAddress;
-        bytes ruleAbi;
+        string ruleAbi;
     }
 
 
@@ -85,9 +102,9 @@ contract TokenRules {
     }
 
     modifier onlyRule {
-        require (
+        require(
             rules[rulesByAddress[msg.sender]].ruleAddress != address(0),
-            "Only registered rule is allowed to call");
+            "Only registered rule is allowed to call.");
         _;
     }
 
@@ -131,14 +148,14 @@ contract TokenRules {
     function registerRule(
         string _ruleName,
         address _ruleAddress,
-        bytes _ruleAbi
+        string _ruleAbi
     )
         external
         onlyOrganization
     {
         require(bytes(_ruleName).length != 0, "Rule name is empty.");
         require(_ruleAddress != address(0), "Rule address is null.");
-        require(_ruleAbi.length != 0, "Rule ABI is empty.");
+        require(bytes(_ruleAbi).length != 0, "Rule ABI is empty.");
 
         bytes32 ruleNameHash = keccak256(abi.encodePacked(_ruleName));
 
@@ -161,7 +178,7 @@ contract TokenRules {
         rulesByNameHash[ruleNameHash] = rules.length;
         rules.push(rule);
 
-        emit RuleRegistered(_ruleName, _ruleAddress, _ruleAbi);
+        emit RuleRegistered(_ruleName, _ruleAddress);
     }
 
     /** @dev See documentation for allowedTransfers storage variable. */
@@ -218,7 +235,7 @@ contract TokenRules {
             "Constraints not fullfilled."
         );
 
-        for (uint256 i = 0; i < _transfersTo.length; ++i) {
+        for(uint256 i = 0; i < _transfersTo.length; ++i) {
             EIP20Interface(token).transferFrom(
                 _from,
                 _transfersTo[i],
@@ -251,7 +268,7 @@ contract TokenRules {
 
         uint256 index = findGlobalConstraintIndex(_globalConstraintAddress);
 
-        require (
+        require(
             index == globalConstraints.length,
             "Constraint to add already exists."
         );
@@ -267,7 +284,7 @@ contract TokenRules {
      *          - Constraint address is not null.
      *          - Constraint exists.
      */
-    function removeGlobalConstraint (
+    function removeGlobalConstraint(
         address _globalConstraintAddress
     )
         external
@@ -291,6 +308,18 @@ contract TokenRules {
 
     /* Public Functions */
 
+    function globalConstraintCount()
+        public
+        view
+        returns (uint256)
+    {
+        return globalConstraints.length;
+    }
+
+    /**
+     * @return Returns true, if all registered global constraints
+     *         are satisfied, otherwise false.
+     */
     function checkGlobalConstraints(
         address _from,
         address[] _transfersTo,
@@ -302,7 +331,7 @@ contract TokenRules {
     {
         _passed = true;
 
-        for (uint256 i = 0; i < globalConstraints.length && _passed; ++i) {
+        for(uint256 i = 0; i < globalConstraints.length && _passed; ++i) {
             _passed = GlobalConstraintInterface(globalConstraints[i]).check(
                 _from,
                 _transfersTo,
@@ -328,7 +357,7 @@ contract TokenRules {
         returns (uint256 index_)
     {
         index_ = 0;
-        while (
+        while(
             index_ < globalConstraints.length &&
             globalConstraints[index_] != _constraint
         )
@@ -340,7 +369,7 @@ contract TokenRules {
     function removeGlobalConstraintByIndex(uint256 _index)
         private
     {
-        require (_index < globalConstraints.length, "Index is out of range.");
+        require(_index < globalConstraints.length, "Index is out of range.");
 
         uint256 lastElementIndex = globalConstraints.length - 1;
         globalConstraints[_index] = globalConstraints[lastElementIndex];

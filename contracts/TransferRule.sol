@@ -21,7 +21,7 @@ contract TransferRule {
 
     /* Variables */
 
-    address tokenRules;
+    TokenRules tokenRules;
 
 
     /* Functions */
@@ -32,7 +32,7 @@ contract TransferRule {
         public
     {
         require (_tokenRules != address(0), "Token rules address is null.");
-        tokenRules = _tokenRules;
+        tokenRules = TokenRules(_tokenRules);
     }
 
     function transferFrom (
