@@ -25,6 +25,7 @@ import "./SafeMath.sol";
 import "./BrandedToken.sol";
 import "./MultiSigWallet.sol";
 import "./GatewayRedeemInterface.sol";
+import "./TokenRules.sol";
 
 
 /**
@@ -50,7 +51,7 @@ contract TokenHolder is MultiSigWallet {
     );
 
     event SessionRevocationSubmitted(
-        uint256 indexed transactionID_,
+        uint256 indexed _transactionID,
         address _ephemeralKey
     );
 
@@ -370,6 +371,8 @@ contract TokenHolder is MultiSigWallet {
 
         EphemeralKeyData storage ephemeralKeyData = ephemeralKeys[ephemeralKey];
 
+        TokenRules(tokenRules).allowTransfers();
+
         BrandedToken(brandedToken).approve(
             tokenRules,
             ephemeralKeyData.spendingLimit
@@ -379,6 +382,8 @@ contract TokenHolder is MultiSigWallet {
         executeStatus_ = _to.call(_data);
 
         BrandedToken(brandedToken).approve(tokenRules, 0);
+
+        TokenRules(tokenRules).disallowTransfers();
 
         emit RuleExecuted(messageHash, _nonce, executeStatus_);
     }
