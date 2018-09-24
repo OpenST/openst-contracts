@@ -370,6 +370,7 @@ contract TokenHolder is MultiSigWallet {
         );
 
         EphemeralKeyData storage ephemeralKeyData = ephemeralKeys[ephemeralKey];
+
         TokenRules(tokenRules).allowTransfers();
 
         BrandedToken(brandedToken).approve(
@@ -384,9 +385,7 @@ contract TokenHolder is MultiSigWallet {
 
         TokenRules(tokenRules).disallowTransfers();
 
-        emit RuleExecuted(_from, _to, _nonce, executionResult_);
-
-        return executionResult_;
+        emit RuleExecuted(messageHash, _nonce, executeStatus_);
     }
 
     /**
