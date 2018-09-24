@@ -36,8 +36,8 @@ contract EIP20Token is EIP20Interface {
     string private tokenSymbol;
     uint8  private tokenDecimals;
 
-    mapping(address => uint256) public balances;
-    mapping(address => mapping (address => uint256)) public allowed;
+    mapping(address => uint256) balances;
+    mapping(address => mapping (address => uint256)) allowed;
 
     /**
      *  @notice Contract constructor.

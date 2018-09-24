@@ -19,48 +19,49 @@
 //
 // ----------------------------------------------------------------------------
 
-const web3 = require('../../lib/web3'),
-  BigNumber = require('bignumber.js'),
-  Hasher = artifacts.require('./Hasher.sol'),
-  brandedToken = artifacts.require('./BrandedToken.sol'),
-  tokenHolder = artifacts.require('./TokenHolder.sol');
+const web3 = require('../../test_lib/web3'),
+    BigNumber = require('bignumber.js'),
+    Hasher = artifacts.require('./Hasher.sol'),
+    brandedToken = artifacts.require('./BrandedToken.sol'),
+    tokenHolder = artifacts.require('./TokenHolder.sol');
 
 module.exports.perform = (accounts) => {
-  const openSTProtocol = accounts[0],
-    conversionRateDecimals = 5,
-    conversionRate = new BigNumber(10 * 10 ** conversionRateDecimals),
-    chainIDValue = 3,
-    chainIDUtility = 1410,
-    symbol = 'symbol',
-    name = 'name',
-    organizationAddress = accounts[1],
-    token = null;
-  let brandedTokenInstance, tokenHolderInstance;
-  beforeEach(async () => {});
+    const openSTProtocol = accounts[0],
+        conversionRateDecimals = 5,
+        conversionRate = new BigNumber(10 * 10 ** conversionRateDecimals),
+        symbol = 'symbol',
+        name = 'name',
+        organizationAddress = accounts[1],
+        token = null;
+    let brandedTokenInstance, tokenHolderInstance;
+    beforeEach(async () => {});
 
-  it('deploys branded token', async () => {
-    const hasher = await Hasher.new();
-    const tokenRules = accounts[0];
-    const valueToken = accounts[1];
-    brandedTokenInstance = await brandedToken.new(
-      valueToken,
-      symbol,
-      name,
-      18,
-      conversionRate,
-      conversionRateDecimals,
-      organizationAddress,
-      { from: openSTProtocol }
-    );
-  });
+    it('deploys branded token', async () => {
+        const hasher = await Hasher.new();
+        const tokenRules = accounts[0];
+        const valueToken = accounts[1];
+        brandedTokenInstance = await brandedToken.new(
+            valueToken,
+            symbol,
+            name,
+            18,
+            conversionRate,
+            conversionRateDecimals,
+            organizationAddress, {
+                from: openSTProtocol
+            }
+        );
+    });
 
-  it('should register internal actor', async () => {
-    let internalActor = [];
-    internalActor.push(accounts[4]);
+    it('should register internal actor', async () => {
+        let internalActor = [];
+        internalActor.push(accounts[4]);
 
-    await brandedTokenInstance.registerInternalActor(internalActor, { from: organizationAddress });
+        await brandedTokenInstance.registerInternalActor(internalActor, {
+            from: organizationAddress
+        });
 
-    assert.equal(await brandedTokenInstance.isInternalActor(accounts[4]), true);
-    assert.equal(await brandedTokenInstance.isInternalActor(accounts[3]), false);
-  });
+        assert.equal(await brandedTokenInstance.isInternalActor(accounts[4]), true);
+        assert.equal(await brandedTokenInstance.isInternalActor(accounts[3]), false);
+    });
 };

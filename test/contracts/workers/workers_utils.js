@@ -19,7 +19,7 @@
 //
 // ----------------------------------------------------------------------------
 
-const Utils = require('../../lib/utils.js'),
+const Utils = require('../../test_lib/utils.js'),
   BigNumber = require('bignumber.js'),
   Workers = artifacts.require('./Workers.sol');
 
