@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 // ----------------------------------------------------------------------------
-// Test: MultiSigWallet::submitAddWallet
+// Test: MultiSigWallet::constructor
 //
 // http://www.simpletoken.org/
 //
@@ -23,69 +23,77 @@ const utils = require('../test_lib/utils.js');
 
 const MultiSigWallet = artifacts.require('MultiSigWallet');
 
-contract('MultiSigWallet::constructor', async (accounts) => {
-    it('negative testing', async () => {
-        const registeredWallet0 = accounts[0];
-        const duplicateWallet = accounts[0];
-        const nullWallet = utils.NULL_ADDRESS;
+contract('MultiSigWallet::constructor', async () => {
+    contract('Negative testing for input parameters.', async (accounts) => {
+        it('Wallets with null entries.', async () => {
+            const registeredWallet0 = accounts[0];
+            const nullWallet = utils.NULL_ADDRESS;
 
-        const walletsWithDuplicate = [registeredWallet0, duplicateWallet];
-        const walletsWithNull = [registeredWallet0, nullWallet];
+            const walletsWithNull = [registeredWallet0, nullWallet];
 
-        await utils.expectRevert(
-            MultiSigWallet.new(walletsWithNull, 1),
-            'Wallets with null entries should revert construction.',
-        );
+            await utils.expectRevert(
+                MultiSigWallet.new(walletsWithNull, 1),
+                'Wallets with null entries should revert construction.',
+            );
+        });
 
-        await utils.expectRevert(
-            MultiSigWallet.new(walletsWithDuplicate, 1),
-            'Wallets with duplicate entries should revert construction.',
-        );
+        it('Wallets with duplicate entries.', async () => {
+            const registeredWallet0 = accounts[0];
+            const duplicateWallet = accounts[0];
+            const walletsWithDuplicate = [registeredWallet0, duplicateWallet];
+
+            await utils.expectRevert(
+                MultiSigWallet.new(walletsWithDuplicate, 1),
+                'Wallets with duplicate entries should revert construction.',
+            );
+        });
     });
 
-    it('input validity', async () => {
-        const required = 2;
-        const registeredWallet0 = accounts[0];
-        const registeredWallet1 = accounts[1];
+    contract('Storage', async (accounts) => {
+        it('Initializing state variables.', async () => {
+            const required = 2;
+            const registeredWallet0 = accounts[0];
+            const registeredWallet1 = accounts[1];
 
-        const wallets = [registeredWallet0, registeredWallet1];
+            const wallets = [registeredWallet0, registeredWallet1];
 
-        const multisig = await MultiSigWallet.new(wallets, required);
+            const multisig = await MultiSigWallet.new(wallets, required);
 
-        assert.isOk(
-            (await multisig.required.call()).eqn(required),
-        );
+            assert.isOk(
+                (await multisig.required.call()).eqn(required),
+            );
 
-        assert.isOk(
-            (await multisig.walletCount.call()).eqn(2),
-        );
+            assert.isOk(
+                (await multisig.walletCount.call()).eqn(2),
+            );
 
-        assert.strictEqual(
-            await multisig.wallets.call(0),
-            registeredWallet0,
-        );
+            assert.strictEqual(
+                await multisig.wallets.call(0),
+                registeredWallet0,
+            );
 
-        assert.strictEqual(
-            await multisig.wallets.call(1),
-            registeredWallet1,
-        );
+            assert.strictEqual(
+                await multisig.wallets.call(1),
+                registeredWallet1,
+            );
 
-        assert.isOk(
-            await multisig.isWallet.call(registeredWallet0),
-        );
+            assert.isOk(
+                await multisig.isWallet.call(registeredWallet0),
+            );
 
-        assert.isOk(
-            await multisig.isWallet.call(registeredWallet1),
-        );
+            assert.isOk(
+                await multisig.isWallet.call(registeredWallet1),
+            );
 
-        assert.isOk(
-            (await multisig.required.call()).eqn(required),
-            'After submitting a transaction, the transaction count is '
-            + 'incremented by one, hence it should be equal to 1',
-        );
+            assert.isOk(
+                (await multisig.required.call()).eqn(required),
+                'After submitting a transaction, the transaction count is '
+                + 'incremented by one, hence it should be equal to 1',
+            );
 
-        assert.isOk(
-            (await multisig.transactionCount.call()).eqn(0),
-        );
+            assert.isOk(
+                (await multisig.transactionCount.call()).eqn(0),
+            );
+        });
     });
 });

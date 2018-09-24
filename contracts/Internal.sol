@@ -45,10 +45,10 @@ contract Internal {
     address public organization;
 
     /**
-     * Varibale is defined private to highlight that even derived contracts
+     * Variable is defined private to highlight that even derived contracts
      * are not able to modify the internal actors.
      */
-    mapping (address /* internal actor */ => bool) private internalActors;
+    mapping (address /* internal actor */ => bool) public isInternalActor;
 
 
     /* Modifiers */
@@ -91,22 +91,10 @@ contract Internal {
     {
         for (uint256 i = 0; i < _internalActors.length; i++) {
 
-            if (isInternalActor(_internalActors[i]) == false) {
-                internalActors[_internalActors[i]] = true;
+            if (!isInternalActor[_internalActors[i]]) {
+                isInternalActor[_internalActors[i]] = true;
                 emit InternalActorRegistered(organization, _internalActors[i]);
             }
         }
     }
-
-
-    /* Public Functions */
-
-    function isInternalActor(address _internalActor)
-        public
-        view
-        returns (bool)
-    {
-        return internalActors[_internalActor];
-    }
-
 }

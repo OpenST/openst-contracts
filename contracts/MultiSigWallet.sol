@@ -71,8 +71,6 @@ contract MultiSigWallet {
 
     /* Constants */
 
-    uint256 constant public MAX_WALLET_COUNT = 50;
-
     bytes4 constant public ADD_WALLET_CALLPREFIX = bytes4(
         keccak256("addWallet(address)")
     );
@@ -121,20 +119,19 @@ contract MultiSigWallet {
     /** Submitted transaction count. */
     uint256 public transactionCount;
 
+
     /* Modifiers */
 
     /**
      * Checks that:
      *      - Number of confirmations (requirement) is less than or
      *        equal to the wallet numbers.
-     *      - Wallet count is less than or equal to the max wallet count.
      *      - Requirement is not 0.
      *      - Wallet count is not 0.
      */
     modifier validRequirement(uint256 _walletCount, uint256 _required)
     {
         require(
-            _walletCount <= MAX_WALLET_COUNT &&
             _required <= _walletCount &&
             _required != uint256(0) &&
             _walletCount != uint256(0),
@@ -237,10 +234,10 @@ contract MultiSigWallet {
     /**
      * @dev Contract constructor sets initial wallets and required number of
      *      confirmations.
-     *      Requiers:
+     *      Requires:
      *          - Requirement validity held.
      *          - No wallet address is null.
-     *          - No duplicated wallet address in list.
+     *          - No duplicate wallet address in list.
      *
      * @param _wallets List of initial wallets.
      * @param _required Number of required confirmations.
@@ -251,7 +248,7 @@ contract MultiSigWallet {
     {
         for (uint256 i = 0; i < _wallets.length; i++) {
             require(_wallets[i] != address(0), "Wallet address is 0.");
-            require(!isWallet[_wallets[i]], "Duplicated wallet address.");
+            require(!isWallet[_wallets[i]], "Duplicate wallet address.");
             isWallet[_wallets[i]] = true;
         }
 
@@ -274,7 +271,7 @@ contract MultiSigWallet {
      * @return Newly created transaction id.
      */
     function submitAddWallet(address _wallet)
-        public
+        external
         onlyWallet
         walletIsNotNull(_wallet)
         walletDoesNotExist(_wallet)
@@ -304,7 +301,7 @@ contract MultiSigWallet {
      * @return Newly created transaction id.
      */
     function submitRemoveWallet(address _wallet)
-        public
+        external
         onlyWallet
         walletExists(_wallet)
         returns (uint256 transactionID_)
@@ -339,7 +336,7 @@ contract MultiSigWallet {
      * @return Newly created transaction id.
      */
     function submitReplaceWallet(address _oldWallet, address _newWallet)
-        public
+        external
         onlyWallet
         walletExists(_oldWallet)
         walletIsNotNull(_newWallet)
@@ -372,7 +369,7 @@ contract MultiSigWallet {
      * @return Newly created transaction id.
      */
     function submitRequirementChange(uint256 _required)
-        public
+        external
         onlyWallet
         validRequirement(wallets.length, _required)
         returns (uint256 transactionID_)
@@ -511,7 +508,7 @@ contract MultiSigWallet {
         onlyMultisig
         walletExists(_wallet)
     {
-        isWallet[_wallet] = false;
+        delete isWallet[_wallet];
 
         for (uint256 i = 0; i < wallets.length - 1; i++) {
             if (wallets[i] == _wallet) {
@@ -592,6 +589,8 @@ contract MultiSigWallet {
      *
      * @dev Transaction is confirmed if wallets' count that confirmed
      *      the transaction is bigger or equal to required.
+     *      Function checks confirmation condition based on current set of
+     *      registered wallet.
      *      Function requires:
      *          - Transaction with the specified id exists.
      *

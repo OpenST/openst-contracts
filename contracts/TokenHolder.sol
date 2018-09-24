@@ -91,15 +91,15 @@ contract TokenHolder is MultiSigWallet {
         keccak256("revokeSession(address)")
     );
 
-    bytes4 public constant EXECUTE_RULE_CALLPREFIX = bytes4 (
-        keccak256 (
-            "executeRule(address,bytes,uint256,uin8,bytes32,bytes32)"
+    bytes4 public constant EXECUTE_RULE_CALLPREFIX = bytes4(
+        keccak256(
+            "executeRule(address,bytes,uint256,uint8,bytes32,bytes32)"
         )
     );
 
-    bytes4 public constant REDEEM_CALLPREFIX = bytes4 (
-        keccak256 (
-            "redeem(address,bytes,uint256,uin8,bytes32,bytes32)"
+    bytes4 public constant REDEEM_CALLPREFIX = bytes4(
+        keccak256(
+            "redeem(address,bytes,uint256,uint8,bytes32,bytes32)"
         )
     );
 
@@ -111,7 +111,7 @@ contract TokenHolder is MultiSigWallet {
     /** Co Gateway contract address for redeem functionality. */
     address public coGateway;
 
-    mapping (address /* key */ => EphemeralKeyData) public ephemeralKeys;
+    mapping(address /* key */ => EphemeralKeyData) public ephemeralKeys;
 
     address private tokenRules;
 
@@ -194,7 +194,7 @@ contract TokenHolder is MultiSigWallet {
      * @param _required No of requirements for multi sig wallet.
      * @param _wallets array of wallet addresses.
      */
-    constructor (
+    constructor(
         address _brandedToken,
         address _coGateway,
         address _tokenRules,
@@ -293,7 +293,7 @@ contract TokenHolder is MultiSigWallet {
      *
      * @return transactionID_ Newly created transaction id.
      */
-    function submitRevokeSession (
+    function submitRevokeSession(
         address _ephemeralKey
     )
         public
@@ -321,6 +321,30 @@ contract TokenHolder is MultiSigWallet {
 
     /* Public Functions */
 
+    /**
+     * @notice Evaluates executable transaction signed by an ephemeral key.
+     *
+     * @dev As a first step, function validates executable transaction by
+     *      checking that the specified signature matches one of the
+     *      authorized (non-expired) ephemeral keys.
+     *
+     *      On success, function executes transaction by calling:
+     *          _to.call(_data);
+     *
+     *      Before execution, it approves the tokenRules as a spender
+     *      for ephemeralKey.spendingLimit amount. This allowance is cleared
+     *      after execution.
+     *
+     * @param _to The target contract address the transaction will be executed
+     *            upon.
+     * @param _data The payload of a function to be executed in the target
+     *              contract.
+     * @param _nonce The nonce of an ephemeral key that was used to sign
+     *               the transaction.
+     *
+     * @return executeStatus_ True in case of successfull execution of the
+     *                        executable transaction, otherwise, false.
+     */
     function executeRule(
         address _to,
         bytes _data,
@@ -334,7 +358,7 @@ contract TokenHolder is MultiSigWallet {
     {
         bytes32 messageHash = bytes32(0);
         address ephemeralKey = address(0);
-        (messageHash, ephemeralKey) = processExecutableTransaction (
+        (messageHash, ephemeralKey) = processExecutableTransaction(
             EXECUTE_RULE_CALLPREFIX,
             _to,
             _data,
@@ -346,7 +370,7 @@ contract TokenHolder is MultiSigWallet {
 
         EphemeralKeyData storage ephemeralKeyData = ephemeralKeys[ephemeralKey];
 
-        BrandedToken(brandedToken).approve (
+        BrandedToken(brandedToken).approve(
             tokenRules,
             ephemeralKeyData.spendingLimit
         );
@@ -359,7 +383,32 @@ contract TokenHolder is MultiSigWallet {
         emit RuleExecuted(messageHash, _nonce, executeStatus_);
     }
 
-    function redeem (
+    /**
+     * @notice Redeems the amount (msg.value) to the beneficiary.
+     *
+     * @dev As a first step, function validates executable transaction by
+     *      checking that the specified signature matches one of the
+     *      authorized (non-expired) ephemeral keys.
+     *
+     *      On success, function executes transaction by calling:
+     *          _to.call.value(msg.value)(_data);
+     *
+     *      Function requires:
+     *          - The target contract should be coGateway address that was
+     *            specified in constructor.
+     *          - Data payload should be redeem function withon coGateway.
+     *
+     * @param _to The target contract address the transaction will be executed
+     *            upon.
+     * @param _data The payload of a function to be executed in the target
+     *              contract.
+     * @param _nonce The nonce of an ephemeral key that was used to sign
+     *               the transaction.
+     *
+     * @return redeemStatus_ True in case of successfull execution of the
+     *                       executable transaction, otherwise, false.
+     */
+    function redeem(
         address _to,
         bytes _data,
         uint256 _nonce,
@@ -371,7 +420,7 @@ contract TokenHolder is MultiSigWallet {
         payable
         returns (bool redeemStatus_)
     {
-        require (
+        require(
             _to == coGateway,
             "Executable transaction should call coGateway."
         );
@@ -381,7 +430,7 @@ contract TokenHolder is MultiSigWallet {
 
         bytes32 messageHash = bytes32(0);
         address ephemeralKey = address(0);
-        (messageHash, ephemeralKey) = processExecutableTransaction (
+        (messageHash, ephemeralKey) = processExecutableTransaction(
             REDEEM_CALLPREFIX,
             _to,
             _data,
@@ -393,7 +442,7 @@ contract TokenHolder is MultiSigWallet {
 
         EphemeralKeyData storage ephemeralKeyData = ephemeralKeys[ephemeralKey];
 
-        BrandedToken(brandedToken).approve (
+        BrandedToken(brandedToken).approve(
             _to,
             ephemeralKeyData.spendingLimit
         );
@@ -454,7 +503,7 @@ contract TokenHolder is MultiSigWallet {
 
     /* Private Functions */
 
-    function processExecutableTransaction (
+    function processExecutableTransaction(
         bytes4 _callPrefix,
         address _to,
         bytes _data,
@@ -466,28 +515,28 @@ contract TokenHolder is MultiSigWallet {
         private
         returns (bytes32 messageHash_, address key_)
     {
-        messageHash_ = getMessageHash (
+        messageHash_ = getMessageHash(
             _callPrefix,
             _to,
             keccak256(_data),
             _nonce
         );
 
-        key_ = recoverKey (
+        key_ = recoverKey(
             messageHash_,
             _v,
             _r,
             _s
         );
 
-        require (
+        require(
             isEphemeralKeyActive(key_),
             "Ephemeral key is not active."
         );
 
         EphemeralKeyData storage keyData = ephemeralKeys[key_];
 
-        require (
+        require(
             _nonce == keyData.nonce,
             "Nonce is not equal to the current nonce."
         );
@@ -495,7 +544,7 @@ contract TokenHolder is MultiSigWallet {
         keyData.nonce = keyData.nonce.add(1);
     }
 
-    function recoverKey (
+    function recoverKey(
         bytes32 _messageHash,
         uint8 _v,
         bytes32 _r,
@@ -508,7 +557,7 @@ contract TokenHolder is MultiSigWallet {
         key_ = ecrecover(_messageHash, _v, _r, _s);
     }
 
-    function getMessageHash (
+    function getMessageHash(
         bytes4 _callPrefix,
         address _to,
         bytes32 _dataHash,
@@ -518,8 +567,8 @@ contract TokenHolder is MultiSigWallet {
         view
         returns (bytes32 messageHash_)
     {
-        messageHash_ = keccak256 (
-            abi.encodePacked  (
+        messageHash_ = keccak256(
+            abi.encodePacked(
                 byte(0x19), // Starting a transaction with byte(0x19) ensure
                             // the signed data from being a valid ethereum
                             // transaction.

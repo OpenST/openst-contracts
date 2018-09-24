@@ -105,7 +105,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(
-            isInternalActor(_to),
+            isInternalActor[_to],
             "To address is not an internal actor."
         );
 
@@ -130,7 +130,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(
-            isInternalActor(_to),
+            isInternalActor[_to],
             "To address is not an internal actor."
         );
 
@@ -153,7 +153,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(
-            isInternalActor(_spender),
+            isInternalActor[_spender],
             "Spender is not an internal actor."
         );
 
@@ -180,7 +180,7 @@ contract BrandedToken is EIP20Token, UtilityTokenAbstract, Internal {
         returns (bool /* success */)
     {
         require(
-            isInternalActor(_beneficiary),
+            isInternalActor[_beneficiary],
             "Beneficiary is not an internal actor."
         );
 

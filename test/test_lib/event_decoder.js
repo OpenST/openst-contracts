@@ -38,10 +38,24 @@ class Event {
         });
 
         Object.keys(actual.args).forEach((key) => {
-            if (key !== '0' && key !== '1' && key !== '__length__') {
+            if (Number.isNaN(Number.parseInt(key, 10)) && key !== '__length__') {
                 assert.isOk(Object.hasOwnProperty.call(expected.args, key));
             }
         });
+    }
+
+    static assertEqualMulti(actualList, expectedList) {
+        assert.strictEqual(
+            actualList.length,
+            expectedList.length,
+            'Length of actual event list and expected ones should be equal.',
+        );
+
+        for (let i = 0; i < actualList.lengh; i += 1) {
+            const actual = actualList[i];
+            const expected = expectedList[i];
+            this.assertEqual(actual, expected);
+        }
     }
 }
 

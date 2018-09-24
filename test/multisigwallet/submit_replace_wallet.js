@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 // ----------------------------------------------------------------------------
-// Test: MultiSigWallet::submitRemoveWallet
+// Test: MultiSigWallet::submitReplaceWallet
 //
 // http://www.simpletoken.org/
 //
@@ -26,90 +26,97 @@ const { Event } = require('../test_lib/event_decoder');
 
 const MultiSigWallet = artifacts.require('MultiSigWallet');
 
-function generateRemoveWalletData(wallet) {
+function generateReplaceWalletData(oldWallet, newWallet) {
     return web3.eth.abi.encodeFunctionCall(
         {
-            name: 'removeWallet',
+            name: 'replaceWallet',
             type: 'function',
-            inputs: [{
-                type: 'address',
-                name: '',
-            }],
+            inputs: [
+                {
+                    type: 'address',
+                    name: '',
+                },
+                {
+                    type: 'address',
+                    name: '',
+                }],
         },
-        [wallet],
+        [oldWallet, newWallet],
     );
 }
 
 contract('MultiSigWallet::submitReplaceWallet', async () => {
-    contract('Negative testing for input parameters.', async (accounts) => {
-        it('Non registered wallet submits a wallet removal.', async () => {
+    contract('Negative testing for input parameters:', async (accounts) => {
+        it('Non registered wallet submits a wallet replacement', async () => {
             const required = 1;
-
             const registeredWallet0 = accounts[0];
-            const nonRegisteredWallet = accounts[1];
-            const walletToRemove = accounts[2];
+            const registeredWallet1 = accounts[1];
+            const newWalletForReplacement = accounts[2];
+            const nonRegisteredWallet = accounts[3];
 
-            const wallets = [registeredWallet0];
+            const wallets = [registeredWallet0, registeredWallet1];
 
             const multisig = await MultiSigWallet.new(wallets, required);
 
             await utils.expectRevert(
-                multisig.submitRemoveWallet(
-                    walletToRemove,
+                multisig.submitReplaceWallet(
+                    registeredWallet1,
+                    newWalletForReplacement,
                     {
                         from: nonRegisteredWallet,
                     },
                 ),
-                'Non registered wallet cannot submit a wallet removal.',
+                'Non registered wallet cannot submit a wallet replacement.',
             );
         });
 
-        it('Null wallets submits a wallet removal.', async () => {
+        it('Old wallet to replace should be registered.', async () => {
             const required = 1;
-
             const registeredWallet0 = accounts[0];
-            const nullWallet = utils.NULL_ADDRESS;
+            const registeredWallet1 = accounts[1];
+            const newWalletForReplacement = accounts[2];
+            const nonRegisteredWallet = accounts[3];
 
-            const wallets = [registeredWallet0];
+            const wallets = [registeredWallet0, registeredWallet1];
 
             const multisig = await MultiSigWallet.new(wallets, required);
 
             await utils.expectRevert(
-                multisig.submitRemoveWallet(
+                multisig.submitReplaceWallet(
+                    nonRegisteredWallet,
+                    newWalletForReplacement,
+                    {
+                        from: registeredWallet0,
+                    },
+                ),
+                'Old wallet to replace should be registered.',
+            );
+        });
+
+        it('New wallet to replace should not be null.', async () => {
+            const required = 1;
+            const registeredWallet0 = accounts[0];
+            const registeredWallet1 = accounts[1];
+            const nullWallet = utils.NULL_ADDRESS;
+
+            const wallets = [registeredWallet0, registeredWallet1];
+
+            const multisig = await MultiSigWallet.new(wallets, required);
+
+            await utils.expectRevert(
+                multisig.submitReplaceWallet(
+                    registeredWallet1,
                     nullWallet,
                     {
                         from: registeredWallet0,
                     },
                 ),
-                'Null wallet cannot be submitted for removal.',
+                'Null wallet to replace should not be null.',
             );
         });
 
-        it('Last wallet removal attempt.', async () => {
+        it('New wallet to replace should not be registered.', async () => {
             const required = 1;
-
-            const registeredWallet0 = accounts[0];
-
-            const wallets = [registeredWallet0];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            await utils.expectRevert(
-                multisig.submitRemoveWallet(
-                    registeredWallet0,
-                    {
-                        from: registeredWallet0,
-                    },
-                ),
-                'Last wallet cannot be removed from multisig.',
-            );
-        });
-    });
-
-    contract('Events', async (accounts) => {
-        it('Submit => Confirm => Execute', async () => {
-            const required = 1;
-
             const registeredWallet0 = accounts[0];
             const registeredWallet1 = accounts[1];
 
@@ -117,8 +124,32 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
 
             const multisig = await MultiSigWallet.new(wallets, required);
 
-            const transactionResponse = await multisig.submitRemoveWallet(
+            await utils.expectRevert(
+                multisig.submitReplaceWallet(
+                    registeredWallet1,
+                    registeredWallet1,
+                    {
+                        from: registeredWallet0,
+                    },
+                ),
+                'New wallet to replace should not be registered.',
+            );
+        });
+    });
+
+    contract('Events', async (accounts) => {
+        it('Submit => Confirm => Execute', async () => {
+            const registeredWallet0 = accounts[0];
+            const registeredWallet1 = accounts[1];
+            const newWalletForReplacement = accounts[2];
+
+            const wallets = [registeredWallet0, registeredWallet1];
+
+            const multisig = await MultiSigWallet.new(wallets, 1);
+
+            const transactionResponse = await multisig.submitReplaceWallet(
                 registeredWallet1,
+                newWalletForReplacement,
                 {
                     from: registeredWallet0,
                 },
@@ -132,25 +163,24 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                 events.length,
                 3,
                 'As requirement is 1, transaction would be executed '
-                + 'afterwards, hence WalletRemovalSubmitted, '
+                + 'afterwards, hence WalletReplacementSubmitted, '
                 + 'TransactionConfirmed and TransactionExecutionSucceeded '
                 + 'would be emitted.',
             );
 
-
-            // The first emitted event should be 'WalletRemovalSubmitted'.
+            // The first emitted event should be 'WalletReplacementSubmitted'.
             Event.assertEqual(events[0], {
-                name: 'WalletRemovalSubmitted',
+                name: 'WalletReplacementSubmitted',
                 args: {
                     _transactionID: new BN(0),
-                    _wallet: registeredWallet1,
+                    _oldWallet: registeredWallet1,
+                    _newWallet: newWalletForReplacement,
                 },
                 logIndex: 0,
             });
 
-            // The second emitted event should be 'TransactionConfirmed',
-            // because the wallet that submitted a wallet removal request
-            // should confirm it afterwards.
+            // The second emitted event should be 'TransactionConfirmed', as
+            // the wallet that submits transaction confirms afterwards.
             Event.assertEqual(events[1], {
                 name: 'TransactionConfirmed',
                 args: {
@@ -160,9 +190,9 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                 logIndex: 1,
             });
 
-            // The third emitted event should be
-            // 'TransactionExecutionSucceeded', because of the setup
-            // 2-wallet-1-requirement.
+            // The third emitted event should be 'TransactionExecutionSucceeded'
+            // as requirement is 1, hence transaction would be executed
+            // afterwards.
             Event.assertEqual(events[2], {
                 name: 'TransactionExecutionSucceeded',
                 args: {
@@ -173,20 +203,17 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
         });
 
         it('Submit => Confirm', async () => {
-            const required = 2;
-
             const registeredWallet0 = accounts[0];
             const registeredWallet1 = accounts[1];
-            const registeredWallet2 = accounts[2];
+            const newWalletToReplace = accounts[2];
 
-            const wallets = [
-                registeredWallet0, registeredWallet1, registeredWallet2,
-            ];
+            const wallets = [registeredWallet0, registeredWallet1];
 
-            const multisig = await MultiSigWallet.new(wallets, required);
+            const multisig = await MultiSigWallet.new(wallets, 2);
 
-            const transactionResponse = await multisig.submitRemoveWallet(
+            const transactionResponse = await multisig.submitReplaceWallet(
                 registeredWallet1,
+                newWalletToReplace,
                 {
                     from: registeredWallet0,
                 },
@@ -200,23 +227,23 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                 events.length,
                 2,
                 'As requirement is 2, transaction would not be executed '
-                + 'afterwards, hence only WalletRemovalSubmitted and '
+                + 'afterwards, hence only WalletReplacementSubmitted and '
                 + 'TransactionConfirmed would be emitted.',
             );
 
-            // The first emitted event should be 'WalletRemovalSubmitted'.
+            // The first emitted event should be 'WalletReplacementSubmitted'.
             Event.assertEqual(events[0], {
-                name: 'WalletRemovalSubmitted',
+                name: 'WalletReplacementSubmitted',
                 args: {
                     _transactionID: new BN(0),
-                    _wallet: registeredWallet1,
+                    _oldWallet: registeredWallet1,
+                    _newWallet: newWalletToReplace,
                 },
                 logIndex: 0,
             });
 
-            // The second emitted event should be 'TransactionConfirmed',
-            // because the wallet that submitted a wallet removal request
-            // should confirm it afterwards.
+            // The second emitted event should be 'TransactionConfirmed', as
+            // the wallet that submits transaction confirms afterwards.
             Event.assertEqual(events[1], {
                 name: 'TransactionConfirmed',
                 args: {
@@ -230,32 +257,36 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
 
     contract('Storage', async (accounts) => {
         it('Submit => Confirm => Execute', async () => {
-            const required = 1;
-
             const registeredWallet0 = accounts[0];
             const registeredWallet1 = accounts[1];
+            const newWalletForReplacement = accounts[2];
 
             const wallets = [registeredWallet0, registeredWallet1];
 
-            const multisig = await MultiSigWallet.new(wallets, required);
+            const multisig = await MultiSigWallet.new(wallets, 1);
 
-            await multisig.submitRemoveWallet(
+            await multisig.submitReplaceWallet(
                 registeredWallet1,
-                {
-                    from: registeredWallet0,
-                },
+                newWalletForReplacement,
             );
 
             const transactionID = 0;
 
+            assert.isOk(
+                await multisig.isWallet.call(newWalletForReplacement),
+                'Wallet replacement should happen immediately, because of '
+                + '2-wallets-1-required setup.',
+            );
+
             assert.isNotOk(
                 await multisig.isWallet.call(registeredWallet1),
-                'Wallet will be removed because of 2-wallets-1-required '
-                + 'setup.',
+                'Wallet replacement should happen immediately, because of '
+                + '2-wallets-1-required setup.',
             );
 
             assert.isOk(
-                (await multisig.walletCount.call()).eqn(1),
+                (await multisig.walletCount.call()).eqn(2),
+                'Wallet count should not change during replace.',
             );
 
             assert.strictEqual(
@@ -263,16 +294,26 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                 registeredWallet0,
             );
 
-            assert.isOk(
-                (await multisig.required.call()).eqn(1),
+            assert.strictEqual(
+                await multisig.wallets.call(1),
+                newWalletForReplacement,
             );
 
             assert.isOk(
-                await multisig.confirmations(transactionID, registeredWallet0),
+                (await multisig.required.call()).eqn(1),
+                'Required number of confirmation should stay unchanged.',
             );
 
             assert.isOk(
                 (await multisig.transactionCount.call()).eqn(1),
+                'Transaction count should be increased by one.',
+            );
+
+            assert.strictEqual(
+                await multisig.confirmations.call(
+                    transactionID, registeredWallet0,
+                ),
+                true,
             );
 
             const transaction = await multisig.transactions.call(transactionID);
@@ -284,7 +325,9 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
 
             assert.strictEqual(
                 transaction.data,
-                generateRemoveWalletData(registeredWallet1),
+                generateReplaceWalletData(
+                    registeredWallet1, newWalletForReplacement,
+                ),
             );
 
             assert.strictEqual(
@@ -294,35 +337,36 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
         });
 
         it('Submit => Confirm', async () => {
-            const required = 2;
-
             const registeredWallet0 = accounts[0];
             const registeredWallet1 = accounts[1];
-            const registeredWallet2 = accounts[2];
+            const newWalletForReplacement = accounts[2];
 
-            const wallets = [
-                registeredWallet0, registeredWallet1, registeredWallet2,
-            ];
+            const wallets = [registeredWallet0, registeredWallet1];
 
-            const multisig = await MultiSigWallet.new(wallets, required);
+            const multisig = await MultiSigWallet.new(wallets, 2);
 
-            await multisig.submitRemoveWallet(
+            await multisig.submitReplaceWallet(
                 registeredWallet1,
-                {
-                    from: registeredWallet0,
-                },
+                newWalletForReplacement,
             );
 
             const transactionID = 0;
 
             assert.isOk(
                 await multisig.isWallet.call(registeredWallet1),
-                'Wallet will not be removed because of 3-wallets-2-required '
-                + 'setup.',
+                'Wallet replacement should not happen immediately, because of '
+                + '2-wallets-2-required setup.',
+            );
+
+            assert.isNotOk(
+                await multisig.isWallet.call(newWalletForReplacement),
+                'Wallet replacement should not happen immediately, because of '
+                + '2-wallets-2-required setup.',
             );
 
             assert.isOk(
-                (await multisig.walletCount.call()).eqn(3),
+                (await multisig.walletCount.call()).eqn(2),
+                'Wallet count should not change during replace.',
             );
 
             assert.strictEqual(
@@ -335,21 +379,21 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                 registeredWallet1,
             );
 
-            assert.strictEqual(
-                await multisig.wallets.call(2),
-                registeredWallet2,
-            );
-
             assert.isOk(
                 (await multisig.required.call()).eqn(2),
-            );
-
-            assert.isOk(
-                await multisig.confirmations(transactionID, registeredWallet0),
+                'Required number of confirmation should stay unchanged.',
             );
 
             assert.isOk(
                 (await multisig.transactionCount.call()).eqn(1),
+                'Transaction count should be increased by one.',
+            );
+
+            assert.strictEqual(
+                await multisig.confirmations.call(
+                    transactionID, registeredWallet0,
+                ),
+                true,
             );
 
             const transaction = await multisig.transactions.call(transactionID);
@@ -361,7 +405,9 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
 
             assert.strictEqual(
                 transaction.data,
-                generateRemoveWalletData(registeredWallet1),
+                generateReplaceWalletData(
+                    registeredWallet1, newWalletForReplacement,
+                ),
             );
 
             assert.strictEqual(
