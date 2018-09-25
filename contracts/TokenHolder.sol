@@ -24,7 +24,6 @@ pragma solidity ^0.4.23;
 import "./SafeMath.sol";
 import "./BrandedToken.sol";
 import "./MultiSigWallet.sol";
-import "./GatewayRedeemInterface.sol";
 import "./TokenRules.sol";
 
 
@@ -98,19 +97,10 @@ contract TokenHolder is MultiSigWallet {
         )
     );
 
-    bytes4 public constant REDEEM_CALLPREFIX = bytes4(
-        keccak256(
-            "redeem(address,bytes,uint256,uint8,bytes32,bytes32)"
-        )
-    );
-
 
     /* Storage */
 
     address public brandedToken;
-
-    /** Co Gateway contract address for redeem functionality. */
-    address public coGateway;
 
     mapping(address /* key */ => EphemeralKeyData) public ephemeralKeys;
 
@@ -190,14 +180,12 @@ contract TokenHolder is MultiSigWallet {
 
     /**
      * @param _brandedToken eip20 contract address deployed for an economy.
-     * @param _coGateway utility chain gateway contract address.
      * @param _tokenRules Token rules contract address.
      * @param _required No of requirements for multi sig wallet.
      * @param _wallets array of wallet addresses.
      */
     constructor(
         address _brandedToken,
-        address _coGateway,
         address _tokenRules,
         uint256 _required,
         address[] _wallets
@@ -210,16 +198,11 @@ contract TokenHolder is MultiSigWallet {
             "Branded token contract address is 0."
         );
         require(
-            _coGateway != address(0),
-            "Co gateway contract address is 0."
-        );
-        require(
             _tokenRules != address(0),
             "TokenRules contract address is 0."
         );
 
         brandedToken = _brandedToken;
-        coGateway = _coGateway;
         tokenRules = _tokenRules;
     }
 
@@ -386,78 +369,6 @@ contract TokenHolder is MultiSigWallet {
         TokenRules(tokenRules).disallowTransfers();
 
         emit RuleExecuted(messageHash, _nonce, executeStatus_);
-    }
-
-    /**
-     * @notice Redeems the amount (msg.value) to the beneficiary.
-     *
-     * @dev As a first step, function validates executable transaction by
-     *      checking that the specified signature matches one of the
-     *      authorized (non-expired) ephemeral keys.
-     *
-     *      On success, function executes transaction by calling:
-     *          _to.call.value(msg.value)(_data);
-     *
-     *      Function requires:
-     *          - The target contract should be coGateway address that was
-     *            specified in constructor.
-     *          - Data payload should be redeem function withon coGateway.
-     *
-     * @param _to The target contract address the transaction will be executed
-     *            upon.
-     * @param _data The payload of a function to be executed in the target
-     *              contract.
-     * @param _nonce The nonce of an ephemeral key that was used to sign
-     *               the transaction.
-     *
-     * @return redeemStatus_ True in case of successfull execution of the
-     *                       executable transaction, otherwise, false.
-     */
-    function redeem(
-        address _to,
-        bytes _data,
-        uint256 _nonce,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    )
-        public
-        payable
-        returns (bool redeemStatus_)
-    {
-        require(
-            _to == coGateway,
-            "Executable transaction should call coGateway."
-        );
-
-        // TODO: Require that call prefix within _data is a redeem function
-        //       selector from _coGateway.
-
-        bytes32 messageHash = bytes32(0);
-        address ephemeralKey = address(0);
-        (messageHash, ephemeralKey) = processExecutableTransaction(
-            REDEEM_CALLPREFIX,
-            _to,
-            _data,
-            _nonce,
-            _v,
-            _r,
-            _s
-        );
-
-        EphemeralKeyData storage ephemeralKeyData = ephemeralKeys[ephemeralKey];
-
-        BrandedToken(brandedToken).approve(
-            _to,
-            ephemeralKeyData.spendingLimit
-        );
-
-        // solium-disable-next-line security/no-call-value
-        redeemStatus_ = _to.call.value(msg.value)(_data);
-
-        BrandedToken(brandedToken).approve(_to, 0);
-
-        emit RuleExecuted(messageHash, _nonce, redeemStatus_);
     }
 
     function authorizeSession(
