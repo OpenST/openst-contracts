@@ -331,7 +331,7 @@ contract MultiSigWallet {
      *          - New wallet does not exist.
      *
      * @param _oldWallet Wallet to remove.
-     * @param _newWallet Wallt to add.
+     * @param _newWallet Wallet to add.
      *
      * @return Newly created transaction id.
      */
@@ -458,6 +458,7 @@ contract MultiSigWallet {
     {
         if (isTransactionConfirmed(_transactionID)) {
             Transaction storage t = transactions[_transactionID];
+            // solium-disable-next-line security/no-low-level-calls
             if (t.destination.call(t.data)) {
                 t.executed = true;
                 emit TransactionExecutionSucceeded(_transactionID);
@@ -466,6 +467,15 @@ contract MultiSigWallet {
                 emit TransactionExecutionFailed(_transactionID);
             }
         }
+    }
+
+    /** @notice Returns the number of registered wallets. */
+    function walletCount()
+        public
+        view
+        returns(uint256)
+    {
+        return wallets.length;
     }
 
     /**
@@ -570,15 +580,6 @@ contract MultiSigWallet {
         validRequirement(wallets.length, _required)
     {
         required = _required;
-    }
-
-    /** @notice Returns the number of registered wallets. */
-    function walletCount()
-        public
-        view
-        returns(uint256)
-    {
-        return wallets.length;
     }
 
 
