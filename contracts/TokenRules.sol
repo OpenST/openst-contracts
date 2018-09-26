@@ -64,6 +64,10 @@ contract TokenRules {
         string ruleAbi;
     }
 
+    struct RuleIndex {
+        uint256 index;
+        bool exists;
+    }
 
     /* Storage */
 
@@ -71,10 +75,10 @@ contract TokenRules {
     TokenRule[] public rules;
 
     /** Mapping from a rule address to the index in the `rules` array. */
-    mapping (address => uint256) public rulesByAddress;
+    mapping (address => RuleIndex) public rulesByAddress;
 
     /** Mapping from a rule name hash to the index in the `rules` array. */
-    mapping (bytes32 => uint256) public rulesByNameHash;
+    mapping (bytes32 => RuleIndex) public rulesByNameHash;
 
     /** Contains a list of all registered global constraints. */
     address[] public globalConstraints;
@@ -103,8 +107,9 @@ contract TokenRules {
 
     modifier onlyRule {
         require(
-            rules[rulesByAddress[msg.sender]].ruleAddress != address(0),
-            "Only registered rule is allowed to call.");
+            rulesByAddress[msg.sender].exists,
+            "Only registered rule is allowed to call."
+        );
         _;
     }
 
@@ -160,11 +165,11 @@ contract TokenRules {
         bytes32 ruleNameHash = keccak256(abi.encodePacked(_ruleName));
 
         require(
-            rules[rulesByNameHash[ruleNameHash]].ruleAddress == address(0),
+            !rulesByNameHash[ruleNameHash].exists,
             "Rule with the specified name already exists."
         );
         require(
-            rules[rulesByAddress[_ruleAddress]].ruleAddress == address(0),
+            !rulesByAddress[_ruleAddress].exists,
             "Rule with the specified address already exists."
         );
 
@@ -174,8 +179,13 @@ contract TokenRules {
             ruleAbi: _ruleAbi
         });
 
-        rulesByAddress[_ruleAddress] = rules.length;
-        rulesByNameHash[ruleNameHash] = rules.length;
+        RuleIndex memory ruleIndex = RuleIndex({
+            index: rules.length,
+            exists: true
+        });
+
+        rulesByAddress[_ruleAddress] = ruleIndex;
+        rulesByNameHash[ruleNameHash] = ruleIndex;
         rules.push(rule);
 
         emit RuleRegistered(_ruleName, _ruleAddress);
