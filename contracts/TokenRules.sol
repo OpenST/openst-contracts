@@ -64,6 +64,14 @@ contract TokenRules {
         string ruleAbi;
     }
 
+    /**
+     * RuleIndex struct is going to be used in 'rulesByAddress' and
+     * 'rulesByNameHash' mappings for pointing to the index with 'rules' array.
+     * Simple usage of uint256 in those mappings does not work, because
+     * for non existing rule name and address it defaults to 0 index,
+     * which is obviously wrong. Before accessing 'rules' array by index
+     * one should check 'exists' field of the struct.
+     */
     struct RuleIndex {
         uint256 index;
         bool exists;

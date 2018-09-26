@@ -19,7 +19,6 @@
 //
 // ----------------------------------------------------------------------------
 
-const BN = require('bn.js');
 const web3 = require('../test_lib/web3.js');
 const utils = require('../test_lib/utils.js');
 const { Event } = require('../test_lib/event_decoder');
