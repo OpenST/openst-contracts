@@ -599,7 +599,7 @@ contract MultiSigWallet {
      *         achieved with current set of registered wallets, otherwise false.
      */
     function isTransactionConfirmed(uint256 _transactionID)
-        internal
+        public
         view
         transactionExists(_transactionID)
         returns (bool)
