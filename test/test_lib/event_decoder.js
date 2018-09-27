@@ -15,7 +15,6 @@ class Event {
             events.push({
                 name: logs[i].event,
                 args: logs[i].args,
-                logIndex: logs[i].logIndex,
             });
         }
 
@@ -23,7 +22,6 @@ class Event {
     }
 
     static assertEqual(actual, expected) {
-        assert.strictEqual(actual.logIndex, expected.logIndex);
         assert.strictEqual(actual.name, expected.name);
         Object.keys(expected.args).forEach((key) => {
             if (key !== '0' && key !== '1' && key !== '__length__') {
