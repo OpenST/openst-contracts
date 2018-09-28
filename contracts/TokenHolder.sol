@@ -82,10 +82,6 @@ contract TokenHolder is MultiSigWallet {
         keccak256("authorizeSession(address,uint256,uint256)")
     );
 
-    bytes4 constant public REVOKE_SESSION_CALLPREFIX = bytes4(
-        keccak256("revokeSession(address)")
-    );
-
     bytes4 public constant EXECUTE_RULE_CALLPREFIX = bytes4(
         keccak256(
             "executeRule(address,bytes,uint256,uint8,bytes32,bytes32)"
@@ -219,8 +215,7 @@ contract TokenHolder is MultiSigWallet {
     }
 
     /**
-     * @notice Submits a transaction for the session revocation for
-     *         the specified ephemeral key.
+     * @notice Revokes session for the specified ephemeral key.
      *
      * @dev Function revokes the key even if it has expired.
      *      Function requires:
@@ -229,34 +224,15 @@ contract TokenHolder is MultiSigWallet {
      *          - The key is authorized.
      *
      * @param _ephemeralKey Ephemeral key to revoke.
-     *
-     * @return transactionID_ Newly created transaction id.
      */
-    function submitRevokeSession(
-        address _ephemeralKey
-    )
-        public
+    function revokeSession(address _ephemeralKey)
+        external
         onlyWallet
         keyIsNotNull(_ephemeralKey)
         keyIsAuthorized(_ephemeralKey)
-        returns (uint256 transactionID_)
     {
-        transactionID_ = addTransaction(
-            address(this),
-            abi.encodeWithSelector(
-                REVOKE_SESSION_CALLPREFIX,
-                _ephemeralKey
-            )
-        );
-
-        emit SessionRevocationSubmitted(
-            transactionID_,
-            _ephemeralKey
-        );
-
-        confirmTransaction(transactionID_);
+        ephemeralKeys[_ephemeralKey].status = AuthorizationStatus.REVOKED;
     }
-
 
     /* Public Functions */
 
@@ -340,16 +316,6 @@ contract TokenHolder is MultiSigWallet {
         keyData.expirationHeight = _expirationHeight;
         keyData.nonce = 0;
         keyData.status = AuthorizationStatus.AUTHORIZED;
-    }
-
-    function revokeSession(
-        address _ephemeralKey
-    )
-        public
-        onlyMultisig
-        keyIsAuthorized(_ephemeralKey)
-    {
-        ephemeralKeys[_ephemeralKey].status = AuthorizationStatus.REVOKED;
     }
 
 
