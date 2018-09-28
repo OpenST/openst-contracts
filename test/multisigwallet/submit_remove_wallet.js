@@ -11,13 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// ----------------------------------------------------------------------------
-// Test: MultiSigWallet::submitRemoveWallet
-//
-// http://www.simpletoken.org/
-//
-// ----------------------------------------------------------------------------
 
 const BN = require('bn.js');
 const web3 = require('../test_lib/web3.js');
