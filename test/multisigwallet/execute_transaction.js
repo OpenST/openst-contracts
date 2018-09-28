@@ -22,6 +22,7 @@
 const BN = require('bn.js');
 const utils = require('../test_lib/utils.js');
 const { Event } = require('../test_lib/event_decoder.js');
+const { MultiSigWalletHelper } = require('../test_lib/multisigwallet_helper.js');
 
 const MultiSigWallet = artifacts.require('MultiSigWallet');
 
@@ -41,14 +42,13 @@ contract('MultiSigWallet::executeTransaction', async () => {
 
             const multisig = await MultiSigWallet.new(wallets, required);
 
-            await multisig.submitAddWallet(
+            const transactionID = await MultiSigWalletHelper.submitAddWallet(
+                multisig,
                 newWalletToAdd,
                 {
                     from: registeredWallet0,
                 },
             );
-
-            const transactionID = 0;
 
             await utils.expectRevert(
                 multisig.executeTransaction(
@@ -93,14 +93,13 @@ contract('MultiSigWallet::executeTransaction', async () => {
 
             const multisig = await MultiSigWallet.new(wallets, required);
 
-            await multisig.submitAddWallet(
+            const transactionID = await MultiSigWalletHelper.submitAddWallet(
+                multisig,
                 newWalletToAdd,
                 {
                     from: registeredWallet0,
                 },
             );
-
-            const transactionID = 0;
 
             await utils.expectRevert(
                 multisig.executeTransaction(
@@ -122,14 +121,13 @@ contract('MultiSigWallet::executeTransaction', async () => {
 
             const multisig = await MultiSigWallet.new(wallets, required);
 
-            await multisig.submitAddWallet(
+            const transactionID = await MultiSigWalletHelper.submitAddWallet(
+                multisig,
                 newWalletToAdd,
                 {
                     from: registeredWallet0,
                 },
             );
-
-            const transactionID = 0;
 
             await utils.expectRevert(
                 multisig.executeTransaction(
@@ -156,13 +154,17 @@ contract('MultiSigWallet::executeTransaction', async () => {
 
             await multisigDouble.makeFooThrow();
 
-            await multisigDouble.submitFoo(
+            transactionID = await multisigDouble.submitFoo.call(
                 {
                     from: registeredWallet0,
                 },
             );
 
-            const transactionID = 0;
+            await multisigDouble.submitFoo(
+                {
+                    from: registeredWallet0,
+                },
+            );
 
             await multisigDouble.makeFooNotThrow();
             const transactionResponse = await multisigDouble
@@ -201,13 +203,17 @@ contract('MultiSigWallet::executeTransaction', async () => {
 
             await multisigDouble.makeFooThrow();
 
-            await multisigDouble.submitFoo(
+            const transactionID = await multisigDouble.submitFoo.call(
                 {
                     from: registeredWallet0,
                 },
             );
 
-            const transactionID = 0;
+            await multisigDouble.submitFoo(
+                {
+                    from: registeredWallet0,
+                },
+            );
 
             const transactionResponse = await multisigDouble
                 .executeTransaction(transactionID);
@@ -245,13 +251,16 @@ contract('MultiSigWallet::executeTransaction', async () => {
             );
 
             await multisigDouble.makeFooThrow();
+            const transactionID = await multisigDouble.submitFoo.call(
+                {
+                    from: registeredWallet0,
+                },
+            );
             await multisigDouble.submitFoo(
                 {
                     from: registeredWallet0,
                 },
             );
-
-            const transactionID = 0;
 
             assert.isNotOk(
                 (await multisigDouble.transactions.call(transactionID)).executed,
@@ -280,13 +289,16 @@ contract('MultiSigWallet::executeTransaction', async () => {
             );
 
             await multisigDouble.makeFooThrow();
+            const transactionID = await multisigDouble.submitFoo.call(
+                {
+                    from: registeredWallet0,
+                },
+            );
             await multisigDouble.submitFoo(
                 {
                     from: registeredWallet0,
                 },
             );
-
-            const transactionID = 0;
 
             assert.isNotOk(
                 (await multisigDouble.transactions.call(transactionID)).executed,

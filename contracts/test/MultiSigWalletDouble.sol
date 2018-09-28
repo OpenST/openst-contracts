@@ -24,6 +24,13 @@ pragma solidity ^0.4.23;
 import "../MultiSigWallet.sol";
 
 
+/**
+ * @dev Contract introduces submitFoo() function which behaves like
+ *      other submit* functions (submitAddWallet, etc).
+ *      The foo() function fails based on storage variable which could be
+ *      set/unset. This way the test of transaction execution of
+ *      MultisigWallet could imitate the non-happy-path.
+ */
 contract MultiSigWalletDouble is MultiSigWallet {
 
     /* Usings */
@@ -56,8 +63,9 @@ contract MultiSigWalletDouble is MultiSigWallet {
     /* External Functions */
 
     /**
-     * @dev Submits a function that fails on a first attempt and succeeds
-     *      the second.
+     * @dev Submits a foo() function that fails based on storage variable
+     *      fooThrows. Used for testing non-happy path of
+     *      MultisigWallet executeTransaction.
      *
      * @return Newly created transaction id.
      */

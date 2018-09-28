@@ -22,6 +22,7 @@
 const BN = require('bn.js');
 const utils = require('../test_lib/utils.js');
 const { Event } = require('../test_lib/event_decoder.js');
+const { MultiSigWalletHelper } = require('../test_lib/multisigwallet_helper.js');
 
 const MultiSigWallet = artifacts.require('MultiSigWallet');
 
@@ -39,14 +40,13 @@ contract('MultiSigWallet::confirmTransaction', async () => {
 
             const multisig = await MultiSigWallet.new(wallets, required);
 
-            await multisig.submitAddWallet(
+            const transactionID = await MultiSigWalletHelper.submitAddWallet(
+                multisig,
                 newWalletToAdd,
                 {
                     from: registeredWallet0,
                 },
             );
-
-            const transactionID = 0;
 
             await utils.expectRevert(
                 multisig.confirmTransaction(
@@ -92,14 +92,13 @@ contract('MultiSigWallet::confirmTransaction', async () => {
 
             const multisig = await MultiSigWallet.new(wallets, required);
 
-            await multisig.submitAddWallet(
+            const transactionID = await MultiSigWalletHelper.submitAddWallet(
+                multisig,
                 newWalletToAdd,
                 {
                     from: registeredWallet0,
                 },
             );
-
-            const transactionID = 0;
 
             await utils.expectRevert(
                 multisig.confirmTransaction(
@@ -128,14 +127,13 @@ contract('MultiSigWallet::confirmTransaction', async () => {
 
             const multisig = await MultiSigWallet.new(wallets, required);
 
-            await multisig.submitAddWallet(
+            const transactionID = await MultiSigWalletHelper.submitAddWallet(
+                multisig,
                 newWalletToAdd,
                 {
                     from: registeredWallet0,
                 },
             );
-
-            const transactionID = 0;
 
             const transactionResponse = await multisig.confirmTransaction(
                 transactionID,
@@ -178,14 +176,13 @@ contract('MultiSigWallet::confirmTransaction', async () => {
 
             const multisig = await MultiSigWallet.new(wallets, required);
 
-            await multisig.submitAddWallet(
+            const transactionID = await MultiSigWalletHelper.submitAddWallet(
+                multisig,
                 newWalletToAdd,
                 {
                     from: registeredWallet0,
                 },
             );
-
-            const transactionID = 0;
 
             assert.isNotOk(
                 (await multisig.transactions.call(transactionID)).executed,

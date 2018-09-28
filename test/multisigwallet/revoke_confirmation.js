@@ -22,12 +22,13 @@
 const BN = require('bn.js');
 const utils = require('../test_lib/utils.js');
 const { Event } = require('../test_lib/event_decoder.js');
+const { MultiSigWalletHelper } = require('../test_lib/multisigwallet_helper.js');
 
 const MultiSigWallet = artifacts.require('MultiSigWallet');
 
 contract('MultiSigWallet::revokeConfirmation', async () => {
     contract('Negative testing for input parameters.', async (accounts) => {
-        it('Non registered wallet submits a wallet removal.', async () => {
+        it('Non registered wallet submits a revocation request.', async () => {
             const required = 2;
 
             const registeredWallet0 = accounts[0];
@@ -39,14 +40,13 @@ contract('MultiSigWallet::revokeConfirmation', async () => {
 
             const multisig = await MultiSigWallet.new(wallets, required);
 
-            await multisig.submitAddWallet(
+            const transactionID = await MultiSigWalletHelper.submitAddWallet(
+                multisig,
                 newWalletToAdd,
                 {
                     from: registeredWallet0,
                 },
             );
-
-            const transactionID = 0;
 
             await utils.expectRevert(
                 multisig.revokeConfirmation(
@@ -89,14 +89,13 @@ contract('MultiSigWallet::revokeConfirmation', async () => {
 
             const multisig = await MultiSigWallet.new(wallets, required);
 
-            await multisig.submitAddWallet(
+            const transactionID = await MultiSigWalletHelper.submitAddWallet(
+                multisig,
                 newWalletToAdd,
                 {
                     from: registeredWallet0,
                 },
             );
-
-            const transactionID = 0;
 
             await utils.expectRevert(
                 multisig.revokeConfirmation(
@@ -118,14 +117,13 @@ contract('MultiSigWallet::revokeConfirmation', async () => {
 
             const multisig = await MultiSigWallet.new(wallets, required);
 
-            await multisig.submitAddWallet(
+            const transactionID = await MultiSigWalletHelper.submitAddWallet(
+                multisig,
                 newWalletToAdd,
                 {
                     from: registeredWallet0,
                 },
             );
-
-            const transactionID = 0;
 
             await utils.expectRevert(
                 multisig.revokeConfirmation(
@@ -150,14 +148,13 @@ contract('MultiSigWallet::revokeConfirmation', async () => {
 
             const multisig = await MultiSigWallet.new(wallets, required);
 
-            await multisig.submitAddWallet(
+            const transactionID = await MultiSigWalletHelper.submitAddWallet(
+                multisig,
                 newWalletToAdd,
                 {
                     from: registeredWallet0,
                 },
             );
-
-            const transactionID = 0;
 
             const transactionResponse = await multisig.revokeConfirmation(
                 transactionID,
@@ -200,14 +197,13 @@ contract('MultiSigWallet::revokeConfirmation', async () => {
 
             const multisig = await MultiSigWallet.new(wallets, required);
 
-            await multisig.submitAddWallet(
+            const transactionID = await MultiSigWalletHelper.submitAddWallet(
+                multisig,
                 newWalletToAdd,
                 {
                     from: registeredWallet0,
                 },
             );
-
-            const transactionID = 0;
 
             assert.isOk(
                 await multisig.confirmations(transactionID, registeredWallet0),

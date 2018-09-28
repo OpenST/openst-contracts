@@ -23,6 +23,7 @@ const BN = require('bn.js');
 const web3 = require('../test_lib/web3.js');
 const utils = require('../test_lib/utils.js');
 const { Event } = require('../test_lib/event_decoder.js');
+const { MultiSigWalletHelper } = require('../test_lib/multisigwallet_helper.js');
 
 const MultiSigWallet = artifacts.require('MultiSigWallet');
 
@@ -246,14 +247,13 @@ contract('MultiSigWallet::submitRequirementChange', async () => {
 
             const newRequired = 2;
 
-            await multisig.submitRequirementChange(
+            const transactionID = await MultiSigWalletHelper.submitRequirementChange(
+                multisig,
                 newRequired,
                 {
                     from: registeredWallet0,
                 },
             );
-
-            const transactionID = 0;
 
             assert.isOk(
                 (await multisig.required.call()).eqn(newRequired),
@@ -309,14 +309,13 @@ contract('MultiSigWallet::submitRequirementChange', async () => {
 
             const newRequired = 3;
 
-            await multisig.submitRequirementChange(
+            const transactionID = await MultiSigWalletHelper.submitRequirementChange(
+                multisig,
                 newRequired,
                 {
                     from: registeredWallet0,
                 },
             );
-
-            const transactionID = 0;
 
             assert.isOk(
                 (await multisig.required.call()).eqn(required),
