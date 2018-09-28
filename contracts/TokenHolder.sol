@@ -309,6 +309,8 @@ contract TokenHolder is MultiSigWallet {
     )
         public
         onlyMultisig
+        keyIsNotNull(_ephemeralKey)
+        keyDoesNotExist(_ephemeralKey)
     {
         EphemeralKeyData storage keyData = ephemeralKeys[_ephemeralKey];
 
