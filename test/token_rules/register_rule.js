@@ -218,7 +218,6 @@ contract('TokenRules::registerRule', async () => {
                     _ruleName: aRuleName,
                     _ruleAddress: aRuleAddress,
                 },
-                logIndex: 0,
             });
         });
     });

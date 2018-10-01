@@ -138,7 +138,6 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                     _transactionID: new BN(0),
                     _wallet: registeredWallet1,
                 },
-                logIndex: 0,
             });
 
             // The second emitted event should be 'TransactionConfirmed',
@@ -150,7 +149,6 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                     _transactionID: new BN(0),
                     _wallet: registeredWallet0,
                 },
-                logIndex: 1,
             });
 
             // The third emitted event should be
@@ -161,7 +159,6 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                 args: {
                     _transactionID: new BN(0),
                 },
-                logIndex: 2,
             });
         });
 
@@ -204,7 +201,6 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                     _transactionID: new BN(0),
                     _wallet: registeredWallet1,
                 },
-                logIndex: 0,
             });
 
             // The second emitted event should be 'TransactionConfirmed',
@@ -216,7 +212,6 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                     _transactionID: new BN(0),
                     _wallet: registeredWallet0,
                 },
-                logIndex: 1,
             });
         });
     });
