@@ -161,14 +161,15 @@ async function createTokenHolder(
     const tokenHolder = await TokenHolder.new(
         token.address,
         tokenRules.address,
-        required,
         wallets,
+        required,
     );
 
+    const blockNumber = await web3.eth.getBlockNumber();
     await tokenHolder.submitAuthorizeSession(
         _ephemeralKeyAddress,
         _spendingLimit,
-        (await web3.eth.getBlockNumber()) + _deltaExpirationHeight,
+        blockNumber + _deltaExpirationHeight,
         {
             from: registeredWallet0,
         },
@@ -182,6 +183,7 @@ contract('TokenHolder::executeRule', async () => {
         it('Non authorized ephemeral key.', async () => {
             const spendingLimit = 10;
             const deltaExpirationHeight = 50;
+
             const tokenHolder = await createTokenHolder(
                 accounts[0],
                 ephemeralKeyAddress1,
