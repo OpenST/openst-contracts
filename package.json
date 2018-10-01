@@ -29,6 +29,7 @@
     "ethereumjs-util": "5.2.0",
     "ganache-cli": "6.1.8",
     "solc": "0.4.23",
+    "solidity-coverage": "0.5.11",
     "truffle": "5.0.0-beta.0",
     "web3": "1.0.0-beta.36"
   }

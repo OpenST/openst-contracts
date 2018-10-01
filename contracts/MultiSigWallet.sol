@@ -465,6 +465,15 @@ contract MultiSigWallet {
         }
     }
 
+    /** @notice Returns the number of registered wallets. */
+    function walletCount()
+        public
+        view
+        returns(uint256)
+    {
+        return wallets.length;
+    }
+
     /**
      * @notice Adds a new wallet.
      *
@@ -567,15 +576,6 @@ contract MultiSigWallet {
         validRequirement(wallets.length, _required)
     {
         required = _required;
-    }
-
-    /** @notice Returns the number of registered wallets. */
-    function walletCount()
-        public
-        view
-        returns(uint256)
-    {
-        return wallets.length;
     }
 
 
