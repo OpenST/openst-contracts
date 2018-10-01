@@ -15,7 +15,7 @@ pragma solidity ^0.4.23;
 // limitations under the License.
 
 import "./SafeMath.sol";
-import "./BrandedToken.sol";
+import "./EIP20TokenInterface.sol";
 import "./MultiSigWallet.sol";
 import "./TokenRules.sol";
 
@@ -91,7 +91,7 @@ contract TokenHolder is MultiSigWallet {
 
     /* Storage */
 
-    address public brandedToken;
+    EIP20TokenInterface public token;
 
     mapping(address /* key */ => EphemeralKeyData) public ephemeralKeys;
 
@@ -132,13 +132,13 @@ contract TokenHolder is MultiSigWallet {
     /* Special Functions */
 
     /**
-     * @param _brandedToken eip20 contract address deployed for an economy.
+     * @param _token eip20 contract address deployed for an economy.
      * @param _tokenRules Token rules contract address.
      * @param _required No of requirements for multi sig wallet.
      * @param _wallets array of wallet addresses.
      */
     constructor(
-        address _brandedToken,
+        EIP20TokenInterface _token,
         address _tokenRules,
         uint256 _required,
         address[] _wallets
@@ -147,15 +147,15 @@ contract TokenHolder is MultiSigWallet {
         MultiSigWallet(_wallets, _required)
     {
         require(
-            _brandedToken != address(0),
-            "Branded token contract address is 0."
+            _token != address(0),
+            "Token contract address is 0."
         );
         require(
             _tokenRules != address(0),
             "TokenRules contract address is 0."
         );
 
-        brandedToken = _brandedToken;
+        token = _token;
         tokenRules = _tokenRules;
     }
 
@@ -287,7 +287,7 @@ contract TokenHolder is MultiSigWallet {
 
         TokenRules(tokenRules).allowTransfers();
 
-        BrandedToken(brandedToken).approve(
+        token.approve(
             tokenRules,
             ephemeralKeyData.spendingLimit
         );
@@ -295,7 +295,7 @@ contract TokenHolder is MultiSigWallet {
         // solium-disable-next-line security/no-low-level-calls
         executeStatus_ = _to.call(_data);
 
-        BrandedToken(brandedToken).approve(tokenRules, 0);
+        token.approve(tokenRules, 0);
 
         TokenRules(tokenRules).disallowTransfers();
 
