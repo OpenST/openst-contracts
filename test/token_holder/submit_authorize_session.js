@@ -108,7 +108,7 @@ contract('TokenHolder::submitAuthorizeSession', async () => {
                 'Ephemeral key can not be null.',
             );
         });
-        it('Submitted ephemeral key is authorized.', async () => {
+        it('Submitted ephemeral key is already authorized.', async () => {
             const required = 1;
 
             const registeredWallet0 = accounts[0];
