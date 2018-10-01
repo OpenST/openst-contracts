@@ -528,6 +528,11 @@ contract TokenHolder is MultiSigWallet {
         );
     }
 
+    /**
+     * @dev Retrieves the first 4 bytes of input byte array into byte4.
+     *      Function requires:
+     *          - Input byte array's length is greater than or equal to 4.
+     */
     function bytesToBytes4(bytes _input) public pure returns (bytes4 out_) {
         require(
             _input.length >= 4,

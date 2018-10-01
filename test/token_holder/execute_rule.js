@@ -254,7 +254,62 @@ contract('TokenHolder::executeRule', async () => {
                     ethUtils.bufferToHex(rsv.r),
                     ethUtils.bufferToHex(rsv.s),
                 ),
-                'Transaction is signed with non authorized key.',
+                'Transaction is signed with expired key.',
+            );
+        });
+
+        it('Revoked ephemeral key.', async () => {
+            const spendingLimit = 10;
+            const deltaExpirationHeight = 50;
+            const wallet = accounts[0];
+            const tokenHolder = await createTokenHolder(
+                wallet,
+                ephemeralKeyAddress1,
+                spendingLimit,
+                deltaExpirationHeight,
+            );
+
+            await tokenHolder.submitRevokeSession(
+                ephemeralKeyAddress1,
+                {
+                    from: wallet,
+                },
+            );
+
+            const keyData = await tokenHolder.ephemeralKeys(
+                ephemeralKeyAddress1,
+            );
+            assert.isOk(
+                // AuthorizationStatus.REVOKED == 2
+                keyData.status.eqn(2),
+                'Because of 1-wallet-1-required setup key should be revoked.',
+            );
+
+            const mockRule = await MockRule.new();
+            const mockRuleValue = accounts[1];
+            const mockRulePassActionData = generateMockRulePassActionData(
+                mockRuleValue,
+            );
+            const nonce = 1;
+
+            const [, rsv] = getExecuteRuleExTxData(
+                tokenHolder.address,
+                mockRule.address,
+                mockRulePassActionData,
+                nonce,
+                ephemeralPrivateKey1,
+            );
+
+            await utils.expectRevert(
+                tokenHolder.executeRule(
+                    mockRule.address,
+                    mockRulePassActionData,
+                    nonce,
+                    rsv.v,
+                    ethUtils.bufferToHex(rsv.r),
+                    ethUtils.bufferToHex(rsv.s),
+                ),
+                'Transaction is signed with revoked key.',
             );
         });
 
