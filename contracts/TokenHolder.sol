@@ -369,12 +369,14 @@ contract TokenHolder is MultiSigWallet {
             "Ephemeral key is not active."
         );
 
+        uint256 expectedNonce = keyData.nonce.add(1);
+
         require(
-            _nonce == keyData.nonce.add(1),
+            _nonce == expectedNonce,
             "The next nonce is not provided."
         );
 
-        keyData.nonce = keyData.nonce.add(1);
+        keyData.nonce = expectedNonce;
     }
 
     /**

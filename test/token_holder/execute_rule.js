@@ -269,7 +269,7 @@ contract('TokenHolder::executeRule', async () => {
                 deltaExpirationHeight,
             );
 
-            await tokenHolder.submitRevokeSession(
+            await tokenHolder.revokeSession(
                 ephemeralKeyAddress1,
                 {
                     from: wallet,
