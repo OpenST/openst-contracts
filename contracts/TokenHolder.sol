@@ -50,8 +50,11 @@ contract TokenHolder is MultiSigWallet {
     );
 
     event RuleExecuted(
-        bytes32 _messageHash,
+        address indexed _to,
+        bytes4 _functionSelector,
+        address _ephemeralKey,
         uint256 _nonce,
+        bytes32 _messageHash,
         bool _status
     );
 
@@ -250,6 +253,11 @@ contract TokenHolder is MultiSigWallet {
      *      for ephemeralKey.spendingLimit amount. This allowance is cleared
      *      after execution.
      *
+     *      Function requires:
+     *          - The key used to sign data is authorized and have not expired.
+     *          - nonce matches the next available one (+1 of the last
+     *            used one).
+     *
      * @param _to The target contract address the transaction will be executed
      *            upon.
      * @param _data The payload of a function to be executed in the target
@@ -269,7 +277,7 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _s
     )
         public
-        returns (bool executeStatus_)
+        returns (bool executionStatus_)
     {
         bytes32 messageHash = bytes32(0);
         address ephemeralKey = address(0);
@@ -293,13 +301,22 @@ contract TokenHolder is MultiSigWallet {
         );
 
         // solium-disable-next-line security/no-low-level-calls
-        executeStatus_ = _to.call(_data);
+        executionStatus_ = _to.call(_data);
 
         BrandedToken(brandedToken).approve(tokenRules, 0);
 
         TokenRules(tokenRules).disallowTransfers();
 
-        emit RuleExecuted(messageHash, _nonce, executeStatus_);
+        bytes4 functionSelector = bytesToBytes4(_data);
+
+        emit RuleExecuted(
+            _to,
+            functionSelector,
+            ephemeralKey,
+            _nonce,
+            messageHash,
+            executionStatus_
+        );
     }
 
     function authorizeSession(
@@ -352,12 +369,14 @@ contract TokenHolder is MultiSigWallet {
             "Ephemeral key is not active."
         );
 
+        uint256 expectedNonce = keyData.nonce.add(1);
+
         require(
-            _nonce == keyData.nonce,
-            "Nonce is not equal to the current nonce."
+            _nonce == expectedNonce,
+            "The next nonce is not provided."
         );
 
-        keyData.nonce = keyData.nonce.add(1);
+        keyData.nonce = expectedNonce;
     }
 
     /**
@@ -403,5 +422,21 @@ contract TokenHolder is MultiSigWallet {
                            // standard.
             )
         );
+    }
+
+    /**
+     * @dev Retrieves the first 4 bytes of input byte array into byte4.
+     *      Function requires:
+     *          - Input byte array's length is greater than or equal to 4.
+     */
+    function bytesToBytes4(bytes _input) public pure returns (bytes4 out_) {
+        require(
+            _input.length >= 4,
+            "Input bytes length is less than 4."
+        );
+
+        for (uint8 i = 0; i < 4; i++) {
+            out_ |= bytes4(_input[i] & 0xFF) >> (i * 8);
+        }
     }
 }
