@@ -14,9 +14,10 @@
 
 const BN = require('bn.js');
 const web3 = require('../test_lib/web3.js');
-const utils = require('../test_lib/utils.js');
+const Utils = require('../test_lib/utils.js');
 const { Event } = require('../test_lib/event_decoder');
-const { TokenHolderHelper } = require('../test_lib/token_holder_helper.js');
+const { TokenHolderUtils } = require('./utils.js');
+const { AccountProvider } = require('../test_lib/utils.js');
 
 const TokenHolder = artifacts.require('TokenHolder');
 
@@ -46,187 +47,159 @@ function generateSubmitAuthorizeSessionData(
     );
 }
 
+async function createTokenHolder(
+    accountProvider,
+) {
+    const required = 1;
+
+    const registeredWallet0 = accountProvider.get();
+
+    const wallets = [registeredWallet0];
+
+    const tokenAddress = accountProvider.get();
+    const tokenRulesAddress = accountProvider.get();
+
+    const tokenHolder = await TokenHolder.new(
+        tokenAddress, tokenRulesAddress, wallets, required,
+    );
+
+    return {
+        tokenHolder,
+        registeredWallet0,
+    };
+}
+
 contract('TokenHolder::submitAuthorizeSession', async () => {
-    contract('Negative testing for input parameters:', async (accounts) => {
-        it('Non registered wallet submits authorization session.', async () => {
-            const required = 1;
+    contract('Negative Tests', async (accounts) => {
+        const accountProvider = new AccountProvider(accounts);
 
-            const registeredWallet0 = accounts[0];
-            const nonRegisteredWallet = accounts[1];
-
-            const wallets = [registeredWallet0];
-
-            const brandedToken = accounts[2];
-            const tokenRules = accounts[3];
+        it('Reverts if non-registered wallet calls.', async () => {
+            const {
+                tokenHolder,
+            } = await createTokenHolder(accountProvider);
 
             const ephemeralKey = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
             const spendingLimit = 1;
             const expirationHeight = (await web3.eth.getBlockNumber()) + 10;
 
-            const tokenHolder = await TokenHolder.new(
-                brandedToken, tokenRules, wallets, required,
-            );
-
-            await utils.expectRevert(
+            await Utils.expectRevert(
                 tokenHolder.submitAuthorizeSession(
                     ephemeralKey,
                     spendingLimit,
                     expirationHeight,
-                    {
-                        from: nonRegisteredWallet,
-                    },
+                    { from: accountProvider.get() },
                 ),
-                'Non registered wallet cannot submit a key authorization.',
+                'Should revert as non-registered wallet calls.',
+                'Only wallet is allowed to call',
             );
         });
-        it('Submitted ephemeral key is null.', async () => {
-            const required = 1;
 
-            const registeredWallet0 = accounts[0];
-
-            const wallets = [registeredWallet0];
-
-            const brandedToken = accounts[2];
-            const tokenRules = accounts[3];
+        it('Reverts if key to authorize is null.', async () => {
+            const {
+                tokenHolder,
+                registeredWallet0,
+            } = await createTokenHolder(accountProvider);
 
             const spendingLimit = 1;
             const expirationHeight = (await web3.eth.getBlockNumber()) + 10;
 
-            const tokenHolder = await TokenHolder.new(
-                brandedToken, tokenRules, wallets, required,
-            );
-
-            await utils.expectRevert(
+            await Utils.expectRevert(
                 tokenHolder.submitAuthorizeSession(
-                    utils.NULL_ADDRESS,
+                    Utils.NULL_ADDRESS,
                     spendingLimit,
                     expirationHeight,
-                    {
-                        from: registeredWallet0,
-                    },
+                    { from: registeredWallet0 },
                 ),
-                'Ephemeral key can not be null.',
+                'Should revert as key to authorize is null.',
+                'Key address is null',
             );
         });
-        it('Submitted ephemeral key is already authorized.', async () => {
-            const required = 1;
 
-            const registeredWallet0 = accounts[0];
-
-            const wallets = [registeredWallet0];
-
-            const brandedToken = accounts[2];
-            const tokenRules = accounts[3];
+        it('Reverts if key to authorize already was authorized.', async () => {
+            const {
+                tokenHolder,
+                registeredWallet0,
+            } = await createTokenHolder(accountProvider);
 
             const ephemeralKey = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
             const spendingLimit = 1;
             const expirationHeight = (await web3.eth.getBlockNumber()) + 10;
-
-            const tokenHolder = await TokenHolder.new(
-                brandedToken, tokenRules, wallets, required,
-            );
 
             await tokenHolder.submitAuthorizeSession(
                 ephemeralKey,
                 spendingLimit,
                 expirationHeight,
-                {
-                    from: registeredWallet0,
-                },
+                { from: registeredWallet0 },
             );
 
-            await utils.expectRevert(
+            await Utils.expectRevert(
                 tokenHolder.submitAuthorizeSession(
                     ephemeralKey,
                     spendingLimit,
                     expirationHeight,
-                    {
-                        from: registeredWallet0,
-                    },
+                    { from: registeredWallet0 },
                 ),
-                'Ephemeral key can not be authorized.',
+                'Should revert as key to authorize was already authorized.',
+                'Key exists',
             );
         });
 
-        it('Submitted ephemeral key is revoked.', async () => {
-            const required = 1;
-
-            const registeredWallet0 = accounts[0];
-
-            const wallets = [registeredWallet0];
-
-            const brandedToken = accounts[2];
-            const tokenRules = accounts[3];
+        it('Reverts if key to authorize is in revoked state.', async () => {
+            const {
+                tokenHolder,
+                registeredWallet0,
+            } = await createTokenHolder(accountProvider);
 
             const ephemeralKey = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
             const spendingLimit = 1;
             const expirationHeight = (await web3.eth.getBlockNumber()) + 10;
 
-            const tokenHolder = await TokenHolder.new(
-                brandedToken, tokenRules, wallets, required,
-            );
-
             await tokenHolder.submitAuthorizeSession(
                 ephemeralKey,
                 spendingLimit,
                 expirationHeight,
-                {
-                    from: registeredWallet0,
-                },
+                { from: registeredWallet0 },
             );
 
             await tokenHolder.revokeSession(
                 ephemeralKey,
-                {
-                    from: registeredWallet0,
-                },
+                { from: registeredWallet0 },
             );
 
-            await utils.expectRevert(
+            await Utils.expectRevert(
                 tokenHolder.submitAuthorizeSession(
                     ephemeralKey,
                     spendingLimit,
                     expirationHeight,
-                    {
-                        from: registeredWallet0,
-                    },
+                    { from: registeredWallet0 },
                 ),
-                'Ephemeral key cannot be revoked.',
+                'Should revert as key to authorize was revoked.',
+                'Key exists',
             );
         });
 
-        it('Submitted ephemeral key has expired.', async () => {
-            const required = 1;
-
-            const registeredWallet0 = accounts[0];
-
-            const wallets = [registeredWallet0];
-
-            const brandedToken = accounts[2];
-            const tokenRules = accounts[3];
+        it('Reverts if key to authorize has expired.', async () => {
+            const {
+                tokenHolder,
+                registeredWallet0,
+            } = await createTokenHolder(accountProvider);
 
             const ephemeralKey = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
             const spendingLimit = 1;
-            const expirationHeightDelta = 5;
+            const expirationHeightDelta = 10;
             const blockNumber = await web3.eth.getBlockNumber();
             const expirationHeight = blockNumber + expirationHeightDelta;
-
-            const tokenHolder = await TokenHolder.new(
-                brandedToken, tokenRules, wallets, required,
-            );
 
             await tokenHolder.submitAuthorizeSession(
                 ephemeralKey,
                 spendingLimit,
                 expirationHeight,
-                {
-                    from: registeredWallet0,
-                },
+                { from: registeredWallet0 },
             );
 
             for (let i = 0; i < expirationHeightDelta; i += 1) {
                 // eslint-disable-next-line no-await-in-loop
-                await utils.advanceBlock();
+                await Utils.advanceBlock();
             }
 
             // Checking that key has expired.
@@ -235,7 +208,7 @@ contract('TokenHolder::submitAuthorizeSession', async () => {
                     .expirationHeight <= (await web3.eth.getBlockNumber()),
             );
 
-            await utils.expectRevert(
+            await Utils.expectRevert(
                 tokenHolder.submitAuthorizeSession(
                     ephemeralKey,
                     spendingLimit,
@@ -244,68 +217,63 @@ contract('TokenHolder::submitAuthorizeSession', async () => {
                         from: registeredWallet0,
                     },
                 ),
-                'Ephemeral key can not be expired.',
+                'Should revert as key to submit has already expired.',
+                'Key exists',
             );
         });
 
         it('Expiration height is less or equal to the block number', async () => {
-            const required = 1;
-
-            const registeredWallet0 = accounts[0];
-
-            const wallets = [registeredWallet0];
-
-            const brandedToken = accounts[2];
-            const tokenRules = accounts[3];
+            const {
+                tokenHolder,
+                registeredWallet0,
+            } = await createTokenHolder(accountProvider);
 
             const ephemeralKey = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
             const spendingLimit = 10;
 
-            const tokenHolder = await TokenHolder.new(
-                brandedToken, tokenRules, wallets, required,
-            );
-
-            await utils.expectRevert(
+            await Utils.expectRevert(
                 tokenHolder.submitAuthorizeSession(
                     ephemeralKey,
                     spendingLimit,
                     (await web3.eth.getBlockNumber()),
-                    {
-                        from: registeredWallet0,
-                    },
+                    { from: registeredWallet0 },
                 ),
-                'Ephemeral key cannot be revoked.',
+                'Should revert as expiration heigh is less than equal to the '
+                + ' current block height',
+                'Expiration height is lte to the current block height',
             );
         });
     });
 
     contract('Events', async (accounts) => {
-        it('Submit => Confirm => Execute', async () => {
+        const accountProvider = new AccountProvider(accounts);
+
+        // Because of 1-wallet-1-required the submitted authorization
+        // request is going to be executed immediately, hence 3 events.
+        it('Emits SessionAuthorizationSubmitted, TransactionConfirmed '
+         + 'TransactionExecutionSucceeded events.', async () => {
             const required = 1;
 
-            const registeredWallet0 = accounts[0];
+            const registeredWallet0 = accountProvider.get();
 
             const wallets = [registeredWallet0];
 
-            const brandedToken = accounts[1];
-            const tokenRules = accounts[2];
+            const token = accountProvider.get();
+            const tokenRules = accountProvider.get();
 
             const tokenHolder = await TokenHolder.new(
-                brandedToken, tokenRules, wallets, required,
+                token, tokenRules, wallets, required,
             );
 
             const ephemeralKey = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
             const spendingLimit = 1;
             const expirationHeight = await web3.eth.getBlockNumber() + 50;
 
-
             const transactionResponse = await tokenHolder.submitAuthorizeSession(
                 ephemeralKey,
                 spendingLimit,
                 expirationHeight,
-                {
-                    from: registeredWallet0,
-                },
+                { from: registeredWallet0 },
             );
 
             const events = Event.decodeTransactionResponse(
@@ -330,7 +298,6 @@ contract('TokenHolder::submitAuthorizeSession', async () => {
                     _spendingLimit: new BN(spendingLimit),
                     _expirationHeight: new BN(expirationHeight),
                 },
-                logIndex: 0,
             });
 
             // The second emitted event should be 'TransactionConfirmed',
@@ -342,7 +309,6 @@ contract('TokenHolder::submitAuthorizeSession', async () => {
                     _transactionID: new BN(0),
                     _wallet: registeredWallet0,
                 },
-                logIndex: 1,
             });
 
             // The third emitted event should be
@@ -353,37 +319,35 @@ contract('TokenHolder::submitAuthorizeSession', async () => {
                 args: {
                     _transactionID: new BN(0),
                 },
-                logIndex: 2,
             });
         });
 
-        it('Submit => Confirm', async () => {
+        // Because of 2-wallet-2-required the submitted authorization
+        // request is *not* going to be executed immediately, hence 2 events.
+        it('Emits SessionAuthorizationSubmitted and TransactionConfirmed', async () => {
             const required = 2;
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
+            const registeredWallet0 = accountProvider.get();
+            const registeredWallet1 = accountProvider.get();
 
             const wallets = [registeredWallet0, registeredWallet1];
 
-            const brandedToken = accounts[2];
-            const tokenRules = accounts[3];
+            const token = accountProvider.get();
+            const tokenRules = accountProvider.get();
 
             const tokenHolder = await TokenHolder.new(
-                brandedToken, tokenRules, wallets, required,
+                token, tokenRules, wallets, required,
             );
 
             const ephemeralKey = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
             const spendingLimit = 1;
             const expirationHeight = await web3.eth.getBlockNumber() + 50;
 
-
             const transactionResponse = await tokenHolder.submitAuthorizeSession(
                 ephemeralKey,
                 spendingLimit,
                 expirationHeight,
-                {
-                    from: registeredWallet0,
-                },
+                { from: registeredWallet0 },
             );
 
             const events = Event.decodeTransactionResponse(
@@ -398,7 +362,6 @@ contract('TokenHolder::submitAuthorizeSession', async () => {
                 + 'TransactionConfirmed would be emitted.',
             );
 
-
             // The first emitted event should be 'SessionAuthorizationSubmitted'.
             Event.assertEqual(events[0], {
                 name: 'SessionAuthorizationSubmitted',
@@ -408,7 +371,6 @@ contract('TokenHolder::submitAuthorizeSession', async () => {
                     _spendingLimit: new BN(spendingLimit),
                     _expirationHeight: new BN(expirationHeight),
                 },
-                logIndex: 0,
             });
 
             // The second emitted event should be 'TransactionConfirmed',
@@ -420,39 +382,37 @@ contract('TokenHolder::submitAuthorizeSession', async () => {
                     _transactionID: new BN(0),
                     _wallet: registeredWallet0,
                 },
-                logIndex: 1,
             });
         });
     });
 
     contract('Storage', async (accounts) => {
-        it('Submit => Confirm => Execute', async () => {
+        const accountProvider = new AccountProvider(accounts);
+
+        it('Checks states in case of 1-wallet-1-required.', async () => {
             const required = 1;
 
-            const registeredWallet0 = accounts[0];
+            const registeredWallet0 = accountProvider.get();
 
             const wallets = [registeredWallet0];
 
-            const brandedToken = accounts[1];
-            const tokenRules = accounts[2];
+            const token = accountProvider.get();
+            const tokenRules = accountProvider.get();
 
             const tokenHolder = await TokenHolder.new(
-                brandedToken, tokenRules, wallets, required,
+                token, tokenRules, wallets, required,
             );
 
             const ephemeralKey = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
             const spendingLimit = 1;
             const expirationHeight = await web3.eth.getBlockNumber() + 50;
 
-
-            const transactionID = await TokenHolderHelper.submitAuthorizeSession(
+            const transactionID = await TokenHolderUtils.submitAuthorizeSession(
                 tokenHolder,
                 ephemeralKey,
                 spendingLimit,
                 expirationHeight,
-                {
-                    from: registeredWallet0,
-                },
+                { from: registeredWallet0 },
             );
 
             const keyData = await tokenHolder.ephemeralKeys.call(ephemeralKey);
@@ -495,27 +455,26 @@ contract('TokenHolder::submitAuthorizeSession', async () => {
             );
         });
 
-        it('Submit => Confirm', async () => {
+        it('Checks states in case of 2-walleta-2-required.', async () => {
             const required = 2;
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
+            const registeredWallet0 = accountProvider.get();
+            const registeredWallet1 = accountProvider.get();
 
             const wallets = [registeredWallet0, registeredWallet1];
 
-            const brandedToken = accounts[2];
-            const tokenRules = accounts[3];
+            const token = accountProvider.get();
+            const tokenRules = accountProvider.get();
 
             const tokenHolder = await TokenHolder.new(
-                brandedToken, tokenRules, wallets, required,
+                token, tokenRules, wallets, required,
             );
 
             const ephemeralKey = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
             const spendingLimit = 1;
             const expirationHeight = await web3.eth.getBlockNumber() + 50;
 
-
-            const transactionID = await TokenHolderHelper.submitAuthorizeSession(
+            const transactionID = await TokenHolderUtils.submitAuthorizeSession(
                 tokenHolder,
                 ephemeralKey,
                 spendingLimit,

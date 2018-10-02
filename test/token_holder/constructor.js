@@ -14,64 +14,71 @@
 
 
 const utils = require('../test_lib/utils.js');
+const { AccountProvider } = require('../test_lib/utils.js');
 
 const TokenHolder = artifacts.require('TokenHolder');
 
 contract('TokenHolder::constructor', async () => {
-    contract('Negative testing for input parameters.', async (accounts) => {
-        it('Null branded token address.', async () => {
+    contract('Negative Tests', async (accounts) => {
+        const accountProvider = new AccountProvider(accounts);
+
+        it('Reverts if token address is null.', async () => {
             const required = 1;
-            const registeredWallet0 = accounts[0];
+            const registeredWallet0 = accountProvider.get();
 
             const wallets = [registeredWallet0];
 
-            const brandedTokenAddress = utils.NULL_ADDRESS;
-            const tokenRulesAddress = accounts[1];
+            const tokenAddress = utils.NULL_ADDRESS;
+            const tokenRulesAddress = accountProvider.get();
 
             await utils.expectRevert(
                 TokenHolder.new(
-                    brandedTokenAddress,
+                    tokenAddress,
                     tokenRulesAddress,
                     wallets,
                     required,
                 ),
-                'Branded token address cannot be null.',
+                'Should revert as token address is null.',
+                'Token contract address is null',
             );
         });
 
-        it('Null token rules address.', async () => {
+        it('Reverts if token rules is null.', async () => {
             const required = 1;
-            const registeredWallet0 = accounts[0];
+            const registeredWallet0 = accountProvider.get();
 
             const wallets = [registeredWallet0];
 
-            const brandedTokenAddress = accounts[1];
+            const tokenAddress = accountProvider.get();
             const tokenRulesAddress = utils.NULL_ADDRESS;
 
             await utils.expectRevert(
                 TokenHolder.new(
-                    brandedTokenAddress,
+                    tokenAddress,
                     tokenRulesAddress,
                     wallets,
                     required,
                 ),
-                'Token rules address cannot be null.',
+                'Should revert as token rules address is null.',
+                'TokenRules contract address is null',
             );
         });
     });
 
     contract('Storage', async (accounts) => {
-        it('Initializing state variables.', async () => {
+        const accountProvider = new AccountProvider(accounts);
+
+        it('Checks that passed arguments are set correctly.', async () => {
             const required = 1;
-            const registeredWallet0 = accounts[0];
+            const registeredWallet0 = accountProvider.get();
 
             const wallets = [registeredWallet0];
 
-            const brandedTokenAddress = accounts[1];
-            const tokenRulesAddress = accounts[2];
+            const tokenAddress = accountProvider.get();
+            const tokenRulesAddress = accountProvider.get();
 
             const tokenHolder = await TokenHolder.new(
-                brandedTokenAddress,
+                tokenAddress,
                 tokenRulesAddress,
                 wallets,
                 required,
@@ -79,7 +86,7 @@ contract('TokenHolder::constructor', async () => {
 
             assert.strictEqual(
                 (await tokenHolder.brandedToken.call()),
-                brandedTokenAddress,
+                tokenAddress,
             );
 
             assert.strictEqual(

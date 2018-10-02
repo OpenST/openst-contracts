@@ -1,6 +1,6 @@
 
 
-class TokenHolderHelper {
+class TokenHolderUtils {
     static async submitAuthorizeSession(
         tokenHolder, ephemeralKey, spendingLimit, expirationHeight, options,
     ) {
@@ -17,5 +17,5 @@ class TokenHolderHelper {
 }
 
 module.exports = {
-    TokenHolderHelper,
+    TokenHolderUtils,
 };

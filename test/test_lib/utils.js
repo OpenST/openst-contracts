@@ -77,3 +77,18 @@ module.exports.advanceBlock = () => new Promise((resolve, reject) => {
         return resolve(newBlockHash);
     });
 });
+
+/** Receives accounts list and gives away each time one. */
+module.exports.AccountProvider = class AccountProvider {
+    constructor(accounts) {
+        this.accounts = accounts;
+        this.index = 0;
+    }
+
+    get() {
+        assert(this.index < this.accounts.length);
+        const account = this.accounts[this.index];
+        this.index += 1;
+        return account;
+    }
+};

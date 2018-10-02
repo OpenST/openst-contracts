@@ -125,7 +125,7 @@ contract TokenHolder is MultiSigWallet {
         AuthorizationStatus status = ephemeralKeys[_key].status;
         require(
             status == AuthorizationStatus.NOT_AUTHORIZED,
-            "Key is not authorized."
+            "Key exists."
         );
         _;
     }
@@ -154,11 +154,11 @@ contract TokenHolder is MultiSigWallet {
     {
         require(
             _brandedToken != address(0),
-            "Branded token contract address is 0."
+            "Token contract address is null."
         );
         require(
             _tokenRules != address(0),
-            "TokenRules contract address is 0."
+            "TokenRules contract address is null."
         );
 
         brandedToken = _brandedToken;
@@ -332,6 +332,11 @@ contract TokenHolder is MultiSigWallet {
         keyIsNotNull(_ephemeralKey)
         keyDoesNotExist(_ephemeralKey)
     {
+        require(
+            _expirationHeight > block.number,
+            "Expiration height is lte to the current block height."
+        );
+
         EphemeralKeyData storage keyData = ephemeralKeys[_ephemeralKey];
 
         keyData.spendingLimit = _spendingLimit;
