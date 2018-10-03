@@ -36,6 +36,7 @@ module.exports.expectRevert = async (
     try {
         await promise;
     } catch (error) {
+        console.log("Messageeee :- ",error);
         assert(
             error.message.search('revert') > -1,
             `The contract should revert. Instead: ${error.message}`,
