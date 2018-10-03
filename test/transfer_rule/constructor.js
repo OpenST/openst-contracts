@@ -14,17 +14,18 @@
 
 const web3 = require('../test_lib/web3.js');
 const utils = require('../test_lib/utils.js');
-const TransferRule = artifacts.require('TransferRule');
 const { AccountProvider } = require('../test_lib/utils.js');
+
+const TransferRule = artifacts.require('TransferRule');
 const tokenRulesMock = artifacts.require('TokenRulesMock');
 
 
 contract('TransferRule::constructor', async () => {
-	contract('Negative testing for input parameters:', async (accounts) => {
+	contract('Negative tests for input parameters:', async (accounts) => {
+		
+		const accountProvider = new AccountProvider(accounts);
 		
 		it('fails when tokenrules address is null.', async () => {
-			
-			const accountProvider = new AccountProvider(accounts);
 			
 			await utils.expectRevert(TransferRule.new(utils.NULL_ADDRESS),
 				'Should revert as token rule address is null',
@@ -35,11 +36,9 @@ contract('TransferRule::constructor', async () => {
 		contract('Positive test cases', async (accounts) => {
 			it('sucessfully initializes when passed arguments are set correctly.', async () => {
 				
-				const accountProvider = new AccountProvider(accounts);
-				
 				const tokenRulesMockInstance = await tokenRulesMock.new();
 				
-				const transferRuleInstance = await TransferRule.new(tokenRulesMockInstance.address);
+				assert.ok(await TransferRule.new(tokenRulesMockInstance.address));
 				
 			});
 		});

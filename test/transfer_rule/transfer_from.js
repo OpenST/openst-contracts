@@ -14,14 +14,17 @@
 
 const web3 = require('../test_lib/web3.js');
 const utils = require('../test_lib/utils.js');
+const { AccountProvider } = require('../test_lib/utils.js');
+
 const TokenRules = artifacts.require('TokenRules');
 const TransferRule = artifacts.require('TransferRule');
-const { AccountProvider } = require('../test_lib/utils.js');
 const tokenRulesMock = artifacts.require('TokenRulesMock');
 
 contract('TransferRule::transferFrom', async () => {
-	contract('Negative testing for input parameters:', async (accounts) => {
+	contract('Negative tests for input parameters:', async (accounts) => {
+		
 		const accountProvider = new AccountProvider(accounts);
+		
 		it('Reverts when Token rules address is incorrect.', async () => {
 			
 			const fromUser = accountProvider.get();
@@ -34,8 +37,10 @@ contract('TransferRule::transferFrom', async () => {
 			
 		});
 		
-	contract('Positive test cases', async (accounts) => {
+	contract('Storage', async (accounts) => {
+		
 			const accountProvider = new AccountProvider(accounts);
+			
 			it('Validates successful transfer.', async () => {
 				
 				const fromUser = accountProvider.get();
@@ -48,7 +53,6 @@ contract('TransferRule::transferFrom', async () => {
 				assert.equal(await transferRuleInstance.transferFrom.call(fromUser, toUser, amount), true, 'transferFrom method failed');
 				await transferRuleInstance.transferFrom(fromUser, toUser, amount);
 				
-				assert.equal(await tokenRulesMockInstance.called.call(), true,"Execute transfers was not called");
 				assert.equal(await tokenRulesMockInstance.from.call(), fromUser,"From address not set correctly");
 				assert.equal(await tokenRulesMockInstance.transferTo.call(0), toUser,"To address not set correctly");
 				assert.equal(await tokenRulesMockInstance.transferAmount.call(0), amount,"Amount is not set correctly");
