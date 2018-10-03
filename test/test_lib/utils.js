@@ -18,22 +18,15 @@ const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 module.exports.NULL_ADDRESS = NULL_ADDRESS;
 
-module.exports.isNullAddress = (address) => {
-    assert.strictEqual(
-        typeof address,
-        'string',
-        'address must be of type \'string\'',
-    );
-    return address === NULL_ADDRESS;
-};
+module.exports.isNullAddress = address => address === NULL_ADDRESS;
 
 /**
  * Asserts that a call or transaction reverts.
  *
  * @param {promise} promise The call or transaction.
  * @param {string} expectedMessage Optional. If given, the revert message will
- *                                 be checked to contain this string. Works with
- *                                 web3 >= 1.0.
+ *                                 be checked to contain this string.
+ *
  * @throws Will fail an assertion if the call or transaction is not reverted.
  */
 module.exports.expectRevert = async (
@@ -48,15 +41,38 @@ module.exports.expectRevert = async (
         );
 
         if (expectedRevertMessage !== undefined) {
-            assert(
-                error.message.search(expectedRevertMessage) > -1,
-                `The contract should revert with "${expectedRevertMessage}", `
-                + `instead: "${error.message}"`,
-            );
+            if (error.reason !== undefined) {
+                assert(
+                    expectedRevertMessage === error.reason,
+                    `\nThe contract should revert with:\n\t"${expectedRevertMessage}" `
+                    + `\ninstead received:\n\t"${error.reason}"\n`,
+                );
+            } else {
+                assert(
+                    error.message.search(expectedRevertMessage) > -1,
+                    `\nThe contract should revert with:\n\t"${expectedRevertMessage}" `
+                    + `\ninstead received:\n\t"${error.message}"\n`,
+                );
+            }
         }
 
         return;
     }
 
     assert(false, displayMessage);
+};
+
+/** Receives accounts list and gives away each time one. */
+module.exports.AccountProvider = class AccountProvider {
+    constructor(accounts) {
+        this.accounts = accounts;
+        this.index = 0;
+    }
+
+    get() {
+        assert(this.index < this.accounts.length);
+        const account = this.accounts[this.index];
+        this.index += 1;
+        return account;
+    }
 };
