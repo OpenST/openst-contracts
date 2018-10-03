@@ -49,11 +49,19 @@ module.exports.expectRevert = async (
         );
 
         if (expectedRevertMessage !== undefined) {
-            assert(
-                error.message.search(expectedRevertMessage) > -1,
-                `The contract should revert with "${expectedRevertMessage}", `
-                + `instead: "${error.message}"`,
-            );
+            if (error.reason !== undefined) {
+                assert(
+                    expectedRevertMessage === error.reason,
+                    `\nThe contract should revert with:\n\t"${expectedRevertMessage}" `
+                    + `\ninstead received:\n\t"${error.reason}"\n`,
+                );
+            } else {
+                assert(
+                    error.message.search(expectedRevertMessage) > -1,
+                    `\nThe contract should revert with:\n\t"${expectedRevertMessage}" `
+                    + `\ninstead received:\n\t"${error.message}"\n`,
+                );
+            }
         }
 
         return;

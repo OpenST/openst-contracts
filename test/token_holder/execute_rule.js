@@ -269,7 +269,7 @@ contract('TokenHolder::executeRule', async () => {
                     EthUtils.bufferToHex(rsv.s),
                 ),
                 'Should revert as ExTx is signed with non-authorized key.',
-                'Ephemeral key is not active',
+                'Ephemeral key is not active.',
             );
         });
 
@@ -310,7 +310,7 @@ contract('TokenHolder::executeRule', async () => {
                     EthUtils.bufferToHex(rsv.s),
                 ),
                 'Should revert as transaction is signed with expired key.',
-                'Ephemeral key is not active',
+                'Ephemeral key is not active.',
             );
         });
 
@@ -364,7 +364,7 @@ contract('TokenHolder::executeRule', async () => {
                     EthUtils.bufferToHex(rsv.s),
                 ),
                 'Should revert as transaction is signed with revoked key.',
-                'Ephemeral key is not active',
+                'Ephemeral key is not active.',
             );
         });
 
@@ -401,7 +401,7 @@ contract('TokenHolder::executeRule', async () => {
                     EthUtils.bufferToHex(rsv0.s),
                 ),
                 'Should revert as ExTx is signed with a wrong nonce.',
-                'The next nonce is not provided',
+                'The next nonce is not provided.',
             );
 
             // correct nonce is 1.
@@ -427,7 +427,7 @@ contract('TokenHolder::executeRule', async () => {
                     EthUtils.bufferToHex(rsv2.s),
                 ),
                 'Should revert as ExTx is signed with a wrong nonce.',
-                'The next nonce is not provided',
+                'The next nonce is not provided.',
             );
         });
     });

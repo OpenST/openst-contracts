@@ -86,7 +86,7 @@ contract('TokenHolder::revokeSession', async () => {
                     },
                 ),
                 'Should revert as non-registered wallet calls.',
-                'Only wallet is allowed to call',
+                'Only wallet is allowed to call.',
             );
         });
 
@@ -104,7 +104,7 @@ contract('TokenHolder::revokeSession', async () => {
                     { from: registeredWallet0 },
                 ),
                 'Should revert as key to revoke does not exist.',
-                'Key is not authorized',
+                'Key is not authorized.',
             );
         });
 
@@ -127,7 +127,7 @@ contract('TokenHolder::revokeSession', async () => {
                     { from: registeredWallet0 },
                 ),
                 'Should revert as key to revoke was already revoked.',
-                'Key is not authorized',
+                'Key is not authorized.',
             );
         });
     });

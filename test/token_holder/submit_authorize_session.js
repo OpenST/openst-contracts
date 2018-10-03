@@ -90,7 +90,7 @@ contract('TokenHolder::submitAuthorizeSession', async () => {
                     { from: accountProvider.get() },
                 ),
                 'Should revert as non-registered wallet calls.',
-                'Only wallet is allowed to call',
+                'Only wallet is allowed to call.',
             );
         });
 
@@ -111,7 +111,7 @@ contract('TokenHolder::submitAuthorizeSession', async () => {
                     { from: registeredWallet0 },
                 ),
                 'Should revert as key to authorize is null.',
-                'Key address is null',
+                'Key address is null.',
             );
         });
 
@@ -140,7 +140,7 @@ contract('TokenHolder::submitAuthorizeSession', async () => {
                     { from: registeredWallet0 },
                 ),
                 'Should revert as key to authorize was already authorized.',
-                'Key exists',
+                'Key exists.',
             );
         });
 
@@ -174,7 +174,7 @@ contract('TokenHolder::submitAuthorizeSession', async () => {
                     { from: registeredWallet0 },
                 ),
                 'Should revert as key to authorize was revoked.',
-                'Key exists',
+                'Key exists.',
             );
         });
 
@@ -218,7 +218,7 @@ contract('TokenHolder::submitAuthorizeSession', async () => {
                     },
                 ),
                 'Should revert as key to submit has already expired.',
-                'Key exists',
+                'Key exists.',
             );
         });
 
@@ -240,7 +240,7 @@ contract('TokenHolder::submitAuthorizeSession', async () => {
                 ),
                 'Should revert as expiration heigh is less than equal to the '
                 + ' current block height',
-                'Expiration height is lte to the current block height',
+                'Expiration height is lte to the current block height.',
             );
         });
     });

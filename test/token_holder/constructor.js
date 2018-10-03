@@ -39,7 +39,7 @@ contract('TokenHolder::constructor', async () => {
                     required,
                 ),
                 'Should revert as token address is null.',
-                'Token contract address is null',
+                'Token contract address is null.',
             );
         });
 
@@ -60,7 +60,7 @@ contract('TokenHolder::constructor', async () => {
                     required,
                 ),
                 'Should revert as token rules address is null.',
-                'TokenRules contract address is null',
+                'TokenRules contract address is null.',
             );
         });
     });
