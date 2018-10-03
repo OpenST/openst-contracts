@@ -25,9 +25,9 @@ contract TokenRulesPassingGlobalConstraint is GlobalConstraintInterface
         address[] _transfersTo,
         uint256[] _transfersAmount
     )
-    external
-    view
-    returns (bool)
+        external
+        view
+        returns (bool)
     {
         _from;
         _transfersTo;
