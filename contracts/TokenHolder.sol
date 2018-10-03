@@ -135,7 +135,7 @@ contract TokenHolder is MultiSigWallet {
 
     /**
      * @dev Constructor requires:
-     *          - Branded token address is not null.
+     *          - EIP20 token address is not null.
      *          - Token rules address is not null.
      *
      * @param _token eip20 contract address deployed for an economy.
