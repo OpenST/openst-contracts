@@ -36,7 +36,6 @@ contract('TransferRule::constructor', async () => {
 			it('sucessfully initializes when passed arguments are set correctly.', async () => {
 				
 				const accountProvider = new AccountProvider(accounts);
-				console.log("version :- ",web3.version);
 				
 				const tokenRulesMockInstance = await tokenRulesMock.new();
 				
