@@ -25,7 +25,7 @@ async function happyPath(accountProvider) {
         tokenRules,
         organizationAddress,
         token,
-    } = await TokenRulesUtils.createTokenRules(accountProvider);
+    } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
     const passingConstraint1 = await PassingConstraint.new();
 
@@ -97,7 +97,7 @@ contract('TokenRules::executeTransfers', async () => {
                     },
                 ),
                 'Should revert as non registered rule is calling.',
-                'Only registered rule is allowed to call',
+                'Only registered rule is allowed to call.',
             );
         });
 
@@ -122,7 +122,7 @@ contract('TokenRules::executeTransfers', async () => {
                     { from: ruleAddress0 },
                 ),
                 'Should revert as "from" account has not allowed transfers.',
-                'Transfers from the address are not allowed',
+                'Transfers from the address are not allowed.',
             );
         });
 
@@ -146,7 +146,7 @@ contract('TokenRules::executeTransfers', async () => {
                 ),
                 'Should revert as transfers "to" and "amount" arrays length '
                 + 'are not equal.',
-                '\'to\' and \'amount\' transfer arrays\' lengths are not equal',
+                '\'to\' and \'amount\' transfer arrays\' lengths are not equal.',
             );
         });
 
@@ -175,7 +175,7 @@ contract('TokenRules::executeTransfers', async () => {
                     { from: ruleAddress0 },
                 ),
                 'Should revert as one of the constraints will fail.',
-                'Constraints not fullfilled',
+                'Constraints not fullfilled.',
             );
         });
     });

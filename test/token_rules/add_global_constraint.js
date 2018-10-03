@@ -24,7 +24,7 @@ contract('TokenRules::addGlobalConstraint', async () => {
         it('Reverts if non-organization address is adding constraint.', async () => {
             const {
                 tokenRules,
-            } = await TokenRulesUtils.createTokenRules(accountProvider);
+            } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const constraintAddress = accountProvider.get();
 
@@ -36,7 +36,7 @@ contract('TokenRules::addGlobalConstraint', async () => {
                     { from: nonOrganizationAddress },
                 ),
                 'Should revert as non-organization address is adding constraint.',
-                'Only organization is allowed to call',
+                'Only organization is allowed to call.',
             );
         });
 
@@ -44,7 +44,7 @@ contract('TokenRules::addGlobalConstraint', async () => {
             const {
                 tokenRules,
                 organizationAddress,
-            } = await TokenRulesUtils.createTokenRules(accountProvider);
+            } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const constraintAddress = Utils.NULL_ADDRESS;
 
@@ -54,7 +54,7 @@ contract('TokenRules::addGlobalConstraint', async () => {
                     { from: organizationAddress },
                 ),
                 'Should revert as constraint\'s address to add is null.',
-                'Constraint to add is null',
+                'Constraint to add is null.',
             );
         });
 
@@ -62,7 +62,7 @@ contract('TokenRules::addGlobalConstraint', async () => {
             const {
                 tokenRules,
                 organizationAddress,
-            } = await TokenRulesUtils.createTokenRules(accountProvider);
+            } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const constraintAddress = accountProvider.get();
             const existingConstraintAddress = constraintAddress;
@@ -78,7 +78,7 @@ contract('TokenRules::addGlobalConstraint', async () => {
                     { from: organizationAddress },
                 ),
                 'Should revert as constraint to add already exists.',
-                'Constraint to add already exists',
+                'Constraint to add already exists.',
             );
         });
     });
@@ -90,7 +90,7 @@ contract('TokenRules::addGlobalConstraint', async () => {
             const {
                 tokenRules,
                 organizationAddress,
-            } = await TokenRulesUtils.createTokenRules(accountProvider);
+            } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const constraintAddress = accountProvider.get();
 
@@ -124,7 +124,7 @@ contract('TokenRules::addGlobalConstraint', async () => {
             const {
                 tokenRules,
                 organizationAddress,
-            } = await TokenRulesUtils.createTokenRules(accountProvider);
+            } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const constraintAddress = accountProvider.get();
 

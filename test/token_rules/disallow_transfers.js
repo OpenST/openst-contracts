@@ -20,7 +20,7 @@ contract('TokenRules::disallowTransfers', async (accounts) => {
     it('Checks that transfer is disallowed.', async () => {
         const {
             tokenRules,
-        } = await TokenRulesUtils.createTokenRules(accountProvider);
+        } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
         const tokenHolder = accountProvider.get();
 

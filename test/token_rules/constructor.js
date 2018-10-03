@@ -28,6 +28,7 @@ contract('TokenRules::constructor', async () => {
             await utils.expectRevert(
                 TokenRules.new(organization, token),
                 'Should revert as organization address is null.',
+                'Organization address is null.',
             );
         });
         it('Reverts if token is null.', async () => {
@@ -37,6 +38,7 @@ contract('TokenRules::constructor', async () => {
             await utils.expectRevert(
                 TokenRules.new(organization, token),
                 'Should revert as token is null.',
+                'Token address is null.',
             );
         });
     });

@@ -26,7 +26,7 @@ contract('TokenRules::registerRule', async () => {
         it('Reverts if non-organization address calls.', async () => {
             const {
                 tokenRules,
-            } = await TokenRulesUtils.createTokenRules(accountProvider);
+            } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const ruleName = 'A';
             const ruleAddress = accountProvider.get();
@@ -39,19 +39,17 @@ contract('TokenRules::registerRule', async () => {
                     ruleName,
                     ruleAddress,
                     ruleAbi,
-                    {
-                        from: nonOrganizationAddress,
-                    },
+                    { from: nonOrganizationAddress },
                 ),
                 'Should revert as non-organization address calls.',
-                'Only organization is allowed to call',
+                'Only organization is allowed to call.',
             );
         });
         it('Reverts if rule name is empty.', async () => {
             const {
                 tokenRules,
                 organizationAddress,
-            } = await TokenRulesUtils.createTokenRules(accountProvider);
+            } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const ruleName = '';
             const ruleAddress = accountProvider.get();
@@ -65,14 +63,14 @@ contract('TokenRules::registerRule', async () => {
                     { from: organizationAddress },
                 ),
                 'Should revert as rule name is empty.',
-                'Rule name is empty',
+                'Rule name is empty.',
             );
         });
         it('Reverts if a rule with the same name already registered.', async () => {
             const {
                 tokenRules,
                 organizationAddress,
-            } = await TokenRulesUtils.createTokenRules(accountProvider);
+            } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const aRuleName = 'A';
             const aRuleAddress = accountProvider.get();
@@ -97,14 +95,14 @@ contract('TokenRules::registerRule', async () => {
                     { from: organizationAddress },
                 ),
                 'Should revert as a rule with the same name already registered',
-                'Rule with the specified name already exists',
+                'Rule with the specified name already exists.',
             );
         });
         it('Reverts if rule address is null.', async () => {
             const {
                 tokenRules,
                 organizationAddress,
-            } = await TokenRulesUtils.createTokenRules(accountProvider);
+            } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const ruleName = 'A';
             const ruleAddress = utils.NULL_ADDRESS;
@@ -118,7 +116,7 @@ contract('TokenRules::registerRule', async () => {
                     { from: organizationAddress },
                 ),
                 'Should revert as rule address is null.',
-                'Rule address is null',
+                'Rule address is null.',
             );
         });
 
@@ -126,10 +124,10 @@ contract('TokenRules::registerRule', async () => {
             const {
                 tokenRules,
                 organizationAddress,
-            } = await TokenRulesUtils.createTokenRules(accountProvider);
+            } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const aRuleName = 'A';
-            const aRuleAddress = accounts[2];
+            const aRuleAddress = accountProvider.get();
             const aRuleAbi = `Rule abi of ${aRuleName}`;
 
             const bRuleName = 'B';
@@ -151,7 +149,7 @@ contract('TokenRules::registerRule', async () => {
                     { from: organizationAddress },
                 ),
                 'Should revert as rule with the specified address already registered.',
-                'Rule with the specified address already exists',
+                'Rule with the specified address already exists.',
             );
         });
 
@@ -159,10 +157,10 @@ contract('TokenRules::registerRule', async () => {
             const {
                 tokenRules,
                 organizationAddress,
-            } = await TokenRulesUtils.createTokenRules(accountProvider);
+            } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const ruleName = 'A';
-            const ruleAddress = accounts[2];
+            const ruleAddress = accountProvider.get();
             const ruleAbi = '';
 
             await utils.expectRevert(
@@ -173,7 +171,7 @@ contract('TokenRules::registerRule', async () => {
                     { from: organizationAddress },
                 ),
                 'Should revert as rule ABI is empty.',
-                'Rule ABI is empty',
+                'Rule ABI is empty.',
             );
         });
     });
@@ -185,7 +183,7 @@ contract('TokenRules::registerRule', async () => {
             const {
                 tokenRules,
                 organizationAddress,
-            } = await TokenRulesUtils.createTokenRules(accountProvider);
+            } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const aRuleName = 'A';
             const aRuleAddress = accountProvider.get();
@@ -225,10 +223,10 @@ contract('TokenRules::registerRule', async () => {
             const {
                 tokenRules,
                 organizationAddress,
-            } = await TokenRulesUtils.createTokenRules(accountProvider);
+            } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const aRuleName = 'A';
-            const aRuleAddress = accounts[2];
+            const aRuleAddress = accountProvider.get();
             const aRuleAbi = `Rule abi of ${aRuleName}`;
 
             await tokenRules.registerRule(

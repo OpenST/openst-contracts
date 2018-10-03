@@ -21,7 +21,7 @@ async function prepareTokenRules(accountProvider) {
     const {
         tokenRules,
         organizationAddress,
-    } = await TokenRulesUtils.createTokenRules(accountProvider);
+    } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
     const constraintAddress0 = accountProvider.get();
 
@@ -55,7 +55,7 @@ contract('TokenRules::removeGlobalConstraint', async () => {
                     { from: nonOrganizationAddress },
                 ),
                 'Should revert as non organization address calls.',
-                'Only organization is allowed to call',
+                'Only organization is allowed to call.',
             );
         });
 
@@ -73,7 +73,7 @@ contract('TokenRules::removeGlobalConstraint', async () => {
                     { from: organizationAddress },
                 ),
                 'Should revert as constraint to remove does not exist.',
-                'Constraint to remove does not exist',
+                'Constraint to remove does not exist.',
             );
         });
     });
@@ -81,7 +81,7 @@ contract('TokenRules::removeGlobalConstraint', async () => {
     contract('Events', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
 
-        it('GlobalConstraintRemoved is emitted.', async () => {
+        it('Emitts GlobalConstraintRemoved on removing global constraint.', async () => {
             const {
                 tokenRules,
                 organizationAddress,

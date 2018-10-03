@@ -28,7 +28,7 @@ contract('TokenRules::checkGlobalConstraints', async () => {
             const {
                 tokenRules,
                 organizationAddress,
-            } = await TokenRulesUtils.createTokenRules(accountProvider);
+            } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const transferTo0 = accountProvider.get();
             const transfersTo = [transferTo0];
@@ -43,7 +43,7 @@ contract('TokenRules::checkGlobalConstraints', async () => {
                 ),
                 'Should revert as transfers "to" and "amount" arrays length '
                 + 'are not equal.',
-                '\'to\' and \'amount\' transfer arrays\' lengths are not equal',
+                '\'to\' and \'amount\' transfer arrays\' lengths are not equal.',
             );
         });
     });
@@ -54,7 +54,7 @@ contract('TokenRules::checkGlobalConstraints', async () => {
             const {
                 tokenRules,
                 organizationAddress,
-            } = await TokenRulesUtils.createTokenRules(accountProvider);
+            } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const transferTo0 = accountProvider.get();
             const transfersTo = [transferTo0];
@@ -90,7 +90,7 @@ contract('TokenRules::checkGlobalConstraints', async () => {
             const {
                 tokenRules,
                 organizationAddress,
-            } = await TokenRulesUtils.createTokenRules(accountProvider);
+            } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const transferTo0 = accountProvider.get();
             const transfersTo = [transferTo0];

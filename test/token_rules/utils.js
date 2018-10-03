@@ -51,7 +51,7 @@ module.exports.constraintExists = async (tokenRules, constraintAddress) => {
  * Creates and returns the tuple:
  *      (tokenRules, organizationAddress, token)
  */
-module.exports.createTokenRules = async (accountProvider) => {
+module.exports.createTokenEconomy = async (accountProvider) => {
     const organizationAddress = accountProvider.get();
     const token = await this.createEIP20Token();
 
