@@ -19,22 +19,15 @@ const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 module.exports.NULL_ADDRESS = NULL_ADDRESS;
 
-module.exports.isNullAddress = (address) => {
-    assert.strictEqual(
-        typeof address,
-        'string',
-        'address must be of type \'string\'',
-    );
-    return address === NULL_ADDRESS;
-};
+module.exports.isNullAddress = address => address === NULL_ADDRESS;
 
 /**
  * Asserts that a call or transaction reverts.
  *
  * @param {promise} promise The call or transaction.
  * @param {string} expectedMessage Optional. If given, the revert message will
- *                                 be checked to contain this string. Works with
- *                                 web3 >= 1.0.
+ *                                 be checked to contain this string.
+ *
  * @throws Will fail an assertion if the call or transaction is not reverted.
  */
 module.exports.expectRevert = async (

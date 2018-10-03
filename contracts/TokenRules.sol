@@ -299,7 +299,6 @@ contract TokenRules {
     /**
      * @dev Function requires:
      *          - Only organization can call.
-     *          - Constraint address is not null.
      *          - Constraint exists.
      */
     function removeGlobalConstraint(
@@ -308,11 +307,6 @@ contract TokenRules {
         external
         onlyOrganization
     {
-        require(
-            _globalConstraintAddress != address(0),
-            "Constraint to remvoe is null."
-        );
-
         uint256 index = findGlobalConstraintIndex(_globalConstraintAddress);
 
         require(
@@ -321,6 +315,8 @@ contract TokenRules {
         );
 
         removeGlobalConstraintByIndex(index);
+
+        emit GlobalConstraintRemoved(_globalConstraintAddress);
     }
 
 
@@ -335,6 +331,9 @@ contract TokenRules {
     }
 
     /**
+     * @dev Function requires:
+     *          - _transfersTo and _transfersAmount arrays length should match.
+     *
      * @return Returns true, if all registered global constraints
      *         are satisfied, otherwise false.
      */
@@ -347,6 +346,11 @@ contract TokenRules {
         view
         returns (bool _passed)
     {
+        require(
+            _transfersTo.length == _transfersAmount.length,
+            "'to' and 'amount' transfer arrays' lengths are not equal."
+        );
+
         _passed = true;
 
         for(uint256 i = 0; i < globalConstraints.length && _passed; ++i) {
