@@ -182,7 +182,7 @@ contract TokenHolder is MultiSigWallet {
      * @param _spendingLimit Spending limit of the key.
      * @param _expirationHeight Expiration height of the ephemeral key.
      *
-     * @return transactionId_ Newly created transaction id.
+     * @return transactionID_ Newly created transaction id.
      */
     function submitAuthorizeSession(
         address _ephemeralKey,
