@@ -20,7 +20,8 @@ contract TokenRulesMock {
 
 
     /* Special functions */
-    constructor(){
+    
+    constructor() {
         called = false;
     }
 
