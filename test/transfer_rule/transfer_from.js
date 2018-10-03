@@ -12,53 +12,46 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const web3 = require('../test_lib/web3.js');
 const utils = require('../test_lib/utils.js');
 const { AccountProvider } = require('../test_lib/utils.js');
 
-const TokenRules = artifacts.require('TokenRules');
 const TransferRule = artifacts.require('TransferRule');
 const tokenRulesMock = artifacts.require('TokenRulesMock');
 
 contract('TransferRule::transferFrom', async () => {
-	contract('Negative tests for input parameters:', async (accounts) => {
-		
-		const accountProvider = new AccountProvider(accounts);
-		
-		it('Reverts when Token rules address is incorrect.', async () => {
-			
-			const fromUser = accountProvider.get();
-			const toUser = accountProvider.get();
-			const amount = 10;
-			const incorrectTokenRulesAddress = accountProvider.get();
-			
-			const transferRuleInstance = await TransferRule.new(incorrectTokenRulesAddress);
-			await utils.expectRevert(transferRuleInstance.transferFrom.call(fromUser, toUser, amount));
-			
-		});
-		
-	contract('Storage', async (accounts) => {
-		
-			const accountProvider = new AccountProvider(accounts);
-			
-			it('Validates successful transfer.', async () => {
-				
-				const fromUser = accountProvider.get();
-				const toUser = accountProvider.get();
-				const amount = 10;
-				
-				const tokenRulesMockInstance = await tokenRulesMock.new();
-				
-				const transferRuleInstance = await TransferRule.new(tokenRulesMockInstance.address);
-				assert.equal(await transferRuleInstance.transferFrom.call(fromUser, toUser, amount), true, 'transferFrom method failed');
-				await transferRuleInstance.transferFrom(fromUser, toUser, amount);
-				
-				assert.equal(await tokenRulesMockInstance.from.call(), fromUser,"From address not set correctly");
-				assert.equal(await tokenRulesMockInstance.transferTo.call(0), toUser,"To address not set correctly");
-				assert.equal(await tokenRulesMockInstance.transferAmount.call(0), amount,"Amount is not set correctly");
-				
-				
-			});
-		});
-	});
+    contract('Negative tests for input parameters:', async (accounts) => {
+        const accountProvider = new AccountProvider(accounts);
+
+        it('Reverts when Token rules address is incorrect.', async () => {
+            const fromUser = accountProvider.get();
+            const toUser = accountProvider.get();
+            const amount = 10;
+            const incorrectTokenRulesAddress = accountProvider.get();
+
+            const transferRuleInstance = await TransferRule.new(incorrectTokenRulesAddress);
+            await utils.expectRevert(
+                transferRuleInstance.transferFrom.call(fromUser, toUser, amount),
+            );
+        });
+    });
+
+    contract('Storage', async (accounts) => {
+        const accountProvider = new AccountProvider(accounts);
+
+        it('Validates successful transfer.', async () => {
+            const fromUser = accountProvider.get();
+            const toUser = accountProvider.get();
+            const amount = 10;
+
+            const tokenRulesMockInstance = await tokenRulesMock.new();
+
+            const transferRuleInstance = await TransferRule.new(tokenRulesMockInstance.address);
+            assert.equal(await transferRuleInstance.transferFrom.call(fromUser, toUser, amount), true, 'transferFrom method failed');
+            await transferRuleInstance.transferFrom(fromUser, toUser, amount);
+
+            assert.equal(await tokenRulesMockInstance.from.call(), fromUser, 'From address not set correctly');
+            assert.equal(await tokenRulesMockInstance.transferTo.call(0), toUser, 'To address not set correctly');
+            assert.equal(await tokenRulesMockInstance.transferAmount.call(0), amount, 'Amount is not set correctly');
+        });
+    });
 });
