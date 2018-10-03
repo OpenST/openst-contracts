@@ -43,7 +43,6 @@ contract('TokenRules::checkGlobalConstraints', async () => {
                 ),
                 'Should revert as transfers "to" and "amount" arrays length '
                 + 'are not equal.',
-                '\'to\' and \'amount\' transfer arrays\' lengths are not equal.',
             );
         });
     });

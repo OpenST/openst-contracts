@@ -154,7 +154,7 @@ contract TokenHolder is MultiSigWallet {
     {
         require(
             _token != address(0),
-            "Token contract address is 0."
+            "Token contract address is null."
         );
         require(
             _tokenRules != address(0),
