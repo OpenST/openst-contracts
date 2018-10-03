@@ -85,7 +85,7 @@ contract('TokenHolder::constructor', async () => {
             );
 
             assert.strictEqual(
-                (await tokenHolder.brandedToken.call()),
+                (await tokenHolder.token.call()),
                 tokenAddress,
             );
 

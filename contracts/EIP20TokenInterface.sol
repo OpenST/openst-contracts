@@ -22,7 +22,7 @@ pragma solidity ^0.4.23;
  *
  *  @notice Provides EIP20 token interface
  */
-contract EIP20Interface {
+contract EIP20TokenInterface {
 
     /** Events */
 

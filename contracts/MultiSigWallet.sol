@@ -565,8 +565,6 @@ contract MultiSigWallet {
      *          - Requirement validity held.
      *
      * @param _required The number of required confirmations.
-     *
-     * @return transactionId_ of the proposal.
      */
     function changeRequirement(
         uint256 _required

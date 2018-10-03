@@ -14,15 +14,15 @@ pragma solidity ^0.4.23;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "./EIP20Interface.sol";
-import "./../SafeMath.sol";
+import "./EIP20TokenInterface.sol";
+import "./SafeMath.sol";
 
 /**
  *  @title EIP20Token contract which implements EIP20Interface.
  *
  *  @notice Implements EIP20 token.
  */
-contract EIP20Token is EIP20Interface {
+contract EIP20Token is EIP20TokenInterface {
     using SafeMath for uint256;
 
     string private tokenName;
