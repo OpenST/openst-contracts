@@ -280,6 +280,7 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _s
     )
         public
+        payable
         returns (bool executionStatus_)
     {
         bytes32 messageHash = bytes32(0);
@@ -303,8 +304,8 @@ contract TokenHolder is MultiSigWallet {
             ephemeralKeyData.spendingLimit
         );
 
-        // solium-disable-next-line security/no-low-level-calls
-        executionStatus_ = _to.call(_data);
+        // solium-disable-next-line security/no-call-value
+        executionStatus_ = _to.call.value(msg.value)(_data);
 
         BrandedToken(brandedToken).approve(tokenRules, 0);
 

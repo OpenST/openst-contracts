@@ -45,6 +45,22 @@ function generateMockRulePassActionData(value) {
     );
 }
 
+function generateMockRulePassPayableActionData(value) {
+    return web3.eth.abi.encodeFunctionCall(
+        {
+            name: 'passPayable',
+            type: 'function',
+            inputs: [
+                {
+                    type: 'address',
+                    name: 'value',
+                },
+            ],
+        },
+        [value],
+    );
+}
+
 function generateMockRuleFailActionData(value) {
     return web3.eth.abi.encodeFunctionCall(
         {
@@ -186,6 +202,32 @@ async function preparePassRule(
     const mockRule = await MockRule.new();
     const mockRuleValue = accountProvider.get();
     const mockRulePassActionData = generateMockRulePassActionData(
+        mockRuleValue,
+    );
+
+    const { msgHash, rsv } = getExecuteRuleExTxData(
+        tokenHolder.address,
+        mockRule.address,
+        mockRulePassActionData,
+        nonce,
+        ephemeralKey,
+    );
+
+    return {
+        mockRule,
+        mockRuleValue,
+        mockRulePassActionData,
+        msgHash,
+        rsv,
+    };
+}
+
+async function preparePassPayableRule(
+    accountProvider, tokenHolder, nonce, ephemeralKey,
+) {
+    const mockRule = await MockRule.new();
+    const mockRuleValue = accountProvider.get();
+    const mockRulePassActionData = generateMockRulePassPayableActionData(
         mockRuleValue,
     );
 
@@ -587,6 +629,52 @@ contract('TokenHolder::executeRule', async () => {
             assert.strictEqual(
                 (await mockRule.value.call()),
                 mockRuleValue,
+            );
+        });
+
+        it('Checks that payable rule is actually executed.', async () => {
+            const spendingLimit = 10;
+            const deltaExpirationHeight = 50;
+            const { tokenHolder } = await createTokenHolder(
+                accountProvider,
+                ephemeralKeyAddress1,
+                spendingLimit,
+                deltaExpirationHeight,
+            );
+
+            const nonce = 1;
+            const {
+                mockRule,
+                mockRuleValue,
+                mockRulePassActionData,
+                rsv,
+            } = await preparePassPayableRule(
+                accountProvider,
+                tokenHolder,
+                nonce,
+                ephemeralPrivateKey1,
+            );
+
+            const payableValue = 111;
+            await tokenHolder.executeRule(
+                mockRule.address,
+                mockRulePassActionData,
+                nonce,
+                rsv.v,
+                EthUtils.bufferToHex(rsv.r),
+                EthUtils.bufferToHex(rsv.s),
+                {
+                    value: payableValue,
+                },
+            );
+
+            assert.strictEqual(
+                (await mockRule.value.call()),
+                mockRuleValue,
+            );
+
+            assert.isOk(
+                (await mockRule.receivedPayableAmount.call()).eqn(payableValue),
             );
         });
     });
