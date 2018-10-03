@@ -14,7 +14,6 @@
 
 const web3 = require('../test_lib/web3.js');
 const utils = require('../test_lib/utils.js');
-const rulesUtils = require('./utils');
 
 const TokenRules = artifacts.require('TokenRules');
 
@@ -44,7 +43,7 @@ contract('TransferRule::constructor', async () => {
 			await tokenRulesInstance.allowTransfers({from: entity1});
 			await tokenRulesInstance.addGlobalConstraint(constraint.address, {from: organization});
 			
-			utils.expectRevert(TransferRule.new(''));
+			await utils.expectRevert(TransferRule.new(''));
 			
 		});
 		
@@ -53,7 +52,6 @@ contract('TransferRule::constructor', async () => {
 				const organization = accounts[0];
 				const constraint = await TokenRulesPassingGlobalConstraint.new();
 				const ruleName = 'A';
-				// const ruleAddress = accounts[2];
 				const entity1 = accounts[1];
 				const entity2 = accounts[4];
 				const ruleAbi = `Rule abi of ${ruleName}`;
@@ -69,18 +67,6 @@ contract('TransferRule::constructor', async () => {
 				await tokenRulesInstance.addGlobalConstraint(constraint.address, {from: organization});
 				
 				const transferRuleInstance = await TransferRule.new(tokenRulesInstance.address);
-				
-				// await tokenRulesInstance.registerRule(
-				// 	ruleName,
-				// 	transferRuleInstance.address,
-				// 	ruleAbi,
-				// 	{
-				// 		from: organization
-				// 	}
-				// );
-				// await token.approve(tokenRulesInstance.address, 20, {from:entity1});
-				// await transferRuleInstance.transferFrom(entity1, entity2, amount);
-				// assert.equal((await token.balanceOf(entity2)).toString(), amount,'Amount not transferred');
 				
 			});
 		});
