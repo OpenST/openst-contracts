@@ -1,3 +1,5 @@
+pragma solidity ^0.4.23;
+
 // Copyright 2018 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,11 +14,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import "../../GlobalConstraintInterface.sol";
 
-const Web3 = require('web3');
+contract TokenRulesPassingGlobalConstraint is GlobalConstraintInterface
+{
+    /* External Functions */
 
-const web3 = new Web3(
-    new Web3.providers.WebsocketProvider('ws://localhost:8545'),
-);
+    function check(
+        address _from,
+        address[] _transfersTo,
+        uint256[] _transfersAmount
+    )
+        external
+        view
+        returns (bool)
+    {
+        _from;
+        _transfersTo;
+        _transfersAmount;
 
-module.exports = web3;
+        return true;
+    }
+}

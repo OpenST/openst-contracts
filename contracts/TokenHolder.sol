@@ -38,14 +38,13 @@ contract TokenHolder is MultiSigWallet {
     /* Events */
 
     event SessionAuthorizationSubmitted(
-        uint256 indexed _transactionId,
+        uint256 indexed _transactionID,
         address _ephemeralKey,
         uint256 _spendingLimit,
         uint256 _expirationHeight
     );
 
-    event SessionRevocationSubmitted(
-        uint256 indexed _transactionID,
+    event SessionRevoked(
         address _ephemeralKey
     );
 
@@ -98,7 +97,7 @@ contract TokenHolder is MultiSigWallet {
 
     mapping(address /* key */ => EphemeralKeyData) public ephemeralKeys;
 
-    address private tokenRules;
+    address public tokenRules;
 
 
     /* Modifiers */
@@ -126,7 +125,7 @@ contract TokenHolder is MultiSigWallet {
         AuthorizationStatus status = ephemeralKeys[_key].status;
         require(
             status == AuthorizationStatus.NOT_AUTHORIZED,
-            "Key is not authorized."
+            "Key exists."
         );
         _;
     }
@@ -135,27 +134,31 @@ contract TokenHolder is MultiSigWallet {
     /* Special Functions */
 
     /**
+     * @dev Constructor requires:
+     *          - Branded token address is not null.
+     *          - Token rules address is not null.
+     *
      * @param _brandedToken eip20 contract address deployed for an economy.
      * @param _tokenRules Token rules contract address.
-     * @param _required No of requirements for multi sig wallet.
      * @param _wallets array of wallet addresses.
+     * @param _required No of requirements for multi sig wallet.
      */
     constructor(
         address _brandedToken,
         address _tokenRules,
-        uint256 _required,
-        address[] _wallets
+        address[] _wallets,
+        uint256 _required
     )
         public
         MultiSigWallet(_wallets, _required)
     {
         require(
             _brandedToken != address(0),
-            "Branded token contract address is 0."
+            "Token contract address is null."
         );
         require(
             _tokenRules != address(0),
-            "TokenRules contract address is 0."
+            "TokenRules contract address is null."
         );
 
         brandedToken = _brandedToken;
@@ -172,7 +175,7 @@ contract TokenHolder is MultiSigWallet {
      * @dev Function requires:
      *          - Only registered wallet can call.
      *          - The key is not null.
-     *          - The key is not authorized.
+     *          - The key does not exist.
      *          - Expiration height is bigger than the current block height.
      *
      * @param _ephemeralKey Ephemeral key to authorize.
@@ -223,7 +226,6 @@ contract TokenHolder is MultiSigWallet {
      * @dev Function revokes the key even if it has expired.
      *      Function requires:
      *          - Only registered wallet can call.
-     *          - The key is not null.
      *          - The key is authorized.
      *
      * @param _ephemeralKey Ephemeral key to revoke.
@@ -231,10 +233,11 @@ contract TokenHolder is MultiSigWallet {
     function revokeSession(address _ephemeralKey)
         external
         onlyWallet
-        keyIsNotNull(_ephemeralKey)
         keyIsAuthorized(_ephemeralKey)
     {
         ephemeralKeys[_ephemeralKey].status = AuthorizationStatus.REVOKED;
+
+        emit SessionRevoked(_ephemeralKey);
     }
 
     /* Public Functions */
@@ -329,6 +332,11 @@ contract TokenHolder is MultiSigWallet {
         keyIsNotNull(_ephemeralKey)
         keyDoesNotExist(_ephemeralKey)
     {
+        require(
+            _expirationHeight > block.number,
+            "Expiration height is lte to the current block height."
+        );
+
         EphemeralKeyData storage keyData = ephemeralKeys[_ephemeralKey];
 
         keyData.spendingLimit = _spendingLimit;
