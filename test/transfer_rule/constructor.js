@@ -20,50 +20,47 @@ const TokenRules = artifacts.require('TokenRules');
 const TransferRule = artifacts.require('TransferRule');
 const EIP20TokenMock = artifacts.require('EIP20TokenMock');
 const TokenRulesPassingGlobalConstraint = artifacts.require('TokenRulesPassingGlobalConstraint');
+const { AccountProvider } = require('../test_lib/utils.js');
 
 contract('TransferRule::constructor', async () => {
 	contract('Negative testing for input parameters:', async (accounts) => {
 		
-		it('Token rules address is empty', async () => {
-			
-			const organization = accounts[0];
+		it('fails when tokenrules address is null.', async () => {
+			const accountProvider = new AccountProvider(accounts);
+			const organization = accountProvider.get();
 			const constraint = await TokenRulesPassingGlobalConstraint.new();
-			const ruleName = 'A';
-			const entity1 = accounts[1];
-			const entity2 = accounts[4];
-			const ruleAbi = `Rule abi of ${ruleName}`;
+			const fromUser = accountProvider.get();
 			const token = await EIP20TokenMock.new(
 				1, 1, 'OST', 'Open Simple Token', 1
 			);
 			
-			token.setBalance(entity1, 100);
+			token.setBalance(fromUser, 100);
 			
 			const tokenRulesInstance = await TokenRules.new(organization, token.address);
 			
-			await tokenRulesInstance.allowTransfers({from: entity1});
+			await tokenRulesInstance.allowTransfers({from: fromUser});
 			await tokenRulesInstance.addGlobalConstraint(constraint.address, {from: organization});
 			
-			await utils.expectRevert(TransferRule.new(''));
+			await utils.expectRevert(TransferRule.new(''),'Should revert as token rule address is null',
+				'Token rules address is null.');
 			
 		});
 		
 		contract('Positive test cases', async (accounts) => {
-			it('Transfer rule contract is initialized', async () => {
-				const organization = accounts[0];
+			it('Validates that passed arguments are set correctly.', async () => {
+				const accountProvider = new AccountProvider(accounts);
+				const organization = accountProvider.get();
 				const constraint = await TokenRulesPassingGlobalConstraint.new();
 				const ruleName = 'A';
-				const entity1 = accounts[1];
-				const entity2 = accounts[4];
-				const ruleAbi = `Rule abi of ${ruleName}`;
+				const fromUser = accountProvider.get();
 				const token = await EIP20TokenMock.new(
 					1, 1, 'OST', 'Open Simple Token', 1,
 				);
-				const amount = 10;
-				token.setBalance(entity1, 100);
+				token.setBalance(fromUser, 100);
 				
 				const tokenRulesInstance = await TokenRules.new(organization, token.address);
 				
-				await tokenRulesInstance.allowTransfers({from: entity1});//{from: ruleAddress});
+				await tokenRulesInstance.allowTransfers({from: fromUser});
 				await tokenRulesInstance.addGlobalConstraint(constraint.address, {from: organization});
 				
 				const transferRuleInstance = await TransferRule.new(tokenRulesInstance.address);

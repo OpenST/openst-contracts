@@ -18,28 +18,28 @@ const TokenRules = artifacts.require('TokenRules');
 const TransferRule = artifacts.require('TransferRule');
 const EIP20TokenMock = artifacts.require('EIP20TokenMock');
 const TokenRulesPassingGlobalConstraint = artifacts.require('TokenRulesPassingGlobalConstraint');
+const { AccountProvider } = require('../test_lib/utils.js');
 
 contract('TransferRule::transferFrom', async () => {
 	contract('Negative testing for input parameters:', async (accounts) => {
-		
-		it('Token rules address is incorrect', async () => {
+		const accountProvider = new AccountProvider(accounts);
+		it('Reverts when Token rules address is incorrect.', async () => {
 
-			const organization = accounts[0];
+			const organization = accountProvider.get();
 			const constraint = await TokenRulesPassingGlobalConstraint.new();
 			const ruleName = 'A';
-			const entity1 = accounts[1];
-			const entity2 = accounts[4];
+			const fromUser = accountProvider.get();
+			const toUser = accountProvider.get();
 			const ruleAbi = `Rule abi of ${ruleName}`;
 			const amount = 10;
 			const token = await EIP20TokenMock.new(
 				1, 1, 'OST', 'Open Simple Token', 1,
 			);
-			token.setBalance(entity1, 100);
+			token.setBalance(fromUser, 100);
 
 			const tokenRulesInstance = await TokenRules.new(organization, token.address);
 
-			await tokenRulesInstance.allowTransfers({from: entity1});
-			console.log("constraint address :- ",constraint.address);
+			await tokenRulesInstance.allowTransfers({from: fromUser});
 			await tokenRulesInstance.addGlobalConstraint(constraint.address, {from: organization});
 
 			const transferRuleInstance = await TransferRule.new(constraint.address);
@@ -51,27 +51,29 @@ contract('TransferRule::transferFrom', async () => {
 					from: organization
 				}
 			);
-			await utils.expectRevert(transferRuleInstance.transferFrom(entity1, entity2, amount));
+			await utils.expectRevert(transferRuleInstance.transferFrom(fromUser, toUser, amount),
+				'Token rules address is incorrect.');
 
 		});
 		
 	contract('Positive test cases', async (accounts) => {
-			it('Transfer done', async () => {
-				const organization = accounts[0];
+			const accountProvider = new AccountProvider(accounts);
+			it('Validates successful transfer.', async () => {
+				const organization = accountProvider.get();
 				const constraint = await TokenRulesPassingGlobalConstraint.new();
 				const ruleName = 'A';
-				const entity1 = accounts[1];
-				const entity2 = accounts[4];
+				const fromUser = accountProvider.get();
+				const toUser = accountProvider.get();
 				const ruleAbi = `Rule abi of ${ruleName}`;
 				const token = await EIP20TokenMock.new(
 					1, 1, 'OST', 'Open Simple Token', 1,
 				);
 				const amount = 10;
-				await token.setBalance(entity1, 100);
+				await token.setBalance(fromUser, 100);
 				
 				const tokenRulesInstance = await TokenRules.new(organization, token.address);
 				
-				await tokenRulesInstance.allowTransfers({from: entity1});
+				await tokenRulesInstance.allowTransfers({from: fromUser});
 				await tokenRulesInstance.addGlobalConstraint(constraint.address, {from: organization});
 				
 				const transferRuleInstance = await TransferRule.new(tokenRulesInstance.address);
@@ -83,9 +85,9 @@ contract('TransferRule::transferFrom', async () => {
 						from: organization
 					}
 				);
-				await token.approve(tokenRulesInstance.address, 20, {from:entity1});
-				await transferRuleInstance.transferFrom(entity1, entity2, amount);
-				assert.equal((await token.balanceOf(entity2)).toString(), amount,'Amount not transferred');
+				await token.approve(tokenRulesInstance.address, 20, {from:fromUser});
+				await transferRuleInstance.transferFrom(fromUser, toUser, amount);
+				assert.equal((await token.balanceOf(toUser)).toString(), amount,'Amount not transferred');
 				
 			});
 		});
