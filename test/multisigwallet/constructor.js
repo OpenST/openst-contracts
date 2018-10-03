@@ -14,40 +14,46 @@
 
 
 const utils = require('../test_lib/utils.js');
+const { AccountProvider } = require('../test_lib/utils.js');
 
 const MultiSigWallet = artifacts.require('MultiSigWallet');
 
 contract('MultiSigWallet::constructor', async () => {
-    contract('Negative testing for input parameters.', async (accounts) => {
-        it('Wallets with null entries.', async () => {
-            const registeredWallet0 = accounts[0];
+    contract('Negative Tests', async (accounts) => {
+        const accountProvider = new AccountProvider(accounts);
+
+        it('Reverts if wallets array contains null address.', async () => {
+            const registeredWallet0 = accountProvider.get();
             const nullWallet = utils.NULL_ADDRESS;
 
             const walletsWithNull = [registeredWallet0, nullWallet];
 
             await utils.expectRevert(
                 MultiSigWallet.new(walletsWithNull, 1),
-                'Wallets with null entries should revert construction.',
+                'Should revert as wallets array contains null address.',
+                'Wallet address is 0.',
             );
         });
 
-        it('Wallets with duplicate entries.', async () => {
-            const registeredWallet0 = accounts[0];
-            const duplicateWallet = accounts[0];
-            const walletsWithDuplicate = [registeredWallet0, duplicateWallet];
+        it('Reverts if wallets array contains duplicate entries.', async () => {
+            const registeredWallet0 = accountProvider.get();
+            const walletsWithDuplicate = [registeredWallet0, registeredWallet0];
 
             await utils.expectRevert(
                 MultiSigWallet.new(walletsWithDuplicate, 1),
-                'Wallets with duplicate entries should revert construction.',
+                'Should revert as wallets array contains duplicate entry.',
+                'Duplicate wallet address.',
             );
         });
     });
 
     contract('Storage', async (accounts) => {
-        it('Initializing state variables.', async () => {
+        const accountProvider = new AccountProvider(accounts);
+
+        it('Checks that passed arguments are set correctly.', async () => {
             const required = 2;
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
+            const registeredWallet0 = accountProvider.get();
+            const registeredWallet1 = accountProvider.get();
 
             const wallets = [registeredWallet0, registeredWallet1];
 
