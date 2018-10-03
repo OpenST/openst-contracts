@@ -13,6 +13,7 @@
 // limitations under the License.
 
 const assert = require('assert');
+const web3 = require('./web3.js');
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -61,6 +62,22 @@ module.exports.expectRevert = async (
 
     assert(false, displayMessage);
 };
+
+module.exports.advanceBlock = () => new Promise((resolve, reject) => {
+    web3.currentProvider.send({
+        jsonrpc: '2.0',
+        method: 'evm_mine',
+        id: new Date().getTime(),
+    }, (err) => {
+        if (err) {
+            return reject(err);
+        }
+
+        const newBlockHash = web3.eth.getBlock('latest').hash;
+
+        return resolve(newBlockHash);
+    });
+});
 
 /** Receives accounts list and gives away each time one. */
 module.exports.AccountProvider = class AccountProvider {
