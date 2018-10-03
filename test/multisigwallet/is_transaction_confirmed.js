@@ -12,118 +12,83 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const BN = require('bn.js');
 const utils = require('../test_lib/utils.js');
-const { MultiSigWalletHelper } = require('../test_lib/multisigwallet_helper.js');
-
-const MultiSigWallet = artifacts.require('MultiSigWallet');
+const { AccountProvider } = require('../test_lib/utils.js');
+const { MultiSigWalletUtils } = require('./utils.js');
 
 contract('MultiSigWallet::isTransactionConfirmed', async (accounts) => {
-    it('Non existing transaction ID should revert.', async () => {
-        const required = 1;
+    const accountProvider = new AccountProvider(accounts);
 
-        const registeredWallet0 = accounts[0];
+    it('Reverts if transaction ID does not exist.', async () => {
+        const helper = await new MultiSigWalletUtils(
+            { accountProvider, walletCount: 1, required: 1 },
+        );
 
-        const wallets = [registeredWallet0];
-
-        const multisig = await MultiSigWallet.new(wallets, required);
-
-        const nonExistingTransactionID = 0;
+        const nonExistingTransactionID = 11;
 
         await utils.expectRevert(
-            multisig.isTransactionConfirmed.call(
+            helper.multisig().isTransactionConfirmed.call(
                 nonExistingTransactionID,
-                {
-                    from: registeredWallet0,
-                },
+                { from: helper.wallet(0) },
             ),
+            'Should revert as transaction ID does not exist.',
+            'Transaction does not exist.',
         );
     });
 
-    it('1-wallet-1-required', async () => {
-        const required = 1;
+    it('Checks transaction confirmation status for 1-wallet-1-required setup.', async () => {
+        const helper = await new MultiSigWalletUtils(
+            { accountProvider, walletCount: 1, required: 1 },
+        );
 
-        const registeredWallet0 = accounts[0];
-        const walletToAdd = accounts[1];
-
-        const wallets = [registeredWallet0];
-
-        const multisig = await MultiSigWallet.new(wallets, required);
-
-        const transactionID = await MultiSigWalletHelper.submitAddWallet(
-            multisig,
-            walletToAdd,
-            {
-                from: registeredWallet0,
-            },
+        const transactionID = await helper.submitAddWallet(
+            accountProvider.get(), 0,
         );
 
         assert.isOk(
-            await multisig.isTransactionConfirmed.call(transactionID),
+            await helper.multisig().isTransactionConfirmed.call(transactionID),
             'Because of required being 1 the transaction would be immediately '
             + 'confirmed by the submitter.',
         );
     });
 
-    it('2-wallets-2-required', async () => {
-        const required = 2;
+    it('Checks transaction confirmation status for  2-wallets-2-required setup.', async () => {
+        const helper = await new MultiSigWalletUtils(
+            { accountProvider, walletCount: 2, required: 2 },
+        );
 
-        const registeredWallet0 = accounts[0];
-        const registeredWallet1 = accounts[1];
-        const walletToReplace = accounts[2];
-        const walletToAdd = accounts[3];
-
-        const wallets = [registeredWallet0, registeredWallet1];
-
-        const multisig = await MultiSigWallet.new(wallets, required);
-
-        const addWalletTransactionID = await MultiSigWalletHelper
-            .submitAddWallet(
-                multisig,
-                walletToAdd,
-                {
-                    from: registeredWallet0,
-                },
-            );
+        const addWalletTransactionID = await helper.submitAddWallet(
+            accountProvider.get(), 0,
+        );
 
         assert.isNotOk(
-            await multisig.isTransactionConfirmed.call(addWalletTransactionID),
+            await helper.multisig().isTransactionConfirmed.call(addWalletTransactionID),
             'Because of required being 2 the transaction is not yet confirmed.',
         );
 
-        await multisig.confirmTransaction(
+        await helper.multisig().confirmTransaction(
             addWalletTransactionID,
-            {
-                from: registeredWallet1,
-            },
+            { from: helper.wallet(1) },
         );
 
         assert.isOk(
-            await multisig.isTransactionConfirmed.call(addWalletTransactionID),
+            await helper.multisig().isTransactionConfirmed.call(addWalletTransactionID),
             'Transaction should be confirmed because the submitter confirms '
             + 'the transaction in the same call, and second wallet has just '
             + 'confirmed it',
         );
 
-        const replaceWalletTransactionID = await MultiSigWalletHelper
-            .submitReplaceWallet(
-                multisig,
-                registeredWallet1,
-                walletToReplace,
-                {
-                    from: registeredWallet0,
-                },
-            );
+        const replaceWalletTransactionID = await helper.submitReplaceWallet(
+            1, accountProvider.get(), 0,
+        );
 
-        await multisig.confirmTransaction(
+        await helper.multisig().confirmTransaction(
             replaceWalletTransactionID,
-            {
-                from: registeredWallet1,
-            },
+            { from: helper.wallet(1) },
         );
 
         assert.isOk(
-            await multisig.isTransactionConfirmed.call(addWalletTransactionID),
+            await helper.multisig().isTransactionConfirmed.call(addWalletTransactionID),
             'Despite that the wallet that has confirmed the transaction '
             + 'was replaced with the one that has not yet confirmed it, '
             + 'function returns true because the transaction was executed',
