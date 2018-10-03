@@ -31,7 +31,8 @@ contract('MultiSigWallet::isTransactionConfirmed', async (accounts) => {
                 nonExistingTransactionID,
                 { from: helper.wallet(0) },
             ),
-            'Should revert as transaction ID does not exist.'
+            'Should revert as transaction ID does not exist.',
+            'Transaction does not exist.',
         );
     });
 
