@@ -22,124 +22,85 @@
 const BN = require('bn.js');
 const utils = require('../test_lib/utils.js');
 const { Event } = require('../test_lib/event_decoder.js');
-const { MultiSigWalletHelper } = require('../test_lib/multisigwallet_helper.js');
+const { AccountProvider } = require('../test_lib/utils.js');
+const { MultiSigWalletUtils } = require('./utils.js');
 
-const MultiSigWallet = artifacts.require('MultiSigWallet');
 
 contract('MultiSigWallet::confirmTransaction', async () => {
-    contract('Negative testing for input parameters.', async (accounts) => {
-        it('Non registered wallet confirms transaction.', async () => {
-            const required = 2;
+    contract('Negative Tests', async (accounts) => {
+        const accountProvider = new AccountProvider(accounts);
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-            const newWalletToAdd = accounts[2];
-            const nonRegisteredWallet = accounts[3];
+        it('Reverts if non-registered wallet calls.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 2, required: 2 },
+            );
 
-            const wallets = [registeredWallet0, registeredWallet1];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            const transactionID = await MultiSigWalletHelper.submitAddWallet(
-                multisig,
-                newWalletToAdd,
-                {
-                    from: registeredWallet0,
-                },
+            const transactionID = await helper.submitAddWallet(
+                accountProvider.get(), 0,
             );
 
             await utils.expectRevert(
-                multisig.confirmTransaction(
+                helper.multisig().confirmTransaction(
                     transactionID,
-                    {
-                        from: nonRegisteredWallet,
-                    },
+                    { from: accountProvider.get() },
                 ),
-                'Non registered wallet cannot confirm transaction.',
+                'Should revert as non-registered wallet calls.',
+                'Only wallet is allowed to call.',
             );
         });
 
-        it('Confirmation of non existing transaction.', async () => {
-            const required = 1;
-
-            const registeredWallet0 = accounts[0];
-
-            const wallets = [registeredWallet0];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
+        it('Reverts if transaction ID to confirm does not exist.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 1, required: 1 },
+            );
 
             const nonExistingTransactionID = 11;
 
             await utils.expectRevert(
-                multisig.confirmTransaction(
+                helper.multisig().confirmTransaction(
                     nonExistingTransactionID,
-                    {
-                        from: registeredWallet0,
-                    },
+                    { from: helper.wallet(0) },
                 ),
-                'Confirmation of non existing transaction is not possible.',
+                'Should revert as transaction does not exist.',
+                'Transaction does not exist.',
             );
         });
 
-        it('Double confirmation.', async () => {
-            const required = 2;
+        it('Reverts if the wallet has already confirmed the transaction.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 2, required: 2 },
+            );
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-            const newWalletToAdd = accounts[2];
-
-            const wallets = [registeredWallet0, registeredWallet1];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            const transactionID = await MultiSigWalletHelper.submitAddWallet(
-                multisig,
-                newWalletToAdd,
-                {
-                    from: registeredWallet0,
-                },
+            const transactionID = await helper.submitAddWallet(
+                accountProvider.get(), 0,
             );
 
             await utils.expectRevert(
-                multisig.confirmTransaction(
+                helper.multisig().confirmTransaction(
                     transactionID,
-                    {
-                        from: registeredWallet0,
-                    },
+                    { from: helper.wallet(0) },
                 ),
-                'Double confirmation by wallet is not allowed.',
+                'Should revert as wallet has already confirmed the transaction.',
+                'Transaction is confirmed by the wallet.',
             );
         });
     });
 
     contract('Events', async (accounts) => {
-        it('Transaction confirmed is emitted.', async () => {
-            const required = 3;
+        const accountProvider = new AccountProvider(accounts);
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-            const registeredWallet2 = accounts[2];
-            const newWalletToAdd = accounts[3];
-
-            const wallets = [
-                registeredWallet0, registeredWallet1, registeredWallet2,
-            ];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            const transactionID = await MultiSigWalletHelper.submitAddWallet(
-                multisig,
-                newWalletToAdd,
-                {
-                    from: registeredWallet0,
-                },
+        it('Emits TransactionConfirmed once wallet confirms transaction.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 3, required: 3 },
             );
 
-            const transactionResponse = await multisig.confirmTransaction(
+            const transactionID = await helper.submitAddWallet(
+                accountProvider.get(), 0,
+            );
+
+            const transactionResponse = await helper.multisig().confirmTransaction(
                 transactionID,
-                {
-                    from: registeredWallet1,
-                },
+                { from: helper.wallet(1) },
             );
 
             const events = Event.decodeTransactionResponse(
@@ -151,54 +112,42 @@ contract('MultiSigWallet::confirmTransaction', async () => {
                 1,
             );
 
-            // The first emitted event should be
-            // 'TransactionConfirmed'.
+            // The first emitted event should be 'TransactionConfirmed'.
             Event.assertEqual(events[0], {
                 name: 'TransactionConfirmed',
                 args: {
                     _transactionID: new BN(transactionID),
-                    _wallet: registeredWallet1,
+                    _wallet: helper.wallet(1),
                 },
-                logIndex: 0,
             });
         });
     });
 
     contract('Storage', async (accounts) => {
-        it('Transaction execution.', async () => {
-            const required = 2;
+        const accountProvider = new AccountProvider(accounts);
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-            const newWalletToAdd = accounts[2];
+        it('Checks that transaction is confirmed by the wallet after '
+            + 'successfull call.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 2, required: 2 },
+            );
 
-            const wallets = [registeredWallet0, registeredWallet1];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            const transactionID = await MultiSigWalletHelper.submitAddWallet(
-                multisig,
-                newWalletToAdd,
-                {
-                    from: registeredWallet0,
-                },
+            const transactionID = await helper.submitAddWallet(
+                accountProvider.get(), 0,
             );
 
             assert.isNotOk(
-                (await multisig.transactions.call(transactionID)).executed,
+                (await helper.multisig().transactions.call(transactionID)).executed,
                 'Transaction should not be confirmed because of '
-                + '2-wallets-2-required setup.',
+                    + '2-wallets-2-required setup.',
             );
 
-            await multisig.confirmTransaction(
-                transactionID,
-                {
-                    from: registeredWallet1,
-                },
+            await helper.multisig().confirmTransaction(
+                transactionID, { from: helper.wallet(1) },
             );
 
             assert.isOk(
-                (await multisig.transactions.call(transactionID)).executed,
+                (await helper.multisig().transactions.call(transactionID)).executed,
                 'Transaction should be confirmed because two wallets '
                 + 'has confirmed it.',
             );
