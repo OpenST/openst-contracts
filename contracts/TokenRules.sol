@@ -331,7 +331,7 @@ contract TokenRules {
     }
 
     /**
-     * @dev Function requies:
+     * @dev Function requires:
      *          - _transfersTo and _transfersAmount arrays length should match.
      *
      * @return Returns true, if all registered global constraints

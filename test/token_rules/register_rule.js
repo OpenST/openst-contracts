@@ -94,7 +94,7 @@ contract('TokenRules::registerRule', async () => {
                     bRuleAbi,
                     { from: organizationAddress },
                 ),
-                'Should revert as a rule with the same name already registered',
+                'Should revert as a rule with the same name already registered.',
                 'Rule with the specified name already exists.',
             );
         });

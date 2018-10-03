@@ -81,7 +81,7 @@ contract('TokenRules::removeGlobalConstraint', async () => {
     contract('Events', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
 
-        it('Emitts GlobalConstraintRemoved on removing global constraint.', async () => {
+        it('Emits GlobalConstraintRemoved on removing global constraint.', async () => {
             const {
                 tokenRules,
                 organizationAddress,
