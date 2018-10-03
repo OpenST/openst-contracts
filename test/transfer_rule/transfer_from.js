@@ -48,6 +48,7 @@ contract('TransferRule::transferFrom', async () => {
 				assert.equal(await transferRuleInstance.transferFrom.call(fromUser, toUser, amount), true, 'transferFrom method failed');
 				await transferRuleInstance.transferFrom(fromUser, toUser, amount);
 				
+				assert.equal(await tokenRulesMockInstance.called.call(), true,"Execute transfers was not called");
 				assert.equal(await tokenRulesMockInstance.from.call(), fromUser,"From address not set correctly");
 				assert.equal(await tokenRulesMockInstance.transferTo.call(0), toUser,"To address not set correctly");
 				assert.equal(await tokenRulesMockInstance.transferAmount.call(0), amount,"Amount is not set correctly");
