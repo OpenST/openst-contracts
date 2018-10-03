@@ -32,6 +32,7 @@ contract MockRule {
     /* Storage */
 
     address public value;
+    uint256 public receivedPayableAmount;
 
 
     /* Public Functions */
@@ -52,5 +53,16 @@ contract MockRule {
     {
         require(_value != address(0), "Value is null.");
         value = _value;
+    }
+
+    function passPayable(
+        address _value
+    )
+        public
+        payable
+    {
+        require(_value != address(0), "Value is null.");
+        value = _value;
+        receivedPayableAmount = msg.value;
     }
 }
