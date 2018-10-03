@@ -16,6 +16,7 @@ const BN = require('bn.js');
 const web3 = require('../test_lib/web3.js');
 const utils = require('../test_lib/utils.js');
 const { Event } = require('../test_lib/event_decoder');
+const { MultiSigWalletHelper } = require('../test_lib/multisigwallet_helper.js');
 
 const MultiSigWallet = artifacts.require('MultiSigWallet');
 
@@ -169,7 +170,6 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                     _oldWallet: registeredWallet1,
                     _newWallet: newWalletForReplacement,
                 },
-                logIndex: 0,
             });
 
             // The second emitted event should be 'TransactionConfirmed', as
@@ -180,7 +180,6 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                     _transactionID: new BN(0),
                     _wallet: registeredWallet0,
                 },
-                logIndex: 1,
             });
 
             // The third emitted event should be 'TransactionExecutionSucceeded'
@@ -191,7 +190,6 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                 args: {
                     _transactionID: new BN(0),
                 },
-                logIndex: 2,
             });
         });
 
@@ -232,7 +230,6 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                     _oldWallet: registeredWallet1,
                     _newWallet: newWalletToReplace,
                 },
-                logIndex: 0,
             });
 
             // The second emitted event should be 'TransactionConfirmed', as
@@ -243,7 +240,6 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                     _transactionID: new BN(0),
                     _wallet: registeredWallet0,
                 },
-                logIndex: 1,
             });
         });
     });
@@ -258,12 +254,14 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
 
             const multisig = await MultiSigWallet.new(wallets, 1);
 
-            await multisig.submitReplaceWallet(
+            const transactionID = await MultiSigWalletHelper.submitReplaceWallet(
+                multisig,
                 registeredWallet1,
                 newWalletForReplacement,
+                {
+                    from: registeredWallet0,
+                },
             );
-
-            const transactionID = 0;
 
             assert.isOk(
                 await multisig.isWallet.call(newWalletForReplacement),
@@ -338,12 +336,14 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
 
             const multisig = await MultiSigWallet.new(wallets, 2);
 
-            await multisig.submitReplaceWallet(
+            const transactionID = await MultiSigWalletHelper.submitReplaceWallet(
+                multisig,
                 registeredWallet1,
                 newWalletForReplacement,
+                {
+                    from: registeredWallet0,
+                },
             );
-
-            const transactionID = 0;
 
             assert.isOk(
                 await multisig.isWallet.call(registeredWallet1),
