@@ -22,145 +22,103 @@
 const BN = require('bn.js');
 const utils = require('../test_lib/utils.js');
 const { Event } = require('../test_lib/event_decoder.js');
-const { MultiSigWalletHelper } = require('../test_lib/multisigwallet_helper.js');
-
-const MultiSigWallet = artifacts.require('MultiSigWallet');
+const { AccountProvider } = require('../test_lib/utils.js');
+const { MultiSigWalletUtils } = require('./utils.js');
 
 contract('MultiSigWallet::revokeConfirmation', async () => {
-    contract('Negative testing for input parameters.', async (accounts) => {
-        it('Non registered wallet submits a revocation request.', async () => {
-            const required = 2;
+    contract('Negative Tests', async (accounts) => {
+        const accountProvider = new AccountProvider(accounts);
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-            const newWalletToAdd = accounts[2];
-            const nonRegisteredWallet = accounts[3];
+        it('Reverts if non-registered wallet calls.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 2, required: 2 },
+            );
 
-            const wallets = [registeredWallet0, registeredWallet1];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            const transactionID = await MultiSigWalletHelper.submitAddWallet(
-                multisig,
-                newWalletToAdd,
-                {
-                    from: registeredWallet0,
-                },
+            const transactionID = await helper.submitAddWallet(
+                accountProvider.get(), 0,
             );
 
             await utils.expectRevert(
-                multisig.revokeConfirmation(
+                helper.multisig().revokeConfirmation(
                     transactionID,
                     {
-                        from: nonRegisteredWallet,
+                        from: accountProvider.get(),
                     },
                 ),
-                'Non registered wallet cannot request revocation.',
+                'Should revert as non-registered wallet calls.',
+                'Only wallet is allowed to call.',
             );
         });
 
-        it('Revocation requested for non existing transaction.', async () => {
-            const required = 1;
-            const registeredWallet0 = accounts[0];
-            const wallets = [registeredWallet0];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
+        it('Reverts if transaction ID does not exist.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 1, required: 1 },
+            );
 
             const nonExistingTransactionID = 11;
 
             await utils.expectRevert(
-                multisig.revokeConfirmation(
+                helper.multisig().revokeConfirmation(
                     nonExistingTransactionID,
-                    {
-                        from: registeredWallet0,
-                    },
+                    { from: helper.wallet(0) },
                 ),
+                'Should revert as transaction ID does not exist.',
+                'Transaction does not exist.',
             );
         });
 
-        it('Revocation request for non confirmed transaction. ', async () => {
-            const required = 2;
+        it('Reverts if revocation request was not confirmed by caller wallet.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 2, required: 2 },
+            );
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-            const newWalletToAdd = accounts[2];
-
-            const wallets = [registeredWallet0, registeredWallet1];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            const transactionID = await MultiSigWalletHelper.submitAddWallet(
-                multisig,
-                newWalletToAdd,
-                {
-                    from: registeredWallet0,
-                },
+            const transactionID = await helper.submitAddWallet(
+                accountProvider.get(), 0,
             );
 
             await utils.expectRevert(
-                multisig.revokeConfirmation(
+                helper.multisig().revokeConfirmation(
                     transactionID,
-                    {
-                        from: registeredWallet1,
-                    },
+                    { from: helper.wallet(1) },
                 ),
+                'Should revert as caller wallet did not confirm the transaction.',
+                'Transaction is not confirmed by the wallet.',
             );
         });
 
-        it('Revocation request for an executed transaction. ', async () => {
-            const required = 1;
+        it('Reverts if revocation is requested for already executed transaction.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 1, required: 1 },
+            );
 
-            const registeredWallet0 = accounts[0];
-            const newWalletToAdd = accounts[1];
-
-            const wallets = [registeredWallet0];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            const transactionID = await MultiSigWalletHelper.submitAddWallet(
-                multisig,
-                newWalletToAdd,
-                {
-                    from: registeredWallet0,
-                },
+            const transactionID = await helper.submitAddWallet(
+                accountProvider.get(), 0,
             );
 
             await utils.expectRevert(
-                multisig.revokeConfirmation(
+                helper.multisig().revokeConfirmation(
                     transactionID,
-                    {
-                        from: registeredWallet0,
-                    },
+                    { from: helper.wallet(0) },
                 ),
             );
         });
     });
 
     contract('Events', async (accounts) => {
-        it('Check the revocation is fired.', async () => {
-            const required = 2;
+        const accountProvider = new AccountProvider(accounts);
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-            const newWalletToAdd = accounts[2];
-
-            const wallets = [registeredWallet0, registeredWallet1];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            const transactionID = await MultiSigWalletHelper.submitAddWallet(
-                multisig,
-                newWalletToAdd,
-                {
-                    from: registeredWallet0,
-                },
+        it('Emits TransactionConfirmationRevoked on successfull revocation.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 2, required: 2 },
             );
 
-            const transactionResponse = await multisig.revokeConfirmation(
+            const transactionID = await helper.submitAddWallet(
+                accountProvider.get(), 0,
+            );
+
+            const transactionResponse = await helper.multisig().revokeConfirmation(
                 transactionID,
-                {
-                    from: registeredWallet0,
-                },
+                { from: helper.wallet(0) },
             );
 
             const events = Event.decodeTransactionResponse(
@@ -172,52 +130,44 @@ contract('MultiSigWallet::revokeConfirmation', async () => {
                 1,
             );
 
-            // The first emitted event should be
-            // 'TransactionConfirmationRevoked'.
+            // The first emitted event should be 'TransactionConfirmationRevoked'.
             Event.assertEqual(events[0], {
                 name: 'TransactionConfirmationRevoked',
                 args: {
                     _transactionID: new BN(0),
-                    _wallet: registeredWallet0,
+                    _wallet: helper.wallet(0),
                 },
-                logIndex: 0,
             });
         });
     });
 
     contract('Storage', async (accounts) => {
-        it('Check revocation is cleared for submitter wallet.', async () => {
-            const required = 2;
+        const accountProvider = new AccountProvider(accounts);
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-            const newWalletToAdd = accounts[2];
+        it('Checks that wallet confirmation flag is cleared.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 2, required: 2 },
+            );
 
-            const wallets = [registeredWallet0, registeredWallet1];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            const transactionID = await MultiSigWalletHelper.submitAddWallet(
-                multisig,
-                newWalletToAdd,
-                {
-                    from: registeredWallet0,
-                },
+            const transactionID = await helper.submitAddWallet(
+                accountProvider.get(), 0,
             );
 
             assert.isOk(
-                await multisig.confirmations(transactionID, registeredWallet0),
+                await helper.multisig().confirmations(
+                    transactionID, helper.wallet(0),
+                ),
             );
 
-            await multisig.revokeConfirmation(
+            await helper.multisig().revokeConfirmation(
                 transactionID,
-                {
-                    from: registeredWallet0,
-                },
+                { from: helper.wallet(0) },
             );
 
             assert.isNotOk(
-                await multisig.confirmations(transactionID, registeredWallet0),
+                await helper.multisig().confirmations(
+                    transactionID, helper.wallet(0),
+                ),
             );
         });
     });

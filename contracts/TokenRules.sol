@@ -16,7 +16,7 @@ pragma solidity ^0.4.23;
 
 import "./GlobalConstraintInterface.sol";
 import "./SafeMath.sol";
-import "./openst-protocol/EIP20Interface.sol";
+import "./EIP20TokenInterface.sol";
 
 
 /**
@@ -92,7 +92,7 @@ contract TokenRules {
     address[] public globalConstraints;
 
     address public organization;
-    address public token;
+    EIP20TokenInterface public token;
 
     /**
      * TokenHolder contract before a rule execution will set the flag
@@ -131,7 +131,7 @@ contract TokenRules {
      */
     constructor(
         address _organization,
-        address _token
+        EIP20TokenInterface _token
     )
         public
     {
@@ -254,7 +254,7 @@ contract TokenRules {
         );
 
         for(uint256 i = 0; i < _transfersTo.length; ++i) {
-            EIP20Interface(token).transferFrom(
+            token.transferFrom(
                 _from,
                 _transfersTo[i],
                 _transfersAmount[i]

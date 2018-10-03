@@ -16,9 +16,8 @@ const BN = require('bn.js');
 const web3 = require('../test_lib/web3.js');
 const utils = require('../test_lib/utils.js');
 const { Event } = require('../test_lib/event_decoder');
-const { MultiSigWalletHelper } = require('../test_lib/multisigwallet_helper.js');
-
-const MultiSigWallet = artifacts.require('MultiSigWallet');
+const { AccountProvider } = require('../test_lib/utils.js');
+const { MultiSigWalletUtils } = require('./utils.js');
 
 function generateRemoveWalletData(wallet) {
     return web3.eth.abi.encodeFunctionCall(
@@ -35,108 +34,69 @@ function generateRemoveWalletData(wallet) {
 }
 
 contract('MultiSigWallet::submitReplaceWallet', async () => {
-    contract('Negative testing for input parameters.', async (accounts) => {
-        it('Non registered wallet submits a wallet removal.', async () => {
-            const required = 1;
+    contract('Negative Tests', async (accounts) => {
+        const accountProvider = new AccountProvider(accounts);
 
-            const registeredWallet0 = accounts[0];
-            const nonRegisteredWallet = accounts[1];
-            const walletToRemove = accounts[2];
-
-            const wallets = [registeredWallet0];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
+        it('Reverts if non-registered wallet calls.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 1, required: 1 },
+            );
 
             await utils.expectRevert(
-                multisig.submitRemoveWallet(
-                    walletToRemove,
-                    {
-                        from: nonRegisteredWallet,
-                    },
+                helper.multisig().submitRemoveWallet(
+                    accountProvider.get(),
+                    { from: accountProvider.get() },
                 ),
-                'Non registered wallet cannot submit a wallet removal.',
+                'Should revert as non-registered wallet calls.',
+                'Only wallet is allowed to call.',
             );
         });
 
-        it('Non registered wallet submitted for removal.', async () => {
-            const required = 1;
-
-            const registeredWallet0 = accounts[0];
-            const nonRegisteredWallet = accounts[1];
-
-            const wallets = [registeredWallet0];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
+        it('Reverts if wallet to remove does not exist.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 1, required: 1 },
+            );
 
             await utils.expectRevert(
-                multisig.submitRemoveWallet(
-                    nonRegisteredWallet,
-                    {
-                        from: registeredWallet0,
-                    },
+                helper.multisig().submitRemoveWallet(
+                    accountProvider.get(),
+                    { from: helper.wallet(0) },
                 ),
-                'Null wallet cannot be submitted for removal.',
+                'Should revert as wallet to remove does not exist.',
+                'Wallet does not exist.',
             );
         });
 
-        it('Null wallet submitted for removal.', async () => {
-            const required = 1;
-
-            const registeredWallet0 = accounts[0];
-            const nullWallet = utils.NULL_ADDRESS;
-
-            const wallets = [registeredWallet0];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            await utils.expectRevert(
-                multisig.submitRemoveWallet(
-                    nullWallet,
-                    {
-                        from: registeredWallet0,
-                    },
-                ),
-                'Null wallet cannot be submitted for removal.',
+        it('Reverts if last wallet is going to be removed.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 1, required: 1 },
             );
-        });
-
-        it('Last wallet removal attempt.', async () => {
-            const required = 1;
-
-            const registeredWallet0 = accounts[0];
-
-            const wallets = [registeredWallet0];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
 
             await utils.expectRevert(
-                multisig.submitRemoveWallet(
-                    registeredWallet0,
+                helper.multisig().submitRemoveWallet(
+                    helper.wallet(0),
                     {
-                        from: registeredWallet0,
+                        from: helper.wallet(0),
                     },
                 ),
-                'Last wallet cannot be removed from multisig.',
+                'Should revert as last wallet is submitted for removal',
+                'Last wallet cannot be submitted for removal.',
             );
         });
     });
 
     contract('Events', async (accounts) => {
-        it('Submit => Confirm => Execute', async () => {
-            const required = 1;
+        const accountProvider = new AccountProvider(accounts);
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
+        it('Emits WalletRemovalSubmitted, TransactionConfirmed '
+        + 'TransactionExecutionSucceeded events.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 2, required: 1 },
+            );
 
-            const wallets = [registeredWallet0, registeredWallet1];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            const transactionResponse = await multisig.submitRemoveWallet(
-                registeredWallet1,
-                {
-                    from: registeredWallet0,
-                },
+            const transactionResponse = await helper.multisig().submitRemoveWallet(
+                helper.wallet(1),
+                { from: helper.wallet(0) },
             );
 
             const events = Event.decodeTransactionResponse(
@@ -158,7 +118,7 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                 name: 'WalletRemovalSubmitted',
                 args: {
                     _transactionID: new BN(0),
-                    _wallet: registeredWallet1,
+                    _wallet: helper.wallet(1),
                 },
             });
 
@@ -169,7 +129,7 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                 name: 'TransactionConfirmed',
                 args: {
                     _transactionID: new BN(0),
-                    _wallet: registeredWallet0,
+                    _wallet: helper.wallet(0),
                 },
             });
 
@@ -184,24 +144,14 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
             });
         });
 
-        it('Submit => Confirm', async () => {
-            const required = 2;
+        it('Emits WalletRemovalSubmitted and TransactionConfirmed.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 3, required: 2 },
+            );
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-            const registeredWallet2 = accounts[2];
-
-            const wallets = [
-                registeredWallet0, registeredWallet1, registeredWallet2,
-            ];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            const transactionResponse = await multisig.submitRemoveWallet(
-                registeredWallet1,
-                {
-                    from: registeredWallet0,
-                },
+            const transactionResponse = await helper.multisig().submitRemoveWallet(
+                helper.wallet(1),
+                { from: helper.wallet(0) },
             );
 
             const events = Event.decodeTransactionResponse(
@@ -221,7 +171,7 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                 name: 'WalletRemovalSubmitted',
                 args: {
                     _transactionID: new BN(0),
-                    _wallet: registeredWallet1,
+                    _wallet: helper.wallet(1),
                 },
             });
 
@@ -232,68 +182,61 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
                 name: 'TransactionConfirmed',
                 args: {
                     _transactionID: new BN(0),
-                    _wallet: registeredWallet0,
+                    _wallet: helper.wallet(0),
                 },
             });
         });
     });
 
     contract('Storage', async (accounts) => {
-        it('Submit => Confirm => Execute', async () => {
-            const required = 1;
+        const accountProvider = new AccountProvider(accounts);
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-
-            const wallets = [registeredWallet0, registeredWallet1];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            const transactionID = await MultiSigWalletHelper.submitRemoveWallet(
-                multisig,
-                registeredWallet1,
-                {
-                    from: registeredWallet0,
-                },
+        it('Checks state in case of 2-wallets-1-required.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 2, required: 1 },
             );
 
+            const transactionID = await helper.submitRemoveWallet(1, 0);
+
             assert.isNotOk(
-                await multisig.isWallet.call(registeredWallet1),
+                await helper.multisig().isWallet.call(helper.wallet(1)),
                 'Wallet will be removed because of 2-wallets-1-required '
                 + 'setup.',
             );
 
             assert.isOk(
-                (await multisig.walletCount.call()).eqn(1),
+                (await helper.multisig().walletCount.call()).eqn(1),
             );
 
             assert.strictEqual(
-                await multisig.wallets.call(0),
-                registeredWallet0,
+                await helper.multisig().wallets.call(0),
+                helper.wallet(0),
             );
 
             assert.isOk(
-                (await multisig.required.call()).eqn(1),
+                (await helper.multisig().required.call()).eqn(1),
             );
 
             assert.isOk(
-                await multisig.confirmations(transactionID, registeredWallet0),
+                await helper.multisig().confirmations(
+                    transactionID, helper.wallet(0),
+                ),
             );
 
             assert.isOk(
-                (await multisig.transactionCount.call()).eqn(1),
+                (await helper.multisig().transactionCount.call()).eqn(1),
             );
 
-            const transaction = await multisig.transactions.call(transactionID);
+            const transaction = await helper.multisig().transactions.call(transactionID);
 
             assert.strictEqual(
                 transaction.destination,
-                multisig.address,
+                helper.multisig().address,
             );
 
             assert.strictEqual(
                 transaction.data,
-                generateRemoveWalletData(registeredWallet1),
+                generateRemoveWalletData(helper.wallet(1)),
             );
 
             assert.strictEqual(
@@ -302,74 +245,62 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
             );
         });
 
-        it('Submit => Confirm', async () => {
-            const required = 2;
-
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-            const registeredWallet2 = accounts[2];
-
-            const wallets = [
-                registeredWallet0, registeredWallet1, registeredWallet2,
-            ];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            const transactionID = await MultiSigWalletHelper.submitRemoveWallet(
-                multisig,
-                registeredWallet1,
-                {
-                    from: registeredWallet0,
-                },
+        it('Checks state in case of 3-wallets-2-required.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 3, required: 2 },
             );
 
+            const transactionID = await helper.submitRemoveWallet(1, 0);
+
             assert.isOk(
-                await multisig.isWallet.call(registeredWallet1),
+                await helper.multisig().isWallet.call(helper.wallet(1)),
                 'Wallet will not be removed because of 3-wallets-2-required '
                 + 'setup.',
             );
 
             assert.isOk(
-                (await multisig.walletCount.call()).eqn(3),
+                (await helper.multisig().walletCount.call()).eqn(3),
             );
 
             assert.strictEqual(
-                await multisig.wallets.call(0),
-                registeredWallet0,
+                await helper.multisig().wallets.call(0),
+                helper.wallet(0),
             );
 
             assert.strictEqual(
-                await multisig.wallets.call(1),
-                registeredWallet1,
+                await helper.multisig().wallets.call(1),
+                helper.wallet(1),
             );
 
             assert.strictEqual(
-                await multisig.wallets.call(2),
-                registeredWallet2,
+                await helper.multisig().wallets.call(2),
+                helper.wallet(2),
             );
 
             assert.isOk(
-                (await multisig.required.call()).eqn(2),
+                (await helper.multisig().required.call()).eqn(2),
             );
 
             assert.isOk(
-                await multisig.confirmations(transactionID, registeredWallet0),
+                await helper.multisig().confirmations(
+                    transactionID, helper.wallet(0),
+                ),
             );
 
             assert.isOk(
-                (await multisig.transactionCount.call()).eqn(1),
+                (await helper.multisig().transactionCount.call()).eqn(1),
             );
 
-            const transaction = await multisig.transactions.call(transactionID);
+            const transaction = await helper.multisig().transactions.call(transactionID);
 
             assert.strictEqual(
                 transaction.destination,
-                multisig.address,
+                helper.multisig().address,
             );
 
             assert.strictEqual(
                 transaction.data,
-                generateRemoveWalletData(registeredWallet1),
+                generateRemoveWalletData(helper.wallet(1)),
             );
 
             assert.strictEqual(
@@ -378,39 +309,24 @@ contract('MultiSigWallet::submitReplaceWallet', async () => {
             );
         });
 
-        it('Submit => Confirm => Confirm => Requirement Change', async () => {
-            const required = 2;
-
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-
-            const wallets = [
-                registeredWallet0, registeredWallet1,
-            ];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            const transactionID = await MultiSigWalletHelper.submitRemoveWallet(
-                multisig,
-                registeredWallet1,
-                {
-                    from: registeredWallet0,
-                },
+        it('Checks that requirement is adjusted after removal.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 2, required: 2 },
             );
+
+            const transactionID = await helper.submitRemoveWallet(1, 0);
 
             assert.isOk(
-                (await multisig.required.call()).eqn(2),
+                (await helper.multisig().required.call()).eqn(2),
             );
 
-            await multisig.confirmTransaction(
+            await helper.multisig().confirmTransaction(
                 transactionID,
-                {
-                    from: registeredWallet1,
-                },
+                { from: helper.wallet(1) },
             );
 
             assert.isOk(
-                (await multisig.required.call()).eqn(1),
+                (await helper.multisig().required.call()).eqn(1),
                 'After removing the wallet the required should be updated '
                 + 'to max wallet count, in this case 1.',
             );

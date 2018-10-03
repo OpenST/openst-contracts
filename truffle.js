@@ -19,7 +19,7 @@ module.exports = {
         optimizer: {
             enabled: true,
             // set to same number of runs as openst-platform
-            // so that integration tests on openst-protocol
+            // so that integration tests
             // give accurate gas measurements
             runs: 200,
         },

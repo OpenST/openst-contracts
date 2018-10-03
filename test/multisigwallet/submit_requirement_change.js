@@ -22,10 +22,10 @@
 const BN = require('bn.js');
 const web3 = require('../test_lib/web3.js');
 const utils = require('../test_lib/utils.js');
-const { Event } = require('../test_lib/event_decoder.js');
-const { MultiSigWalletHelper } = require('../test_lib/multisigwallet_helper.js');
+const { Event } = require('../test_lib/event_decoder');
+const { AccountProvider } = require('../test_lib/utils.js');
+const { MultiSigWalletUtils } = require('./utils.js');
 
-const MultiSigWallet = artifacts.require('MultiSigWallet');
 
 function generateRequirementChangeData(required) {
     return web3.eth.abi.encodeFunctionCall(
@@ -42,94 +42,70 @@ function generateRequirementChangeData(required) {
 }
 
 contract('MultiSigWallet::submitRequirementChange', async () => {
-    contract('Negative testing for input parameters.', async (accounts) => {
-        it('Non registered wallet submits a wallet removal.', async () => {
-            const required = 1;
+    contract('Negative Tests', async (accounts) => {
+        const accountProvider = new AccountProvider(accounts);
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-            const nonRegisteredWallet = accounts[2];
+        it('Reverts if non-registered wallet calls.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 2, required: 1 },
+            );
 
-            const newRequired = 2;
-
-            const wallets = [registeredWallet0, registeredWallet1];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
 
             await utils.expectRevert(
-                multisig.submitRequirementChange(
-                    newRequired,
-                    {
-                        from: nonRegisteredWallet,
-                    },
+                helper.multisig().submitRequirementChange(
+                    2,
+                    { from: accountProvider.get() },
                 ),
-                'Non registered wallet cannot submit a requirement change.',
+                'Should revert as non-registered wallet calls.',
+                'Only wallet is allowed to call.',
             );
         });
 
-        contract('Submitting invalid requirement.', async () => {
-            it('Required is 0.', async () => {
-                const required = 1;
+        it('Should revert if new requirement equal to 0.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 1, required: 1 },
+            );
 
-                const registeredWallet0 = accounts[0];
+            await utils.expectRevert(
+                helper.multisig().submitRequirementChange(
+                    0,
+                    { from: helper.wallet(0) },
+                ),
+                'Should revert as new requirement is 0.',
+                'Requirement validity not fulfilled.',
+            );
+        });
 
-                const wallets = [registeredWallet0];
+        it('Should revert if new requirement is bigger than wallets count.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 1, required: 1 },
+            );
 
-                const multisig = await MultiSigWallet.new(wallets, required);
-
-                const newRequired = 0;
-
-                await utils.expectRevert(
-                    multisig.submitRequirementChange(
-                        newRequired,
-                        {
-                            from: registeredWallet0,
-                        },
-                    ),
-                    'Required is 0.',
-                );
-            });
-            it('Required is bigger then wallet counts.', async () => {
-                const required = 1;
-
-                const registeredWallet0 = accounts[0];
-
-                const wallets = [registeredWallet0];
-
-                const multisig = await MultiSigWallet.new(wallets, required);
-
-                const newRequired = 2;
-
-                await utils.expectRevert(
-                    multisig.submitRequirementChange(
-                        newRequired,
-                        {
-                            from: registeredWallet0,
-                        },
-                    ),
-                    'Wallets count is 1 and proposed required is 2.',
-                );
-            });
+            await utils.expectRevert(
+                helper.multisig().submitRequirementChange(
+                    2,
+                    { from: helper.wallet(0) },
+                ),
+                'Should revert as new requirement is 2 and wallet counts is 1.',
+                'Requirement validity not fulfilled.',
+            );
         });
     });
+
     contract('Events', async (accounts) => {
-        it('Submit => Confirm => Execute', async () => {
-            const required = 1;
+        const accountProvider = new AccountProvider(accounts);
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-
-            const wallets = [registeredWallet0, registeredWallet1];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
+        it('Emits RequirementChangeSubmitted, TransactionConfirmed '
+        + 'TransactionExecutionSucceeded events.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 2, required: 1 },
+            );
 
             const newRequired = 2;
 
-            const transactionResponse = await multisig.submitRequirementChange(
+            const transactionResponse = await helper.multisig().submitRequirementChange(
                 newRequired,
-                {
-                    from: registeredWallet0,
-                },
+                { from: helper.wallet(0) },
             );
 
             const events = Event.decodeTransactionResponse(
@@ -152,7 +128,6 @@ contract('MultiSigWallet::submitRequirementChange', async () => {
                     _transactionID: new BN(0),
                     _required: new BN(newRequired),
                 },
-                logIndex: 0,
             });
 
             // The second emitted event should be 'TransactionConfirmed', as
@@ -161,9 +136,8 @@ contract('MultiSigWallet::submitRequirementChange', async () => {
                 name: 'TransactionConfirmed',
                 args: {
                     _transactionID: new BN(0),
-                    _wallet: registeredWallet0,
+                    _wallet: helper.wallet(0),
                 },
-                logIndex: 1,
             });
 
             // The third emitted event should be 'TransactionExecutionSucceeded'
@@ -174,29 +148,19 @@ contract('MultiSigWallet::submitRequirementChange', async () => {
                 args: {
                     _transactionID: new BN(0),
                 },
-                logIndex: 2,
             });
         });
-        it('Submit => Confirm', async () => {
-            const required = 2;
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-            const registeredWallet2 = accounts[2];
-
-            const wallets = [
-                registeredWallet0, registeredWallet1, registeredWallet2,
-            ];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
+        it('Emits RequirementChangeSubmitted and TransactionConfirmed.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 3, required: 2 },
+            );
 
             const newRequired = 3;
 
-            const transactionResponse = await multisig.submitRequirementChange(
+            const transactionResponse = await helper.multisig().submitRequirementChange(
                 newRequired,
-                {
-                    from: registeredWallet0,
-                },
+                { from: helper.wallet(0) },
             );
 
             const events = Event.decodeTransactionResponse(
@@ -218,7 +182,6 @@ contract('MultiSigWallet::submitRequirementChange', async () => {
                     _transactionID: new BN(0),
                     _required: new BN(newRequired),
                 },
-                logIndex: 0,
             });
 
             // The second emitted event should be 'TransactionConfirmed', as
@@ -227,60 +190,57 @@ contract('MultiSigWallet::submitRequirementChange', async () => {
                 name: 'TransactionConfirmed',
                 args: {
                     _transactionID: new BN(0),
-                    _wallet: registeredWallet0,
+                    _wallet: helper.wallet(0),
                 },
-                logIndex: 1,
             });
         });
     });
 
     contract('Storage', async (accounts) => {
-        it('Submit => Confirm => Execute', async () => {
-            const required = 1;
+        const accountProvider = new AccountProvider(accounts);
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-
-            const wallets = [registeredWallet0, registeredWallet1];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
+        it('Checks state in case of 2-wallets-1-required.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 2, required: 1 },
+            );
 
             const newRequired = 2;
 
-            const transactionID = await MultiSigWalletHelper.submitRequirementChange(
-                multisig,
+            const transactionID = await helper.submitRequirementChange(
                 newRequired,
-                {
-                    from: registeredWallet0,
-                },
+                0,
             );
 
             assert.isOk(
-                (await multisig.required.call()).eqn(newRequired),
+                (await helper.multisig().required.call()).eqn(newRequired),
                 'As required is equal to 1, the transaction would be '
                 + 'executed in the same call.',
             );
 
             assert.isOk(
-                await multisig.confirmations(transactionID, registeredWallet0),
+                await helper.multisig().confirmations(
+                    transactionID, helper.wallet(0),
+                ),
                 'Submitter should also confirm.',
             );
 
             assert.isNotOk(
-                await multisig.confirmations(transactionID, registeredWallet1),
+                await helper.multisig().confirmations(
+                    transactionID, helper.wallet(1),
+                ),
                 'Non submitter should not confirm.',
             );
 
             assert.isOk(
-                (await multisig.transactionCount.call()).eqn(1),
+                (await helper.multisig().transactionCount.call()).eqn(1),
                 'Transaction count should be increased by one.',
             );
 
-            const transaction = await multisig.transactions.call(transactionID);
+            const transaction = await helper.multisig().transactions.call(transactionID);
 
             assert.strictEqual(
                 transaction.destination,
-                multisig.address,
+                helper.multisig().address,
             );
 
             assert.strictEqual(
@@ -294,60 +254,53 @@ contract('MultiSigWallet::submitRequirementChange', async () => {
             );
         });
 
-        it('Submit => Confirm', async () => {
+        it('Checks state in case of 3-wallets-2-required.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 3, required: 2 },
+            );
+
             const required = 2;
-
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-            const registeredWallet2 = accounts[2];
-
-            const wallets = [
-                registeredWallet0, registeredWallet1, registeredWallet2,
-            ];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
             const newRequired = 3;
 
-            const transactionID = await MultiSigWalletHelper.submitRequirementChange(
-                multisig,
-                newRequired,
-                {
-                    from: registeredWallet0,
-                },
+            const transactionID = await helper.submitRequirementChange(
+                newRequired, 0,
             );
 
             assert.isOk(
-                (await multisig.required.call()).eqn(required),
+                (await helper.multisig().required.call()).eqn(required),
                 'As required is equal to 2, the transaction would not be '
                 + 'executed in the same call.',
             );
 
             assert.isOk(
-                await multisig.confirmations(transactionID, registeredWallet0),
+                await helper.multisig().confirmations(
+                    transactionID, helper.wallet(0),
+                ),
                 'Submitter should also confirm.',
             );
 
             assert.isNotOk(
-                await multisig.confirmations(transactionID, registeredWallet1),
+                await helper.multisig().confirmations(
+                    transactionID, helper.wallet(1),
+                ),
                 'Non submitter should not confirm.',
             );
 
             assert.isNotOk(
-                await multisig.confirmations(transactionID, registeredWallet2),
+                await helper.multisig().confirmations(transactionID, helper.wallet(2)),
                 'Non submitter should not confirm.',
             );
 
             assert.isOk(
-                (await multisig.transactionCount.call()).eqn(1),
+                (await helper.multisig().transactionCount.call()).eqn(1),
                 'Transaction count should be increased by one.',
             );
 
-            const transaction = await multisig.transactions.call(transactionID);
+            const transaction = await helper.multisig().transactions.call(transactionID);
 
             assert.strictEqual(
                 transaction.destination,
-                multisig.address,
+                helper.multisig().address,
             );
 
             assert.strictEqual(
