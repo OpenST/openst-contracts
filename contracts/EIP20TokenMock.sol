@@ -14,16 +14,8 @@ pragma solidity ^0.4.23;
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// ----------------------------------------------------------------------------
-// Utility chain: EIP20TokenMock
-//
-// http://www.simpletoken.org/
-//
-// ----------------------------------------------------------------------------
 
-
-import "./openst-protocol/EIP20Token.sol";
+import "./EIP20Token.sol";
 
 
 /// @title EIP20TokenMock - Provides EIP20Token with mock functionality to facilitate testing payments 
