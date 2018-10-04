@@ -15,7 +15,7 @@ TokenRules Contract and custom Rule Contracts represent the administration funct
 
 #### Diagram
 
-![Image for readme](https://github.com/OpenSTFoundation/openst-contracts/blob/amulya/readme/OpenSTv0.9.4Components.jpg)
+![Image for readme](OpenSTv0.9.4Components.jpg)
 
 #### Related Repositories
 
