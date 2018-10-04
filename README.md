@@ -1,3 +1,11 @@
+<h1 align="center">OpenST - Empowering Decentralized Economies</h1>
+
+[![Gitter: JOIN CHAT](https://img.shields.io/badge/gitter-JOIN%20CHAT-brightgreen.svg)](https://gitter.im/OpenSTFoundation/SimpleToken)
+
+OpenST blockchain infrastructure empowers new economies for mainstream businesses and emerging (D)Apps. The central component of this infrastructure is the OpenST Protocol, a framework for tokenizing businesses.
+
+_While OpenST is available as-is for anyone to use, we caution that this is early stage software and under heavy ongoing development and improvement. Please report bugs and suggested improvements._
+
 #### Purpose
 
 This repository houses the work that focuses on improving the usability of decentralized applications.
