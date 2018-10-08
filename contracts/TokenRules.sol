@@ -17,6 +17,7 @@ pragma solidity ^0.4.23;
 import "./GlobalConstraintInterface.sol";
 import "./SafeMath.sol";
 import "./EIP20TokenInterface.sol";
+import "./Organized.sol";
 
 
 /**
@@ -37,7 +38,7 @@ import "./EIP20TokenInterface.sol";
  *      function only once. This allows global constraints to be checked
  *      on complete list of transfers.
  */
-contract TokenRules {
+contract TokenRules is Organized {
 
      /* Usings */
 
@@ -133,6 +134,7 @@ contract TokenRules {
         address _organization,
         EIP20TokenInterface _token
     )
+        Organized(_organization)
         public
     {
         require(_organization != address(0), "Organization address is null.");
@@ -164,7 +166,7 @@ contract TokenRules {
         string _ruleAbi
     )
         external
-        onlyOrganization
+        onlyWorker
     {
         require(bytes(_ruleName).length != 0, "Rule name is empty.");
         require(_ruleAddress != address(0), "Rule address is null.");
@@ -277,7 +279,7 @@ contract TokenRules {
         address _globalConstraintAddress
     )
         external
-        onlyOrganization
+        onlyWorker
     {
         require(
             _globalConstraintAddress != address(0),
@@ -305,7 +307,7 @@ contract TokenRules {
         address _globalConstraintAddress
     )
         external
-        onlyOrganization
+        onlyWorker
     {
         uint256 index = findGlobalConstraintIndex(_globalConstraintAddress);
 

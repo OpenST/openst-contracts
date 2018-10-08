@@ -38,7 +38,7 @@ contract Organized {
 
     /* Special functions */
 
-    constructor(Organization _organization)
+    constructor(address _organization)
         public
     {
         require(
@@ -46,7 +46,7 @@ contract Organized {
             "Organization contract address is null."
         );
 
-        organization = _organization;
+        organization = Organization(_organization);
     }
 
 }
