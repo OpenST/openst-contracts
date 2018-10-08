@@ -15,22 +15,21 @@ pragma solidity ^0.4.23;
 // limitations under the License.
 
 // TODO Documentation and styleguide changes.
-contract Organization {
+contract Owner {
 
-    address public organization;
-    address public proposedOrganization;
+    address public owner;
+    address public proposedOwner;
 
 
     /* Events */
 
-    event OrganizationTransferInitiated(
-        address _currentOrganization,
-        address _proposedOrganization
+    event OwnerTransferInitiated(
+        address _proposedOwner
     );
 
-    event OrganizationTransferCompleted(
-        address _previousOrganization,
-        address _newOrganization
+    event OwnerTransferCompleted(
+        address _previousOwner,
+        address _newOwner
     );
 
 
@@ -41,19 +40,19 @@ contract Organization {
     {
         require(
             msg.sender != address(0),
-            "Organization address is null."
+            "Owner address is null."
         );
-        organization = msg.sender;
+        owner = msg.sender;
     }
 
 
     /* Modifiers */
 
-    modifier onlyOrganization()
+    modifier onlyOwner()
     {
         require(
-            msg.sender == organization,
-            "Only organization is allowed to call."
+            msg.sender == owner,
+            "Only owner is allowed to call."
         );
         _;
     }
@@ -61,53 +60,48 @@ contract Organization {
 
     /* External Functions */
 
-    function isOrganization(address _address)
+    function isOwner(address _address)
         external
         view
         returns (bool)
     {
-        return (_address == organization);
+        return (_address == owner);
     }
 
 
     /* Public Functions */
 
-    function initiateOrganizationTransfer(address _proposedOrganization)
+    function initiateOwnerTransfer(address _proposedOwner)
         public
-        onlyOrganization
+        onlyOwner
         returns (bool)
     {
         require(
-            _proposedOrganization != address(0),
-            "Proposed organization address is null."
+            _proposedOwner != owner,
+            "ProposedOwner address can't be owner address."
         );
 
-        require(
-            _proposedOrganization != organization,
-            "Proposed organization address can't be organization address."
-        );
+        proposedOwner = _proposedOwner;
 
-        proposedOrganization = _proposedOrganization;
-
-        emit OrganizationTransferInitiated(organization, _proposedOrganization);
+        emit OwnerTransferInitiated(_proposedOwner);
 
         return true;
     }
 
-    function completeOrganizationTransfer()
+    function completeOwnerTransfer()
         public
         returns (bool)
     {
         require(
-            msg.sender == proposedOrganization,
-            "msg.sender is not proposed organization address."
+            msg.sender == proposedOwner,
+            "msg.sender is not proposed owner address."
         );
 
-        address oldOrganization = organization;
-        organization = proposedOrganization;
-        proposedOrganization = address(0);
+        address oldOwner = owner;
+        owner = proposedOwner;
+        proposedOwner = address(0);
 
-        emit OrganizationTransferCompleted(oldOrganization, organization);
+        emit OwnerTransferCompleted(oldOwner, owner);
 
         return true;
     }

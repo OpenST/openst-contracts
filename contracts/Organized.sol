@@ -16,15 +16,13 @@ pragma solidity ^0.4.23;
 
 import "./Organization.sol";
 
-// Question: Should we rename Organized to OrgManaged/Operative/OrgAuthorized?
-// Question: Do we need admin address?
 // TODO Documentation and Styleguide changes
 contract Organized {
 
 
     /* Events */
 
-    event OperatorAddressUpdated(address _oldOperator, address _newOperator);
+    event OperatorAddressChanged(address _oldOperator, address _newOperator);
 
     Organization public organization;
 
@@ -37,7 +35,7 @@ contract Organized {
     modifier onlyOrganization()
     {
         require(
-            organization.isOrganization(msg.sender),
+            organization.isOwner(msg.sender),
             "msg.sender is not organization address."
         );
         _;
@@ -52,10 +50,13 @@ contract Organized {
         _;
     }
 
+    /**
+    * It's needed for tokenrule
+    */
     modifier onlyAuthorized()
     {
         require(
-            organization.isOrganization(msg.sender) ||
+            organization.isOwner(msg.sender) ||
             (msg.sender == operator),
             "msg.sender is not authorized."
         );
@@ -70,7 +71,7 @@ contract Organized {
     {
         require(
             _organization != address(0),
-            "Organization contract address is 0."
+            "Organization contract address is null."
         );
 
         organization = _organization;
@@ -79,26 +80,22 @@ contract Organized {
 
     /* External Functions */
 
-    // Question: Should we allow reseting of operator?
+    // Allow address 0
+    // Allow resetting of operator with address 0
     function setOperator(address _operator)
         external
         onlyOrganization
         returns (bool)
     {
         require(
-            _operator != address(0),
-            "Operator address is null."
-        );
-
-        require(
-            !organization.isOrganization(_operator),
+            !organization.isOwner(_operator),
             "Operator address can't be organization address."
         );
 
         address oldOperator = operator;
         operator = _operator;
 
-        emit OperatorAddressUpdated(oldOperator, _operator);
+        emit OperatorAddressChanged(oldOperator, _operator);
 
         return true;
     }
