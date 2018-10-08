@@ -181,7 +181,7 @@ contract Organization {
         return _existed;
     }
 
-    function isWorker(address _worker) external view returns (bool)
+    function isWorker(address _worker) public view returns (bool)
     {
         return (workers[_worker] >= block.number);
     }
