@@ -25,11 +25,6 @@ pragma solidity ^0.4.23;
 // The MIT License.
 // ----------------------------------------------------------------------------
 
-
-/**
-   @title SafeMath
-   @notice Implements SafeMath
-*/
 pragma solidity ^0.4.24;
 
 /**
