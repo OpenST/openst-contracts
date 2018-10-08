@@ -1,6 +1,6 @@
 pragma solidity ^0.4.23;
 
-// Copyright 2017 OpenST Ltd.
+// Copyright 2018 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,23 +13,16 @@ pragma solidity ^0.4.23;
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// 
-// ----------------------------------------------------------------------------
-// Utility chain: EIP20 Token Implementation
-//
-// http://www.simpletoken.org/
-//
-// ----------------------------------------------------------------------------
 
-import "./EIP20Interface.sol";
-import "./../SafeMath.sol";
+import "./EIP20TokenInterface.sol";
+import "./SafeMath.sol";
 
 /**
  *  @title EIP20Token contract which implements EIP20Interface.
  *
  *  @notice Implements EIP20 token.
  */
-contract EIP20Token is EIP20Interface {
+contract EIP20Token is EIP20TokenInterface {
     using SafeMath for uint256;
 
     string private tokenName;

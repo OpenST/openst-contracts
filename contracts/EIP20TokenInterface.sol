@@ -1,6 +1,6 @@
 pragma solidity ^0.4.23;
 
-// Copyright 2017 OpenST Ltd.
+// Copyright 2018 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,24 +13,16 @@ pragma solidity ^0.4.23;
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// 
-// ----------------------------------------------------------------------------
-// Common: Standard EIP20 Interface
 //
-// http://www.simpletoken.org/
-//
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
 // Based on the 'final' EIP20 token standard as specified at:
 // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20-token-standard.md
-// ----------------------------------------------------------------------------
 
 /**
  *  @title EIP20Interface
  *
  *  @notice Provides EIP20 token interface
  */
-contract EIP20Interface {
+contract EIP20TokenInterface {
 
     /** Events */
 

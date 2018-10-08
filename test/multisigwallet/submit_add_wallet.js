@@ -11,20 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// ----------------------------------------------------------------------------
-// Test: MultiSigWallet::submitAddWallet
-//
-// http://www.simpletoken.org/
-//
-// ----------------------------------------------------------------------------
 
 const BN = require('bn.js');
 const web3 = require('../test_lib/web3.js');
 const utils = require('../test_lib/utils.js');
 const { Event } = require('../test_lib/event_decoder');
-
-const MultiSigWallet = artifacts.require('MultiSigWallet');
+const { AccountProvider } = require('../test_lib/utils.js');
+const { MultiSigWalletUtils } = require('./utils.js');
 
 function generateAddWalletData(wallet) {
     return web3.eth.abi.encodeFunctionCall(
@@ -41,87 +34,68 @@ function generateAddWalletData(wallet) {
 }
 
 contract('MultiSigWallet::submitAddWallet', async () => {
-    contract('Negative testing for input parameters:', async (accounts) => {
-        it('Non registered wallet submits.', async () => {
-            const required = 1;
+    contract('Negative Tests', async (accounts) => {
+        const accountProvider = new AccountProvider(accounts);
 
-            const registeredWallet0 = accounts[0];
-            const nonRegisteredWallet = accounts[1];
-            const walletToAdd = accounts[2];
-
-            const wallets = [registeredWallet0];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
+        it('Reverts if non-registered wallet calls.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 1, required: 1 },
+            );
 
             await utils.expectRevert(
-                multisig.submitAddWallet(
-                    walletToAdd,
-                    {
-                        from: nonRegisteredWallet,
-                    },
+                helper.multisig().submitAddWallet(
+                    accountProvider.get(),
+                    { from: accountProvider.get() },
                 ),
-                'Non registered wallet cannot submit a wallet addition.',
+                'Should revert as non-registered wallet calls.',
+                'Only wallet is allowed to call.',
             );
         });
 
-        it('Null wallet submits.', async () => {
-            const required = 1;
-
-            const registeredWallet0 = accounts[0];
-            const nullWallet = utils.NULL_ADDRESS;
-
-            const wallets = [registeredWallet0];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
+        it('Reverts if a null wallet is submitted for addition.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 1, required: 1 },
+            );
 
             await utils.expectRevert(
-                multisig.submitAddWallet(
-                    nullWallet,
-                    {
-                        from: registeredWallet0,
-                    },
+                helper.multisig().submitAddWallet(
+                    utils.NULL_ADDRESS,
+                    { from: helper.wallet(0) },
                 ),
-                'Null wallet cannot be submitted for addition.',
+                'Should revert as the submitted wallet is null.',
+                'Wallet address is null.',
             );
         });
 
-        it('Submits already registered wallet.', async () => {
-            const required = 1;
-
-            const registeredWallet0 = accounts[0];
-
-            const wallets = [registeredWallet0];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
+        it('Reverts if the submitted wallet already exists.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 2, required: 2 },
+            );
 
             await utils.expectRevert(
-                multisig.submitAddWallet(
-                    registeredWallet0,
-                    {
-                        from: registeredWallet0,
-                    },
+                helper.multisig().submitAddWallet(
+                    helper.wallet(1),
+                    { from: helper.wallet(0) },
                 ),
-                'Already registered wallet cannot be submitted for addition.',
+                'Should revert as the submitted wallet already exists.',
+                'Wallet exists.',
             );
         });
     });
 
     contract('Events', async (accounts) => {
-        it('Submit => Confirm => Execute', async () => {
-            const required = 1;
+        const accountProvider = new AccountProvider(accounts);
 
-            const registeredWallet0 = accounts[0];
-            const walletToAdd = accounts[1];
+        it('Emits WalletAdditionSubmitted, TransactionConfirmed '
+        + 'TransactionExecutionSucceeded events.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 1, required: 1 },
+            );
 
-            const wallets = [registeredWallet0];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            const transactionResponse = await multisig.submitAddWallet(
+            const walletToAdd = accountProvider.get();
+            const transactionResponse = await helper.multisig().submitAddWallet(
                 walletToAdd,
-                {
-                    from: registeredWallet0,
-                },
+                { from: helper.wallet(0) },
             );
 
             const events = Event.decodeTransactionResponse(
@@ -145,7 +119,6 @@ contract('MultiSigWallet::submitAddWallet', async () => {
                     _transactionID: new BN(0),
                     _wallet: walletToAdd,
                 },
-                logIndex: 0,
             });
 
             // The second emitted event should be 'TransactionConfirmed',
@@ -155,9 +128,8 @@ contract('MultiSigWallet::submitAddWallet', async () => {
                 name: 'TransactionConfirmed',
                 args: {
                     _transactionID: new BN(0),
-                    _wallet: registeredWallet0,
+                    _wallet: helper.wallet(0),
                 },
-                logIndex: 1,
             });
 
             // The third emitted event should be
@@ -168,26 +140,18 @@ contract('MultiSigWallet::submitAddWallet', async () => {
                 args: {
                     _transactionID: new BN(0),
                 },
-                logIndex: 2,
             });
         });
 
-        it('Submit => Confirm', async () => {
-            const required = 2;
+        it('Emits WalletAdditionSubmitted and TransactionConfirmed.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 2, required: 2 },
+            );
 
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-            const walletToAdd = accounts[2];
-
-            const wallets = [registeredWallet0, registeredWallet1];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            const transactionResponse = await multisig.submitAddWallet(
+            const walletToAdd = accountProvider.get();
+            const transactionResponse = await helper.multisig().submitAddWallet(
                 walletToAdd,
-                {
-                    from: registeredWallet0,
-                },
+                { from: helper.wallet(0) },
             );
 
             const events = Event.decodeTransactionResponse(
@@ -210,7 +174,6 @@ contract('MultiSigWallet::submitAddWallet', async () => {
                     _transactionID: new BN(0),
                     _wallet: walletToAdd,
                 },
-                logIndex: 0,
             });
 
             // The second emitted event should be 'TransactionConfirmed',
@@ -220,65 +183,57 @@ contract('MultiSigWallet::submitAddWallet', async () => {
                 name: 'TransactionConfirmed',
                 args: {
                     _transactionID: new BN(0),
-                    _wallet: registeredWallet0,
+                    _wallet: helper.wallet(0),
                 },
-                logIndex: 1,
             });
         });
     });
 
     contract('Storage', async (accounts) => {
-        it('Submit => Confirm => Execute', async () => {
-            const required = 1;
+        const accountProvider = new AccountProvider(accounts);
 
-            const registeredWallet0 = accounts[0];
-            const walletToAdd = accounts[1];
-
-            const wallets = [registeredWallet0];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            await multisig.submitAddWallet(
-                walletToAdd,
-                {
-                    from: registeredWallet0,
-                },
+        it('Checks state in case of 1-wallet-1-required.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 1, required: 1 },
             );
 
-            const transactionID = 0;
+            const walletToAdd = accountProvider.get();
+            const transactionID = await helper.submitAddWallet(
+                walletToAdd, 0,
+            );
 
             assert.isOk(
-                await multisig.isWallet.call(walletToAdd),
+                await helper.multisig().isWallet.call(walletToAdd),
                 'Newly submitted wallet would be added because of '
                 + '1-wallet-1-required condition.',
             );
 
             assert.strictEqual(
-                await multisig.wallets.call(0),
-                registeredWallet0,
+                await helper.multisig().wallets.call(0),
+                helper.wallet(0),
             );
 
             assert.strictEqual(
-                await multisig.wallets.call(1),
+                await helper.multisig().wallets.call(1),
                 walletToAdd,
             );
 
             assert.isOk(
-                (await multisig.transactionCount.call()).eqn(1),
+                (await helper.multisig().transactionCount.call()).eqn(1),
                 'Transaction count should be increased by one.',
             );
 
             assert.isOk(
-                await multisig.confirmations.call(
-                    transactionID, registeredWallet0,
+                await helper.multisig().confirmations.call(
+                    transactionID, helper.wallet(0),
                 ),
             );
 
-            const transaction = await multisig.transactions.call(transactionID);
+            const transaction = await helper.multisig().transactions.call(transactionID);
 
             assert.strictEqual(
                 transaction.destination,
-                multisig.address,
+                helper.multisig().address,
             );
 
             assert.strictEqual(
@@ -291,58 +246,48 @@ contract('MultiSigWallet::submitAddWallet', async () => {
             );
         });
 
-        it('Submit => Confirm', async () => {
-            const required = 2;
-
-            const registeredWallet0 = accounts[0];
-            const registeredWallet1 = accounts[1];
-            const walletToAdd = accounts[2];
-
-            const wallets = [registeredWallet0, registeredWallet1];
-
-            const multisig = await MultiSigWallet.new(wallets, required);
-
-            await multisig.submitAddWallet(
-                walletToAdd,
-                {
-                    from: registeredWallet0,
-                },
+        it('Checks state in case of 2-wallets-2-required.', async () => {
+            const helper = await new MultiSigWalletUtils(
+                { accountProvider, walletCount: 2, required: 2 },
             );
 
-            const transactionID = 0;
+            const walletToAdd = accountProvider.get();
+            const transactionID = await helper.submitAddWallet(
+                walletToAdd, 0,
+            );
 
             assert.isNotOk(
-                await multisig.isWallet.call(walletToAdd),
+                await helper.multisig().isWallet.call(walletToAdd),
                 'Newly submitted wallet would *not* be added because of '
                 + '2-wallet-1-required condition.',
             );
 
             assert.strictEqual(
-                await multisig.wallets.call(0),
-                registeredWallet0,
+                await helper.multisig().wallets.call(0),
+                helper.wallet(0),
             );
 
             assert.strictEqual(
-                await multisig.wallets.call(1),
-                registeredWallet1,
+                await helper.multisig().wallets.call(1),
+                helper.wallet(1),
             );
 
             assert.isOk(
-                (await multisig.transactionCount.call()).eqn(1),
+                (await helper.multisig().transactionCount.call()).eqn(1),
                 'Transaction count should be increased by one.',
             );
 
             assert.isOk(
-                await multisig.confirmations.call(
-                    transactionID, registeredWallet0,
+                await helper.multisig().confirmations.call(
+                    transactionID, helper.wallet(0),
                 ),
             );
 
-            const transaction = await multisig.transactions.call(transactionID);
+            const transaction = await helper.multisig().transactions.call(transactionID);
 
             assert.strictEqual(
                 transaction.destination,
-                multisig.address,
+                helper.multisig().address,
             );
 
             assert.strictEqual(

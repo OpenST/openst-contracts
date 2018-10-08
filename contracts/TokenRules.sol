@@ -16,7 +16,7 @@ pragma solidity ^0.4.23;
 
 import "./GlobalConstraintInterface.sol";
 import "./SafeMath.sol";
-import "./openst-protocol/EIP20Interface.sol";
+import "./EIP20TokenInterface.sol";
 
 
 /**
@@ -64,6 +64,18 @@ contract TokenRules {
         string ruleAbi;
     }
 
+    /**
+     * RuleIndex struct is going to be used in 'rulesByAddress' and
+     * 'rulesByNameHash' mappings for pointing to the index with 'rules' array.
+     * Simple usage of uint256 in those mappings does not work, because
+     * for non existing rule name and address it defaults to 0 index,
+     * which is obviously wrong. Before accessing 'rules' array by index
+     * one should check 'exists' field of the struct.
+     */
+    struct RuleIndex {
+        uint256 index;
+        bool exists;
+    }
 
     /* Storage */
 
@@ -71,16 +83,16 @@ contract TokenRules {
     TokenRule[] public rules;
 
     /** Mapping from a rule address to the index in the `rules` array. */
-    mapping (address => uint256) public rulesByAddress;
+    mapping (address => RuleIndex) public rulesByAddress;
 
     /** Mapping from a rule name hash to the index in the `rules` array. */
-    mapping (bytes32 => uint256) public rulesByNameHash;
+    mapping (bytes32 => RuleIndex) public rulesByNameHash;
 
     /** Contains a list of all registered global constraints. */
     address[] public globalConstraints;
 
     address public organization;
-    address public token;
+    EIP20TokenInterface public token;
 
     /**
      * TokenHolder contract before a rule execution will set the flag
@@ -103,8 +115,9 @@ contract TokenRules {
 
     modifier onlyRule {
         require(
-            rules[rulesByAddress[msg.sender]].ruleAddress != address(0),
-            "Only registered rule is allowed to call.");
+            rulesByAddress[msg.sender].exists,
+            "Only registered rule is allowed to call."
+        );
         _;
     }
 
@@ -118,7 +131,7 @@ contract TokenRules {
      */
     constructor(
         address _organization,
-        address _token
+        EIP20TokenInterface _token
     )
         public
     {
@@ -160,11 +173,11 @@ contract TokenRules {
         bytes32 ruleNameHash = keccak256(abi.encodePacked(_ruleName));
 
         require(
-            rules[rulesByNameHash[ruleNameHash]].ruleAddress == address(0),
+            !rulesByNameHash[ruleNameHash].exists,
             "Rule with the specified name already exists."
         );
         require(
-            rules[rulesByAddress[_ruleAddress]].ruleAddress == address(0),
+            !rulesByAddress[_ruleAddress].exists,
             "Rule with the specified address already exists."
         );
 
@@ -174,8 +187,13 @@ contract TokenRules {
             ruleAbi: _ruleAbi
         });
 
-        rulesByAddress[_ruleAddress] = rules.length;
-        rulesByNameHash[ruleNameHash] = rules.length;
+        RuleIndex memory ruleIndex = RuleIndex({
+            index: rules.length,
+            exists: true
+        });
+
+        rulesByAddress[_ruleAddress] = ruleIndex;
+        rulesByNameHash[ruleNameHash] = ruleIndex;
         rules.push(rule);
 
         emit RuleRegistered(_ruleName, _ruleAddress);
@@ -236,7 +254,7 @@ contract TokenRules {
         );
 
         for(uint256 i = 0; i < _transfersTo.length; ++i) {
-            EIP20Interface(token).transferFrom(
+            token.transferFrom(
                 _from,
                 _transfersTo[i],
                 _transfersAmount[i]
@@ -281,7 +299,6 @@ contract TokenRules {
     /**
      * @dev Function requires:
      *          - Only organization can call.
-     *          - Constraint address is not null.
      *          - Constraint exists.
      */
     function removeGlobalConstraint(
@@ -290,11 +307,6 @@ contract TokenRules {
         external
         onlyOrganization
     {
-        require(
-            _globalConstraintAddress != address(0),
-            "Constraint to remvoe is null."
-        );
-
         uint256 index = findGlobalConstraintIndex(_globalConstraintAddress);
 
         require(
@@ -303,6 +315,8 @@ contract TokenRules {
         );
 
         removeGlobalConstraintByIndex(index);
+
+        emit GlobalConstraintRemoved(_globalConstraintAddress);
     }
 
 
@@ -317,6 +331,9 @@ contract TokenRules {
     }
 
     /**
+     * @dev Function requires:
+     *          - _transfersTo and _transfersAmount arrays length should match.
+     *
      * @return Returns true, if all registered global constraints
      *         are satisfied, otherwise false.
      */
@@ -329,6 +346,11 @@ contract TokenRules {
         view
         returns (bool _passed)
     {
+        require(
+            _transfersTo.length == _transfersAmount.length,
+            "'to' and 'amount' transfer arrays' lengths are not equal."
+        );
+
         _passed = true;
 
         for(uint256 i = 0; i < globalConstraints.length && _passed; ++i) {

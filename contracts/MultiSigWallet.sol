@@ -13,19 +13,15 @@ pragma solidity ^0.4.23;
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// ----------------------------------------------------------------------------
-// Utility Chain: MultiSigWallet
-//
-// http://www.simpletoken.org/
-//
-// ----------------------------------------------------------------------------
 
 import "./SafeMath.sol";
 
 
 /**
  * @title Allows multiple parties to agree on transactions before execution.
+ *
+ * @dev The contract implementation is heavily inspired by Gnosis MultiSigWallet
+ *      (https://github.com/gnosis/MultiSigWallet).
  */
 contract MultiSigWallet {
 
@@ -331,7 +327,7 @@ contract MultiSigWallet {
      *          - New wallet does not exist.
      *
      * @param _oldWallet Wallet to remove.
-     * @param _newWallet Wallt to add.
+     * @param _newWallet Wallet to add.
      *
      * @return Newly created transaction id.
      */
@@ -458,6 +454,7 @@ contract MultiSigWallet {
     {
         if (isTransactionConfirmed(_transactionID)) {
             Transaction storage t = transactions[_transactionID];
+            // solium-disable-next-line security/no-low-level-calls
             if (t.destination.call(t.data)) {
                 t.executed = true;
                 emit TransactionExecutionSucceeded(_transactionID);
@@ -466,6 +463,15 @@ contract MultiSigWallet {
                 emit TransactionExecutionFailed(_transactionID);
             }
         }
+    }
+
+    /** @notice Returns the number of registered wallets. */
+    function walletCount()
+        public
+        view
+        returns(uint256)
+    {
+        return wallets.length;
     }
 
     /**
@@ -559,8 +565,6 @@ contract MultiSigWallet {
      *          - Requirement validity held.
      *
      * @param _required The number of required confirmations.
-     *
-     * @return transactionId_ of the proposal.
      */
     function changeRequirement(
         uint256 _required
@@ -572,15 +576,6 @@ contract MultiSigWallet {
         required = _required;
     }
 
-    /** @notice Returns the number of registered wallets. */
-    function walletCount()
-        public
-        view
-        returns(uint256)
-    {
-        return wallets.length;
-    }
-
 
     /* Internal Functions */
 
@@ -590,21 +585,27 @@ contract MultiSigWallet {
      * @dev Transaction is confirmed if wallets' count that confirmed
      *      the transaction is bigger or equal to required.
      *      Function checks confirmation condition based on current set of
-     *      registered wallet.
+     *      registered wallets.
+     *      Function returns true if transaction was executed despite if
+     *      with current set of registered wallets it might not.
      *      Function requires:
      *          - Transaction with the specified id exists.
      *
      * @param _transactionID Transaction id to check.
      *
-     * @return Returns true in case if transaction confirmed, otherwise
-     *         false.
+     * @return Returns true if the transaction is executed or confirmation is
+     *         achieved with current set of registered wallets, otherwise false.
      */
     function isTransactionConfirmed(uint256 _transactionID)
-        internal
+        public
         view
         transactionExists(_transactionID)
         returns (bool)
     {
+        if (transactions[_transactionID].executed) {
+            return true;
+        }
+
         uint256 count = 0;
         for (uint256 i = 0; i < wallets.length; i++) {
             if (confirmations[_transactionID][wallets[i]]) {

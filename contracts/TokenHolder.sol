@@ -1,6 +1,6 @@
 pragma solidity ^0.4.23;
 
-// Copyright 2017 OpenST Ltd.
+// Copyright 2018 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,16 +13,9 @@ pragma solidity ^0.4.23;
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// ----------------------------------------------------------------------------
-// Utility Chain: Token Holder
-//
-// http://www.simpletoken.org/
-//
-// ----------------------------------------------------------------------------
 
 import "./SafeMath.sol";
-import "./BrandedToken.sol";
+import "./EIP20TokenInterface.sol";
 import "./MultiSigWallet.sol";
 import "./TokenRules.sol";
 
@@ -30,8 +23,10 @@ import "./TokenRules.sol";
 /**
  * @title TokenHolder contract.
  *
- * @notice Implements properties and actions performed by an user. It enables
- *         scalable key management solutions for mainstream apps.
+ * @notice Implements executable transactions (EIP-1077) for users to interact
+ *         with token rules. It enables users to authorise sessions for
+ *         ephemeral keys that dapps and mainstream applications can use to
+ *         generate token events on-chain.
  */
 contract TokenHolder is MultiSigWallet {
 
@@ -43,20 +38,22 @@ contract TokenHolder is MultiSigWallet {
     /* Events */
 
     event SessionAuthorizationSubmitted(
-        uint256 indexed _transactionId,
+        uint256 indexed _transactionID,
         address _ephemeralKey,
         uint256 _spendingLimit,
         uint256 _expirationHeight
     );
 
-    event SessionRevocationSubmitted(
-        uint256 indexed _transactionID,
+    event SessionRevoked(
         address _ephemeralKey
     );
 
     event RuleExecuted(
-        bytes32 _messageHash,
+        address indexed _to,
+        bytes4 _functionSelector,
+        address _ephemeralKey,
         uint256 _nonce,
+        bytes32 _messageHash,
         bool _status
     );
 
@@ -87,10 +84,6 @@ contract TokenHolder is MultiSigWallet {
         keccak256("authorizeSession(address,uint256,uint256)")
     );
 
-    bytes4 constant public REVOKE_SESSION_CALLPREFIX = bytes4(
-        keccak256("revokeSession(address)")
-    );
-
     bytes4 public constant EXECUTE_RULE_CALLPREFIX = bytes4(
         keccak256(
             "executeRule(address,bytes,uint256,uint8,bytes32,bytes32)"
@@ -100,11 +93,11 @@ contract TokenHolder is MultiSigWallet {
 
     /* Storage */
 
-    address public brandedToken;
+    EIP20TokenInterface public token;
 
     mapping(address /* key */ => EphemeralKeyData) public ephemeralKeys;
 
-    address private tokenRules;
+    address public tokenRules;
 
 
     /* Modifiers */
@@ -112,19 +105,6 @@ contract TokenHolder is MultiSigWallet {
     modifier keyIsNotNull(address _key)
     {
         require(_key != address(0), "Key address is null.");
-        _;
-    }
-
-    /** Requires that key is in autorized state and non-expired. */
-    modifier keyIsActive(address _key)
-    {
-        AuthorizationStatus status = ephemeralKeys[_key].status;
-        uint256 expirationHeight = ephemeralKeys[_key].expirationHeight;
-        require(
-            status == AuthorizationStatus.AUTHORIZED &&
-            expirationHeight <= block.number,
-            "Key is not active."
-        );
         _;
     }
 
@@ -139,38 +119,13 @@ contract TokenHolder is MultiSigWallet {
         _;
     }
 
-    /**
-     * Requires that key was authorized. Key might be in authorized or
-     * revoked state.
-     */
-    modifier keyWasAuthorized(address _key)
-    {
-        AuthorizationStatus status = ephemeralKeys[_key].status;
-        require(
-            status != AuthorizationStatus.NOT_AUTHORIZED,
-            "Key was not authorized."
-        );
-        _;
-    }
-
     /** Requires that key was not authorized. */
-    modifier keyWasNotAuthorized(address _key)
+    modifier keyDoesNotExist(address _key)
     {
         AuthorizationStatus status = ephemeralKeys[_key].status;
         require(
             status == AuthorizationStatus.NOT_AUTHORIZED,
-            "Key is not authorized."
-        );
-        _;
-    }
-
-    /** Requires that key has not expired. */
-    modifier keyHasNotExpired(address _key)
-    {
-        uint256 expirationHeight = ephemeralKeys[_key].expirationHeight;
-        require(
-            expirationHeight > block.number,
-            "Expiration key has expired."
+            "Key exists."
         );
         _;
     }
@@ -179,30 +134,34 @@ contract TokenHolder is MultiSigWallet {
     /* Special Functions */
 
     /**
-     * @param _brandedToken eip20 contract address deployed for an economy.
+     * @dev Constructor requires:
+     *          - EIP20 token address is not null.
+     *          - Token rules address is not null.
+     *
+     * @param _token eip20 contract address deployed for an economy.
      * @param _tokenRules Token rules contract address.
-     * @param _required No of requirements for multi sig wallet.
      * @param _wallets array of wallet addresses.
+     * @param _required No of requirements for multi sig wallet.
      */
     constructor(
-        address _brandedToken,
+        EIP20TokenInterface _token,
         address _tokenRules,
-        uint256 _required,
-        address[] _wallets
+        address[] _wallets,
+        uint256 _required
     )
         public
         MultiSigWallet(_wallets, _required)
     {
         require(
-            _brandedToken != address(0),
-            "Branded token contract address is 0."
+            _token != address(0),
+            "Token contract address is null."
         );
         require(
             _tokenRules != address(0),
-            "TokenRules contract address is 0."
+            "TokenRules contract address is null."
         );
 
-        brandedToken = _brandedToken;
+        token = _token;
         tokenRules = _tokenRules;
     }
 
@@ -213,19 +172,17 @@ contract TokenHolder is MultiSigWallet {
      * @notice Submits a transaction for a session authorization with
      *         the specified ephemeral key.
      *
-     * @dev If the session authorization with the specified key is already
-     *      proposed by other wallet, the function only confirms that proposal.
-     *      Function requires:
+     * @dev Function requires:
      *          - Only registered wallet can call.
      *          - The key is not null.
-     *          - The key is not authorized.
+     *          - The key does not exist.
      *          - Expiration height is bigger than the current block height.
      *
      * @param _ephemeralKey Ephemeral key to authorize.
      * @param _spendingLimit Spending limit of the key.
      * @param _expirationHeight Expiration height of the ephemeral key.
      *
-     * @return transactionId_ Newly created transaction id.
+     * @return transactionID_ Newly created transaction id.
      */
     function submitAuthorizeSession(
         address _ephemeralKey,
@@ -235,7 +192,7 @@ contract TokenHolder is MultiSigWallet {
         public
         onlyWallet
         keyIsNotNull(_ephemeralKey)
-        keyWasNotAuthorized(_ephemeralKey)
+        keyDoesNotExist(_ephemeralKey)
         returns (uint256 transactionID_)
     {
         require(
@@ -264,44 +221,24 @@ contract TokenHolder is MultiSigWallet {
     }
 
     /**
-     * @notice Submits a transaction for the session revocation for
-     *         the specified ephemeral key.
+     * @notice Revokes session for the specified ephemeral key.
      *
      * @dev Function revokes the key even if it has expired.
      *      Function requires:
      *          - Only registered wallet can call.
-     *          - The key is not null.
      *          - The key is authorized.
      *
      * @param _ephemeralKey Ephemeral key to revoke.
-     *
-     * @return transactionID_ Newly created transaction id.
      */
-    function submitRevokeSession(
-        address _ephemeralKey
-    )
-        public
+    function revokeSession(address _ephemeralKey)
+        external
         onlyWallet
-        keyIsNotNull(_ephemeralKey)
         keyIsAuthorized(_ephemeralKey)
-        returns (uint256 transactionID_)
     {
-        transactionID_ = addTransaction(
-            address(this),
-            abi.encodeWithSelector(
-                REVOKE_SESSION_CALLPREFIX,
-                _ephemeralKey
-            )
-        );
+        ephemeralKeys[_ephemeralKey].status = AuthorizationStatus.REVOKED;
 
-        emit SessionRevocationSubmitted(
-            transactionID_,
-            _ephemeralKey
-        );
-
-        confirmTransaction(transactionID_);
+        emit SessionRevoked(_ephemeralKey);
     }
-
 
     /* Public Functions */
 
@@ -318,6 +255,11 @@ contract TokenHolder is MultiSigWallet {
      *      Before execution, it approves the tokenRules as a spender
      *      for ephemeralKey.spendingLimit amount. This allowance is cleared
      *      after execution.
+     *
+     *      Function requires:
+     *          - The key used to sign data is authorized and have not expired.
+     *          - nonce matches the next available one (+1 of the last
+     *            used one).
      *
      * @param _to The target contract address the transaction will be executed
      *            upon.
@@ -338,11 +280,12 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _s
     )
         public
-        returns (bool executeStatus_)
+        payable
+        returns (bool executionStatus_)
     {
         bytes32 messageHash = bytes32(0);
         address ephemeralKey = address(0);
-        (messageHash, ephemeralKey) = processExecutableTransaction(
+        (messageHash, ephemeralKey) = verifyExecutableTransaction(
             EXECUTE_RULE_CALLPREFIX,
             _to,
             _data,
@@ -356,19 +299,28 @@ contract TokenHolder is MultiSigWallet {
 
         TokenRules(tokenRules).allowTransfers();
 
-        BrandedToken(brandedToken).approve(
+        token.approve(
             tokenRules,
             ephemeralKeyData.spendingLimit
         );
 
-        // solium-disable-next-line security/no-low-level-calls
-        executeStatus_ = _to.call(_data);
+        // solium-disable-next-line security/no-call-value
+        executionStatus_ = _to.call.value(msg.value)(_data);
 
-        BrandedToken(brandedToken).approve(tokenRules, 0);
+        token.approve(tokenRules, 0);
 
         TokenRules(tokenRules).disallowTransfers();
 
-        emit RuleExecuted(messageHash, _nonce, executeStatus_);
+        bytes4 functionSelector = bytesToBytes4(_data);
+
+        emit RuleExecuted(
+            _to,
+            functionSelector,
+            ephemeralKey,
+            _nonce,
+            messageHash,
+            executionStatus_
+        );
     }
 
     function authorizeSession(
@@ -378,7 +330,14 @@ contract TokenHolder is MultiSigWallet {
     )
         public
         onlyMultisig
+        keyIsNotNull(_ephemeralKey)
+        keyDoesNotExist(_ephemeralKey)
     {
+        require(
+            _expirationHeight > block.number,
+            "Expiration height is lte to the current block height."
+        );
+
         EphemeralKeyData storage keyData = ephemeralKeys[_ephemeralKey];
 
         keyData.spendingLimit = _spendingLimit;
@@ -387,39 +346,10 @@ contract TokenHolder is MultiSigWallet {
         keyData.status = AuthorizationStatus.AUTHORIZED;
     }
 
-    function revokeSession(
-        address _ephemeralKey
-    )
-        public
-        onlyMultisig
-        keyIsNotNull(_ephemeralKey)
-        keyIsAuthorized(_ephemeralKey)
-    {
-        ephemeralKeys[_ephemeralKey].status = AuthorizationStatus.REVOKED;
-    }
-
-    /**
-     * @notice Checks if the specified key is authorized and non-expired.
-     *
-     * @param _ephemeralKey Key to check.
-     *
-     * @return True if the key is currently authorized and has not expired,
-     *         otherwise false.
-     */
-    function isEphemeralKeyActive(address _ephemeralKey)
-        public
-        view
-        returns (bool)
-    {
-        EphemeralKeyData storage keyData = ephemeralKeys[_ephemeralKey];
-        return keyData.status == AuthorizationStatus.AUTHORIZED &&
-            keyData.expirationHeight > block.number;
-    }
-
 
     /* Private Functions */
 
-    function processExecutableTransaction(
+    function verifyExecutableTransaction(
         bytes4 _callPrefix,
         address _to,
         bytes _data,
@@ -438,41 +368,33 @@ contract TokenHolder is MultiSigWallet {
             _nonce
         );
 
-        key_ = recoverKey(
-            messageHash_,
-            _v,
-            _r,
-            _s
-        );
-
-        require(
-            isEphemeralKeyActive(key_),
-            "Ephemeral key is not active."
-        );
+        key_ = ecrecover(messageHash_, _v, _r, _s);
 
         EphemeralKeyData storage keyData = ephemeralKeys[key_];
 
         require(
-            _nonce == keyData.nonce,
-            "Nonce is not equal to the current nonce."
+            keyData.status == AuthorizationStatus.AUTHORIZED &&
+            keyData.expirationHeight > block.number,
+            "Ephemeral key is not active."
         );
 
-        keyData.nonce = keyData.nonce.add(1);
+        uint256 expectedNonce = keyData.nonce.add(1);
+
+        require(
+            _nonce == expectedNonce,
+            "The next nonce is not provided."
+        );
+
+        keyData.nonce = expectedNonce;
     }
 
-    function recoverKey(
-        bytes32 _messageHash,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    )
-        private
-        pure
-        returns (address key_)
-    {
-        key_ = ecrecover(_messageHash, _v, _r, _s);
-    }
-
+    /**
+     * @notice The hashed message format is compliant with EIP-1077.
+     *
+     * @dev EIP-1077 enables user to sign messages to show intent of execution,
+     *      but allows a third party relayer to execute them.
+     *      https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1077.md
+     */
     function getMessageHash(
         bytes4 _callPrefix,
         address _to,
@@ -509,5 +431,21 @@ contract TokenHolder is MultiSigWallet {
                            // standard.
             )
         );
+    }
+
+    /**
+     * @dev Retrieves the first 4 bytes of input byte array into byte4.
+     *      Function requires:
+     *          - Input byte array's length is greater than or equal to 4.
+     */
+    function bytesToBytes4(bytes _input) public pure returns (bytes4 out_) {
+        require(
+            _input.length >= 4,
+            "Input bytes length is less than 4."
+        );
+
+        for (uint8 i = 0; i < 4; i++) {
+            out_ |= bytes4(_input[i] & 0xFF) >> (i * 8);
+        }
     }
 }
