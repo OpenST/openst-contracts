@@ -14,23 +14,45 @@ pragma solidity ^0.4.23;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO Documentation and styleguide changes.
-contract Owner {
+import "./SafeMath.sol";
 
-    address public owner;
-    address public proposedOwner;
+// TODO Documentation and styleguide changes.
+contract Organization {
+
+    /* Usings */
+
+    using SafeMath for uint256;
 
 
     /* Events */
 
-    event OwnerTransferInitiated(
-        address _proposedOwner
+    event OwnershipTransferInitiated(address indexed _proposedOwner);
+
+    event OwnershipTransferCompleted(
+        address indexed _previousOwner,
+        address indexed _newOwner
     );
 
-    event OwnerTransferCompleted(
-        address _previousOwner,
-        address _newOwner
+    event AdminAddressChanged(address indexed _newAddress);
+
+    event WorkerSet(
+        address indexed _worker,
+        uint256 indexed _deactivationHeight,
+        uint256 _remainingHeight
     );
+
+    event WorkerRemoved(
+        address indexed _worker,
+        bool _existed
+    );
+
+
+    /* Storage */
+
+    address public owner;
+    address public proposedOwner;
+    address public admin;
+    mapping(address => uint256 /* deactivation height */) public workers;
 
 
     /* Special Functions */
@@ -57,39 +79,37 @@ contract Owner {
         _;
     }
 
-
-    /* External Functions */
-
-    function isOwner(address _address)
-        external
-        view
-        returns (bool)
+    modifier onlyOwnerOrAdmin()
     {
-        return (_address == owner);
+        require(
+            msg.sender == owner || msg.sender == admin,
+            "only owner or admin is allowed to call."
+        );
+        _;
     }
 
 
-    /* Public Functions */
+    /* External Functions */
 
-    function initiateOwnerTransfer(address _proposedOwner)
-        public
+    function initiateOwnershipTransfer(address _proposedOwner)
+        external
         onlyOwner
         returns (bool)
     {
         require(
             _proposedOwner != owner,
-            "ProposedOwner address can't be owner address."
+            "proposedOwner address can't be owner address."
         );
 
         proposedOwner = _proposedOwner;
 
-        emit OwnerTransferInitiated(_proposedOwner);
+        emit OwnershipTransferInitiated(_proposedOwner);
 
         return true;
     }
 
-    function completeOwnerTransfer()
-        public
+    function completeOwnershipTransfer()
+        external
         returns (bool)
     {
         require(
@@ -101,9 +121,69 @@ contract Owner {
         owner = proposedOwner;
         proposedOwner = address(0);
 
-        emit OwnerTransferCompleted(oldOwner, owner);
+        emit OwnershipTransferCompleted(oldOwner, owner);
 
         return true;
+    }
+
+    function setAdmin(address _admin)
+        external
+        onlyOwnerOrAdmin
+        returns (bool)
+    {
+        require(
+            _admin != owner,
+            "admin address can't be owner address."
+        );
+
+        admin = _admin;
+
+        emit AdminAddressChanged(_admin);
+
+        return true;
+    }
+
+    function setWorker(
+        address _worker,
+        uint256 _deactivationHeight)
+        external
+        onlyOwnerOrAdmin
+        returns (uint256 _remainingHeight)
+    {
+        require(
+            _worker != address(0),
+            "Worker address is null."
+        );
+        require(
+            _deactivationHeight > block.number,
+            "Deactivation height has expired."
+        );
+
+        workers[_worker] = _deactivationHeight;
+        _remainingHeight = _deactivationHeight.sub(block.number);
+
+        emit WorkerSet(_worker, _deactivationHeight, _remainingHeight);
+
+        return _remainingHeight;
+    }
+
+    function removeWorker(address _worker)
+        external
+        onlyOwnerOrAdmin
+        returns (bool _existed)
+    {
+        _existed = (workers[_worker] > 0);
+
+        delete workers[_worker];
+
+        emit WorkerRemoved(_worker, _existed);
+
+        return _existed;
+    }
+
+    function isWorker(address _worker) external view returns (bool)
+    {
+        return (workers[_worker] >= block.number);
     }
 
 }
