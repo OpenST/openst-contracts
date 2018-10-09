@@ -17,13 +17,15 @@ The major components of this repository are the TokenHolder contracts, TokenRule
 <br>
 
 TokenHolder Contracts are multi-sig contracts with multiple ownership keys that are housed in different wallets that are controlled by a single human owner (say, a participant in the token economy). The multi-sig logic supports both custodial and fully decentralized key management, thus supporting a wide range of user profiles.
-<br>
+Ephemeral keys are introduced to sign transactions from within applications without requiring the user to manually sign every action. Ephemeral keys are temporary keys that can be authorized by the owner keys.
 
-TokenRules Contract and custom Rule Contracts represent the administration functionality that enables economy managers to design intra-economy transactions that map to their business logic.
+![Image for readme](openst-contracts/OpenST 0.9.4 - Users 1.jpg)
 
-#### Diagram
+The addition of the TokenRules contract in OpenST v0.9.4 represents the decentralization of rule design and allows apps to design on-chain rules that map to their business logic. 
 
-![Image for readme](OpenSTv0.9.4Components.jpg)
+With his ephemeral key, the user can request the TokenHolder Contract to call on a rule on his behalf. The TokenRules contract executes the Token transfers that are required to execute the rule 
+
+![Image for readme](openst-contracts/OpenST 0.9.4 - Users 2.jpg)
 
 #### Related Repositories
 
