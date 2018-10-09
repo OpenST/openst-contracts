@@ -50,7 +50,7 @@ contract Organization {
     /* Storage */
 
     address public owner;
-    address public proposedOwner;
+    address private proposedOwner;
     address public admin;
     mapping(address => uint256 /* deactivation height */) public workers;
 
@@ -79,6 +79,7 @@ contract Organization {
         _;
     }
 
+    // TODO Rename
     modifier onlyOwnerOrAdmin()
     {
         require(
