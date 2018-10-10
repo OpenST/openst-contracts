@@ -17,7 +17,6 @@ pragma solidity ^0.4.23;
 import "./GlobalConstraintInterface.sol";
 import "./SafeMath.sol";
 import "./EIP20TokenInterface.sol";
-import "./Organized.sol";
 
 
 /**
@@ -38,7 +37,7 @@ import "./Organized.sol";
  *      function only once. This allows global constraints to be checked
  *      on complete list of transfers.
  */
-contract TokenRules is Organized {
+contract TokenRules {
 
      /* Usings */
 
@@ -134,7 +133,6 @@ contract TokenRules is Organized {
         address _organization,
         EIP20TokenInterface _token
     )
-        Organized(_organization)
         public
     {
         require(_organization != address(0), "Organization address is null.");
@@ -149,7 +147,7 @@ contract TokenRules is Organized {
 
     /**
      * @dev Function requires:
-     *          - Only whitelisted worker can call.
+     *          - Only organization can call.
      *          - Rule name is not empty.
      *          - Rule with the specified name does not exist.
      *          - Rule address is not null.
@@ -166,7 +164,7 @@ contract TokenRules is Organized {
         string _ruleAbi
     )
         external
-        onlyWorker
+        onlyOrganization
     {
         require(bytes(_ruleName).length != 0, "Rule name is empty.");
         require(_ruleAddress != address(0), "Rule address is null.");
@@ -271,7 +269,7 @@ contract TokenRules is Organized {
      *         executing transfers.
      *
      * @dev Function requires:
-     *          - Only whitelisted worker can call.
+     *          - Only organization can call.
      *          - Constraint address is not null.
      *          - Constraint is not registered.
      */
@@ -279,7 +277,7 @@ contract TokenRules is Organized {
         address _globalConstraintAddress
     )
         external
-        onlyWorker
+        onlyOrganization
     {
         require(
             _globalConstraintAddress != address(0),
@@ -300,14 +298,14 @@ contract TokenRules is Organized {
 
     /**
      * @dev Function requires:
-     *          - Only whitelisted worker can call.
+     *          - Only organization can call.
      *          - Constraint exists.
      */
     function removeGlobalConstraint(
         address _globalConstraintAddress
     )
         external
-        onlyWorker
+        onlyOrganization
     {
         uint256 index = findGlobalConstraintIndex(_globalConstraintAddress);
 

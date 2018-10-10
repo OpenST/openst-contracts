@@ -70,7 +70,7 @@ contract Organization {
     address public owner;
 
     /** proposedOwner is address proposed by owner for ownership transfer. */
-    address private proposedOwner;
+    address public proposedOwner;
 
     /** admin address set by owner to facilitate operations of an economy. */
     address public admin;
@@ -103,16 +103,13 @@ contract Organization {
     /* Special Functions */
 
     /**
-     * @dev Constructor requires:
+     * @dev Function requires:
      *          - msg.sender is not null.
      */
     constructor()
         public
     {
-        require(
-            msg.sender != address(0),
-            "Owner address is null."
-        );
+        require(msg.sender != address(0), "Owner address is null.");
 
         owner = msg.sender;
     }
@@ -122,11 +119,12 @@ contract Organization {
 
     /**
      * @notice Initiates ownership transfer to proposed owner.
-
+     *
      * @dev Requires:
      *          - msg.sender should be owner.
      *          - proposed owner can't be null.
-     *          - Allows resetting to 0x address.
+     *
+     * @dev Allows resetting of admin to 0x address.
      *
      * @param _proposedOwner worker address to be added.
      *
@@ -151,7 +149,7 @@ contract Organization {
 
     /**
      * @notice Complete ownership transfer to proposed owner.
-
+     *
      * @dev Requires:
      *          - msg.sender should be proposed owner.
      *
@@ -177,11 +175,12 @@ contract Organization {
 
     /**
      * @notice Sets admin address.
-
+     *
      * @dev Requires:
      *          - msg.sender should be owner or owner.
      *          - admin should not be same as owner.
-     *          - Allows resetting of admin to 0x address.
+     *
+     * @dev Allows resetting of admin to 0x address.
      *
      * @param _admin admin address to be added.
      *
@@ -243,7 +242,7 @@ contract Organization {
 
     /**
      * @notice Removes a worker.
-
+     *
      * @dev Requires:
      *          - msg.sender should be owner or admin.
      *

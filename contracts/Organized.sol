@@ -14,7 +14,7 @@ pragma solidity ^0.4.23;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "./Organization.sol";
+import "./OrganizationInterface.sol";
 
 
 /**
@@ -27,10 +27,10 @@ contract Organized {
     /* Storage */
 
     /**
-     * Organization contract address holds all the keys
+     * OrganizationInterface contract address holds all the keys
      * needed to administer the economy.
      */
-    Organization public organization;
+    OrganizationInterface public organization;
 
 
     /* Modifiers */
@@ -62,7 +62,7 @@ contract Organized {
             "Organization contract address is null."
         );
 
-        organization = Organization(_organization);
+        organization = OrganizationInterface(_organization);
     }
 
 }
