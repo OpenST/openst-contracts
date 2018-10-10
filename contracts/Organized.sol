@@ -16,11 +16,20 @@ pragma solidity ^0.4.23;
 
 import "./Organization.sol";
 
-// TODO Documentation and Styleguide changes
+
+/**
+ * @title Organized contract.
+ *
+ * @notice TODO
+ */
 contract Organized {
 
     /* Storage */
 
+    /**
+     * Organization contract address holds all the keys
+     * needed to administer the economy.
+     */
     Organization public organization;
 
 
@@ -30,14 +39,21 @@ contract Organized {
     {
         require(
             organization.isWorker(msg.sender),
-            "Only whitelisted worker allowed to call."
+            "Only whitelisted worker is allowed to call."
         );
         _;
     }
 
 
-    /* Special functions */
+    /* Special Functions */
 
+    /**
+     * @dev Constructor requires:
+     *          - organization contract address is not null.
+     *
+     * @param _organization organization contract address containing
+     *        different administration keys.
+     */
     constructor(address _organization)
         public
     {

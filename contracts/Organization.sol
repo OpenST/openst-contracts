@@ -16,7 +16,24 @@ pragma solidity ^0.4.23;
 
 import "./SafeMath.sol";
 
-// TODO Documentation and styleguide changes.
+
+/**
+ * @title Organization contract.
+ *
+ * @notice The organization represents an entity that manages the Branded Token
+ *         Economy, and therefore the Organization.sol contract holds all
+ *         the keys required to administer the economy. This includes:
+ *         -    Organization owner can set admin key to facilitate economy
+ *              operations.
+ *         -    Organization workers can register internal actors in the
+ *              utility branded token contract.
+ *         -    Organization workers can setGateway, setStakeVault, do KYC
+ *              verification.
+ *         -    Organization workers can register custom token rules
+ *              in TokenRules contract.
+ *         -    Organization workers can add/remove global constraints in
+ *              TokenRules contract.
+ */
 contract Organization {
 
     /* Usings */
@@ -37,7 +54,7 @@ contract Organization {
 
     event WorkerSet(
         address indexed _worker,
-        uint256 indexed _deactivationHeight,
+        uint256 indexed _expirationHeight,
         uint256 _remainingHeight
     );
 
@@ -49,23 +66,17 @@ contract Organization {
 
     /* Storage */
 
+    /** Address for which private key will be owned by organization. */
     address public owner;
+
+    /** proposedOwner is address proposed by owner for ownership transfer. */
     address private proposedOwner;
+
+    /** admin address set by owner to facilitate operations of an economy. */
     address public admin;
-    mapping(address => uint256 /* deactivation height */) public workers;
 
-
-    /* Special Functions */
-
-    constructor()
-        public
-    {
-        require(
-            msg.sender != address(0),
-            "Owner address is null."
-        );
-        owner = msg.sender;
-    }
+    /** List of whitelisted workers active upto the expiration height. */
+    mapping(address => uint256 /* expiration height */) public workers;
 
 
     /* Modifiers */
@@ -79,19 +90,48 @@ contract Organization {
         _;
     }
 
-    // TODO Rename
-    modifier onlyOwnerOrAdmin()
+    modifier onlyAdminstered()
     {
         require(
             msg.sender == owner || msg.sender == admin,
-            "only owner or admin is allowed to call."
+            "Only owner or admin is allowed to call."
         );
         _;
     }
 
 
+    /* Special Functions */
+
+    /**
+     * @dev Constructor requires:
+     *          - msg.sender is not null.
+     */
+    constructor()
+        public
+    {
+        require(
+            msg.sender != address(0),
+            "Owner address is null."
+        );
+
+        owner = msg.sender;
+    }
+
+
     /* External Functions */
 
+    /**
+     * @notice Initiates ownership transfer to proposed owner.
+
+     * @dev Requires:
+     *          - msg.sender should be owner.
+     *          - proposed owner can't be null.
+     *          - Allows resetting to 0x address.
+     *
+     * @param _proposedOwner worker address to be added.
+     *
+     * @return Returns true on successful execution.
+     */
     function initiateOwnershipTransfer(address _proposedOwner)
         external
         onlyOwner
@@ -109,6 +149,14 @@ contract Organization {
         return true;
     }
 
+    /**
+     * @notice Complete ownership transfer to proposed owner.
+
+     * @dev Requires:
+     *          - msg.sender should be proposed owner.
+     *
+     * @return Returns true on successful execution.
+     */
     function completeOwnershipTransfer()
         external
         returns (bool)
@@ -127,9 +175,21 @@ contract Organization {
         return true;
     }
 
+    /**
+     * @notice Sets admin address.
+
+     * @dev Requires:
+     *          - msg.sender should be owner or owner.
+     *          - admin should not be same as owner.
+     *          - Allows resetting of admin to 0x address.
+     *
+     * @param _admin admin address to be added.
+     *
+     * @return Returns true on successful execution.
+     */
     function setAdmin(address _admin)
         external
-        onlyOwnerOrAdmin
+        onlyAdminstered
         returns (bool)
     {
         require(
@@ -144,44 +204,78 @@ contract Organization {
         return true;
     }
 
+    /**
+     * @notice Sets worker and its expiration height.
+     *
+     * @dev Requires:
+     *          - msg.sender should be owner or admin.
+     *          - worker address can't be null.
+     *          - expiration height should not be expired.
+     *
+     * @param _worker worker address to be added.
+     * @param _expirationHeight expiration height of worker.
+     *
+     * @return Returns remaining height for which worker is active.
+     */
     function setWorker(
         address _worker,
-        uint256 _deactivationHeight)
+        uint256 _expirationHeight)
         external
-        onlyOwnerOrAdmin
-        returns (uint256 _remainingHeight)
+        onlyAdminstered
+        returns (uint256 remainingHeight_)
     {
         require(
             _worker != address(0),
             "Worker address is null."
         );
         require(
-            _deactivationHeight > block.number,
-            "Deactivation height has expired."
+            _expirationHeight > block.number,
+            "Expiration height is lte to the current block height."
         );
 
-        workers[_worker] = _deactivationHeight;
-        _remainingHeight = _deactivationHeight.sub(block.number);
+        workers[_worker] = _expirationHeight;
+        remainingHeight_ = _expirationHeight.sub(block.number);
 
-        emit WorkerSet(_worker, _deactivationHeight, _remainingHeight);
+        emit WorkerSet(_worker, _expirationHeight, remainingHeight_);
 
-        return _remainingHeight;
+        return remainingHeight_;
     }
 
+    /**
+     * @notice Removes a worker.
+
+     * @dev Requires:
+     *          - msg.sender should be owner or admin.
+     *
+     * @param _worker address to be removed.
+     *
+     * @return Returns true if the worker existed else returns false.
+     */
     function removeWorker(address _worker)
         external
-        onlyOwnerOrAdmin
-        returns (bool _existed)
+        onlyAdminstered
+        returns (bool existed_)
     {
-        _existed = (workers[_worker] > 0);
+        existed_ = (workers[_worker] > 0);
 
         delete workers[_worker];
 
-        emit WorkerRemoved(_worker, _existed);
+        emit WorkerRemoved(_worker, existed_);
 
-        return _existed;
+        return existed_;
     }
 
+
+    /* Public Functions */
+
+    /**
+     * @notice Checks if the worker is valid.
+     *
+     * @param _worker address to check if whitelisted.
+     *
+     * @return Returns true if the worker is already added and not expired
+     *         else returns false.
+     */
     function isWorker(address _worker) public view returns (bool)
     {
         return (workers[_worker] >= block.number);

@@ -149,7 +149,7 @@ contract TokenRules is Organized {
 
     /**
      * @dev Function requires:
-     *          - Only organization can call.
+     *          - Only whitelisted worker can call.
      *          - Rule name is not empty.
      *          - Rule with the specified name does not exist.
      *          - Rule address is not null.
@@ -271,7 +271,7 @@ contract TokenRules is Organized {
      *         executing transfers.
      *
      * @dev Function requires:
-     *          - Only organization can call.
+     *          - Only whitelisted worker can call.
      *          - Constraint address is not null.
      *          - Constraint is not registered.
      */
@@ -300,7 +300,7 @@ contract TokenRules is Organized {
 
     /**
      * @dev Function requires:
-     *          - Only organization can call.
+     *          - Only whitelisted worker can call.
      *          - Constraint exists.
      */
     function removeGlobalConstraint(
