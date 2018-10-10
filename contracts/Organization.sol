@@ -50,7 +50,7 @@ contract Organization {
         address indexed _newOwner
     );
 
-    event AdminAddressChanged(address indexed _newAddress);
+    event AdminAddressChanged(address indexed _newAdmin);
 
     event WorkerSet(
         address indexed _worker,
@@ -90,11 +90,11 @@ contract Organization {
         _;
     }
 
-    modifier onlyAdminstered()
+    modifier onlyAuthorized()
     {
         require(
             msg.sender == owner || msg.sender == admin,
-            "Only owner or admin is allowed to call."
+            "Only owner/admin is allowed to call."
         );
         _;
     }
@@ -123,8 +123,7 @@ contract Organization {
      * @dev Requires:
      *          - msg.sender should be owner.
      *          - proposed owner can't be null.
-     *
-     * @dev Allows resetting of admin to 0x address.
+     *      Allows resetting of admin to 0x address.
      *
      * @param _proposedOwner worker address to be added.
      *
@@ -179,8 +178,7 @@ contract Organization {
      * @dev Requires:
      *          - msg.sender should be owner or owner.
      *          - admin should not be same as owner.
-     *
-     * @dev Allows resetting of admin to 0x address.
+     *      Allows resetting of admin to 0x address.
      *
      * @param _admin admin address to be added.
      *
@@ -188,12 +186,12 @@ contract Organization {
      */
     function setAdmin(address _admin)
         external
-        onlyAdminstered
+        onlyAuthorized
         returns (bool)
     {
         require(
             _admin != owner,
-            "admin address can't be owner address."
+            "Admin address can't be owner address."
         );
 
         admin = _admin;
@@ -220,7 +218,7 @@ contract Organization {
         address _worker,
         uint256 _expirationHeight)
         external
-        onlyAdminstered
+        onlyAuthorized
         returns (uint256 remainingHeight_)
     {
         require(
@@ -252,7 +250,7 @@ contract Organization {
      */
     function removeWorker(address _worker)
         external
-        onlyAdminstered
+        onlyAuthorized
         returns (bool existed_)
     {
         existed_ = (workers[_worker] > 0);
