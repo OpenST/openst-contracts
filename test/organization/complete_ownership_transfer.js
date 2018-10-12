@@ -19,112 +19,78 @@ const Utils = require('../test_lib/utils.js'),
 
 const Organization = artifacts.require('Organization');
 
-contract('Organization::setAdmin', async () => {
+contract('Organization::initiateOwnershipTransfer', async () => {
 
   contract('Negative Tests', async (accounts) => {
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get(),
-      admin = accountProvider.get();
+      proposedOwner = accountProvider.get();
     let organization = null;
 
     beforeEach(async function () {
       organization = await Organization.new({ from: owner });
+      await organization.initiateOwnershipTransfer(
+        proposedOwner,
+        { from: owner },
+      )
     });
 
-    it('Reverts when caller is not owner/admin.', async () => {
+    it('Reverts when caller is not owner.', async () => {
 
       await Utils.expectRevert(
-        organization.setAdmin(
-          admin,
-          { from: accountProvider.get() },
-        ),
-        'Should revert as caller is not owner/admin.',
-        'Only owner/admin is allowed to call.',
+        organization.completeOwnershipTransfer({ from: accountProvider.get() },),
+        'Should revert as caller is not proposedOwner.',
+        'msg.sender is not proposed owner address.',
       );
-    });
-
-    it('Reverts when admin is same as owner.', async () => {
-
-      await Utils.expectRevert(
-        organization.setAdmin(
-          owner,
-          { from: owner },
-        ),
-        'Should revert as owner is setting himself as admin address.',
-        'Admin address can\'t be owner address.',
-      );
-
     });
 
   });
 
   contract('Storage Tests', async (accounts) => {
+
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get(),
-      admin = accountProvider.get();
+      proposedOwner = accountProvider.get();
     let organization = null;
 
     beforeEach(async function () {
       organization = await Organization.new({ from: owner });
+      await organization.initiateOwnershipTransfer(
+        proposedOwner,
+        { from: owner },
+      )
     });
 
-    it('Should pass when correct admin is passed by owner.', async () => {
-      const admin = accountProvider.get();
+    it('Should pass when caller is proposed owner.', async () => {
       assert.ok(
-        await organization.setAdmin(
-          admin,
-          { from: owner },
+        await organization.completeOwnershipTransfer(
+          { from: proposedOwner },
         )
       );
 
-      assert.strictEqual(await organization.admin.call(), admin);
-    });
-
-    it('Should pass when correct admin is passed by admin.', async () => {
-      assert.ok(
-        await organization.setAdmin(
-          admin,
-          { from: owner },
-        )
-      );
-      let newAdmin = accountProvider.get();
-      assert.ok(
-        await organization.setAdmin(
-          newAdmin,
-          { from: admin },
-        )
-      );
-
-      assert.strictEqual(await organization.admin.call(), newAdmin);
-    });
-
-    it('Should pass when admin address is 0x.', async () => {
-      assert.ok(
-        await organization.setAdmin(
-          Utils.NULL_ADDRESS,
-          { from: owner },
-        )
-      );
-
-      assert.strictEqual(await organization.admin.call(), Utils.NULL_ADDRESS);
+      assert.strictEqual(await organization.owner.call(), proposedOwner);
     });
 
   });
 
   contract('Event Tests', async (accounts) => {
+
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get(),
-      admin = accountProvider.get();
+      proposedOwner = accountProvider.get();
     let organization = null;
 
     beforeEach(async function () {
       organization = await Organization.new({ from: owner });
+      await organization.initiateOwnershipTransfer(
+        proposedOwner,
+        { from: owner },
+      )
     });
 
-    it('Verifies emitting of AdminAddressChanged event.', async () => {
-      const transactionReceipt = await organization.setAdmin(
-        admin,
-        { from: owner },
+    it('Verifies emitting of OwnershipTransferCompleted event.', async () => {
+      const transactionReceipt = await organization.completeOwnershipTransfer(
+        { from: proposedOwner },
       );
 
       const events = Event.decodeTransactionResponse(
@@ -134,13 +100,15 @@ contract('Organization::setAdmin', async () => {
       assert.strictEqual(
         events.length,
         1,
-        'AdminAddressChanged event should be emitted.',
+        'OwnershipTransferCompleted event should be emitted.',
       );
 
+      // The emitted event should be 'OwnershipTransferInitiated'.
       Event.assertEqual(events[0], {
-        name: 'AdminAddressChanged',
+        name: 'OwnershipTransferCompleted',
         args: {
-          _newAdmin: admin,
+          _previousOwner: owner,
+          _newOwner: proposedOwner
         },
       });
 

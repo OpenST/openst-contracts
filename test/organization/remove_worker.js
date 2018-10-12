@@ -15,16 +15,19 @@
 
 const Utils = require('../test_lib/utils.js'),
   { AccountProvider } = require('../test_lib/utils.js'),
-  { Event } = require('../test_lib/event_decoder');
+  { Event } = require('../test_lib/event_decoder'),
+  web3 = require('../test_lib/web3.js'),
+  BN = require('bn.js');
 
 const Organization = artifacts.require('Organization');
 
-contract('Organization::setAdmin', async () => {
+contract('Organization::setWorker', async () => {
 
   contract('Negative Tests', async (accounts) => {
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get(),
-      admin = accountProvider.get();
+      worker = accountProvider.get();
+
     let organization = null;
 
     beforeEach(async function () {
@@ -34,113 +37,83 @@ contract('Organization::setAdmin', async () => {
     it('Reverts when caller is not owner/admin.', async () => {
 
       await Utils.expectRevert(
-        organization.setAdmin(
-          admin,
+        organization.removeWorker(
+          worker,
           { from: accountProvider.get() },
         ),
         'Should revert as caller is not owner/admin.',
         'Only owner/admin is allowed to call.',
       );
-    });
-
-    it('Reverts when admin is same as owner.', async () => {
-
-      await Utils.expectRevert(
-        organization.setAdmin(
-          owner,
-          { from: owner },
-        ),
-        'Should revert as owner is setting himself as admin address.',
-        'Admin address can\'t be owner address.',
-      );
 
     });
 
   });
 
-  contract('Storage Tests', async (accounts) => {
+  contract('Successful execution', async (accounts) => {
+
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get(),
-      admin = accountProvider.get();
-    let organization = null;
+      worker = accountProvider.get();
+    let organization = null,
+      expirationHeight = null;
 
     beforeEach(async function () {
       organization = await Organization.new({ from: owner });
+      expirationHeight = (await web3.eth.getBlockNumber()) + 10;
+      await organization.setWorker(worker, expirationHeight, { from: owner })
     });
 
-    it('Should pass when correct admin is passed by owner.', async () => {
-      const admin = accountProvider.get();
+    it('Should pass when correct arguments are passed.', async () => {
+
       assert.ok(
-        await organization.setAdmin(
-          admin,
+        await organization.removeWorker(
+          worker,
           { from: owner },
         )
       );
-
-      assert.strictEqual(await organization.admin.call(), admin);
-    });
-
-    it('Should pass when correct admin is passed by admin.', async () => {
-      assert.ok(
-        await organization.setAdmin(
-          admin,
-          { from: owner },
-        )
-      );
-      let newAdmin = accountProvider.get();
-      assert.ok(
-        await organization.setAdmin(
-          newAdmin,
-          { from: admin },
-        )
+      assert.equal(
+        (await organization.workers.call(worker)).toString(10),
+        (new BN(0)).toString(0)
       );
 
-      assert.strictEqual(await organization.admin.call(), newAdmin);
-    });
-
-    it('Should pass when admin address is 0x.', async () => {
-      assert.ok(
-        await organization.setAdmin(
-          Utils.NULL_ADDRESS,
-          { from: owner },
-        )
-      );
-
-      assert.strictEqual(await organization.admin.call(), Utils.NULL_ADDRESS);
     });
 
   });
 
   contract('Event Tests', async (accounts) => {
+
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get(),
-      admin = accountProvider.get();
-    let organization = null;
+      worker = accountProvider.get();
+    let organization = null,
+      expirationHeight = null;
 
     beforeEach(async function () {
       organization = await Organization.new({ from: owner });
+      expirationHeight = (await web3.eth.getBlockNumber()) + 10;
+      await organization.setWorker(worker, expirationHeight, { from: owner })
     });
 
-    it('Verifies emitting of AdminAddressChanged event.', async () => {
-      const transactionReceipt = await organization.setAdmin(
-        admin,
+    it('Verifies emitting of removeWorker event.', async () => {
+
+      const transactionReceipt = await organization.removeWorker(
+        worker,
         { from: owner },
       );
-
       const events = Event.decodeTransactionResponse(
         transactionReceipt,
       );
-
       assert.strictEqual(
         events.length,
         1,
-        'AdminAddressChanged event should be emitted.',
+        'WorkerRemoved event should be emitted.',
       );
 
       Event.assertEqual(events[0], {
-        name: 'AdminAddressChanged',
+        name: 'WorkerRemoved',
         args: {
-          _newAdmin: admin,
+          _worker: worker,
+          _existed: true
         },
       });
 

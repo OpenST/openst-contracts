@@ -136,7 +136,7 @@ contract Organization {
     {
         require(
             _proposedOwner != owner,
-            "proposedOwner address can't be owner address."
+            "ProposedOwner address can't be owner address."
         );
 
         proposedOwner = _proposedOwner;

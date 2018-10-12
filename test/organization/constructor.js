@@ -25,7 +25,7 @@ contract('Organization::constructor', async () => {
     let organization = null;
 
     beforeEach(async function () {
-      organization = await Organization.new();
+      organization = await Organization.new({ from: owner });
     });
 
     it('Checks that organization owner is set correctly.', async () => {
