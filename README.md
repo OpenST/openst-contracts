@@ -8,7 +8,9 @@ _While OpenST is available as-is for anyone to use, we caution that this is earl
 
 #### Purpose
 
-This repository houses the work that focuses on improving the usability of decentralized applications.
+This repository houses the work that focuses on improving the usability of decentralized applications.To participate in the discussion on technical matters, please join our [forum](https://discuss.openst.org/). The project also has a [Gitter](https://gitter.im/OpenSTFoundation/SimpleToken) channel and we track our issues in GitHub.
+
+
 
 OpenST-contracts is a collection of smart contracts that enable developers to program Token Economies.
 <br>
