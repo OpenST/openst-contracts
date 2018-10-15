@@ -146,7 +146,7 @@ contract('Organization::setWorker', async () => {
         name: 'WorkerSet',
         args: {
           _worker: worker,
-          _expirationHeight: expirationHeight,
+          _expirationHeight: new BN(expirationHeight),
           _remainingHeight: new BN(remainingHeight)
         },
       });

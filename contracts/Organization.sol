@@ -20,19 +20,9 @@ import "./SafeMath.sol";
 /**
  * @title Organization contract.
  *
- * @notice The organization represents an entity that manages the Branded Token
+ * @notice The organization represents an entity that manages the
  *         Economy, and therefore the Organization.sol contract holds all
- *         the keys required to administer the economy. This includes:
- *         -    Organization owner can set admin key to facilitate economy
- *              operations.
- *         -    Organization workers can register internal actors in the
- *              utility branded token contract.
- *         -    Organization workers can setGateway, setStakeVault, do KYC
- *              verification.
- *         -    Organization workers can register custom token rules
- *              in TokenRules contract.
- *         -    Organization workers can add/remove global constraints in
- *              TokenRules contract.
+ *         the keys required to administer the economy.
  */
 contract Organization {
 
@@ -93,7 +83,7 @@ contract Organization {
     modifier onlyAuthorized()
     {
         require(
-            msg.sender == owner || msg.sender == admin,
+            (msg.sender == owner) || (msg.sender == admin),
             "Only owner/admin is allowed to call."
         );
         _;
@@ -176,9 +166,9 @@ contract Organization {
      * @notice Sets admin address.
      *
      * @dev Requires:
-     *          - msg.sender should be owner or owner.
+     *          - msg.sender should be owner or admin.
      *          - admin should not be same as owner.
-     *      Allows resetting of admin to 0x address.
+     *      Allows resetting of admin address to 0x.
      *
      * @param _admin admin address to be added.
      *
@@ -248,10 +238,7 @@ contract Organization {
      *
      * @return Returns true if the worker existed else returns false.
      */
-    function removeWorker(address _worker)
-        external
-        onlyAuthorized
-        returns (bool existed_)
+    function removeWorker(address _worker) external onlyAuthorized returns (bool existed_)
     {
         existed_ = (workers[_worker] > 0);
 
@@ -266,7 +253,7 @@ contract Organization {
     /* Public Functions */
 
     /**
-     * @notice Checks if the worker is valid.
+     * @notice Checks if the worker is valid or invalid.
      *
      * @param _worker address to check if whitelisted.
      *
