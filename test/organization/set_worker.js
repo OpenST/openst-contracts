@@ -13,7 +13,7 @@
 // limitations under the License.
 
 
-const utils = require('../test_lib/utils.js'),
+const Utils = require('../test_lib/utils.js'),
   { AccountProvider } = require('../test_lib/utils.js'),
   { Event } = require('../test_lib/event_decoder'),
   web3 = require('../test_lib/web3.js'),
@@ -26,7 +26,8 @@ contract('Organization::setWorker', async () => {
   contract('Negative Tests', async (accounts) => {
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get(),
-      worker = accountProvider.get();
+      worker = accountProvider.get(),
+      expirationHeightDelta = 10;
 
     let organization = null,
       expirationHeight = 0;
@@ -38,7 +39,7 @@ contract('Organization::setWorker', async () => {
 
     it('Reverts when caller is not owner/admin.', async () => {
 
-      await utils.expectRevert(
+      await Utils.expectRevert(
         organization.setWorker(
           worker,
           expirationHeight,
@@ -51,9 +52,9 @@ contract('Organization::setWorker', async () => {
 
     it('Reverts when worker address is null.', async () => {
 
-      await utils.expectRevert(
+      await Utils.expectRevert(
         organization.setWorker(
-          utils.NULL_ADDRESS,
+          Utils.NULL_ADDRESS,
           expirationHeight,
           { from: owner },
         ),
@@ -65,8 +66,18 @@ contract('Organization::setWorker', async () => {
 
     it('Reverts when expiration height is expired.', async () => {
 
-      expirationHeight = (await web3.eth.getBlockNumber()) - 10;
-      await utils.expectRevert(
+      const blockNumber = await web3.eth.getBlockNumber();
+      const expirationHeight = blockNumber + expirationHeightDelta;
+      for (let i = 0; i < expirationHeightDelta; i += 1) {
+        await Utils.advanceBlock();
+      }
+
+      // Checking that key has expired.
+      assert.isOk(
+        (await organization.workers.call(worker)) <=
+        (await web3.eth.getBlockNumber()),
+      );
+      await Utils.expectRevert(
         organization.setWorker(
           worker,
           expirationHeight,

@@ -21,7 +21,7 @@ import "./SafeMath.sol";
  * @title Organization contract.
  *
  * @notice The organization represents an entity that manages the
- *         Economy, and therefore the Organization.sol contract holds all
+ *         economy and therefore the Organization.sol contract holds all
  *         the keys required to administer the economy.
  */
 contract Organization {
