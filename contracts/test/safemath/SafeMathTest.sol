@@ -2,14 +2,13 @@ pragma solidity ^0.4.24;
 import "../../SafeMath.sol";
 
 /**
- * It is used to test SafeMath contract
- *
+ * It is used to test SafeMath contract.
  */
 contract SafeMathTest {
 
     /**
-    * @dev Multiplies two numbers, reverts on overflow.
-    */
+     * @dev Multiplies two numbers, reverts on overflow.
+     */
     function mul(uint256 a, uint256 b)
         public
         pure
@@ -21,8 +20,9 @@ contract SafeMathTest {
     }
 
     /**
-    * @dev Integer division of two numbers truncating the quotient, reverts on division by zero.
-    */
+     * @dev Integer division of two numbers truncating the quotient,
+     *      reverts on division by zero.
+     */
     function div(uint256 a, uint256 b)
         public
         pure
@@ -34,8 +34,9 @@ contract SafeMathTest {
     }
 
     /**
-    * @dev Subtracts two numbers, reverts on overflow (i.e. if subtrahend is greater than minuend).
-    */
+     * @dev Subtracts two numbers, reverts on overflow (i.e. if subtrahend
+     *      is greater than minuend).
+     */
     function sub(uint256 a, uint256 b)
         public
         pure
@@ -47,8 +48,8 @@ contract SafeMathTest {
     }
 
     /**
-    * @dev Adds two numbers, reverts on overflow.
-    */
+     * @dev Adds two numbers, reverts on overflow.
+     */
     function add(uint256 a, uint256 b)
         public
         pure
@@ -60,9 +61,9 @@ contract SafeMathTest {
     }
 
     /**
-    * @dev Divides two numbers and returns the remainder (unsigned integer modulo),
-    * reverts when dividing by zero.
-    */
+     * @dev Divides two numbers and returns the remainder (unsigned integer modulo),
+     *      reverts when dividing by zero.
+     */
     function mod(uint256 a, uint256 b)
         public
         pure
