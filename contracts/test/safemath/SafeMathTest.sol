@@ -61,8 +61,8 @@ contract SafeMathTest {
     }
 
     /**
-     * @dev Divides two numbers and returns the remainder (unsigned integer modulo),
-     *      reverts when dividing by zero.
+     * @dev Divides two numbers and returns the remainder (unsigned integer
+     *      modulo), reverts when dividing by zero.
      */
     function mod(uint256 a, uint256 b)
         public
