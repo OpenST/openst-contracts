@@ -141,7 +141,6 @@ contract('Organization::setWorker', async () => {
 
       let currentBlockNumber = await web3.eth.getBlockNumber();
       let remainingHeight = expirationHeight - currentBlockNumber;
-      console.log("events:", events[0]);
       Event.assertEqual(events[0], {
         name: 'WorkerSet',
         args: {

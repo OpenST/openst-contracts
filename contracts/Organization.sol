@@ -65,7 +65,10 @@ contract Organization {
     /** admin address set by owner to facilitate operations of an economy. */
     address public admin;
 
-    /** List of whitelisted workers active upto the expiration height. */
+    /**
+     *  List of whitelisted workers active upto the expiration height.
+     *  Expiration height 0 is a valid height.
+     */
     mapping(address => uint256 /* expiration height */) public workers;
 
 
@@ -198,6 +201,7 @@ contract Organization {
      *          - msg.sender should be owner or admin.
      *          - worker address can't be null.
      *          - expiration height should not be expired.
+     *      ExpirationHeight 0 is a valid block number.
      *
      * @param _worker worker address to be added.
      * @param _expirationHeight expiration height of worker.
@@ -233,12 +237,20 @@ contract Organization {
      *
      * @dev Requires:
      *          - msg.sender should be owner or admin.
+     *      existed_ is true when a worker exists with greater than 0
+     *      block height. This is added because there could be a added worker
+     *      with expiration height 0. In this case existed_ will be false and
+     *      worker will be deleted.
      *
      * @param _worker address to be removed.
      *
      * @return Returns true if the worker existed else returns false.
      */
-    function removeWorker(address _worker) external onlyAuthorized returns (bool existed_)
+    function removeWorker(
+        address _worker)
+        external
+        onlyAuthorized
+        returns (bool existed_)
     {
         existed_ = (workers[_worker] > 0);
 
