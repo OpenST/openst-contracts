@@ -29,7 +29,7 @@ pragma solidity ^0.4.24;
 
 /**
  * @title SafeMath
- * @dev Math operations with safety checks that revert on error
+ * @dev Math operations with safety checks that revert on error.
  */
 library SafeMath {
 
@@ -55,8 +55,8 @@ library SafeMath {
      *      on division by zero.
      */
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b > 0); // Solidity only automatically asserts when dividing
-                        // by 0
+        // Solidity only automatically asserts when dividing by 0.
+        require(b > 0);
         uint256 c = a / b;
         // assert(a == b * c + a % b); // There is no case in which this
                                        // doesn't hold
@@ -87,8 +87,8 @@ library SafeMath {
     }
 
     /**
-     * @dev Divides two numbers and returns the remainder (unsigned integer modulo),
-     * reverts when dividing by zero.
+     * @dev Divides two numbers and returns the remainder,
+     *      (unsigned integer modulo) reverts when dividing by zero.
      */
     function mod(uint256 a, uint256 b) internal pure returns (uint256) {
         require(b != 0);
