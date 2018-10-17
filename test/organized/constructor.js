@@ -20,7 +20,7 @@ const Organization = artifacts.require('Organization'),
 
 contract('Organized::constructor', async (accounts) => {
 
-  describe('Negative Tests', async (accounts) => {
+  describe('Negative Tests', async () => {
 
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get();
