@@ -42,9 +42,9 @@ contract Organization {
 
     event AdminAddressChanged(address indexed _newAdmin);
 
-    event WorkerSet(
+    event WorkerAdded(
         address indexed _worker,
-        uint256 indexed _expirationHeight,
+        uint256 _expirationHeight,
         uint256 _remainingHeight
     );
 
@@ -227,7 +227,7 @@ contract Organization {
         workers[_worker] = _expirationHeight;
         remainingHeight_ = _expirationHeight.sub(block.number);
 
-        emit WorkerSet(_worker, _expirationHeight, remainingHeight_);
+        emit WorkerAdded(_worker, _expirationHeight, remainingHeight_);
 
         return remainingHeight_;
     }

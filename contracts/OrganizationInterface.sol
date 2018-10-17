@@ -33,9 +33,9 @@ contract OrganizationInterface {
 
     event AdminAddressChanged(address indexed _newAddress);
 
-    event WorkerSet(
+    event WorkerAdded(
         address indexed _worker,
-        uint256 indexed _expirationHeight,
+        uint256 _expirationHeight,
         uint256 _remainingHeight
     );
 
