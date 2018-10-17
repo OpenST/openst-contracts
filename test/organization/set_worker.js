@@ -21,9 +21,9 @@ const Utils = require('../test_lib/utils.js'),
 
 const Organization = artifacts.require('Organization');
 
-contract('Organization::setWorker', async () => {
+contract('Organization::setWorker', async (accounts) => {
 
-  contract('Negative Tests', async (accounts) => {
+  describe('Negative Tests', async () => {
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get(),
       worker = accountProvider.get(),
@@ -91,7 +91,7 @@ contract('Organization::setWorker', async () => {
 
   });
 
-  contract('Storage Tests', async (accounts) => {
+  describe('Storage Tests', async () => {
 
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get(),
@@ -121,7 +121,7 @@ contract('Organization::setWorker', async () => {
 
   });
 
-  contract('Event Tests', async (accounts) => {
+  describe('Event Tests', async () => {
 
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get(),

@@ -18,9 +18,9 @@ const Utils = require('../test_lib/utils.js'),
 const Organization = artifacts.require('Organization'),
   Organized = artifacts.require('Organized');
 
-contract('Organized::constructor', async () => {
+contract('Organized::constructor', async (accounts) => {
 
-  contract('Negative Tests', async (accounts) => {
+  describe('Negative Tests', async (accounts) => {
 
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get();
@@ -42,7 +42,7 @@ contract('Organized::constructor', async () => {
 
   });
 
-  contract('Storage Tests', async (accounts) => {
+  describe('Storage Tests', async () => {
 
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get();

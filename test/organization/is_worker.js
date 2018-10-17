@@ -17,9 +17,9 @@ const Utils  = require('../test_lib/utils.js');
 
 const Organization = artifacts.require('Organization');
 
-contract('Organization::constructor', async () => {
+contract('Organization::constructor', async (accounts) => {
 
-  contract('Negative Tests', async (accounts) => {
+  describe('Negative Tests', async () => {
     const accountProvider = new Utils.AccountProvider(accounts),
       owner = accountProvider.get(),
       worker = accountProvider.get();
@@ -39,7 +39,6 @@ contract('Organization::constructor', async () => {
       await organization.setWorker(worker, expirationHeight, { from: owner });
       // Dummy Transaction to increase block number
       for (let i = 0; i < deltaExpirationHeight; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
         await Utils.advanceBlock();
       }
       assert.strictEqual(await organization.isWorker.call(worker), false);
@@ -47,7 +46,7 @@ contract('Organization::constructor', async () => {
 
   });
 
-  contract('SuccessFul Execution', async (accounts) => {
+  describe('SuccessFul Execution', async () => {
 
     const accountProvider = new Utils.AccountProvider(accounts),
       owner = accountProvider.get(),

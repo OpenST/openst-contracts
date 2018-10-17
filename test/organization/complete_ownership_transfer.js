@@ -19,9 +19,9 @@ const Utils = require('../test_lib/utils.js'),
 
 const Organization = artifacts.require('Organization');
 
-contract('Organization::initiateOwnershipTransfer', async () => {
+contract('Organization::initiateOwnershipTransfer', async (accounts) => {
 
-  contract('Negative Tests', async (accounts) => {
+  describe('Negative Tests', async () => {
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get(),
       proposedOwner = accountProvider.get();
@@ -40,13 +40,13 @@ contract('Organization::initiateOwnershipTransfer', async () => {
       await Utils.expectRevert(
         organization.completeOwnershipTransfer({ from: accountProvider.get() },),
         'Should revert as caller is not proposedOwner.',
-        'msg.sender is not proposed owner address.',
+        'Caller is not proposed owner address.',
       );
     });
 
   });
 
-  contract('Storage Tests', async (accounts) => {
+  describe('Storage Tests', async () => {
 
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get(),
@@ -73,7 +73,7 @@ contract('Organization::initiateOwnershipTransfer', async () => {
 
   });
 
-  contract('Event Tests', async (accounts) => {
+  describe('Event Tests', async () => {
 
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get(),

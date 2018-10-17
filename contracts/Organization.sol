@@ -153,7 +153,7 @@ contract Organization {
     {
         require(
             msg.sender == proposedOwner,
-            "msg.sender is not proposed owner address."
+            "Caller is not proposed owner address."
         );
 
         address oldOwner = owner;
@@ -189,7 +189,7 @@ contract Organization {
 
         admin = _admin;
 
-        emit AdminAddressChanged(_admin);
+        emit AdminAddressChanged(admin);
 
         return true;
     }

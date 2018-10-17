@@ -17,9 +17,9 @@ const { AccountProvider } = require('../test_lib/utils.js');
 
 const Organization = artifacts.require('Organization');
 
-contract('Organization::constructor', async () => {
+contract('Organization::constructor', async (accounts) => {
 
-  contract('Storage Tests', async (accounts) => {
+  describe('Storage Tests', async () => {
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get();
     let organization = null;
