@@ -42,15 +42,14 @@ contract Organization {
 
     event AdminAddressChanged(address indexed _newAdmin);
 
-    event WorkerAdded(
+    event WorkerSet(
         address indexed _worker,
         uint256 _expirationHeight,
         uint256 _remainingHeight
     );
 
     event WorkerRemoved(
-        address indexed _worker,
-        bool _existed
+        address indexed _worker
     );
 
 
@@ -95,15 +94,8 @@ contract Organization {
 
     /* Special Functions */
 
-    /**
-     * @dev Function requires:
-     *          - msg.sender is not null.
-     */
-    constructor()
-        public
+    constructor() public
     {
-        require(msg.sender != address(0), "Owner address is null.");
-
         owner = msg.sender;
     }
 
@@ -115,12 +107,11 @@ contract Organization {
      *
      * @dev Requires:
      *          - msg.sender should be owner.
-     *          - proposed owner can't be null.
-     *      Allows resetting of admin to 0x address.
+     *      Allows resetting of owner to 0x address.
      *
      * @param _proposedOwner worker address to be added.
      *
-     * @return Returns true on successful execution.
+     * @return true on successful execution.
      */
     function initiateOwnershipTransfer(address _proposedOwner)
         external
@@ -129,7 +120,7 @@ contract Organization {
     {
         require(
             _proposedOwner != owner,
-            "ProposedOwner address can't be owner address."
+            "ProposedOwner address can't be current owner address."
         );
 
         proposedOwner = _proposedOwner;
@@ -145,11 +136,9 @@ contract Organization {
      * @dev Requires:
      *          - msg.sender should be proposed owner.
      *
-     * @return Returns true on successful execution.
+     * @return true on successful execution.
      */
-    function completeOwnershipTransfer()
-        external
-        returns (bool)
+    function completeOwnershipTransfer() external returns (bool)
     {
         require(
             msg.sender == proposedOwner,
@@ -175,12 +164,9 @@ contract Organization {
      *
      * @param _admin admin address to be added.
      *
-     * @return Returns true on successful execution.
+     * @return true on successful execution.
      */
-    function setAdmin(address _admin)
-        external
-        onlyAuthorized
-        returns (bool)
+    function setAdmin(address _admin) external onlyAuthorized returns (bool)
     {
         require(
             _admin != owner,
@@ -198,19 +184,23 @@ contract Organization {
      * @notice Sets worker and its expiration height.
      *
      * @dev Requires:
-     *          - msg.sender should be owner or admin.
+     *          - Caller should be owner or admin.
      *          - worker address can't be null.
      *          - expiration height should not be expired.
-     *      ExpirationHeight 0 is a valid block number.
+     *          - 0 expiration height is not allowed.
+     *      Admin/Owner has the flexibility to extend/reduce worker expiration
+     *      height. This way a worker is in control without adding/removing
+     *      new worker keys.
      *
      * @param _worker worker address to be added.
      * @param _expirationHeight expiration height of worker.
      *
-     * @return Returns remaining height for which worker is active.
+     * @return Remaining height for which worker is active.
      */
     function setWorker(
         address _worker,
-        uint256 _expirationHeight)
+        uint256 _expirationHeight
+    )
         external
         onlyAuthorized
         returns (uint256 remainingHeight_)
@@ -219,6 +209,9 @@ contract Organization {
             _worker != address(0),
             "Worker address is null."
         );
+
+        // expiration height with 0 block number is not allowed since the
+        // minimum block number can be 0.
         require(
             _expirationHeight > block.number,
             "Expiration height is lte to the current block height."
@@ -227,7 +220,7 @@ contract Organization {
         workers[_worker] = _expirationHeight;
         remainingHeight_ = _expirationHeight.sub(block.number);
 
-        emit WorkerAdded(_worker, _expirationHeight, remainingHeight_);
+        emit WorkerSet(_worker, _expirationHeight, remainingHeight_);
 
         return remainingHeight_;
     }
@@ -236,29 +229,28 @@ contract Organization {
      * @notice Removes a worker.
      *
      * @dev Requires:
-     *          - msg.sender should be owner or admin.
-     *      existed_ is true when a worker exists with greater than 0
-     *      block height. This is added because there could be a added worker
-     *      with expiration height 0. In this case existed_ will be false and
-     *      worker will be deleted.
+     *          - Caller should be owner or admin.
+     *          - Worker to be removed should be present.
      *
      * @param _worker address to be removed.
      *
-     * @return Returns true if the worker existed else returns false.
+     * @return true if the worker existed else returns false.
      */
-    function removeWorker(
-        address _worker)
+    function removeWorker(address _worker)
         external
         onlyAuthorized
-        returns (bool existed_)
+        returns (bool)
     {
-        existed_ = (workers[_worker] > 0);
+        require(
+            workers[_worker] > 0,
+            "Worker to be removed is not present."
+        );
 
         delete workers[_worker];
 
-        emit WorkerRemoved(_worker, existed_);
+        emit WorkerRemoved(_worker);
 
-        return existed_;
+        return true;
     }
 
 
@@ -269,7 +261,7 @@ contract Organization {
      *
      * @param _worker address to check if whitelisted.
      *
-     * @return Returns true if the worker is already added and not expired
+     * @return true if the worker is already added and not expired
      *         else returns false.
      */
     function isWorker(address _worker) public view returns (bool)

@@ -58,8 +58,7 @@ contract Organized {
      * @param _organization organization contract address containing
      *        different administration keys.
      */
-    constructor(address _organization)
-        public
+    constructor(address _organization) public
     {
         require(
             _organization != address(0),

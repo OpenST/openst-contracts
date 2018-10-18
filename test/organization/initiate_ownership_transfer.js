@@ -51,7 +51,7 @@ contract('Organization::initiateOwnershipTransfer', async (accounts) => {
           { from: owner },
         ),
         'Should revert as owner is proposing himself for ownership transfer.',
-        'ProposedOwner address can\'t be owner address.',
+        'ProposedOwner address can\'t be current owner address.',
       );
 
     });

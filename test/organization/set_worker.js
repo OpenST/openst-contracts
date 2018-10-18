@@ -134,7 +134,7 @@ contract('Organization::setWorker', async (accounts) => {
       expirationHeight = (await web3.eth.getBlockNumber()) + 10;
     });
 
-    it('Verifies emitting of WorkerAdded event.', async () => {
+    it('Verifies emitting of WorkerSet event.', async () => {
 
       const transactionReceipt = await organization.setWorker(
         worker,
@@ -147,13 +147,13 @@ contract('Organization::setWorker', async (accounts) => {
       assert.strictEqual(
         events.length,
         1,
-        'WorkerAdded event should be emitted.',
+        'WorkerSet event should be emitted.',
       );
 
       let currentBlockNumber = await web3.eth.getBlockNumber();
       let remainingHeight = expirationHeight - currentBlockNumber;
       Event.assertEqual(events[0], {
-        name: 'WorkerAdded',
+        name: 'WorkerSet',
         args: {
           _worker: worker,
           _expirationHeight: new BN(expirationHeight),

@@ -47,6 +47,19 @@ contract('Organization::setWorker', async (accounts) => {
 
     });
 
+    it('Reverts when worker to be removed is not present.', async () => {
+
+      await Utils.expectRevert(
+        organization.removeWorker(
+          accountProvider.get(),
+          { from: owner },
+        ),
+        'Should revert as worker to be removed is not present.',
+        'Worker to be removed is not present.',
+      );
+
+    });
+
   });
 
   describe('Successful execution', async () => {
@@ -112,8 +125,7 @@ contract('Organization::setWorker', async (accounts) => {
       Event.assertEqual(events[0], {
         name: 'WorkerRemoved',
         args: {
-          _worker: worker,
-          _existed: true
+          _worker: worker
         },
       });
 
