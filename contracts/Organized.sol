@@ -31,8 +31,8 @@ contract Organized {
     /* Storage */
 
     /**
-     * OrganizationInterface contract address holds all the keys
-     * needed to administer the economy.
+     * OrganizationInterface of Organization contract which holds all the
+     * keys needed to administer the economy.
      */
     OrganizationInterface public organization;
 
