@@ -6,7 +6,7 @@ OpenST blockchain infrastructure empowers new economies for mainstream businesse
 
 _While OpenST is available as-is for anyone to use, we caution that this is early stage software and under heavy ongoing development and improvement. Please report bugs and suggested improvements._
 
-OpenST-contracts is a collection of smart contracts that enable developers to program Token Economies.s.To participate in the discussion on technical matters, please join our [forum](https://discuss.openst.org/). The project also has a [Gitter](https://gitter.im/OpenSTFoundation/SimpleToken) channel and we track our issues in GitHub.
+OpenST-contracts is a collection of smart contracts that enable developers to program Token Economiess.To participate in the discussion on technical matters, please join our [forum](https://discuss.openst.org/). The project also has a [Gitter](https://gitter.im/OpenSTFoundation/SimpleToken) channel in case you run into challenges and need help and we track our issues in GitHub.
 
 The major components of this repository are the TokenHolder contracts, TokenRules contract, and the custom Rule contracts that can be registered with the TokenRules contracts to establish the economy specific payments and rewards.
 
@@ -23,6 +23,8 @@ Once an (d)App developer has set up their Token Economy using OpenST, their user
 The user can sign an executable transaction using an ephemeral key. Their TokenHolder Contract calls on a rule on their behalf. The TokenRules contract executes the Token transfers that are required to execute the rule 
 
 ![Image2](src/ExecuteRule.png)
+
+To incorporate OpenST in your (D)app, please use [openst.js](https://github.com/OpenSTFoundation/openst.js). 
       
 #### Related Repositories
 
