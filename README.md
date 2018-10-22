@@ -14,7 +14,7 @@ TokenHolder Contracts are multi-sig contracts with multiple ownership keys that 
 
 Ephemeral keys are introduced to sign transactions from within applications without requiring the user to manually sign every action. Ephemeral keys are temporary keys that can be authorized by the owner keys in accordance with the multi-sig requirements set by the user. 
 
-![Image 1](src/OEphemeralKeyAuthorization.png)
+![Image 1](src/EphemeralKeyAuthorization.png)
 
 The addition of the TokenRules contract in OpenST v0.9.4 represents the decentralization of rule design and allows apps to design on-chain rules that map to their business logic. 
 
