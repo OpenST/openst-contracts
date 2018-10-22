@@ -58,14 +58,14 @@ contract Organized {
      * @param _organization organization contract address containing
      *        different administration keys.
      */
-    constructor(address _organization) public
+    constructor(OrganizationInterface _organization) public
     {
         require(
             _organization != address(0),
             "Organization contract address is null."
         );
 
-        organization = OrganizationInterface(_organization);
+        organization = _organization;
     }
 
 }
