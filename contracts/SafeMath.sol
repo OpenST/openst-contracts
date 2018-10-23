@@ -1,5 +1,3 @@
-pragma solidity ^0.4.23;
-
 // Copyright 2018 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
