@@ -82,7 +82,7 @@ contract Organization {
         _;
     }
 
-    modifier onlyAuthorized()
+    modifier onlyOrganization()
     {
         require(
             (msg.sender == owner) || (msg.sender == admin),
@@ -166,7 +166,7 @@ contract Organization {
      *
      * @return true on successful execution.
      */
-    function setAdmin(address _admin) external onlyAuthorized returns (bool)
+    function setAdmin(address _admin) external onlyOrganization returns (bool)
     {
         require(
             _admin != owner,
@@ -189,8 +189,8 @@ contract Organization {
      *          - expiration height should not be expired.
      *          - 0 expiration height is not allowed.
      *      Admin/Owner has the flexibility to extend/reduce worker expiration
-     *      height. This way a worker is in control without adding/removing
-     *      new worker keys.
+     *      height. This way a worker activation/deactivation can be
+     *      controlled without adding/removing new worker keys.
      *
      * @param _worker worker address to be added.
      * @param _expirationHeight expiration height of worker.
@@ -202,7 +202,7 @@ contract Organization {
         uint256 _expirationHeight
     )
         external
-        onlyAuthorized
+        onlyOrganization
         returns (uint256 remainingHeight_)
     {
         require(
@@ -238,7 +238,7 @@ contract Organization {
      */
     function removeWorker(address _worker)
         external
-        onlyAuthorized
+        onlyOrganization
         returns (bool)
     {
         require(
