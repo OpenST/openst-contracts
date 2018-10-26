@@ -26,8 +26,32 @@ const EIP20TokenMock = artifacts.require('EIP20TokenMock');
 
 const ephemeralPrivateKey1 = '0xa8225c01ceeaf01d7bc7c1b1b929037bd4050967c5730c0b854263121b8399f3';
 const ephemeralKeyAddress1 = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
-
 const ephemeralPrivateKey2 = '0x634011a05b2f48e2d19aba49a9dbc12766bf7dbd6111ed2abb2621c92e8cfad9';
+
+let token;
+
+function generateEIP20PassData(to, value){
+
+    return web3.eth.abi.encodeFunctionCall(
+      {
+
+        name: 'transfer',
+        type: 'function',
+        inputs: [
+          {
+              type: 'address',
+              name: 'to'
+          },
+          {
+            type: 'uint256',
+            name: 'value'
+          }
+        ]
+      },
+      [to, value]
+    );
+
+}
 
 function generateMockRulePassActionData(value) {
     return web3.eth.abi.encodeFunctionCall(
@@ -168,7 +192,7 @@ function getExecuteRuleExTxData(
 async function createTokenHolder(
     accountProvider, _ephemeralKeyAddress, _spendingLimit, _deltaExpirationHeight,
 ) {
-    const token = await EIP20TokenMock.new(1, 1, 'OST', 'Open Simple Token', 1);
+    token = await EIP20TokenMock.new(1, 1, 'OST', 'Open Simple Token', 1);
     const tokenRules = await TokenRulesMock.new();
     const required = 1;
     const registeredWallet0 = accountProvider.get();
@@ -193,6 +217,33 @@ async function createTokenHolder(
     return {
         tokenHolder,
         registeredWallet0,
+    };
+}
+
+async function prepareEIP20PassData(
+  accountProvider, tokenHolder, nonce, ephemeralKey,
+) {
+
+    const to = accountProvider.get();
+    const amount = 100;
+    const eip20PassActionData = generateEIP20PassData(
+      to, amount
+    );
+
+    const { msgHash, rsv } = getExecuteRuleExTxData(
+        tokenHolder.address,
+        token.address,
+        eip20PassActionData,
+        nonce,
+        ephemeralKey
+    );
+
+    return {
+        token,
+        to,
+        eip20PassActionData,
+        msgHash,
+        rsv
     };
 }
 
@@ -410,6 +461,43 @@ contract('TokenHolder::executeRule', async () => {
             );
         });
 
+      it('Reverts if to address is EIP20 token', async () => {
+        const spendingLimit = 10;
+        const deltaExpirationHeight = 50;
+        const { tokenHolder } = await createTokenHolder(
+          accountProvider,
+          ephemeralKeyAddress1,
+          spendingLimit,
+          deltaExpirationHeight,
+        );
+
+        // Correct nonce is 1.
+        const nonce = 1;
+        const {
+          token: EIP20Token,
+          eip20PassActionData: eip20TokenBalanceOfData,
+          rsv: rsv,
+        } = await prepareEIP20PassData(
+          accountProvider,
+          tokenHolder,
+          nonce,
+          ephemeralPrivateKey1,
+        );
+
+        await Utils.expectRevert(
+          tokenHolder.executeRule(
+            EIP20Token.address,
+            eip20TokenBalanceOfData,
+            nonce,
+            rsv.v,
+            EthUtils.bufferToHex(rsv.r),
+            EthUtils.bufferToHex(rsv.s),
+          ),
+          'Should revert as ExTx is signed with a wrong nonce.',
+          'to address can\'t be EIP20 token.'
+        );
+
+      });
         it('Reverts if ExTx is signed with a wrong nonce.', async () => {
             const spendingLimit = 10;
             const deltaExpirationHeight = 50;
