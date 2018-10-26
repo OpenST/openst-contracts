@@ -472,6 +472,41 @@ contract('TokenHolder::executeRule', async () => {
                 'The next nonce is not provided.',
             );
         });
+
+        it('Reverts if ExTx targets itself (TokenHolder)', async () => {
+            const spendingLimit = 10;
+            const deltaExpirationHeight = 50;
+            const { tokenHolder } = await createTokenHolder(
+                accountProvider,
+                ephemeralKeyAddress1,
+                spendingLimit,
+                deltaExpirationHeight,
+            );
+
+            const nonce = 1;
+            const {
+                mockRulePassActionData: mockRulePassActionData,
+                rsv: rsv,
+            } = await preparePassRule(
+                accountProvider,
+                tokenHolder,
+                nonce,
+                ephemeralPrivateKey1,
+            );
+
+            await Utils.expectRevert(
+                tokenHolder.executeRule(
+                    tokenHolder.address,
+                    mockRulePassActionData,
+                    nonce,
+                    rsv.v,
+                    EthUtils.bufferToHex(rsv.r),
+                    EthUtils.bufferToHex(rsv.s),
+                ),
+                'Should revert as ExTx target is TokenHolder itself.',
+                'Target of a transaction cannot be TokenHolder itself.',
+            );
+        });
     });
 
     contract('Events', async (accounts) => {

@@ -361,6 +361,11 @@ contract TokenHolder is MultiSigWallet {
         private
         returns (bytes32 messageHash_, address key_)
     {
+        require(
+            _to != address(this),
+            "Target of a transaction cannot be TokenHolder itself."
+        );
+
         messageHash_ = getMessageHash(
             _callPrefix,
             _to,
