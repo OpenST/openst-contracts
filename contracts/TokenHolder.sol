@@ -15,9 +15,10 @@ pragma solidity ^0.4.23;
 // limitations under the License.
 
 import "./SafeMath.sol";
-import "./EIP20TokenInterface.sol";
+import "./UtilityTokenInterface.sol";
 import "./MultiSigWallet.sol";
 import "./TokenRules.sol";
+import "./coGatewayRedeemInterface.sol";
 
 
 /**
@@ -57,6 +58,12 @@ contract TokenHolder is MultiSigWallet {
         bool _status
     );
 
+    event RedeemExecuted(
+        bytes32 messageHash,
+        uint256 _nonce,
+        bytes32 _redeemMessageHash
+    );
+
 
     /* Enums */
 
@@ -90,14 +97,23 @@ contract TokenHolder is MultiSigWallet {
         )
     );
 
+    bytes4 public constant REDEEM_CALLPREFIX = bytes4(
+        keccak256(
+            "redeem(address,uint256,address,uint256,uint256,uint256,bytes32,uint256,uint8,bytes32,bytes32)"
+        )
+    );
+
 
     /* Storage */
 
-    EIP20TokenInterface public token;
+    UtilityTokenInterface public token;
 
     mapping(address /* key */ => EphemeralKeyData) public ephemeralKeys;
 
     address public tokenRules;
+
+    /** Co Gateway contract address for redeem functionality. */
+    address public coGateway;
 
 
     /* Modifiers */
@@ -135,16 +151,16 @@ contract TokenHolder is MultiSigWallet {
 
     /**
      * @dev Constructor requires:
-     *          - EIP20 token address is not null.
+     *          - Utility token address is not null.
      *          - Token rules address is not null.
      *
-     * @param _token eip20 contract address deployed for an economy.
+     * @param _token Utility token contract address deployed for an economy.
      * @param _tokenRules Token rules contract address.
      * @param _wallets array of wallet addresses.
      * @param _required No of requirements for multi sig wallet.
      */
     constructor(
-        EIP20TokenInterface _token,
+        UtilityTokenInterface _token,
         address _tokenRules,
         address[] _wallets,
         uint256 _required
@@ -160,7 +176,12 @@ contract TokenHolder is MultiSigWallet {
             _tokenRules != address(0),
             "TokenRules contract address is null."
         );
+        require(
+            _token.coGateway() != address(0),
+            "coGateway contract address is null."
+        );
 
+        coGateway = _token.coGateway();
         token = _token;
         tokenRules = _tokenRules;
     }
@@ -321,6 +342,107 @@ contract TokenHolder is MultiSigWallet {
             messageHash,
             executionStatus_
         );
+    }
+
+    /**
+     * @notice Redeem the amount to the beneficiary.
+     *
+     * @dev Function validates executable transaction by
+     *      checking that the specified signature matches one of the
+     *      authorized (non-expired) ephemeral keys.
+     *
+     *      In order to redeem, the redeemer needs to approve CoGateway
+     *      contract for the redeem amount. Redeem amount is transferred from
+     *      redeemer address to CoGateway contract. This is a payable
+     *      function. The bounty is transferred in base token.
+     *
+     *      Function requires:
+     *          - The target contract should be coGateway address that was
+     *            specified in constructor.
+     *          - Ephemeral key nonce is valid.
+     *
+     * @param _to The target contract address the transaction will be executed
+     *            upon.
+     * @param _amount Redeem amount that will be transferred from redeemer
+     *                account.
+     * @param _beneficiary The address in the origin chain where the tokens
+     *                     will be released.
+     * @param _gasPrice Gas price that redeemer is ready to pay to get the
+     *                  redemption process done.
+     * @param _gasLimit Gas limit that redeemer is ready to pay.
+     * @param _redeemerNonce Nonce of the redeemer address.
+     * @param _hashLock Hash Lock provided by the facilitator.
+     * @param _nonce The nonce of an ephemeral key that was used to sign
+     *               the transaction.
+     *
+     * @return _redeemMessageHash which is unique for each redeem request.
+     */
+    function redeem(
+        address _to,
+        uint256 _amount,
+        address _beneficiary,
+        uint256 _gasPrice,
+        uint256 _gasLimit,
+        uint256 _redeemerNonce,
+        bytes32 _hashLock,
+        uint256 _nonce,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    )
+        public
+        payable
+        returns (bytes32 _redeemMessageHash)
+    {
+        require(
+            _to == coGateway,
+            "Executable transaction should call coGateway."
+        );
+
+        bytes memory data = abi.encodeWithSelector(
+            REDEEM_CALLPREFIX,
+            _amount,
+            _beneficiary,
+            msg.sender,
+            _gasPrice,
+            _gasLimit,
+            _redeemerNonce,
+            _hashLock
+        );
+        bytes32 messageHash = bytes32(0);
+        address ephemeralKey = address(0);
+        (messageHash, ephemeralKey) = verifyExecutableTransaction(
+            REDEEM_CALLPREFIX,
+            _to,
+            data,
+            _nonce,
+            _v,
+            _r,
+            _s
+        );
+
+        EphemeralKeyData storage ephemeralKeyData = ephemeralKeys[ephemeralKey];
+
+        token.approve(
+            _to,
+            ephemeralKeyData.spendingLimit
+        );
+
+        _redeemMessageHash = coGatewayRedeemInterface(coGateway).redeem(
+            _amount,
+            _beneficiary,
+            msg.sender,
+            _gasPrice,
+            _gasLimit,
+            _redeemerNonce,
+            _hashLock
+        );
+
+        token.approve(_to, 0);
+
+        emit RedeemExecuted(messageHash, _nonce, _redeemMessageHash);
+
+        return _redeemMessageHash;
     }
 
     function authorizeSession(
