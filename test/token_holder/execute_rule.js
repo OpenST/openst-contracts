@@ -30,17 +30,17 @@ const ephemeralPrivateKey2 = '0x634011a05b2f48e2d19aba49a9dbc12766bf7dbd6111ed2a
 
 let token;
 
-function generateEIP20PassData(to, value){
+function generateEIP20PassData(spender, value){
 
     return web3.eth.abi.encodeFunctionCall(
       {
 
-        name: 'transfer',
+        name: 'approve',
         type: 'function',
         inputs: [
           {
               type: 'address',
-              name: 'to'
+              name: 'spender'
           },
           {
             type: 'uint256',
@@ -48,7 +48,7 @@ function generateEIP20PassData(to, value){
           }
         ]
       },
-      [to, value]
+      [spender, value]
     );
 
 }
@@ -224,10 +224,10 @@ async function prepareEIP20PassData(
   accountProvider, tokenHolder, nonce, ephemeralKey,
 ) {
 
-    const to = accountProvider.get();
+    const spender = accountProvider.get();
     const amount = 100;
     const eip20PassActionData = generateEIP20PassData(
-      to, amount
+      spender, amount
     );
 
     const { msgHash, rsv } = getExecuteRuleExTxData(
@@ -240,7 +240,7 @@ async function prepareEIP20PassData(
 
     return {
         token,
-        to,
+        spender,
         eip20PassActionData,
         msgHash,
         rsv
