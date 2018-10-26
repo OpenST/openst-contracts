@@ -493,7 +493,7 @@ contract('TokenHolder::executeRule', async () => {
             EthUtils.bufferToHex(rsv.r),
             EthUtils.bufferToHex(rsv.s),
           ),
-          'Should revert when to address is EIP20 token.',
+          'Should revert if to address is EIP20 token.',
           'to address can\'t be EIP20 token.'
         );
 
