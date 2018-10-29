@@ -278,6 +278,7 @@ contract TokenHolder is MultiSigWallet {
      *      after execution.
      *
      *      Function requires:
+     *          - _to address cannot be EIP20 Token.
      *          - The key used to sign data is authorized and have not expired.
      *          - nonce matches the next available one (+1 of the last
      *            used one).
@@ -304,6 +305,8 @@ contract TokenHolder is MultiSigWallet {
         payable
         returns (bool executionStatus_)
     {
+        require(_to != address(token),"to address can't be EIP20 token.");
+
         bytes32 messageHash = bytes32(0);
         address ephemeralKey = address(0);
         (messageHash, ephemeralKey) = verifyExecutableTransaction(
