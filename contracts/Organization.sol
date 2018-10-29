@@ -16,6 +16,7 @@ pragma solidity ^0.4.23;
 
 import "./SafeMath.sol";
 import "./OrganizationInterface.sol";
+import "./OrganizationIsWorkerInterface.sol";
 
 
 /**
@@ -25,7 +26,7 @@ import "./OrganizationInterface.sol";
  *         economy and therefore the Organization.sol contract holds all
  *         the keys required to administer the economy.
  */
-contract Organization is OrganizationInterface {
+contract Organization is OrganizationInterface, OrganizationIsWorkerInterface {
 
     /* Usings */
 

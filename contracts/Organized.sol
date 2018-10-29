@@ -14,7 +14,7 @@ pragma solidity ^0.4.23;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "./OrganizationInterface.sol";
+import "./OrganizationIsWorkerInterface.sol";
 
 
 /**
@@ -31,10 +31,10 @@ contract Organized {
     /* Storage */
 
     /**
-     * OrganizationInterface of Organization contract which holds all the
+     * OrganizationIsWorkerInterface of Organization contract which holds all the
      * keys needed to administer the economy.
      */
-    OrganizationInterface public organization;
+    OrganizationIsWorkerInterface public organization;
 
 
     /* Modifiers */
@@ -58,7 +58,7 @@ contract Organized {
      * @param _organization Organization contract address containing
      *        different administration keys.
      */
-    constructor(OrganizationInterface _organization) public
+    constructor(OrganizationIsWorkerInterface _organization) public
     {
         require(
             _organization != address(0),

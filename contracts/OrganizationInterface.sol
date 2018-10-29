@@ -91,16 +91,4 @@ interface OrganizationInterface {
      * @return True if the worker existed else returns false.
      */
     function unsetWorker(address _worker) external returns (bool);
-
-
-    /**
-     * @notice Checks if the worker is valid or invalid.
-     *
-     * @param _worker Worker address to check if whitelisted.
-     *
-     * @return True if the worker is already added and expiration height is
-     *         more than or equal to current block number else returns false.
-     */
-    function isWorker(address _worker) external view returns (bool);
-
 }
