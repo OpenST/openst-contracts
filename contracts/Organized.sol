@@ -22,9 +22,6 @@ import "./OrganizationIsWorkerInterface.sol";
  *
  * @notice The Organized contract facilitates integration of
  *         organization administration keys with different contracts.
- *         Entity has the flexibility to deploy separate Organization
- *         contract if administration keys are different for different
- *         contracts.
  */
 contract Organized {
 
