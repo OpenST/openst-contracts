@@ -21,10 +21,10 @@ import "./OrganizationInterface.sol";
  * @title Organized contract.
  *
  * @notice The Organized contract facilitates integration of
- *         organization administration keys with different contracts like
- *         TokenRules, CustomRules etc. Entity has the
- *         flexibility to deploy separate Organization contract if
- *         administration keys are different for different contracts.
+ *         organization administration keys with different contracts.
+ *         Entity has the flexibility to deploy separate Organization
+ *         contract if administration keys are different for different
+ *         contracts.
  */
 contract Organized {
 
@@ -55,7 +55,7 @@ contract Organized {
      * @dev Constructor requires:
      *          - organization contract address is not null.
      *
-     * @param _organization organization contract address containing
+     * @param _organization Organization contract address containing
      *        different administration keys.
      */
     constructor(OrganizationInterface _organization) public

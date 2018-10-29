@@ -16,11 +16,11 @@ pragma solidity ^0.4.23;
 
 
 /**
- *  @title OrganizationInterface
+ *  @title OrganizationInterface.
  *
- *  @notice Provides organization interface
+ *  @notice Provides organization interface.
  */
-contract OrganizationInterface {
+interface OrganizationInterface {
 
     /* Events */
 
@@ -31,7 +31,7 @@ contract OrganizationInterface {
         address indexed _newOwner
     );
 
-    event AdminAddressChanged(address indexed _newAddress);
+    event AdminAddressChanged(address indexed _newAdmin);
 
     event WorkerSet(
         address indexed _worker,
@@ -39,7 +39,7 @@ contract OrganizationInterface {
         uint256 _remainingHeight
     );
 
-    event WorkerRemoved(address indexed _worker);
+    event WorkerUnset(address indexed _worker, bool _wasSet);
 
 
     /* External Functions */
@@ -47,9 +47,9 @@ contract OrganizationInterface {
     /**
      * @notice Initiates ownership transfer to proposed owner.
      *
-     * @param _proposedOwner worker address to be added.
+     * @param _proposedOwner Proposed owner address.
      *
-     * @return true on successful execution.
+     * @return True on successful execution.
      */
     function initiateOwnershipTransfer(address _proposedOwner)
         external
@@ -58,24 +58,24 @@ contract OrganizationInterface {
     /**
      * @notice Complete ownership transfer to proposed owner.
      *
-     * @return true on successful execution.
+     * @return True on successful execution.
      */
     function completeOwnershipTransfer() external returns (bool);
 
     /**
      * @notice Sets admin address.
      *
-     * @param _admin admin address to be added.
+     * @param _admin Admin address to be added.
      *
-     * @return true on successful execution.
+     * @return True on successful execution.
      */
     function setAdmin(address _admin) external returns (bool);
 
     /**
      * @notice Sets worker and its expiration height.
      *
-     * @param _worker worker address to be added.
-     * @param _expirationHeight expiration height of worker.
+     * @param _worker Worker address to be added.
+     * @param _expirationHeight Expiration height of worker.
      *
      * @return Remaining height for which worker is active.
      */
@@ -86,23 +86,21 @@ contract OrganizationInterface {
     /**
      * @notice Removes a worker.
      *
-     * @param _worker address to be removed.
+     * @param _worker Worker address to be removed.
      *
-     * @return true if the worker existed else returns false.
+     * @return True if the worker existed else returns false.
      */
-    function removeWorker(address _worker) external returns (bool);
+    function unsetWorker(address _worker) external returns (bool);
 
-
-    /* Public Functions */
 
     /**
      * @notice Checks if the worker is valid or invalid.
      *
-     * @param _worker address to check if whitelisted.
+     * @param _worker Worker address to check if whitelisted.
      *
-     * @return true if the worker is already added and not expired
-     *         else returns false.
+     * @return True if the worker is already added and expiration height is
+     *         more than or equal to current block number else returns false.
      */
-    function isWorker(address _worker) public view returns (bool);
+    function isWorker(address _worker) external view returns (bool);
 
 }

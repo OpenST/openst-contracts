@@ -68,7 +68,7 @@ contract('Organization::setAdmin', async (accounts) => {
       organization = await Organization.new({ from: owner });
     });
 
-    it('Should pass when correct admin is passed by owner.', async () => {
+    it('Should pass when valid admin is passed by owner.', async () => {
       const admin = accountProvider.get();
       assert.ok(
         await organization.setAdmin(
@@ -80,7 +80,7 @@ contract('Organization::setAdmin', async (accounts) => {
       assert.strictEqual(await organization.admin.call(), admin);
     });
 
-    it('Should pass when correct admin is passed by admin.', async () => {
+    it('Should pass when valid admin is passed by admin.', async () => {
       assert.ok(
         await organization.setAdmin(
           admin,

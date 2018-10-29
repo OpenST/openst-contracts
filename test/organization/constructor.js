@@ -28,7 +28,7 @@ contract('Organization::constructor', async (accounts) => {
       organization = await Organization.new({ from: owner });
     });
 
-    it('Checks that organization owner is set correctly.', async () => {
+    it('Checks that organization valid owner is set.', async () => {
       assert.strictEqual(await organization.owner.call(), owner);
     });
 

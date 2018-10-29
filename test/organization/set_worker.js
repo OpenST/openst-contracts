@@ -72,10 +72,10 @@ contract('Organization::setWorker', async (accounts) => {
         await Utils.advanceBlock();
       }
 
-      // Checking that key has expired.
-      assert.isOk(
-        (await organization.workers.call(worker)) <=
-        (await web3.eth.getBlockNumber()),
+      // Checking that worker key has expired.
+      assert.equal(
+        (await organization.isWorker.call(worker)),
+        false
       );
       await Utils.expectRevert(
         organization.setWorker(
@@ -84,7 +84,7 @@ contract('Organization::setWorker', async (accounts) => {
           { from: owner },
         ),
         'Should revert as worker has expired.',
-        'Expiration height is lte to the current block height.',
+        'Expiration height is less than current block number.',
       );
 
     });
@@ -95,21 +95,38 @@ contract('Organization::setWorker', async (accounts) => {
 
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get(),
-      worker = accountProvider.get();
+      worker = accountProvider.get(),
+      admin = accountProvider.get();
     let organization = null,
       expirationHeight = null;
 
     beforeEach(async function () {
       organization = await Organization.new({ from: owner });
+      await organization.setAdmin(admin, {from: owner});
       expirationHeight = (await web3.eth.getBlockNumber()) + 10;
     });
 
-    it('Should pass when correct arguments are passed.', async () => {
+    it('Should pass when owner adds a worker with valid expiration height.', async () => {
       assert.ok(
         await organization.setWorker(
           worker,
           expirationHeight,
           { from: owner },
+        )
+      );
+      assert.equal(
+        (await organization.workers.call(worker)).toString(10),
+        new BN(expirationHeight).toString(10)
+      );
+
+    });
+
+    it('Should pass when admin adds a worker with valid expiration height.', async () => {
+      assert.ok(
+        await organization.setWorker(
+          worker,
+          expirationHeight,
+          { from: admin },
         )
       );
       assert.equal(

@@ -15,6 +15,7 @@ pragma solidity ^0.4.23;
 // limitations under the License.
 
 import "./SafeMath.sol";
+import "./OrganizationInterface.sol";
 
 
 /**
@@ -24,33 +25,11 @@ import "./SafeMath.sol";
  *         economy and therefore the Organization.sol contract holds all
  *         the keys required to administer the economy.
  */
-contract Organization {
+contract Organization is OrganizationInterface {
 
     /* Usings */
 
     using SafeMath for uint256;
-
-
-    /* Events */
-
-    event OwnershipTransferInitiated(address indexed _proposedOwner);
-
-    event OwnershipTransferCompleted(
-        address indexed _previousOwner,
-        address indexed _newOwner
-    );
-
-    event AdminAddressChanged(address indexed _newAdmin);
-
-    event WorkerSet(
-        address indexed _worker,
-        uint256 _expirationHeight,
-        uint256 _remainingHeight
-    );
-
-    event WorkerRemoved(
-        address indexed _worker
-    );
 
 
     /* Storage */
@@ -58,15 +37,14 @@ contract Organization {
     /** Address for which private key will be owned by organization. */
     address public owner;
 
-    /** proposedOwner is address proposed by owner for ownership transfer. */
+    /** Proposed Owner is address proposed by owner for ownership transfer. */
     address public proposedOwner;
 
-    /** admin address set by owner to facilitate operations of an economy. */
+    /** Admin address set by owner to facilitate operations of an economy. */
     address public admin;
 
     /**
      *  List of whitelisted workers active upto the expiration height.
-     *  Expiration height 0 is a valid height.
      */
     mapping(address => uint256 /* expiration height */) public workers;
 
@@ -82,7 +60,7 @@ contract Organization {
         _;
     }
 
-    modifier onlyOrganization()
+    modifier onlyOwnerOrAdmin()
     {
         require(
             (msg.sender == owner) || (msg.sender == admin),
@@ -109,9 +87,9 @@ contract Organization {
      *          - msg.sender should be owner.
      *      Allows resetting of owner to 0x address.
      *
-     * @param _proposedOwner worker address to be added.
+     * @param _proposedOwner Proposed owner address.
      *
-     * @return true on successful execution.
+     * @return True on successful execution.
      */
     function initiateOwnershipTransfer(address _proposedOwner)
         external
@@ -136,7 +114,7 @@ contract Organization {
      * @dev Requires:
      *          - msg.sender should be proposed owner.
      *
-     * @return true on successful execution.
+     * @return True on successful execution.
      */
     function completeOwnershipTransfer() external returns (bool)
     {
@@ -162,11 +140,11 @@ contract Organization {
      *          - admin should not be same as owner.
      *      Allows resetting of admin address to 0x.
      *
-     * @param _admin admin address to be added.
+     * @param _admin Admin address to be added.
      *
-     * @return true on successful execution.
+     * @return True on successful execution.
      */
-    function setAdmin(address _admin) external onlyOrganization returns (bool)
+    function setAdmin(address _admin) external onlyOwnerOrAdmin returns (bool)
     {
         require(
             _admin != owner,
@@ -186,14 +164,14 @@ contract Organization {
      * @dev Requires:
      *          - Caller should be owner or admin.
      *          - worker address can't be null.
-     *          - expiration height should not be expired.
-     *          - 0 expiration height is not allowed.
+     *          - expiration height should be greater or equal to current
+     *            block number.
      *      Admin/Owner has the flexibility to extend/reduce worker expiration
      *      height. This way a worker activation/deactivation can be
      *      controlled without adding/removing new worker keys.
      *
-     * @param _worker worker address to be added.
-     * @param _expirationHeight expiration height of worker.
+     * @param _worker Worker address to be added.
+     * @param _expirationHeight Expiration height of worker.
      *
      * @return Remaining height for which worker is active.
      */
@@ -202,7 +180,7 @@ contract Organization {
         uint256 _expirationHeight
     )
         external
-        onlyOrganization
+        onlyOwnerOrAdmin
         returns (uint256 remainingHeight_)
     {
         require(
@@ -210,11 +188,9 @@ contract Organization {
             "Worker address is null."
         );
 
-        // expiration height with 0 block number is not allowed since the
-        // minimum block number can be 0.
         require(
-            _expirationHeight > block.number,
-            "Expiration height is lte to the current block height."
+            _expirationHeight >= block.number,
+            "Expiration height is less than current block number."
         );
 
         workers[_worker] = _expirationHeight;
@@ -226,43 +202,39 @@ contract Organization {
     }
 
     /**
-     * @notice Removes a worker.
+     * @notice Unsets/deactivates a worker.
      *
      * @dev Requires:
      *          - Caller should be owner or admin.
-     *          - Worker to be removed should be present.
      *
-     * @param _worker address to be removed.
+     * @param _worker Worker address to unset/deactivate.
      *
-     * @return true if the worker existed else returns false.
+     * @return True if the worker was set/existed else returns false.
      */
-    function removeWorker(address _worker)
+    function unsetWorker(address _worker)
         external
-        onlyOrganization
-        returns (bool)
+        onlyOwnerOrAdmin
+        returns (bool wasSet_)
     {
-        require(
-            workers[_worker] > 0,
-            "Worker to be removed is not present."
-        );
+        wasSet_ = (workers[_worker] > 0);
 
         delete workers[_worker];
 
-        emit WorkerRemoved(_worker);
+        emit WorkerUnset(_worker, wasSet_);
 
-        return true;
+        return wasSet_;
     }
 
 
     /* Public Functions */
 
     /**
-     * @notice Checks if the worker is valid or invalid.
+     * @notice Returns whether the worker is expired.
      *
-     * @param _worker address to check if whitelisted.
+     * @param _worker Worker address to check.
      *
-     * @return true if the worker is already added and not expired
-     *         else returns false.
+     * @return True if worker expiration height is more than or equal to
+     *         current block number else returns false.
      */
     function isWorker(address _worker) public view returns (bool)
     {

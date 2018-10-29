@@ -69,6 +69,7 @@ contract('Organization::initiateOwnershipTransfer', async (accounts) => {
       );
 
       assert.strictEqual(await organization.owner.call(), proposedOwner);
+      assert.strictEqual(await organization.proposedOwner.call(), Utils.NULL_ADDRESS);
     });
 
   });

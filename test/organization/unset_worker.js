@@ -21,7 +21,7 @@ const Utils = require('../test_lib/utils.js'),
 
 const Organization = artifacts.require('Organization');
 
-contract('Organization::setWorker', async (accounts) => {
+contract('Organization::unsetWorker', async (accounts) => {
 
   describe('Negative Tests', async () => {
     const accountProvider = new AccountProvider(accounts),
@@ -37,25 +37,12 @@ contract('Organization::setWorker', async (accounts) => {
     it('Reverts when caller is not owner/admin.', async () => {
 
       await Utils.expectRevert(
-        organization.removeWorker(
+        organization.unsetWorker(
           worker,
           { from: accountProvider.get() },
         ),
         'Should revert as caller is not owner/admin.',
         'Only owner/admin is allowed to call.',
-      );
-
-    });
-
-    it('Reverts when worker to be removed is not present.', async () => {
-
-      await Utils.expectRevert(
-        organization.removeWorker(
-          accountProvider.get(),
-          { from: owner },
-        ),
-        'Should revert as worker to be removed is not present.',
-        'Worker to be removed is not present.',
       );
 
     });
@@ -66,22 +53,37 @@ contract('Organization::setWorker', async (accounts) => {
 
     const accountProvider = new AccountProvider(accounts),
       owner = accountProvider.get(),
+      admin = accountProvider.get(),
       worker = accountProvider.get();
-    let organization = null,
-      expirationHeight = null;
+    let organization = null;
 
     beforeEach(async function () {
       organization = await Organization.new({ from: owner });
       expirationHeight = (await web3.eth.getBlockNumber()) + 10;
-      await organization.setWorker(worker, expirationHeight, { from: owner })
+      await organization.setWorker(worker, expirationHeight, {from: owner});
     });
 
-    it('Should pass when correct arguments are passed.', async () => {
+    it('Should pass when owner unsets/deactivates a worker.', async () => {
 
       assert.ok(
-        await organization.removeWorker(
+        await organization.unsetWorker(
           worker,
           { from: owner },
+        )
+      );
+      assert.equal(
+        (await organization.workers.call(worker)).toString(10),
+        (new BN(0)).toString(0)
+      );
+
+    });
+
+    it('Should pass when admin unsets/deactivates a worker.', async () => {
+      await organization.setAdmin(admin, { from: owner });
+      assert.ok(
+        await organization.unsetWorker(
+          worker,
+          { from: admin },
         )
       );
       assert.equal(
@@ -96,20 +98,19 @@ contract('Organization::setWorker', async (accounts) => {
   describe('Event Tests', async () => {
 
     const accountProvider = new AccountProvider(accounts),
-      owner = accountProvider.get(),
-      worker = accountProvider.get();
+      owner = accountProvider.get();
     let organization = null,
       expirationHeight = null;
 
     beforeEach(async function () {
       organization = await Organization.new({ from: owner });
       expirationHeight = (await web3.eth.getBlockNumber()) + 10;
-      await organization.setWorker(worker, expirationHeight, { from: owner })
     });
 
-    it('Verifies emitting of removeWorker event.', async () => {
-
-      const transactionReceipt = await organization.removeWorker(
+    it('Verifies emitting of unsetWorker event when worker is present.', async () => {
+      let worker = accountProvider.get();
+      await organization.setWorker(worker, expirationHeight, { from: owner });
+      const transactionReceipt = await organization.unsetWorker(
         worker,
         { from: owner },
       );
@@ -119,13 +120,14 @@ contract('Organization::setWorker', async (accounts) => {
       assert.strictEqual(
         events.length,
         1,
-        'WorkerRemoved event should be emitted.',
+        'WorkerUnset event should be emitted.',
       );
 
       Event.assertEqual(events[0], {
-        name: 'WorkerRemoved',
+        name: 'WorkerUnset',
         args: {
-          _worker: worker
+          _worker: worker,
+          _wasSet: true
         },
       });
 

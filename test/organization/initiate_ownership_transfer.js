@@ -69,7 +69,7 @@ contract('Organization::initiateOwnershipTransfer', async (accounts) => {
       organization = await Organization.new({ from: owner });
     });
 
-    it('Should pass when correct proposed owner is passed.', async () => {
+    it('Should pass when valid proposed owner is passed.', async () => {
       assert.ok(
         await organization.initiateOwnershipTransfer(
           proposedOwner,
@@ -117,7 +117,6 @@ contract('Organization::initiateOwnershipTransfer', async (accounts) => {
         'OwnershipTransferInitiated event should be emitted.',
       );
 
-      // The emitted event should be 'OwnershipTransferInitiated'.
       Event.assertEqual(events[0], {
         name: 'OwnershipTransferInitiated',
         args: {
