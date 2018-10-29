@@ -133,6 +133,31 @@ contract('Organization::unsetWorker', async (accounts) => {
 
     });
 
+    it('Verifies emitting of unsetWorker event when worker is not present.', async () => {
+      let nonSetWorker = accountProvider.get();
+      const transactionReceipt = await organization.unsetWorker(
+        nonSetWorker,
+        { from: owner },
+      );
+      const events = Event.decodeTransactionResponse(
+        transactionReceipt,
+      );
+      assert.strictEqual(
+        events.length,
+        1,
+        'WorkerUnset event should be emitted.',
+      );
+
+      Event.assertEqual(events[0], {
+        name: 'WorkerUnset',
+        args: {
+          _worker: nonSetWorker,
+          _wasSet: null // Web3 returning null instead of false in this case.
+        },
+      });
+
+    });
+
   });
 
 });
