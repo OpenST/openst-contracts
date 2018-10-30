@@ -26,10 +26,7 @@ interface OrganizationInterface {
 
     event OwnershipTransferInitiated(address indexed _proposedOwner);
 
-    event OwnershipTransferCompleted(
-        address indexed _previousOwner,
-        address indexed _newOwner
-    );
+    event OwnershipTransferCompleted(address indexed _newOwner);
 
     event AdminAddressChanged(address indexed _newAdmin);
 

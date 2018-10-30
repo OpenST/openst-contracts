@@ -124,11 +124,10 @@ contract Organization is OrganizationInterface, OrganizationIsWorkerInterface {
             "Caller is not proposed owner address."
         );
 
-        address oldOwner = owner;
         owner = proposedOwner;
         proposedOwner = address(0);
 
-        emit OwnershipTransferCompleted(oldOwner, owner);
+        emit OwnershipTransferCompleted(owner);
 
         return true;
     }

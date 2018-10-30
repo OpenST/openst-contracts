@@ -108,7 +108,6 @@ contract('Organization::initiateOwnershipTransfer', async (accounts) => {
       Event.assertEqual(events[0], {
         name: 'OwnershipTransferCompleted',
         args: {
-          _previousOwner: owner,
           _newOwner: proposedOwner
         },
       });
