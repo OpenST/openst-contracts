@@ -2,10 +2,30 @@ pragma solidity ^0.4.23;
 
 contract coGatewayRedeemInterface {
 
-    function isActivated() external returns (bool);
-    function bounty() external returns (uint256);
+	/* Public functions */
 
-
+	/**
+     * @notice Initiates the redemption process.
+     *
+     * @dev In order to redeem the redeemer needs to approve CoGateway contract
+     *      for redeem amount. Redeem amount is transferred from redeemer
+     *      address to CoGateway contract.
+     *      This is a payable function. The bounty is transferred in base token
+     *      Redeemer is always msg.sender
+     *
+     * @param _amount Redeem amount that will be transferred form redeemer
+     *                account.
+     * @param _beneficiary The address in the origin chain where the value
+     *                     tok ens will be released.
+     * @param _facilitator Facilitator address.
+     * @param _gasPrice Gas price that redeemer is ready to pay to get the
+     *                  redemption process done.
+     * @param _gasLimit Gas limit that redeemer is ready to pay
+     * @param _nonce Nonce of the redeemer address.
+     * @param _hashLock Hash Lock provided by the facilitator.
+     *
+     * @return messageHash_ which is unique for each request.
+     */
     function redeem(
 		uint256 _amount,
 		address _beneficiary,
@@ -19,22 +39,18 @@ contract coGatewayRedeemInterface {
 		payable
 		returns (bytes32 messageHash_);
 
-	function processRedemption(
-		bytes32 _messageHash,
-		bytes32 _unlockSecret
-	)
-		external
-		returns (uint256 redeemAmount);
-
-	function processRedemptionWithProof(
-		bytes32 _messageHash,
-		bytes _rlpEncodedParentNodes,
-		uint256 _blockHeight,
-		uint256 _messageStatus
-	)
-		external
-		returns (uint256 redeemAmount);
-
+	/**
+     * @notice Revert redemption to stop the redeem process. Only redeemer can
+     *         revert redemption by providing penalty i.e. 1.5 times of
+     *         bounty amount. On revert process, penalty and facilitator
+     *         bounty will be burned.
+     *
+     * @param _messageHash Message hash.
+     *
+     * @return redeemer_ Redeemer address
+     * @return redeemerNonce_ Redeemer nonce
+     * @return amount_ Redeem amount
+     */
 	function revertRedemption(
 		bytes32 _messageHash
 	)
@@ -45,13 +61,4 @@ contract coGatewayRedeemInterface {
 			uint256 redeemerNonce_,
 			uint256 amount_
 		);
-
-	function processRevertRedemption(
-		bytes32 _messageHash,
-		uint256 _blockHeight,
-		bytes _rlpEncodedParentNodes
-	)
-		external
-		returns (bool /*TBD*/);
-
 }

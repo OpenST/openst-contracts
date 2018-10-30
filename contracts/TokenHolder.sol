@@ -58,11 +58,7 @@ contract TokenHolder is MultiSigWallet {
         bool _status
     );
 
-    event RedeemExecuted(
-        bytes32 messageHash,
-        uint256 _nonce,
-        bytes32 _redeemMessageHash
-    );
+    event Redeemed(bytes32 _redeemMessageHash);
 
 
     /* Enums */
@@ -261,6 +257,7 @@ contract TokenHolder is MultiSigWallet {
         emit SessionRevoked(_ephemeralKey);
     }
 
+
     /* Public Functions */
 
     /**
@@ -377,6 +374,9 @@ contract TokenHolder is MultiSigWallet {
      * @param _hashLock Hash Lock provided by the facilitator.
      * @param _nonce The nonce of an ephemeral key that was used to sign
      *               the transaction.
+     * @param _v V of the signature.
+     * @param _r R of the signature.
+     * @param _s S of the signature.
      *
      * @return _redeemMessageHash which is unique for each redeem request.
      */
@@ -395,43 +395,34 @@ contract TokenHolder is MultiSigWallet {
     )
         public
         payable
-        returns (bytes32 _redeemMessageHash)
+        returns (bytes32 redeemMessageHash_)
     {
         require(
             _to == coGateway,
             "Executable transaction should call coGateway."
         );
 
-        bytes memory data = abi.encodeWithSelector(
-            REDEEM_CALLPREFIX,
+        bytes memory redeemCallData = getRedeemCallData(
             _amount,
             _beneficiary,
-            msg.sender,
             _gasPrice,
             _gasLimit,
             _redeemerNonce,
             _hashLock
         );
-        bytes32 messageHash = bytes32(0);
-        address ephemeralKey = address(0);
-        (messageHash, ephemeralKey) = verifyExecutableTransaction(
-            REDEEM_CALLPREFIX,
+
+        address ephemeralKey = verifyRedeemExecutableTransaction(
             _to,
-            data,
+            redeemCallData,
             _nonce,
             _v,
             _r,
             _s
         );
 
-        EphemeralKeyData storage ephemeralKeyData = ephemeralKeys[ephemeralKey];
+        token.approve(_to, getSpendingLimit(ephemeralKey));
 
-        token.approve(
-            _to,
-            ephemeralKeyData.spendingLimit
-        );
-
-        _redeemMessageHash = coGatewayRedeemInterface(coGateway).redeem(
+        redeemMessageHash_ = coGatewayRedeemInterface(coGateway).redeem(
             _amount,
             _beneficiary,
             msg.sender,
@@ -443,9 +434,23 @@ contract TokenHolder is MultiSigWallet {
 
         token.approve(_to, 0);
 
-        emit RedeemExecuted(messageHash, _nonce, _redeemMessageHash);
+        emit Redeemed(redeemMessageHash_);
+    }
 
-        return _redeemMessageHash;
+    /**
+     * @dev Retrieves the first 4 bytes of input byte array into byte4.
+     *      Function requires:
+     *          - Input byte array's length is greater than or equal to 4.
+     */
+    function bytesToBytes4(bytes _input) public pure returns (bytes4 out_) {
+        require(
+            _input.length >= 4,
+            "Input bytes length is less than 4."
+        );
+
+        for (uint8 i = 0; i < 4; i++) {
+            out_ |= bytes4(_input[i] & 0xFF) >> (i * 8);
+        }
     }
 
     function authorizeSession(
@@ -559,18 +564,62 @@ contract TokenHolder is MultiSigWallet {
     }
 
     /**
-     * @dev Retrieves the first 4 bytes of input byte array into byte4.
-     *      Function requires:
-     *          - Input byte array's length is greater than or equal to 4.
+     * @notice Constructs redeem call data.
+     *
+     * @dev Hashed redeem call data is used for recovery of ephemeral key.
+     *
      */
-    function bytesToBytes4(bytes _input) public pure returns (bytes4 out_) {
-        require(
-            _input.length >= 4,
-            "Input bytes length is less than 4."
+    function getRedeemCallData(
+        uint256 _amount,
+        address _beneficiary,
+        uint256 _gasPrice,
+        uint256 _gasLimit,
+        uint256 _redeemerNonce,
+        bytes32 _hashLock
+    )
+        private
+        view
+        returns (bytes memory redeemCallData_)
+    {
+        redeemCallData_ = abi.encodeWithSelector(
+            REDEEM_CALLPREFIX,
+            _amount,
+            _beneficiary,
+            msg.sender,
+            _gasPrice,
+            _gasLimit,
+            _redeemerNonce,
+            _hashLock
         );
+    }
 
-        for (uint8 i = 0; i < 4; i++) {
-            out_ |= bytes4(_input[i] & 0xFF) >> (i * 8);
-        }
+    function getSpendingLimit(address ephemeralKey)
+        private
+        view
+        returns (uint256)
+    {
+        return ephemeralKeys[ephemeralKey].spendingLimit;
+    }
+
+    function verifyRedeemExecutableTransaction(
+        address _to,
+        bytes memory _redeemData,
+        uint256 _nonce,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    )
+        private
+        returns (address ephemeralKey_)
+    {
+        (, ephemeralKey_) = verifyExecutableTransaction(
+            REDEEM_CALLPREFIX,
+            _to,
+            _redeemData,
+            _nonce,
+            _v,
+            _r,
+            _s
+        );
     }
 }
