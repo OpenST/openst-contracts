@@ -16,6 +16,7 @@ const utils = require('../test_lib/utils.js');
 const { AccountProvider } = require('../test_lib/utils');
 
 const TokenRules = artifacts.require('TokenRules');
+const Organization = artifacts.require('Organization');
 
 contract('TokenRules::constructor', async () => {
     contract('Negative Tests', async (accounts) => {
@@ -28,15 +29,16 @@ contract('TokenRules::constructor', async () => {
             await utils.expectRevert(
                 TokenRules.new(organization, token),
                 'Should revert as organization address is null.',
-                'Organization address is null.',
+                'Organization contract address is null.',
             );
         });
         it('Reverts if token is null.', async () => {
-            const organization = accountProvider.get();
+            const owner = accountProvider.get();
+            const organization = await Organization.new({from: owner});
             const token = utils.NULL_ADDRESS;
 
             await utils.expectRevert(
-                TokenRules.new(organization, token),
+                TokenRules.new(organization.address, token),
                 'Should revert as token is null.',
                 'Token address is null.',
             );
@@ -47,14 +49,15 @@ contract('TokenRules::constructor', async () => {
         const accountProvider = new AccountProvider(accounts);
 
         it('Checks that passed arguments are set correctly.', async () => {
-            const organization = accountProvider.get();
+            const owner = accountProvider.get();
+            const organization = await Organization.new({from: owner});
             const token = accountProvider.get();
 
-            const tokenRules = await TokenRules.new(organization, token);
+            const tokenRules = await TokenRules.new(organization.address, token);
 
             assert.strictEqual(
                 (await tokenRules.organization.call()),
-                organization,
+                organization.address,
             );
 
             assert.strictEqual(

@@ -14,6 +14,7 @@
 
 const EIP20TokenMock = artifacts.require('EIP20TokenMock');
 const TokenRules = artifacts.require('TokenRules');
+const Organization = artifacts.require('Organization');
 
 /**
  * Creates an EIP20 instance to be used during TokenRules::executeTransfers
@@ -52,16 +53,21 @@ module.exports.constraintExists = async (tokenRules, constraintAddress) => {
  *      (tokenRules, organizationAddress, token)
  */
 module.exports.createTokenEconomy = async (accountProvider) => {
-    const organizationAddress = accountProvider.get();
+    const owner = accountProvider.get();
+    const worker = accountProvider.get();
+    const organization = await Organization.new({from: owner});
+    const expirationHeight = (await web3.eth.getBlockNumber()) + 100;
+    await organization.setWorker(worker, expirationHeight, {from: owner});
     const token = await this.createEIP20Token();
 
     const tokenRules = await TokenRules.new(
-        organizationAddress, token.address,
+        organization.address, token.address,
     );
-
+    const organizationAddress = organization.address;
     return {
         tokenRules,
         organizationAddress,
         token,
+        worker
     };
 };
