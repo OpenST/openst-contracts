@@ -18,7 +18,7 @@ import "./SafeMath.sol";
 import "./UtilityTokenInterface.sol";
 import "./MultiSigWallet.sol";
 import "./TokenRules.sol";
-import "./coGatewayRedeemInterface.sol";
+import "./CoGatewayRedeemInterface.sol";
 
 
 /**
@@ -58,7 +58,7 @@ contract TokenHolder is MultiSigWallet {
         bool _status
     );
 
-    event Redeemed(bytes32 _redeemMessageHash);
+    event RedeemInitiated(bytes32 _redeemMessageHash);
 
 
     /* Enums */
@@ -108,8 +108,15 @@ contract TokenHolder is MultiSigWallet {
 
     address public tokenRules;
 
-    /** Co Gateway contract address for redeem functionality. */
-    address public coGateway;
+    /**
+     *  CoGateway is contract address needed for redeem and revertRedemption
+     *  functionality. It's fetched from utilityToken.
+     *  It's set when user is doing redeem for below reasons:
+     *      - CoGateway address can change.
+     *      - TokenHolder should be able to communicate with EIP20 without
+     *        redeem functionality also.
+     */
+    CoGatewayRedeemInterface public CoGateway;
 
 
     /* Modifiers */
@@ -172,12 +179,6 @@ contract TokenHolder is MultiSigWallet {
             _tokenRules != address(0),
             "TokenRules contract address is null."
         );
-        require(
-            _token.coGateway() != address(0),
-            "coGateway contract address is null."
-        );
-
-        coGateway = _token.coGateway();
         token = _token;
         tokenRules = _tokenRules;
     }
@@ -397,8 +398,9 @@ contract TokenHolder is MultiSigWallet {
         payable
         returns (bytes32 redeemMessageHash_)
     {
+        CoGateway = CoGatewayRedeemInterface(token.coGateway());
         require(
-            _to == coGateway,
+            _to == address(CoGateway),
             "Executable transaction should call coGateway."
         );
 
@@ -422,7 +424,7 @@ contract TokenHolder is MultiSigWallet {
 
         token.approve(_to, getSpendingLimit(ephemeralKey));
 
-        redeemMessageHash_ = coGatewayRedeemInterface(coGateway).redeem(
+        redeemMessageHash_ = CoGateway.redeem(
             _amount,
             _beneficiary,
             msg.sender,
@@ -434,7 +436,7 @@ contract TokenHolder is MultiSigWallet {
 
         token.approve(_to, 0);
 
-        emit Redeemed(redeemMessageHash_);
+        emit RedeemInitiated(redeemMessageHash_);
     }
 
     /**

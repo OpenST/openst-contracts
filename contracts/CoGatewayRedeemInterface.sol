@@ -1,6 +1,6 @@
 pragma solidity ^0.4.23;
 
-contract coGatewayRedeemInterface {
+contract CoGatewayRedeemInterface {
 
 	/* Public functions */
 
