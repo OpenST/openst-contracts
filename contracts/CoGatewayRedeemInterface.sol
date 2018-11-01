@@ -13,6 +13,9 @@ contract CoGatewayRedeemInterface {
      *      This is a payable function. The bounty is transferred in base token
      *      Redeemer is always msg.sender
      *
+     *		Update redeem signature after _facilitator argument is removed
+     *      from CoGateway.redeem in mosaic-contracts.
+     *
      * @param _amount Redeem amount that will be transferred form redeemer
      *                account.
      * @param _beneficiary The address in the origin chain where the value

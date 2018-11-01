@@ -58,7 +58,11 @@ contract TokenHolder is MultiSigWallet {
         bool _status
     );
 
-    event RedeemInitiated(bytes32 _redeemMessageHash);
+    event RedeemInitiated(
+        address _beneficiary,
+        uint256 _amount,
+        bytes32 _redeemMessageHash
+    );
 
 
     /* Enums */
@@ -95,7 +99,7 @@ contract TokenHolder is MultiSigWallet {
 
     bytes4 public constant REDEEM_CALLPREFIX = bytes4(
         keccak256(
-            "redeem(address,uint256,address,uint256,uint256,uint256,bytes32,uint256,uint8,bytes32,bytes32)"
+            "redeem(uint256,address,uint256,uint256,uint256,bytes32,uint256,uint8,bytes32,bytes32)"
         )
     );
 
@@ -108,15 +112,8 @@ contract TokenHolder is MultiSigWallet {
 
     address public tokenRules;
 
-    /**
-     *  CoGateway is contract address needed for redeem and revertRedemption
-     *  functionality. It's fetched from utilityToken.
-     *  It's set when user is doing redeem for below reasons:
-     *      - CoGateway address can change.
-     *      - TokenHolder should be able to communicate with EIP20 without
-     *        redeem functionality also.
-     */
-    CoGatewayRedeemInterface public CoGateway;
+    /** coGateway address needed for redeem and revertRedemption operations. */
+    address public coGateway;
 
 
     /* Modifiers */
@@ -352,9 +349,13 @@ contract TokenHolder is MultiSigWallet {
      *      checking that the specified signature matches one of the
      *      authorized (non-expired) ephemeral keys.
      *
-     *      In order to redeem, the redeemer needs to approve CoGateway
+     *      HashLock is not part of data which ephemeral key is signing.
+     *      User signs the data and facilitator calls redeem.
+     *      Whoever calls redeem should provide HashLock.
+     *
+     *      In order to redeem, tokenholder needs to approve CoGateway
      *      contract for the redeem amount. Redeem amount is transferred from
-     *      redeemer address to CoGateway contract. This is a payable
+     *      tokenholder address to CoGateway contract. This is a payable
      *      function. The bounty is transferred in base token.
      *
      *      Function requires:
@@ -362,15 +363,20 @@ contract TokenHolder is MultiSigWallet {
      *            specified in constructor.
      *          - Ephemeral key nonce is valid.
      *
-     * @param _to The target contract address the transaction will be executed
-     *            upon.
-     * @param _amount Redeem amount that will be transferred from redeemer
-     *                account.
+     *      Update redeem signature after _facilitator argument is removed
+     *      from CoGateway.redeem() in mosaic-contracts.
+     *
+     *      CoGateway is contract address needed for redeem functionality.
+     *      It's fetched from UtilityToken. TokenHolder should be able to
+     *      communicate with EIP20 without redeem functionality also.
+     *
      * @param _beneficiary The address in the origin chain where the tokens
      *                     will be released.
-     * @param _gasPrice Gas price that redeemer is ready to pay to get the
+     * @param _amount Redeem amount that will be transferred from tokenholder
+     *                account.
+     * @param _gasPrice Gas price that tokenholder is ready to pay to get the
      *                  redemption process done.
-     * @param _gasLimit Gas limit that redeemer is ready to pay.
+     * @param _gasLimit Gas limit that tokenholder is ready to pay.
      * @param _redeemerNonce Nonce of the redeemer address.
      * @param _hashLock Hash Lock provided by the facilitator.
      * @param _nonce The nonce of an ephemeral key that was used to sign
@@ -382,7 +388,6 @@ contract TokenHolder is MultiSigWallet {
      * @return _redeemMessageHash which is unique for each redeem request.
      */
     function redeem(
-        address _to,
         uint256 _amount,
         address _beneficiary,
         uint256 _gasPrice,
@@ -398,45 +403,42 @@ contract TokenHolder is MultiSigWallet {
         payable
         returns (bytes32 redeemMessageHash_)
     {
-        CoGateway = CoGatewayRedeemInterface(token.coGateway());
-        require(
-            _to == address(CoGateway),
-            "Executable transaction should call coGateway."
-        );
+        coGateway = token.coGateway();
 
-        bytes memory redeemCallData = getRedeemCallData(
+        address ephemeralKey = verifyRedeemExecutableTransaction(
             _amount,
             _beneficiary,
             _gasPrice,
             _gasLimit,
             _redeemerNonce,
-            _hashLock
-        );
-
-        address ephemeralKey = verifyRedeemExecutableTransaction(
-            _to,
-            redeemCallData,
             _nonce,
             _v,
             _r,
             _s
         );
 
-        token.approve(_to, getSpendingLimit(ephemeralKey));
-
-        redeemMessageHash_ = CoGateway.redeem(
-            _amount,
-            _beneficiary,
-            msg.sender,
-            _gasPrice,
-            _gasLimit,
-            _redeemerNonce,
-            _hashLock
+        require(
+            _amount >= getSpendingLimit(ephemeralKey),
+            "Amount to redeem should be gte than spending limit."
         );
 
-        token.approve(_to, 0);
+        token.approve(coGateway, getSpendingLimit(ephemeralKey));
 
-        emit RedeemInitiated(redeemMessageHash_);
+        redeemMessageHash_ = CoGatewayRedeemInterface(coGateway).
+            redeem.value(msg.value)
+            (
+                _amount,
+                _beneficiary,
+                msg.sender,
+                _gasPrice,
+                _gasLimit,
+                _redeemerNonce,
+                _hashLock
+            );
+
+        token.approve(coGateway, 0);
+
+        emit RedeemInitiated(_beneficiary, _amount, redeemMessageHash_);
     }
 
     /**
@@ -565,47 +567,13 @@ contract TokenHolder is MultiSigWallet {
         );
     }
 
-    /**
-     * @notice Constructs redeem call data.
-     *
-     * @dev Hashed redeem call data is used for recovery of ephemeral key.
-     *
-     */
-    function getRedeemCallData(
+    /** @notice Constructs redeemCallData and verifies ephemeral key.*/
+    function verifyRedeemExecutableTransaction(
         uint256 _amount,
         address _beneficiary,
         uint256 _gasPrice,
         uint256 _gasLimit,
         uint256 _redeemerNonce,
-        bytes32 _hashLock
-    )
-        private
-        view
-        returns (bytes memory redeemCallData_)
-    {
-        redeemCallData_ = abi.encodeWithSelector(
-            REDEEM_CALLPREFIX,
-            _amount,
-            _beneficiary,
-            msg.sender,
-            _gasPrice,
-            _gasLimit,
-            _redeemerNonce,
-            _hashLock
-        );
-    }
-
-    function getSpendingLimit(address ephemeralKey)
-        private
-        view
-        returns (uint256)
-    {
-        return ephemeralKeys[ephemeralKey].spendingLimit;
-    }
-
-    function verifyRedeemExecutableTransaction(
-        address _to,
-        bytes memory _redeemData,
         uint256 _nonce,
         uint8 _v,
         bytes32 _r,
@@ -614,14 +582,33 @@ contract TokenHolder is MultiSigWallet {
         private
         returns (address ephemeralKey_)
     {
+        bytes memory redeemCallData = abi.encodeWithSelector(
+            REDEEM_CALLPREFIX,
+            _amount,
+            _beneficiary,
+            msg.sender,
+            _gasPrice,
+            _gasLimit,
+            _redeemerNonce
+        );
+
         (, ephemeralKey_) = verifyExecutableTransaction(
             REDEEM_CALLPREFIX,
-            _to,
-            _redeemData,
+            coGateway,
+            redeemCallData,
             _nonce,
             _v,
             _r,
             _s
         );
+    }
+
+    /** @notice Returns spending limit of an ephemeral key.*/
+    function getSpendingLimit(address ephemeralKey)
+        private
+        view
+        returns (uint256)
+    {
+        return ephemeralKeys[ephemeralKey].spendingLimit;
     }
 }

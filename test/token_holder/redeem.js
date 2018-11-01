@@ -85,32 +85,29 @@ function generateMockRulePassPayableActionData(value) {
   );
 }
 
-function generateMockRuleFailActionData(value) {
-  return web3.eth.abi.encodeFunctionCall(
-    {
-      name: 'fail',
-      type: 'function',
-      inputs: [
-        {
-          type: 'address',
-          name: 'value',
-        },
-      ],
-    },
-    [value],
-  );
-}
 
-function generateExecuteRuleCallPrefix() {
+function generateRedeemCallPrefix() {
   return web3.eth.abi.encodeFunctionSignature({
-    name: 'executeRule',
+    name: 'redeem',
     type: 'function',
     inputs: [
+      {
+        type: 'uint256', name: '',
+      },
       {
         type: 'address', name: '',
       },
       {
-        type: 'bytes', name: '',
+        type: 'uint256', name: '',
+      },
+      {
+        type: 'uint256', name: '',
+      },
+      {
+        type: 'uint256', name: '',
+      },
+      {
+        type: 'bytes32', name: '',
       },
       {
         type: 'uint256', name: '',
@@ -128,7 +125,7 @@ function generateExecuteRuleCallPrefix() {
   });
 }
 
-function getExecuteRuleExTxHash(
+function getRedeemExTxHash(
   tokenHolderAddress, ruleAddress, ruleData, nonce,
 ) {
   return web3.utils.soliditySha3(
@@ -163,7 +160,7 @@ function getExecuteRuleExTxHash(
       t: 'uint8', v: 0,
     },
     {
-      t: 'bytes4', v: generateExecuteRuleCallPrefix(),
+      t: 'bytes4', v: generateRedeemCallPrefix(),
     },
     {
       t: 'uint8', v: 0,
@@ -174,10 +171,10 @@ function getExecuteRuleExTxHash(
   );
 }
 
-function getExecuteRuleExTxData(
+function getRedeemExTxData(
   _tokenHolderAddress, _ruleAddress, _ruleData, _nonce, _ephemeralKey,
 ) {
-  const msgHash = getExecuteRuleExTxHash(
+  const msgHash = getRedeemExTxHash(
     _tokenHolderAddress, _ruleAddress, _ruleData, _nonce,
   );
 
@@ -205,8 +202,6 @@ async function createTokenHolder(
     required,
   );
 
-  await token.setCoGateway(accountProvider.get());
-
   const blockNumber = await web3.eth.getBlockNumber();
 
   await tokenHolder.submitAuthorizeSession(
@@ -219,59 +214,7 @@ async function createTokenHolder(
   return {
     tokenHolder,
     registeredWallet0,
-  };
-}
-
-async function prepareEIP20PassData(
-  accountProvider, tokenHolder, nonce, ephemeralKey,
-) {
-
-  const spender = accountProvider.get();
-  const amount = 100;
-  const eip20PassActionData = generateEIP20PassData(
-    spender, amount
-  );
-
-  const { msgHash, rsv } = getExecuteRuleExTxData(
-    tokenHolder.address,
-    token.address,
-    eip20PassActionData,
-    nonce,
-    ephemeralKey
-  );
-
-  return {
-    token,
-    spender,
-    eip20PassActionData,
-    msgHash,
-    rsv
-  };
-}
-
-async function preparePassRule(
-  accountProvider, tokenHolder, nonce, ephemeralKey,
-) {
-  const mockRule = await MockRule.new();
-  const mockRuleValue = accountProvider.get();
-  const mockRulePassActionData = generateMockRulePassActionData(
-    mockRuleValue,
-  );
-
-  const { msgHash, rsv } = getExecuteRuleExTxData(
-    tokenHolder.address,
-    mockRule.address,
-    mockRulePassActionData,
-    nonce,
-    ephemeralKey,
-  );
-
-  return {
-    mockRule,
-    mockRuleValue,
-    mockRulePassActionData,
-    msgHash,
-    rsv,
+    CoGatewayAddress,
   };
 }
 
@@ -284,7 +227,7 @@ async function preparePassPayableRule(
     mockRuleValue,
   );
 
-  const { msgHash, rsv } = getExecuteRuleExTxData(
+  const { msgHash, rsv } = getRedeemExTxData(
     tokenHolder.address,
     mockRule.address,
     mockRulePassActionData,
@@ -296,32 +239,6 @@ async function preparePassPayableRule(
     mockRule,
     mockRuleValue,
     mockRulePassActionData,
-    msgHash,
-    rsv,
-  };
-}
-
-async function prepareFailRule(
-  accountProvider, tokenHolder, nonce, ephemeralKey,
-) {
-  const mockRule = await MockRule.new();
-  const mockRuleValue = accountProvider.get();
-  const mockRuleFailActionData = generateMockRuleFailActionData(
-    mockRuleValue,
-  );
-
-  const { msgHash, rsv } = getExecuteRuleExTxData(
-    tokenHolder.address,
-    mockRule.address,
-    mockRuleFailActionData,
-    nonce,
-    ephemeralKey,
-  );
-
-  return {
-    mockRule,
-    mockRuleValue,
-    mockRuleFailActionData,
     msgHash,
     rsv,
   };
@@ -341,7 +258,9 @@ contract('TokenHolder::redeem', async (accounts) => {
       redeemerNonce = 1,
       hashLock = web3.utils.soliditySha3('test');
 
-      const { tokenHolder } = await createTokenHolder(
+      const {
+              tokenHolder,
+           } = await createTokenHolder(
         accountProvider,
         ephemeralKeyAddress1,
         spendingLimit,
@@ -352,7 +271,6 @@ contract('TokenHolder::redeem', async (accounts) => {
       const {
         mockRule,
         mockRuleValue,
-        mockRulePassActionData,
         rsv,
       } = await preparePassPayableRule(
         accountProvider,
@@ -361,7 +279,14 @@ contract('TokenHolder::redeem', async (accounts) => {
         ephemeralPrivateKey1,
       );
 
-      const payableValue = 111;
+      await token.setCoGateway(mockRule.address);
+
+      assert.strictEqual(
+        (await tokenHolder.coGateway.call()),
+        mockRule.address,
+      );
+
+      const payableValue = 100;
       await tokenHolder.redeem(
         mockRule.address,
         amount,

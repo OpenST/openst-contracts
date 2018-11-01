@@ -46,7 +46,13 @@ contract UtilityTokenMock is EIP20TokenMock {
         string _name,
         uint8 _decimals
     )
-        EIP20TokenMock(_symbol, _name, _decimals)
+        EIP20TokenMock(
+            _conversionRate,
+            _conversionRateDecimals,
+            _symbol,
+            _name,
+            _decimals
+        )
         public
     {
         conversionRate = _conversionRate;

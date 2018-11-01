@@ -65,4 +65,31 @@ contract MockRule {
         value = _value;
         receivedPayableAmount = msg.value;
     }
+
+    /** Mocks CoGateway redeem function */
+    function redeem(
+        uint256 _amount,
+        address _beneficiary,
+        address _facilitator,
+        uint256 _gasPrice,
+        uint256 _gasLimit,
+        uint256 _nonce,
+        bytes32 _hashLock
+    )
+        public
+        payable
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encodePacked(
+            _amount,
+            _beneficiary,
+            _facilitator,
+            _gasPrice,
+            _gasLimit,
+            _nonce,
+            _hashLock
+            )
+        );
+    }
 }
