@@ -1,6 +1,6 @@
 pragma solidity ^0.4.23;
 
-contract CoGatewayRedeemInterface {
+interface CoGatewayRedeemInterface {
 
 	/* Public functions */
 
@@ -38,7 +38,7 @@ contract CoGatewayRedeemInterface {
 		uint256 _nonce,
 		bytes32 _hashLock
 	)
-		public
+		external
 		payable
 		returns (bytes32 messageHash_);
 

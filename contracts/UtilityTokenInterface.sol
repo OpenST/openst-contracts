@@ -28,7 +28,8 @@ import "./EIP20TokenInterface.sol";
 /**
  *  @title UtilityTokenInterface contract.
  *
- *  @notice Provides the interface to utility token contract.
+ *  @notice Provides the interface to utility token contract. The interface
+ *          has minimum required functions for bytecode optimizations.
  */
 contract UtilityTokenInterface is EIP20TokenInterface {
 

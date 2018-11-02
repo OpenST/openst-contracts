@@ -234,7 +234,7 @@ contract('TokenHolder::redeem', async (accounts) => {
   contract('Positive Tests', async () => {
     const accountProvider = new AccountProvider(accounts);
 
-    it('Checks that redeem payable rule is actually executed.', async () => {
+    it('Checks that redeem payable rule is successfully executed.', async () => {
       const spendingLimit = 50,
       deltaExpirationHeight = 100,
       amount = 10,
