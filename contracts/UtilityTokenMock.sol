@@ -25,7 +25,7 @@ import "./EIP20TokenMock.sol";
  */
 contract UtilityTokenMock is EIP20TokenMock {
 
-    address public CoGateway;
+    address public coGateway;
 
 
     /* Special functions */
@@ -66,6 +66,6 @@ contract UtilityTokenMock is EIP20TokenMock {
     function setCoGateway(address _coGateway)
         external
     {
-        CoGateway = _coGateway;
+        coGateway = _coGateway;
     }
 }

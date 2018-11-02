@@ -30,61 +30,6 @@ const ephemeralPrivateKey2 = '0x634011a05b2f48e2d19aba49a9dbc12766bf7dbd6111ed2a
 
 let token;
 
-function generateEIP20PassData(spender, value){
-
-  return web3.eth.abi.encodeFunctionCall(
-    {
-
-      name: 'approve',
-      type: 'function',
-      inputs: [
-        {
-          type: 'address',
-          name: 'spender'
-        },
-        {
-          type: 'uint256',
-          name: 'value'
-        }
-      ]
-    },
-    [spender, value]
-  );
-
-}
-
-function generateMockRulePassActionData(value) {
-  return web3.eth.abi.encodeFunctionCall(
-    {
-      name: 'pass',
-      type: 'function',
-      inputs: [
-        {
-          type: 'address',
-          name: 'value',
-        },
-      ],
-    },
-    [value],
-  );
-}
-
-function generateMockRulePassPayableActionData(value) {
-  return web3.eth.abi.encodeFunctionCall(
-    {
-      name: 'passPayable',
-      type: 'function',
-      inputs: [
-        {
-          type: 'address',
-          name: 'value',
-        },
-      ],
-    },
-    [value],
-  );
-}
-
 
 function generateRedeemCallPrefix() {
   return web3.eth.abi.encodeFunctionSignature({
@@ -171,11 +116,11 @@ function getRedeemExTxHash(
   );
 }
 
-function getRedeemExTxData(
-  _tokenHolderAddress, _ruleAddress, _ruleData, _nonce, _ephemeralKey,
+function getRedeemSignedData(
+  _tokenHolderAddress, _ruleAddress, _redeemCallData, _nonce, _ephemeralKey,
 ) {
   const msgHash = getRedeemExTxHash(
-    _tokenHolderAddress, _ruleAddress, _ruleData, _nonce,
+    _tokenHolderAddress, _ruleAddress, _redeemCallData, _nonce,
   );
 
   const rsv = EthUtils.ecsign(
@@ -186,7 +131,48 @@ function getRedeemExTxData(
   return { msgHash, rsv };
 }
 
-async function createTokenHolder(
+async function prepareRedeemPayableRule(
+    accountProvider,
+    amount,
+    beneficiary,
+    facilitator,
+    gasPrice,
+    gasLimit,
+    redeemerNonce,
+    tokenHolder,
+    nonce,
+    ephemeralKey,
+)
+{
+  const mockRule = await MockRule.new();
+
+  const redeemEncodedAbi = await mockRule.methods
+    .redeemWithoutHashLock(
+      amount,
+      beneficiary,
+      facilitator,
+      gasPrice,
+      gasLimit,
+      redeemerNonce
+    )
+    .encodeABI();
+
+  const { msgHash, rsv } = getRedeemSignedData(
+    tokenHolder.address,
+    mockRule.address,
+    redeemEncodedAbi,
+    nonce,
+    ephemeralKey,
+  );
+
+  return {
+    mockRule,
+    msgHash,
+    rsv,
+  };
+}
+
+async function setupTokenHolder(
   accountProvider, _ephemeralKeyAddress, _spendingLimit, _deltaExpirationHeight,
 ) {
   token = await UtilityTokenMock.new(1, 1, 'OST', 'Open Simple Token', 1);
@@ -214,33 +200,6 @@ async function createTokenHolder(
   return {
     tokenHolder,
     registeredWallet0,
-    CoGatewayAddress,
-  };
-}
-
-async function preparePassPayableRule(
-  accountProvider, tokenHolder, nonce, ephemeralKey,
-) {
-  const mockRule = await MockRule.new();
-  const mockRuleValue = accountProvider.get();
-  const mockRulePassActionData = generateMockRulePassPayableActionData(
-    mockRuleValue,
-  );
-
-  const { msgHash, rsv } = getRedeemExTxData(
-    tokenHolder.address,
-    mockRule.address,
-    mockRulePassActionData,
-    nonce,
-    ephemeralKey,
-  );
-
-  return {
-    mockRule,
-    mockRuleValue,
-    mockRulePassActionData,
-    msgHash,
-    rsv,
   };
 }
 
@@ -253,6 +212,7 @@ contract('TokenHolder::redeem', async (accounts) => {
       deltaExpirationHeight = 50,
       amount = 10,
       beneficiary = accountProvider.get(),
+      facilitator = accountProvider.get(),
       gasPrice = 10,
       gasLimit = 10,
       redeemerNonce = 1,
@@ -260,7 +220,7 @@ contract('TokenHolder::redeem', async (accounts) => {
 
       const {
               tokenHolder,
-           } = await createTokenHolder(
+           } = await setupTokenHolder(
         accountProvider,
         ephemeralKeyAddress1,
         spendingLimit,
@@ -270,10 +230,15 @@ contract('TokenHolder::redeem', async (accounts) => {
       const nonce = 1;
       const {
         mockRule,
-        mockRuleValue,
         rsv,
-      } = await preparePassPayableRule(
+      } = await prepareRedeemPayableRule(
         accountProvider,
+        amount,
+        beneficiary,
+        facilitator,
+        gasPrice,
+        gasLimit,
+        redeemerNonce,
         tokenHolder,
         nonce,
         ephemeralPrivateKey1,
@@ -281,14 +246,8 @@ contract('TokenHolder::redeem', async (accounts) => {
 
       await token.setCoGateway(mockRule.address);
 
-      assert.strictEqual(
-        (await tokenHolder.coGateway.call()),
-        mockRule.address,
-      );
-
       const payableValue = 100;
       await tokenHolder.redeem(
-        mockRule.address,
         amount,
         beneficiary,
         gasPrice,
@@ -302,6 +261,11 @@ contract('TokenHolder::redeem', async (accounts) => {
         {
           value: payableValue,
         },
+      );
+
+      assert.strictEqual(
+        (await tokenHolder.coGateway.call()),
+        mockRule.address,
       );
 
       assert.strictEqual(
