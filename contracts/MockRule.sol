@@ -80,6 +80,7 @@ contract MockRule {
         payable
         returns (bytes32)
     {
+        receivedPayableAmount = msg.value;
         return keccak256(
             abi.encodePacked(
             _amount,
@@ -89,31 +90,6 @@ contract MockRule {
             _gasLimit,
             _nonce,
             _hashLock
-            )
-        );
-    }
-
-    /** Needed to evaluate encoded abi for JS layer */
-    function redeemWithoutHashLock(
-        uint256 _amount,
-        address _beneficiary,
-        address _facilitator,
-        uint256 _gasPrice,
-        uint256 _gasLimit,
-        uint256 _nonce
-    )
-        public
-        payable
-        returns (bytes32)
-    {
-        return keccak256(
-            abi.encodePacked(
-                _amount,
-                _beneficiary,
-                _facilitator,
-                _gasPrice,
-                _gasLimit,
-                _nonce
             )
         );
     }

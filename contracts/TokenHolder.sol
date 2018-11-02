@@ -103,6 +103,12 @@ contract TokenHolder is MultiSigWallet {
         )
     );
 
+    bytes4 public constant COGATEWAY_REDEEM_CALLPREFIX = bytes4(
+        keccak256(
+            "redeem(uint256,address,address,uint256,uint256,uint256)"
+        )
+    );
+
 
     /* Storage */
 
@@ -418,8 +424,8 @@ contract TokenHolder is MultiSigWallet {
         );
 
         require(
-            _amount >= getSpendingLimit(ephemeralKey),
-            "Amount to redeem should be gte than spending limit."
+            _amount <= getSpendingLimit(ephemeralKey),
+            "Amount to redeem should be lte than spending limit."
         );
 
         token.approve(coGateway, getSpendingLimit(ephemeralKey));
@@ -567,7 +573,7 @@ contract TokenHolder is MultiSigWallet {
         );
     }
 
-    /** @notice Constructs redeemCallData and verifies ephemeral key.*/
+    /** @notice Constructs redeemCallData and verifies ephemeral key. */
     function verifyRedeemExecutableTransaction(
         uint256 _amount,
         address _beneficiary,
@@ -582,8 +588,8 @@ contract TokenHolder is MultiSigWallet {
         private
         returns (address ephemeralKey_)
     {
-        bytes memory redeemCallData = abi.encodeWithSelector(
-            REDEEM_CALLPREFIX,
+        bytes memory coGatewayRedeemCallData = abi.encodeWithSelector(
+            COGATEWAY_REDEEM_CALLPREFIX,
             _amount,
             _beneficiary,
             msg.sender,
@@ -595,7 +601,7 @@ contract TokenHolder is MultiSigWallet {
         (, ephemeralKey_) = verifyExecutableTransaction(
             REDEEM_CALLPREFIX,
             coGateway,
-            redeemCallData,
+            coGatewayRedeemCallData,
             _nonce,
             _v,
             _r,

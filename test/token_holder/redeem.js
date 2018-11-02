@@ -24,14 +24,14 @@ const MockRule = artifacts.require('MockRule');
 const TokenRulesMock = artifacts.require('TokenRulesMock');
 const UtilityTokenMock = artifacts.require('UtilityTokenMock');
 
-const ephemeralPrivateKey1 = '0xa8225c01ceeaf01d7bc7c1b1b929037bd4050967c5730c0b854263121b8399f3';
 const ephemeralKeyAddress1 = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
+const ephemeralPrivateKey1 = '0xa8225c01ceeaf01d7bc7c1b1b929037bd4050967c5730c0b854263121b8399f3';
 const ephemeralPrivateKey2 = '0x634011a05b2f48e2d19aba49a9dbc12766bf7dbd6111ed2abb2621c92e8cfad9';
 
 let token;
 
 
-function generateRedeemCallPrefix() {
+function getRedeemCallPrefix() {
   return web3.eth.abi.encodeFunctionSignature({
     name: 'redeem',
     type: 'function',
@@ -70,10 +70,10 @@ function generateRedeemCallPrefix() {
   });
 }
 
-function getRedeemExTxHash(
-  tokenHolderAddress, ruleAddress, ruleData, nonce,
+function getRedeemSignedData(
+  tokenHolderAddress, ruleAddress, redeemCallData, nonce, ephemeralKey
 ) {
-  return web3.utils.soliditySha3(
+  const msgHash = web3.utils.soliditySha3(
     {
       t: 'bytes1', v: '0x19',
     },
@@ -90,7 +90,7 @@ function getRedeemExTxHash(
       t: 'uint8', v: 0,
     },
     {
-      t: 'bytes32', v: web3.utils.keccak256(ruleData),
+      t: 'bytes32', v: web3.utils.keccak256(redeemCallData),
     },
     {
       t: 'uint256', v: nonce,
@@ -105,7 +105,7 @@ function getRedeemExTxHash(
       t: 'uint8', v: 0,
     },
     {
-      t: 'bytes4', v: generateRedeemCallPrefix(),
+      t: 'bytes4', v: getRedeemCallPrefix(),
     },
     {
       t: 'uint8', v: 0,
@@ -114,21 +114,50 @@ function getRedeemExTxHash(
       t: 'bytes32', v: '0x0',
     },
   );
-}
-
-function getRedeemSignedData(
-  _tokenHolderAddress, _ruleAddress, _redeemCallData, _nonce, _ephemeralKey,
-) {
-  const msgHash = getRedeemExTxHash(
-    _tokenHolderAddress, _ruleAddress, _redeemCallData, _nonce,
-  );
 
   const rsv = EthUtils.ecsign(
     EthUtils.toBuffer(msgHash),
-    EthUtils.toBuffer(_ephemeralKey),
+    EthUtils.toBuffer(ephemeralKey),
   );
 
   return { msgHash, rsv };
+}
+
+function getRedeemAbiWithoutHashLock(
+  amount, beneficiary, facilitator, gasPrice, gasLimit, redeemerNonce) {
+  return web3.eth.abi.encodeFunctionCall(
+    {
+      name: 'redeem',
+      type: 'function',
+      inputs: [
+        {
+          type: 'uint256',
+          name: 'amount',
+        },
+        {
+          type: 'address',
+          name: 'beneficiary',
+        },
+        {
+          type: 'address',
+          name: 'facilitator',
+        },
+        {
+          type: 'uint256',
+          name: 'gasPrice',
+        },
+        {
+          type: 'uint256',
+          name: 'gasLimit',
+        },
+        {
+          type: 'uint256',
+          name: 'redeemerNonce',
+        },
+      ],
+    },
+    [amount, beneficiary, facilitator, gasPrice, gasLimit, redeemerNonce],
+  );
 }
 
 async function prepareRedeemPayableRule(
@@ -146,21 +175,19 @@ async function prepareRedeemPayableRule(
 {
   const mockRule = await MockRule.new();
 
-  const redeemEncodedAbi = await mockRule.methods
-    .redeemWithoutHashLock(
+  const coGatewayRedeemEncodedAbiWithoutHashLock = await getRedeemAbiWithoutHashLock(
       amount,
       beneficiary,
       facilitator,
       gasPrice,
       gasLimit,
       redeemerNonce
-    )
-    .encodeABI();
+    );
 
   const { msgHash, rsv } = getRedeemSignedData(
     tokenHolder.address,
     mockRule.address,
-    redeemEncodedAbi,
+    coGatewayRedeemEncodedAbiWithoutHashLock,
     nonce,
     ephemeralKey,
   );
@@ -208,8 +235,8 @@ contract('TokenHolder::redeem', async (accounts) => {
     const accountProvider = new AccountProvider(accounts);
 
     it('Checks that redeem payable rule is actually executed.', async () => {
-      const spendingLimit = 10,
-      deltaExpirationHeight = 50,
+      const spendingLimit = 50,
+      deltaExpirationHeight = 100,
       amount = 10,
       beneficiary = accountProvider.get(),
       facilitator = accountProvider.get(),
@@ -247,7 +274,7 @@ contract('TokenHolder::redeem', async (accounts) => {
       await token.setCoGateway(mockRule.address);
 
       const payableValue = 100;
-      await tokenHolder.redeem(
+      let redeemReceipt = await tokenHolder.redeem(
         amount,
         beneficiary,
         gasPrice,
@@ -260,17 +287,15 @@ contract('TokenHolder::redeem', async (accounts) => {
         EthUtils.bufferToHex(rsv.s),
         {
           value: payableValue,
-        },
+          from: facilitator,
+        }
       );
+
+      assert.equal(redeemReceipt.receipt.status, true);
 
       assert.strictEqual(
         (await tokenHolder.coGateway.call()),
         mockRule.address,
-      );
-
-      assert.strictEqual(
-        (await mockRule.value.call()),
-        mockRuleValue,
       );
 
       assert.isOk(
