@@ -24,7 +24,7 @@ interface CoGatewayRedeemInterface {
 
 	/* Public functions */
 
-	/**
+    /**
      * @notice Initiates the redemption process.
      *
      * @dev In order to redeem the redeemer needs to approve CoGateway contract
@@ -62,7 +62,7 @@ interface CoGatewayRedeemInterface {
 		payable
 		returns (bytes32 messageHash_);
 
-	/**
+    /**
      * @notice Revert redemption to stop the redeem process. Only redeemer can
      *         revert redemption by providing penalty i.e. 1.5 times of
      *         bounty amount. On revert process, penalty and facilitator
