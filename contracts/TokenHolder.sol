@@ -61,6 +61,7 @@ contract TokenHolder is MultiSigWallet {
     event RedeemInitiated(
         address _beneficiary,
         uint256 _amount,
+        uint256 _redeemerNonce,
         bytes32 _redeemMessageHash
     );
 
@@ -444,7 +445,12 @@ contract TokenHolder is MultiSigWallet {
 
         token.approve(coGateway, 0);
 
-        emit RedeemInitiated(_beneficiary, _amount, redeemMessageHash_);
+        emit RedeemInitiated(
+            _beneficiary,
+            _amount,
+            _redeemerNonce,
+            redeemMessageHash_
+        );
     }
 
     /**

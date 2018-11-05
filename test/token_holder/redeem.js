@@ -231,7 +231,248 @@ async function setupTokenHolder(
 }
 
 contract('TokenHolder::redeem', async (accounts) => {
-  contract('Positive Tests', async () => {
+
+  describe('Negative Tests', async () => {
+    const accountProvider = new AccountProvider(accounts);
+    const spendingLimit = 50,
+      deltaExpirationHeight = 100,
+      amount = 10,
+      beneficiary = accountProvider.get(),
+      facilitator = accountProvider.get(),
+      gasPrice = 10,
+      gasLimit = 10,
+      redeemerNonce = 1,
+      hashLock = web3.utils.soliditySha3('hl'),
+      payableValue = 100,
+      nonce = 1;
+
+    it('Reverts if ExTx is signed with non-authorized key.', async () => {
+
+      const {
+        tokenHolder,
+      } = await setupTokenHolder(
+        accountProvider,
+        ephemeralKeyAddress1,
+        spendingLimit,
+        deltaExpirationHeight,
+      );
+
+      const {
+        mockRule,
+        rsv,
+      } = await prepareRedeemPayableRule(
+        accountProvider,
+        amount,
+        beneficiary,
+        facilitator,
+        gasPrice,
+        gasLimit,
+        redeemerNonce,
+        tokenHolder,
+        nonce,
+        ephemeralPrivateKey2,
+      );
+
+      await token.setCoGateway(mockRule.address);
+
+
+      await Utils.expectRevert(
+         tokenHolder.redeem(
+          amount,
+          beneficiary,
+          gasPrice,
+          gasLimit,
+          redeemerNonce,
+          hashLock,
+          nonce,
+          rsv.v,
+          EthUtils.bufferToHex(rsv.r),
+          EthUtils.bufferToHex(rsv.s),
+          {
+            value: payableValue,
+            from: facilitator,
+          }
+      ),
+      'Should revert as Redeem is signed with non-authorized key.',
+      'Ephemeral key is not active.'
+      );
+    });
+
+    it('Reverts if Redeem ExTx is signed with authorized but expired key.', async () => {
+
+      const {
+        tokenHolder,
+      } = await setupTokenHolder(
+        accountProvider,
+        ephemeralKeyAddress1,
+        spendingLimit,
+        deltaExpirationHeight,
+      );
+
+      for (let i = 0; i < deltaExpirationHeight; i += 1) {
+        await Utils.advanceBlock();
+      }
+
+      const {
+        mockRule,
+        rsv,
+      } = await prepareRedeemPayableRule(
+        accountProvider,
+        amount,
+        beneficiary,
+        facilitator,
+        gasPrice,
+        gasLimit,
+        redeemerNonce,
+        tokenHolder,
+        nonce,
+        ephemeralPrivateKey2,
+      );
+
+      await token.setCoGateway(mockRule.address);
+
+      await Utils.expectRevert(
+        tokenHolder.redeem(
+          amount,
+          beneficiary,
+          gasPrice,
+          gasLimit,
+          redeemerNonce,
+          hashLock,
+          nonce,
+          rsv.v,
+          EthUtils.bufferToHex(rsv.r),
+          EthUtils.bufferToHex(rsv.s),
+          {
+            value: payableValue,
+            from: facilitator,
+          }
+        ),
+        'Should revert as Redeem is signed with authorized expired key.',
+        'Ephemeral key is not active.'
+      );
+
+    });
+
+    it('Reverts if transaction signed with revoked key.', async () => {
+      const {
+        tokenHolder,
+        registeredWallet0,
+      } = await setupTokenHolder(
+        accountProvider,
+        ephemeralKeyAddress1,
+        spendingLimit,
+        deltaExpirationHeight,
+      );
+
+      await tokenHolder.revokeSession(
+        ephemeralKeyAddress1,
+        { from: registeredWallet0 },
+      );
+
+      const keyData = await tokenHolder.ephemeralKeys(
+        ephemeralKeyAddress1,
+      );
+
+      assert.isOk(
+        keyData.status.eqn(2),
+        'Ephemeral key should be revoked.',
+      );
+
+      const {
+        mockRule,
+        rsv,
+      } = await prepareRedeemPayableRule(
+        accountProvider,
+        amount,
+        beneficiary,
+        facilitator,
+        gasPrice,
+        gasLimit,
+        redeemerNonce,
+        tokenHolder,
+        nonce,
+        ephemeralPrivateKey1,
+      );
+
+      await token.setCoGateway(mockRule.address);
+
+      await Utils.expectRevert(
+        tokenHolder.redeem(
+          amount,
+          beneficiary,
+          gasPrice,
+          gasLimit,
+          redeemerNonce,
+          hashLock,
+          nonce,
+          rsv.v,
+          EthUtils.bufferToHex(rsv.r),
+          EthUtils.bufferToHex(rsv.s),
+          {
+            value: payableValue,
+            from: facilitator,
+          }
+        ),
+        'Should revert as Redeem is signed with authorized expired key.',
+        'Ephemeral key is not active.'
+      );
+    });
+
+    it('Reverts if amount to redeem is higher than spending limit.', async () => {
+      const {
+        tokenHolder
+      } = await setupTokenHolder(
+        accountProvider,
+        ephemeralKeyAddress1,
+        spendingLimit,
+        deltaExpirationHeight,
+      );
+
+      const amountToRedeem = 100;
+      const {
+        mockRule,
+        rsv,
+      } = await prepareRedeemPayableRule(
+        accountProvider,
+        amountToRedeem,
+        beneficiary,
+        facilitator,
+        gasPrice,
+        gasLimit,
+        redeemerNonce,
+        tokenHolder,
+        nonce,
+        ephemeralPrivateKey1,
+      );
+
+      await token.setCoGateway(mockRule.address);
+
+      await Utils.expectRevert(
+        tokenHolder.redeem(
+          amountToRedeem,
+          beneficiary,
+          gasPrice,
+          gasLimit,
+          redeemerNonce,
+          hashLock,
+          nonce,
+          rsv.v,
+          EthUtils.bufferToHex(rsv.r),
+          EthUtils.bufferToHex(rsv.s),
+          {
+            value: payableValue,
+            from: facilitator,
+          }
+        ),
+        'Should revert as amount to redeem is higher than redemption limit.',
+        'Amount to redeem should be lte than spending limit.'
+      );
+    });
+
+  });
+
+  describe('Positive Tests', async () => {
     const accountProvider = new AccountProvider(accounts);
 
     it('Checks that redeem payable rule is successfully executed.', async () => {
@@ -243,7 +484,7 @@ contract('TokenHolder::redeem', async (accounts) => {
       gasPrice = 10,
       gasLimit = 10,
       redeemerNonce = 1,
-      hashLock = web3.utils.soliditySha3('test');
+      hashLock = web3.utils.soliditySha3('hl');
 
       const {
               tokenHolder,
@@ -303,5 +544,108 @@ contract('TokenHolder::redeem', async (accounts) => {
       );
     });
   });
+
+  describe('Events', async () => {
+    const accountProvider = new AccountProvider(accounts);
+
+    it('Verifies emitting of RedeemInitiated event.', async () => {
+      const spendingLimit = 50,
+        deltaExpirationHeight = 100,
+        amount = 10,
+        beneficiary = accountProvider.get(),
+        facilitator = accountProvider.get(),
+        gasPrice = 10,
+        gasLimit = 10,
+        redeemerNonce = 1,
+        hashLock = web3.utils.soliditySha3('hl');
+
+      const {
+        tokenHolder,
+      } = await setupTokenHolder(
+        accountProvider,
+        ephemeralKeyAddress1,
+        spendingLimit,
+        deltaExpirationHeight,
+      );
+
+      const nonce = 1;
+      const {
+        mockRule,
+        rsv,
+      } = await prepareRedeemPayableRule(
+        accountProvider,
+        amount,
+        beneficiary,
+        facilitator,
+        gasPrice,
+        gasLimit,
+        redeemerNonce,
+        tokenHolder,
+        nonce,
+        ephemeralPrivateKey1,
+      );
+
+      await token.setCoGateway(mockRule.address);
+
+      const payableValue = 100;
+
+      const redeemMessageHash = await tokenHolder.redeem.call(
+        amount,
+        beneficiary,
+        gasPrice,
+        gasLimit,
+        redeemerNonce,
+        hashLock,
+        nonce,
+        rsv.v,
+        EthUtils.bufferToHex(rsv.r),
+        EthUtils.bufferToHex(rsv.s),
+        {
+          value: payableValue,
+          from: facilitator,
+        }
+      );
+
+      let redeemReceipt = await tokenHolder.redeem(
+        amount,
+        beneficiary,
+        gasPrice,
+        gasLimit,
+        redeemerNonce,
+        hashLock,
+        nonce,
+        rsv.v,
+        EthUtils.bufferToHex(rsv.r),
+        EthUtils.bufferToHex(rsv.s),
+        {
+          value: payableValue,
+          from: facilitator,
+        }
+      );
+
+      const events = Event.decodeTransactionResponse(
+        redeemReceipt,
+      );
+
+      assert.strictEqual(
+        events.length,
+        1,
+      );
+
+      Event.assertEqual(events[0], {
+        name: 'RedeemInitiated',
+        args: {
+          _beneficiary: beneficiary,
+          _amount: new BN(amount),
+          _redeemerNonce: new BN(redeemerNonce),
+          _redeemMessageHash: redeemMessageHash
+        },
+      });
+
+    });
+
+  });
+
+
 
 });
