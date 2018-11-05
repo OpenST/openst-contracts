@@ -646,6 +646,4 @@ contract('TokenHolder::redeem', async (accounts) => {
 
   });
 
-
-
 });
