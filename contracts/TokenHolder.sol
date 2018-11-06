@@ -599,7 +599,7 @@ contract TokenHolder is MultiSigWallet {
         );
     }
 
-    /** @notice Constructs redeemCallData and verifies ephemeral key. */
+    /** @notice Constructs data for verification of ephemeral key. */
     function verifyRedeemExecutableTransaction(
         uint256 _amount,
         address _beneficiary,
