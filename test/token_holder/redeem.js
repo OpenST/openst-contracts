@@ -123,8 +123,8 @@ function getRedeemSignedData(
   return { msgHash, rsv };
 }
 
-function getRedeemAbiWithoutHashLock(
-  amount, beneficiary, facilitator, gasPrice, gasLimit, redeemerNonce) {
+function getRedeemDataToSign(
+  amount, beneficiary, gasPrice, gasLimit, redeemerNonce) {
   return web3.eth.abi.encodeFunctionCall(
     {
       name: 'redeem',
@@ -137,10 +137,6 @@ function getRedeemAbiWithoutHashLock(
         {
           type: 'address',
           name: 'beneficiary',
-        },
-        {
-          type: 'address',
-          name: 'facilitator',
         },
         {
           type: 'uint256',
@@ -156,7 +152,7 @@ function getRedeemAbiWithoutHashLock(
         },
       ],
     },
-    [amount, beneficiary, facilitator, gasPrice, gasLimit, redeemerNonce],
+    [amount, beneficiary, gasPrice, gasLimit, redeemerNonce],
   );
 }
 
@@ -175,10 +171,9 @@ async function prepareRedeemPayableRule(
 {
   const mockRule = await MockRule.new();
 
-  const coGatewayRedeemEncodedAbiWithoutHashLock = await getRedeemAbiWithoutHashLock(
+  const coGatewayRedeemEncodedAbiWithoutHashLock = await getRedeemDataToSign(
       amount,
       beneficiary,
-      facilitator,
       gasPrice,
       gasLimit,
       redeemerNonce
@@ -466,7 +461,58 @@ contract('TokenHolder::redeem', async (accounts) => {
           }
         ),
         'Should revert as amount to redeem is higher than redemption limit.',
-        'Amount to redeem should be lte than spending limit.'
+        'Amount to redeem should be lte to spending limit.'
+      );
+    });
+
+    it('Reverts if data is not signed with valid nonce.', async () => {
+      const {
+        tokenHolder
+      } = await setupTokenHolder(
+        accountProvider,
+        ephemeralKeyAddress1,
+        spendingLimit,
+        deltaExpirationHeight,
+      );
+
+      const {
+        mockRule,
+        rsv,
+      } = await prepareRedeemPayableRule(
+        accountProvider,
+        amount,
+        beneficiary,
+        facilitator,
+        gasPrice,
+        gasLimit,
+        redeemerNonce,
+        tokenHolder,
+        nonce,
+        ephemeralPrivateKey1,
+      );
+
+      await token.setCoGateway(mockRule.address);
+
+      const invalidNonce = 0;
+      await Utils.expectRevert(
+        tokenHolder.redeem(
+          amount,
+          beneficiary,
+          gasPrice,
+          gasLimit,
+          redeemerNonce,
+          hashLock,
+          invalidNonce,
+          rsv.v,
+          EthUtils.bufferToHex(rsv.r),
+          EthUtils.bufferToHex(rsv.s),
+          {
+            value: payableValue,
+            from: facilitator,
+          }
+        ),
+        'Should revert as data is not signed with valid nonce.',
+        'Ephemeral key is not active.'
       );
     });
 
@@ -589,7 +635,7 @@ contract('TokenHolder::redeem', async (accounts) => {
 
       const payableValue = 100;
 
-      const redeemMessageHash = await tokenHolder.redeem.call(
+      const executionStatus = await tokenHolder.redeem.call(
         amount,
         beneficiary,
         gasPrice,
@@ -638,7 +684,7 @@ contract('TokenHolder::redeem', async (accounts) => {
           _beneficiary: beneficiary,
           _amount: new BN(amount),
           _redeemerNonce: new BN(redeemerNonce),
-          _redeemMessageHash: redeemMessageHash
+          _executionStatus: executionStatus
         },
       });
 
