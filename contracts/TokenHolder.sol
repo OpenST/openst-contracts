@@ -60,7 +60,8 @@ contract TokenHolder is MultiSigWallet {
 
     event RevertRedemptionInitiated(
         bytes32 _redeemMessageHash,
-        bool executionStatus_
+        address _ephemeralKey,
+        bool _executionStatus
     );
 
 
@@ -409,7 +410,11 @@ contract TokenHolder is MultiSigWallet {
         // solium-disable-next-line security/no-call-value
         executionStatus_ = coGateway.call.value(msg.value)(data);
 
-        emit RevertRedemptionInitiated(_redeemMessageHash, executionStatus_);
+        emit RevertRedemptionInitiated(
+            _redeemMessageHash,
+            ephemeralKey,
+            executionStatus_
+        );
     }
 
     /**
