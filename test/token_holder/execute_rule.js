@@ -30,25 +30,25 @@ const ephemeralPrivateKey2 = '0x634011a05b2f48e2d19aba49a9dbc12766bf7dbd6111ed2a
 
 let token;
 
-function generateEIP20PassData(spender, value){
+function generateEIP20PassData(spender, value) {
 
     return web3.eth.abi.encodeFunctionCall(
-      {
+        {
 
-        name: 'approve',
-        type: 'function',
-        inputs: [
-          {
-              type: 'address',
-              name: 'spender'
-          },
-          {
-            type: 'uint256',
-            name: 'value'
-          }
-        ]
-      },
-      [spender, value]
+            name: 'approve',
+            type: 'function',
+            inputs: [
+                {
+                    type: 'address',
+                    name: 'spender'
+                },
+                {
+                    type: 'uint256',
+                    name: 'value'
+                }
+            ]
+        },
+        [spender, value]
     );
 
 }
@@ -221,13 +221,13 @@ async function createTokenHolder(
 }
 
 async function prepareEIP20PassData(
-  accountProvider, tokenHolder, nonce, ephemeralKey,
+    accountProvider, tokenHolder, nonce, ephemeralKey,
 ) {
 
     const spender = accountProvider.get();
     const amount = 100;
     const eip20PassActionData = generateEIP20PassData(
-      spender, amount
+        spender, amount
     );
 
     const { msgHash, rsv } = getExecuteRuleExTxData(
@@ -461,43 +461,43 @@ contract('TokenHolder::executeRule', async () => {
             );
         });
 
-      it('Reverts if to address is EIP20 token', async () => {
-        const spendingLimit = 10;
-        const deltaExpirationHeight = 50;
-        const { tokenHolder } = await createTokenHolder(
-          accountProvider,
-          ephemeralKeyAddress1,
-          spendingLimit,
-          deltaExpirationHeight,
-        );
+        it('Reverts if to address is EIP20 token', async () => {
+            const spendingLimit = 10;
+            const deltaExpirationHeight = 50;
+            const { tokenHolder } = await createTokenHolder(
+                accountProvider,
+                ephemeralKeyAddress1,
+                spendingLimit,
+                deltaExpirationHeight,
+            );
 
-        // Correct nonce is 1.
-        const nonce = 1;
-        const {
-          token: EIP20Token,
-          eip20PassActionData: eip20TokenBalanceOfData,
-          rsv: rsv,
-        } = await prepareEIP20PassData(
-          accountProvider,
-          tokenHolder,
-          nonce,
-          ephemeralPrivateKey1,
-        );
+            // Correct nonce is 1.
+            const nonce = 1;
+            const {
+                token: EIP20Token,
+                eip20PassActionData: eip20TokenBalanceOfData,
+                rsv: rsv,
+            } = await prepareEIP20PassData(
+                accountProvider,
+                tokenHolder,
+                nonce,
+                ephemeralPrivateKey1,
+            );
 
-        await Utils.expectRevert(
-          tokenHolder.executeRule(
-            EIP20Token.address,
-            eip20TokenBalanceOfData,
-            nonce,
-            rsv.v,
-            EthUtils.bufferToHex(rsv.r),
-            EthUtils.bufferToHex(rsv.s),
-          ),
-          'Should revert if to address is EIP20 token.',
-          'to address can\'t be EIP20 token.'
-        );
+            await Utils.expectRevert(
+                tokenHolder.executeRule(
+                    EIP20Token.address,
+                    eip20TokenBalanceOfData,
+                    nonce,
+                    rsv.v,
+                    EthUtils.bufferToHex(rsv.r),
+                    EthUtils.bufferToHex(rsv.s),
+                ),
+                'Should revert if to address is EIP20 token.',
+                'to address can\'t be EIP20 token.'
+            );
 
-      });
+        });
         it('Reverts if ExTx is signed with a wrong nonce.', async () => {
             const spendingLimit = 10;
             const deltaExpirationHeight = 50;
@@ -592,7 +592,7 @@ contract('TokenHolder::executeRule', async () => {
                     EthUtils.bufferToHex(rsv.s),
                 ),
                 'Should revert as ExTx target is TokenHolder itself.',
-                'Target of a transaction cannot be TokenHolder itself.',
+                'to address can\'t be TokenHolder itself.',
             );
         });
     });
