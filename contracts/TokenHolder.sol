@@ -451,7 +451,7 @@ contract TokenHolder is MultiSigWallet {
 
         token.approve(coGateway, getSpendingLimit(ephemeralKey));
 
-        bytes memory _data = getCoGatewayRedeemExecutableData(
+        bytes memory data = getCoGatewayRedeemExecutableData(
             _amount,
             _beneficiary,
             _gasPrice,
@@ -461,7 +461,7 @@ contract TokenHolder is MultiSigWallet {
         );
 
         // solium-disable-next-line security/no-call-value
-        executionStatus_ = coGateway.call.value(msg.value)(_data);
+        executionStatus_ = coGateway.call.value(msg.value)(data);
 
         token.approve(coGateway, 0);
 
