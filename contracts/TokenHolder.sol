@@ -15,9 +15,10 @@ pragma solidity ^0.4.23;
 // limitations under the License.
 
 import "./SafeMath.sol";
-import "./EIP20TokenInterface.sol";
+import "./UtilityTokenInterface.sol";
 import "./MultiSigWallet.sol";
 import "./TokenRules.sol";
+import "./CoGatewayRedeemInterface.sol";
 
 
 /**
@@ -57,6 +58,11 @@ contract TokenHolder is MultiSigWallet {
         bool _status
     );
 
+    event RevertRedemptionInitiated(
+        bytes32 _redeemMessageHash,
+        bool executionStatus_
+    );
+
 
     /* Enums */
 
@@ -90,14 +96,37 @@ contract TokenHolder is MultiSigWallet {
         )
     );
 
+    /**
+     *  TH revertRedemption function rule call prefix needed to verify signed
+     *  data as per EIP1077 proposal.
+     */
+    bytes4 public constant REVERT_REDEMPTION_RULE_CALLPREFIX = bytes4(
+        keccak256(
+            "redeem(bytes32,uint256,uint8,bytes32,bytes32)"
+        )
+    );
+
+    /**
+     *  Using COGATEWAY_REVERT_REDEMPTION_CALLPREFIX CoGateway.RevertRedemption
+     *  executable data is constructed and called.
+     */
+    bytes4 public constant COGATEWAY_REVERT_REDEMPTION_CALLPREFIX = bytes4(
+        keccak256(
+            "redeem(bytes32)"
+        )
+    );
+
 
     /* Storage */
 
-    EIP20TokenInterface public token;
+    UtilityTokenInterface public token;
 
     mapping(address /* key */ => EphemeralKeyData) public ephemeralKeys;
 
     address public tokenRules;
+
+    /** coGateway address needed for redeem and revertRedemption operations. */
+    address public coGateway;
 
 
     /* Modifiers */
@@ -135,16 +164,16 @@ contract TokenHolder is MultiSigWallet {
 
     /**
      * @dev Constructor requires:
-     *          - EIP20 token address is not null.
+     *          - Utility token address is not null.
      *          - Token rules address is not null.
      *
-     * @param _token eip20 contract address deployed for an economy.
+     * @param _token Utility token contract address deployed for an economy.
      * @param _tokenRules Token rules contract address.
      * @param _wallets array of wallet addresses.
      * @param _required No of requirements for multi sig wallet.
      */
     constructor(
-        EIP20TokenInterface _token,
+        UtilityTokenInterface _token,
         address _tokenRules,
         address[] _wallets,
         uint256 _required
@@ -240,6 +269,7 @@ contract TokenHolder is MultiSigWallet {
         emit SessionRevoked(_ephemeralKey);
     }
 
+
     /* Public Functions */
 
     /**
@@ -324,6 +354,78 @@ contract TokenHolder is MultiSigWallet {
             messageHash,
             executionStatus_
         );
+    }
+
+    /**
+     * @notice Revert redemption to stop the redeem process.
+     *
+     * @dev Function validates executable signed data by checking that the
+     *      specified signature matches one of the
+     *      authorized (non-expired) ephemeral keys.
+     *
+     *      Function requires:
+     *          - Ephemeral key is authorized.
+     *          - Ephemeral key nonce is valid.
+     *
+     * @param _redeemMessageHash Message hash was returned while submitting
+     *        redeem request.
+     * @param _nonce The nonce of an ephemeral key that was used to sign
+     *               the transaction.
+     * @param _v V of the signature.
+     * @param _r R of the signature.
+     * @param _s S of the signature.
+     *
+     * @return executionStatus_ which is bool status of coGateway.revertRedemption.
+     */
+    function revertRedemption(
+        bytes32 _redeemMessageHash,
+        uint256 _nonce,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    )
+        public
+        payable
+        returns (bool executionStatus_)
+    {
+        coGateway = token.coGateway();
+
+        bytes memory data = abi.encodeWithSelector(
+            COGATEWAY_REVERT_REDEMPTION_CALLPREFIX,
+            _redeemMessageHash
+        );
+
+        address ephemeralKey = address(0);
+        (, ephemeralKey) = verifyExecutableTransaction(
+            REVERT_REDEMPTION_RULE_CALLPREFIX,
+            coGateway,
+            data,
+            _nonce,
+            _v,
+            _r,
+            _s
+        );
+
+        // solium-disable-next-line security/no-call-value
+        executionStatus_ = coGateway.call.value(msg.value)(data);
+
+        emit RevertRedemptionInitiated(_redeemMessageHash, executionStatus_);
+    }
+
+    /**
+     * @dev Retrieves the first 4 bytes of input byte array into byte4.
+     *      Function requires:
+     *          - Input byte array's length is greater than or equal to 4.
+     */
+    function bytesToBytes4(bytes _input) public pure returns (bytes4 out_) {
+        require(
+            _input.length >= 4,
+            "Input bytes length is less than 4."
+        );
+
+        for (uint8 i = 0; i < 4; i++) {
+            out_ |= bytes4(_input[i] & 0xFF) >> (i * 8);
+        }
     }
 
     function authorizeSession(
@@ -434,21 +536,5 @@ contract TokenHolder is MultiSigWallet {
                            // standard.
             )
         );
-    }
-
-    /**
-     * @dev Retrieves the first 4 bytes of input byte array into byte4.
-     *      Function requires:
-     *          - Input byte array's length is greater than or equal to 4.
-     */
-    function bytesToBytes4(bytes _input) public pure returns (bytes4 out_) {
-        require(
-            _input.length >= 4,
-            "Input bytes length is less than 4."
-        );
-
-        for (uint8 i = 0; i < 4; i++) {
-            out_ |= bytes4(_input[i] & 0xFF) >> (i * 8);
-        }
     }
 }
