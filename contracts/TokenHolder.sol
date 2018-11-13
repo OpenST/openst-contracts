@@ -285,6 +285,10 @@ contract TokenHolder is MultiSigWallet {
         returns (bool executionStatus_)
     {
         require(_to != address(token),"to address can't be EIP20 token.");
+        require(
+            _to != address(this),
+            "to address can't be TokenHolder itself."
+        );
 
         bytes32 messageHash = bytes32(0);
         address ephemeralKey = address(0);
