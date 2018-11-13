@@ -103,7 +103,7 @@ contract TokenHolder is MultiSigWallet {
      */
     bytes4 public constant REVERT_REDEMPTION_RULE_CALLPREFIX = bytes4(
         keccak256(
-            "redeem(bytes32,uint256,uint8,bytes32,bytes32)"
+            "revertRedemption(bytes32,uint256,uint8,bytes32,bytes32)"
         )
     );
 
@@ -113,7 +113,7 @@ contract TokenHolder is MultiSigWallet {
      */
     bytes4 public constant COGATEWAY_REVERT_REDEMPTION_CALLPREFIX = bytes4(
         keccak256(
-            "redeem(bytes32)"
+            "revertRedemption(bytes32)"
         )
     );
 
