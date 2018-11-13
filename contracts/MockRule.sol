@@ -65,4 +65,17 @@ contract MockRule {
         value = _value;
         receivedPayableAmount = msg.value;
     }
+
+    /** Mocks CoGateway revertRedemption function */
+    function revertRedemption(
+        bytes32 _messageHash
+    )
+        payable
+        public
+        returns (bytes32, bool)
+    {
+        require(msg.value != uint256(0), "msg.value is 0.");
+        receivedPayableAmount = msg.value;
+        return (_messageHash, true);
+    }
 }
