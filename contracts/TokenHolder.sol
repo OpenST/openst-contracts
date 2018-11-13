@@ -62,6 +62,7 @@ contract TokenHolder is MultiSigWallet {
         address _beneficiary,
         uint256 _amount,
         uint256 _redeemerNonce,
+        address _ephemeralKey,
         bool _executionStatus
     );
 
@@ -469,6 +470,7 @@ contract TokenHolder is MultiSigWallet {
             _beneficiary,
             _amount,
             _redeemerNonce,
+            ephemeralKey,
             executionStatus_
         );
     }

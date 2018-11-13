@@ -80,6 +80,8 @@ contract MockRule {
         payable
         returns (bytes32)
     {
+        require(msg.value != uint256(0), "msg.value is 0.");
+
         receivedPayableAmount = msg.value;
         return keccak256(
             abi.encodePacked(

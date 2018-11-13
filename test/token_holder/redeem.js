@@ -684,11 +684,110 @@ contract('TokenHolder::redeem', async (accounts) => {
           _beneficiary: beneficiary,
           _amount: new BN(amount),
           _redeemerNonce: new BN(redeemerNonce),
+          _ephemeralKey: ephemeralKeyAddress1,
           _executionStatus: executionStatus
         },
       });
 
     });
+
+    it('Verifies execution status is false when msg.value is 0.', async () => {
+      const spendingLimit = 50,
+        deltaExpirationHeight = 100,
+        amount = 10,
+        beneficiary = accountProvider.get(),
+        facilitator = accountProvider.get(),
+        gasPrice = 10,
+        gasLimit = 10,
+        redeemerNonce = 1,
+        hashLock = web3.utils.soliditySha3('hl');
+
+      const {
+        tokenHolder,
+      } = await setupTokenHolder(
+        accountProvider,
+        ephemeralKeyAddress1,
+        spendingLimit,
+        deltaExpirationHeight,
+      );
+
+      const nonce = 1;
+      const {
+        mockRule,
+        rsv,
+      } = await prepareRedeemPayableRule(
+        accountProvider,
+        amount,
+        beneficiary,
+        facilitator,
+        gasPrice,
+        gasLimit,
+        redeemerNonce,
+        tokenHolder,
+        nonce,
+        ephemeralPrivateKey1,
+      );
+
+      await token.setCoGateway(mockRule.address);
+
+      const payableValue = 100;
+
+      const executionStatus = await tokenHolder.redeem.call(
+        amount,
+        beneficiary,
+        gasPrice,
+        gasLimit,
+        redeemerNonce,
+        hashLock,
+        nonce,
+        rsv.v,
+        EthUtils.bufferToHex(rsv.r),
+        EthUtils.bufferToHex(rsv.s),
+        {
+          value: payableValue,
+          from: facilitator,
+        }
+      );
+
+      let redeemReceipt = await tokenHolder.redeem(
+        amount,
+        beneficiary,
+        gasPrice,
+        gasLimit,
+        redeemerNonce,
+        hashLock,
+        nonce,
+        rsv.v,
+        EthUtils.bufferToHex(rsv.r),
+        EthUtils.bufferToHex(rsv.s),
+        {
+          value: 0,
+          from: facilitator,
+        }
+      );
+
+      const events = Event.decodeTransactionResponse(
+        redeemReceipt,
+      );
+
+      assert.strictEqual(
+        events.length,
+        1,
+      );
+
+      Event.assertEqual(events[0], {
+        name: 'RedeemInitiated',
+        args: {
+          _beneficiary: beneficiary,
+          _amount: new BN(amount),
+          _redeemerNonce: new BN(redeemerNonce),
+          _ephemeralKey: ephemeralKeyAddress1,
+          // web3 returns null when _executionStatus is false
+          _executionStatus: null
+        },
+      });
+
+    })
 
   });
 
