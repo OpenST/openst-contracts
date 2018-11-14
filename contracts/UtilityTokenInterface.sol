@@ -32,5 +32,5 @@ contract UtilityTokenInterface is EIP20TokenInterface {
     function coGateway()
         public
         view
-    returns (address);
+        returns (address);
 }
