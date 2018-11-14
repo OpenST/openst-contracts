@@ -126,9 +126,6 @@ contract TokenHolder is MultiSigWallet {
 
     address public tokenRules;
 
-    /** coGateway address needed for redeem and revertRedemption operations. */
-    address public coGateway;
-
 
     /* Modifiers */
 
@@ -393,7 +390,7 @@ contract TokenHolder is MultiSigWallet {
         payable
         returns (bool executionStatus_)
     {
-        coGateway = token.coGateway();
+        address coGateway = token.coGateway();
 
         bytes memory data = abi.encodeWithSelector(
             COGATEWAY_REVERT_REDEMPTION_CALLPREFIX,

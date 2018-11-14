@@ -428,11 +428,6 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
 
       assert.equal(redeemReceipt.receipt.status, true);
 
-      assert.strictEqual(
-        (await tokenHolder.coGateway.call()),
-        mockRule.address,
-      );
-
       assert.isOk(
         (await mockRule.receivedPayableAmount.call()).eqn(payableValue),
       );
