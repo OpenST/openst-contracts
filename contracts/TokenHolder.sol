@@ -316,6 +316,10 @@ contract TokenHolder is MultiSigWallet {
         returns (bool executionStatus_)
     {
         require(_to != address(token),"to address can't be EIP20 token.");
+        require(
+            _to != address(this),
+            "to address can't be TokenHolder itself."
+        );
 
         bytes32 messageHash = bytes32(0);
         address ephemeralKey = address(0);
@@ -541,5 +545,21 @@ contract TokenHolder is MultiSigWallet {
                            // standard.
             )
         );
+    }
+
+    /**
+     * @dev Retrieves the first 4 bytes of input byte array into byte4.
+     *      Function requires:
+     *          - Input byte array's length is greater than or equal to 4.
+     */
+    function bytesToBytes4(bytes _input) public pure returns (bytes4 out_) {
+        require(
+            _input.length >= 4,
+            "Input bytes length is less than 4."
+        );
+
+        for (uint8 i = 0; i < 4; i++) {
+            out_ |= bytes4(_input[i] & 0xFF) >> (i * 8);
+        }
     }
 }
