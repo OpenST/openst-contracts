@@ -20,12 +20,11 @@ before_install:
   - sudo apt-get install software-properties-common
   - sudo add-apt-repository -y ppa:ethereum/ethereum
   - sudo apt-get update
-  - sudo apt-get --allow-unauthenticated install solc
 install:
   - npm install
 before_script:
   - nohup sh tools/runGanacheCli.sh </dev/null >/dev/null 2>&1 &
-  - bash tools/compile.sh
+  - truffle compile
 script:
   - truffle test
 after_script:
