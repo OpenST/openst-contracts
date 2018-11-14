@@ -140,9 +140,6 @@ contract TokenHolder is MultiSigWallet {
 
     address public tokenRules;
 
-    /** coGateway address needed for redeem and revertRedemption operations. */
-    address public coGateway;
-
 
     /* Modifiers */
 
@@ -435,7 +432,7 @@ contract TokenHolder is MultiSigWallet {
         payable
         returns (bool executionStatus_)
     {
-        coGateway = token.coGateway();
+        address coGateway = token.coGateway();
 
         address ephemeralKey = verifyRedeemExecutableTransaction(
             _amount,
@@ -443,6 +440,7 @@ contract TokenHolder is MultiSigWallet {
             _gasPrice,
             _gasLimit,
             _redeemerNonce,
+            coGateway,
             _nonce,
             _v,
             _r,
@@ -612,6 +610,7 @@ contract TokenHolder is MultiSigWallet {
         uint256 _gasPrice,
         uint256 _gasLimit,
         uint256 _redeemerNonce,
+        address _coGateway,
         uint256 _nonce,
         uint8 _v,
         bytes32 _r,
@@ -631,7 +630,7 @@ contract TokenHolder is MultiSigWallet {
 
         (, ephemeralKey_) = verifyExecutableTransaction(
             REDEEM_RULE_CALLPREFIX,
-            coGateway,
+            _coGateway,
             redeemData,
             _nonce,
             _v,
