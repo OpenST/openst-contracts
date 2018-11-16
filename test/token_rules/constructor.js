@@ -50,7 +50,7 @@ contract('TokenRules::constructor', async () => {
 
         it('Checks that passed arguments are set correctly.', async () => {
             const owner = accountProvider.get();
-            const organization = await Organization.new({from: owner});
+            const organization = await Organization.new({ from: owner });
             const token = accountProvider.get();
 
             const tokenRules = await TokenRules.new(organization.address, token);

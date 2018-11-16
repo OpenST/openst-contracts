@@ -68,6 +68,6 @@ module.exports.createTokenEconomy = async (accountProvider) => {
         tokenRules,
         organizationAddress,
         token,
-        worker
+        worker,
     };
 };

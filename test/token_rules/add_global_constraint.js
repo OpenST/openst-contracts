@@ -21,21 +21,21 @@ contract('TokenRules::addGlobalConstraint', async () => {
     contract('Negative Tests', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
 
-        it('Reverts if non-organization address is adding constraint.', async () => {
+        it('Reverts if non worker address is adding constraint.', async () => {
             const {
                 tokenRules,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const constraintAddress = accountProvider.get();
 
-            const nonOrganizationAddress = accountProvider.get();
+            const nonWorkerAddress = accountProvider.get();
 
             await Utils.expectRevert(
                 tokenRules.addGlobalConstraint(
                     constraintAddress,
-                    { from: nonOrganizationAddress },
+                    { from: nonWorkerAddress },
                 ),
-                'Should revert as non-organization address is adding constraint.',
+                'Should revert as non worker address is adding constraint.',
                 'Only whitelisted worker is allowed to call.',
             );
         });

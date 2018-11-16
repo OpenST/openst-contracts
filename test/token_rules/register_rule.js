@@ -23,7 +23,7 @@ contract('TokenRules::registerRule', async () => {
     contract('Negative Tests', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
 
-        it('Reverts if non-organization address calls.', async () => {
+        it('Reverts if non worker address calls.', async () => {
             const {
                 tokenRules,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
@@ -32,16 +32,16 @@ contract('TokenRules::registerRule', async () => {
             const ruleAddress = accountProvider.get();
             const ruleAbi = `Rule abi of ${ruleName}`;
 
-            const nonOrganizationAddress = accountProvider.get();
+            const nonWorkerAddress = accountProvider.get();
 
             await utils.expectRevert(
                 tokenRules.registerRule(
                     ruleName,
                     ruleAddress,
                     ruleAbi,
-                    { from: nonOrganizationAddress },
+                    { from: nonWorkerAddress },
                 ),
-                'Should revert as non-organization address calls.',
+                'Should revert as non worker address calls.',
                 'Only whitelisted worker is allowed to call.',
             );
         });

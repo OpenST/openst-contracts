@@ -72,7 +72,7 @@ async function happyPath(accountProvider) {
         ruleAddress0,
         transfersTo,
         transfersAmount,
-        worker
+        worker,
     };
 }
 

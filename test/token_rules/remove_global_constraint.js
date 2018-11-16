@@ -43,20 +43,20 @@ contract('TokenRules::removeGlobalConstraint', async () => {
     contract('Negative Tests', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
 
-        it('Reverts if non-organization address is removing constraint.', async () => {
+        it('Reverts if non worker address is removing constraint.', async () => {
             const {
                 tokenRules,
-                constraintAddress0
+                constraintAddress0,
             } = await prepareTokenRules(accountProvider);
 
-            const nonOrganizationAddress = accountProvider.get();
+            const nonWorkerAddress = accountProvider.get();
 
             await utils.expectRevert(
                 tokenRules.removeGlobalConstraint(
                     constraintAddress0,
-                    { from: nonOrganizationAddress },
+                    { from: nonWorkerAddress },
                 ),
-                'Should revert as non organization address calls.',
+                'Should revert as non worker address calls.',
                 'Only whitelisted worker is allowed to call.',
             );
         });
@@ -64,7 +64,7 @@ contract('TokenRules::removeGlobalConstraint', async () => {
         it('Reverts if constraint to remove does not exist.', async () => {
             const {
                 tokenRules,
-                worker
+                worker,
             } = await prepareTokenRules(accountProvider);
 
             const nonExistingConstraintAddress = accountProvider.get();
@@ -87,7 +87,7 @@ contract('TokenRules::removeGlobalConstraint', async () => {
             const {
                 tokenRules,
                 constraintAddress0,
-                worker
+                worker,
             } = await prepareTokenRules(accountProvider);
 
             const transactionResponse = await tokenRules.removeGlobalConstraint(

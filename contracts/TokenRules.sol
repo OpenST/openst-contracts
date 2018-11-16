@@ -138,7 +138,7 @@ contract TokenRules is Organized {
 
     /**
      * @dev Function requires:
-     *          - Only Worker can call.
+     *          - Only worker can call.
      *          - Rule name is not empty.
      *          - Rule with the specified name does not exist.
      *          - Rule address is not null.
