@@ -22,16 +22,6 @@ contract('TokenRules::constructor', async () => {
     contract('Negative Tests', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
 
-        it('Reverts if organization address is null.', async () => {
-            const organization = utils.NULL_ADDRESS;
-            const token = accountProvider.get();
-
-            await utils.expectRevert(
-                TokenRules.new(organization, token),
-                'Should revert as organization address is null.',
-                'Organization contract address is null.',
-            );
-        });
         it('Reverts if token is null.', async () => {
             const owner = accountProvider.get();
             const organization = await Organization.new({from: owner});
@@ -54,11 +44,6 @@ contract('TokenRules::constructor', async () => {
             const token = accountProvider.get();
 
             const tokenRules = await TokenRules.new(organization.address, token);
-
-            assert.strictEqual(
-                (await tokenRules.organization.call()),
-                organization.address,
-            );
 
             assert.strictEqual(
                 (await tokenRules.token.call()),
