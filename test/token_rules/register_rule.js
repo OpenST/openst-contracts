@@ -23,7 +23,7 @@ contract('TokenRules::registerRule', async () => {
     contract('Negative Tests', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
 
-        it('Reverts if non-organization address calls.', async () => {
+        it('Reverts if non worker address calls.', async () => {
             const {
                 tokenRules,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
@@ -32,23 +32,23 @@ contract('TokenRules::registerRule', async () => {
             const ruleAddress = accountProvider.get();
             const ruleAbi = `Rule abi of ${ruleName}`;
 
-            const nonOrganizationAddress = accountProvider.get();
+            const nonWorkerAddress = accountProvider.get();
 
             await utils.expectRevert(
                 tokenRules.registerRule(
                     ruleName,
                     ruleAddress,
                     ruleAbi,
-                    { from: nonOrganizationAddress },
+                    { from: nonWorkerAddress },
                 ),
-                'Should revert as non-organization address calls.',
-                'Only organization is allowed to call.',
+                'Should revert as non worker address calls.',
+                'Only whitelisted worker is allowed to call.',
             );
         });
         it('Reverts if rule name is empty.', async () => {
             const {
                 tokenRules,
-                organizationAddress,
+                worker,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const ruleName = '';
@@ -60,7 +60,7 @@ contract('TokenRules::registerRule', async () => {
                     ruleName,
                     ruleAddress,
                     ruleAbi,
-                    { from: organizationAddress },
+                    { from: worker },
                 ),
                 'Should revert as rule name is empty.',
                 'Rule name is empty.',
@@ -69,7 +69,7 @@ contract('TokenRules::registerRule', async () => {
         it('Reverts if a rule with the same name already registered.', async () => {
             const {
                 tokenRules,
-                organizationAddress,
+                worker,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const aRuleName = 'A';
@@ -84,7 +84,7 @@ contract('TokenRules::registerRule', async () => {
                 aRuleName,
                 aRuleAddress,
                 aRuleAbi,
-                { from: organizationAddress },
+                { from: worker },
             );
 
             await utils.expectRevert(
@@ -92,7 +92,7 @@ contract('TokenRules::registerRule', async () => {
                     bRuleName,
                     bRuleAddress,
                     bRuleAbi,
-                    { from: organizationAddress },
+                    { from: worker },
                 ),
                 'Should revert as a rule with the same name already registered.',
                 'Rule with the specified name already exists.',
@@ -101,7 +101,7 @@ contract('TokenRules::registerRule', async () => {
         it('Reverts if rule address is null.', async () => {
             const {
                 tokenRules,
-                organizationAddress,
+                worker,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const ruleName = 'A';
@@ -113,7 +113,7 @@ contract('TokenRules::registerRule', async () => {
                     ruleName,
                     ruleAddress,
                     ruleAbi,
-                    { from: organizationAddress },
+                    { from: worker },
                 ),
                 'Should revert as rule address is null.',
                 'Rule address is null.',
@@ -123,7 +123,7 @@ contract('TokenRules::registerRule', async () => {
         it('Reverts if rule with the same address already registered.', async () => {
             const {
                 tokenRules,
-                organizationAddress,
+                worker,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const aRuleName = 'A';
@@ -138,7 +138,7 @@ contract('TokenRules::registerRule', async () => {
                 aRuleName,
                 aRuleAddress,
                 aRuleAbi,
-                { from: organizationAddress },
+                { from: worker },
             );
 
             await utils.expectRevert(
@@ -146,7 +146,7 @@ contract('TokenRules::registerRule', async () => {
                     bRuleName,
                     bRuleAddress,
                     bRuleAbi,
-                    { from: organizationAddress },
+                    { from: worker },
                 ),
                 'Should revert as rule with the specified address already registered.',
                 'Rule with the specified address already exists.',
@@ -156,7 +156,7 @@ contract('TokenRules::registerRule', async () => {
         it('Reverts if rule ABI is empty.', async () => {
             const {
                 tokenRules,
-                organizationAddress,
+                worker,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const ruleName = 'A';
@@ -168,7 +168,7 @@ contract('TokenRules::registerRule', async () => {
                     ruleName,
                     ruleAddress,
                     ruleAbi,
-                    { from: organizationAddress },
+                    { from: worker },
                 ),
                 'Should revert as rule ABI is empty.',
                 'Rule ABI is empty.',
@@ -182,7 +182,7 @@ contract('TokenRules::registerRule', async () => {
         it('Emits RuleRegistered event on registering rule.', async () => {
             const {
                 tokenRules,
-                organizationAddress,
+                worker,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const aRuleName = 'A';
@@ -193,7 +193,7 @@ contract('TokenRules::registerRule', async () => {
                 aRuleName,
                 aRuleAddress,
                 aRuleAbi,
-                { from: organizationAddress },
+                { from: worker },
             );
 
             const events = Event.decodeTransactionResponse(
@@ -222,7 +222,7 @@ contract('TokenRules::registerRule', async () => {
         it('Checks that rule exists after registration.', async () => {
             const {
                 tokenRules,
-                organizationAddress,
+                worker,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const aRuleName = 'A';
@@ -233,7 +233,7 @@ contract('TokenRules::registerRule', async () => {
                 aRuleName,
                 aRuleAddress,
                 aRuleAbi,
-                { from: organizationAddress },
+                { from: worker },
             );
 
             const ruleIndexByAddress = await tokenRules.rulesByAddress.call(

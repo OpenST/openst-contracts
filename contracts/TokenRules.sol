@@ -17,6 +17,7 @@ pragma solidity ^0.4.23;
 import "./GlobalConstraintInterface.sol";
 import "./SafeMath.sol";
 import "./EIP20TokenInterface.sol";
+import "./Organized.sol";
 
 
 /**
@@ -37,7 +38,7 @@ import "./EIP20TokenInterface.sol";
  *      function only once. This allows global constraints to be checked
  *      on complete list of transfers.
  */
-contract TokenRules {
+contract TokenRules is Organized {
 
      /* Usings */
 
@@ -91,7 +92,6 @@ contract TokenRules {
     /** Contains a list of all registered global constraints. */
     address[] public globalConstraints;
 
-    address public organization;
     EIP20TokenInterface public token;
 
     /**
@@ -105,13 +105,6 @@ contract TokenRules {
 
     /* Modifiers */
 
-    modifier onlyOrganization {
-        require(
-            organization == msg.sender,
-            "Only organization is allowed to call."
-        );
-        _;
-    }
 
     modifier onlyRule {
         require(
@@ -126,19 +119,17 @@ contract TokenRules {
 
     /**
      * @dev Function requires:
-     *          - Organization address is not null.
      *          - Token address is not null.
      */
     constructor(
-        address _organization,
+        OrganizationIsWorkerInterface _organization,
         EIP20TokenInterface _token
     )
+        Organized(_organization)
         public
     {
-        require(_organization != address(0), "Organization address is null.");
         require(_token != address(0), "Token address is null.");
 
-        organization = _organization;
         token = _token;
     }
 
@@ -147,7 +138,7 @@ contract TokenRules {
 
     /**
      * @dev Function requires:
-     *          - Only organization can call.
+     *          - Only worker can call.
      *          - Rule name is not empty.
      *          - Rule with the specified name does not exist.
      *          - Rule address is not null.
@@ -164,7 +155,7 @@ contract TokenRules {
         string _ruleAbi
     )
         external
-        onlyOrganization
+        onlyWorker
     {
         require(bytes(_ruleName).length != 0, "Rule name is empty.");
         require(_ruleAddress != address(0), "Rule address is null.");
@@ -269,7 +260,7 @@ contract TokenRules {
      *         executing transfers.
      *
      * @dev Function requires:
-     *          - Only organization can call.
+     *          - Only worker can call.
      *          - Constraint address is not null.
      *          - Constraint is not registered.
      */
@@ -277,7 +268,7 @@ contract TokenRules {
         address _globalConstraintAddress
     )
         external
-        onlyOrganization
+        onlyWorker
     {
         require(
             _globalConstraintAddress != address(0),
@@ -298,14 +289,14 @@ contract TokenRules {
 
     /**
      * @dev Function requires:
-     *          - Only organization can call.
+     *          - Only worker can call.
      *          - Constraint exists.
      */
     function removeGlobalConstraint(
         address _globalConstraintAddress
     )
         external
-        onlyOrganization
+        onlyWorker
     {
         uint256 index = findGlobalConstraintIndex(_globalConstraintAddress);
 
