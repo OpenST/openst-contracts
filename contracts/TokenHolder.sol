@@ -15,10 +15,10 @@ pragma solidity ^0.4.23;
 // limitations under the License.
 
 import "./SafeMath.sol";
-import "./UtilityTokenInterface.sol";
+import "./EIP20TokenInterface.sol";
+import "./UtilityTokenRequiredInterface.sol";
 import "./MultiSigWallet.sol";
 import "./TokenRules.sol";
-import "./CoGatewayRedeemInterface.sol";
 
 
 /**
@@ -120,7 +120,7 @@ contract TokenHolder is MultiSigWallet {
 
     /* Storage */
 
-    UtilityTokenInterface public token;
+    EIP20TokenInterface public token;
 
     mapping(address /* key */ => EphemeralKeyData) public ephemeralKeys;
 
@@ -162,16 +162,16 @@ contract TokenHolder is MultiSigWallet {
 
     /**
      * @dev Constructor requires:
-     *          - Utility token address is not null.
+     *          - EIP20 token address is not null.
      *          - Token rules address is not null.
      *
-     * @param _token Utility token contract address deployed for an economy.
+     * @param _token EIP20 token contract address deployed for an economy.
      * @param _tokenRules Token rules contract address.
      * @param _wallets array of wallet addresses.
      * @param _required No of requirements for multi sig wallet.
      */
     constructor(
-        UtilityTokenInterface _token,
+        EIP20TokenInterface _token,
         address _tokenRules,
         address[] _wallets,
         uint256 _required
@@ -390,7 +390,7 @@ contract TokenHolder is MultiSigWallet {
         payable
         returns (bool executionStatus_)
     {
-        address coGateway = token.coGateway();
+        address coGateway = UtilityTokenRequiredInterface(token).coGateway();
 
         bytes memory data = abi.encodeWithSelector(
             COGATEWAY_REVERT_REDEMPTION_CALLPREFIX,
