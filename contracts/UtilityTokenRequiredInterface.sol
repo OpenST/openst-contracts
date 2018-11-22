@@ -15,16 +15,12 @@ pragma solidity ^0.4.23;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "./EIP20TokenInterface.sol";
-
-
 /**
- *  @title UtilityTokenInterface contract.
+ *  @title UtilityTokenRequiredInterface contract.
  *
- *  @notice Provides the interface to utility token contract. The interface
- *          has minimum required functions for bytecode optimizations.
+ *  @notice Provides minimum required function signatures of utility token.
  */
-contract UtilityTokenInterface is EIP20TokenInterface {
+contract UtilityTokenRequiredInterface {
 
     /* Public functions */
 
@@ -33,4 +29,5 @@ contract UtilityTokenInterface is EIP20TokenInterface {
         public
         view
         returns (address);
+
 }

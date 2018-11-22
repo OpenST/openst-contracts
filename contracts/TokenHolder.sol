@@ -15,10 +15,10 @@ pragma solidity ^0.4.23;
 // limitations under the License.
 
 import "./SafeMath.sol";
-import "./UtilityTokenInterface.sol";
+import "./EIP20TokenInterface.sol";
+import "./UtilityTokenRequiredInterface.sol";
 import "./MultiSigWallet.sol";
 import "./TokenRules.sol";
-import "./CoGatewayRedeemInterface.sol";
 
 
 /**
@@ -134,7 +134,7 @@ contract TokenHolder is MultiSigWallet {
 
     /* Storage */
 
-    UtilityTokenInterface public token;
+    EIP20TokenInterface public token;
 
     mapping(address /* key */ => EphemeralKeyData) public ephemeralKeys;
 
@@ -176,16 +176,16 @@ contract TokenHolder is MultiSigWallet {
 
     /**
      * @dev Constructor requires:
-     *          - Utility token address is not null.
+     *          - EIP20 token address is not null.
      *          - Token rules address is not null.
      *
-     * @param _token Utility token contract address deployed for an economy.
+     * @param _token EIP20 token contract address deployed for an economy.
      * @param _tokenRules Token rules contract address.
      * @param _wallets array of wallet addresses.
      * @param _required No of requirements for multi sig wallet.
      */
     constructor(
-        UtilityTokenInterface _token,
+        EIP20TokenInterface _token,
         address _tokenRules,
         address[] _wallets,
         uint256 _required
@@ -380,8 +380,7 @@ contract TokenHolder is MultiSigWallet {
      *
      *      HashLock and facilitator is not part of data which ephemeral key
      *      is signing. User signs the data and facilitator calls redeem.
-     *      Facilitator from an open calls redeem should provide
-     *      his HashLock.
+     *      Facilitator calling redeem should provide his HashLock.
      *
      *      In order to redeem, tokenholder needs to approve CoGateway
      *      contract for the redemption limit. Redeem is a payable
@@ -397,7 +396,7 @@ contract TokenHolder is MultiSigWallet {
      *
      *      CoGateway contract address is needed for redeem functionality.
      *      It's fetched from UtilityToken. As per requirement TokenHolder
-     *      should be able to communicate with EIP20.
+     *      should not be tightly integrated with utility token.
      *
      * @param _beneficiary The address in the origin chain where the tokens
      *                     will be released.
@@ -432,7 +431,7 @@ contract TokenHolder is MultiSigWallet {
         payable
         returns (bool executionStatus_)
     {
-        address coGateway = token.coGateway();
+        address coGateway = UtilityTokenRequiredInterface(token).coGateway();
 
         address ephemeralKey = verifyRedeemExecutableTransaction(
             _amount,
@@ -452,7 +451,7 @@ contract TokenHolder is MultiSigWallet {
             "Amount to redeem should be lte to spending limit."
         );
 
-        token.approve(coGateway, getSpendingLimit(ephemeralKey));
+        approveAmount(coGateway, _amount);
 
         bytes memory data = getCoGatewayRedeemExecutableData(
             _amount,
@@ -466,7 +465,7 @@ contract TokenHolder is MultiSigWallet {
         // solium-disable-next-line security/no-call-value
         executionStatus_ = coGateway.call.value(msg.value)(data);
 
-        token.approve(coGateway, 0);
+        approveAmount(coGateway, 0);
 
         emit RedeemInitiated(
             _beneficiary,
@@ -664,7 +663,7 @@ contract TokenHolder is MultiSigWallet {
         );
     }
 
-    /** @notice Returns spending limit of an ephemeral key.*/
+    /** @notice Returns spending limit of an ephemeral key. */
     function getSpendingLimit(address ephemeralKey)
         private
         view
@@ -672,4 +671,14 @@ contract TokenHolder is MultiSigWallet {
     {
         return ephemeralKeys[ephemeralKey].spendingLimit;
     }
+
+    function approveAmount(
+        address _spender,
+        uint256 _amount
+    )
+        private
+    {
+        token.approve(_spender, _amount);
+    }
+
 }
