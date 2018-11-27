@@ -12,6 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @dev  This is the integration test with global constraint.
+ *        We register a global constraint called 'LimitTransferGlobalConstraint'.
+ *        It checks for sum of all the tokens to be transferred is not more than
+ *        the set limit.
+ *        In the test, we have set the limit as 200 tokens in LimitTransferGlobalConstraint
+ *        contract.But,we try to transfer 250 tokens in a transaction.
+ */
 const EthUtils = require('ethereumjs-util'),
   utils = require('../../test_lib/utils'),
   AccountsProvider = utils.AccountProvider,
@@ -38,7 +45,7 @@ contract('TokenHolder::executeRule', async (accounts) => {
 
   describe('ExecuteRule integration test', async () => {
 
-    it('Transfer BTs more than global constraint on max tokens to be transferred', async () => {
+    it('Should fail while transferring BTs more than global constraint on max tokens to be transferred', async () => {
 
       accountProvider = new AccountsProvider(accounts);
 
@@ -128,6 +135,9 @@ contract('TokenHolder::executeRule', async (accounts) => {
       // this test might fail and we should use false (as intended)
       assert.equal(events[0].args['_status'], null);
 
+      // 'to' address and tokenholder has 0 and 500 tokens even after executeRule
+      // execution status is false as we tried to transfer more than the transfer
+      // limit set in LimitTransferGlobalConstraint global constraint.
       assert.equal(
         (await eip20TokenMock.balanceOf(to)),
         0,
