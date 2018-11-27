@@ -24,7 +24,7 @@ import "../../../GlobalConstraintInterface.sol";
  *         test. It implements GlobalConstraintInterface. It checks that sum of
  *         all tokens should not be more than 'transferLimit'.
  */
-contract LimitTransferGlobalConstraint is GlobalConstraintInterface{
+contract LimitTransferGlobalConstraint is GlobalConstraintInterface {
 
     /* Storage */
 
@@ -34,7 +34,7 @@ contract LimitTransferGlobalConstraint is GlobalConstraintInterface{
 
     /* Special Functions */
 
-    constructor(uint256 _transferLimit){
+    constructor(uint256 _transferLimit) {
         transferLimit = _transferLimit;
     }
 
@@ -48,7 +48,7 @@ contract LimitTransferGlobalConstraint is GlobalConstraintInterface{
      * @param _from Address from which BTs are to be transferred.
      * @param _transfersTo Array of addresses to which BTs are to be transferred.
      * @param _transfersAmount Array of uint256 which specifies the number of
-     *        BTs to be transferred to each address.
+     *        BTs to be transferred to each respective '_transfersTo' address.
      *
      * @return True if sum of all BTs to be transferred is less than allowed
      *         limit.
@@ -60,14 +60,13 @@ contract LimitTransferGlobalConstraint is GlobalConstraintInterface{
     )
         external
         view
-        returns
-        (bool)
+        returns (bool)
     {
-        uint totalAmount = 0;
+        uint256 totalAmount = 0;
         bool isMoreThanTransferLimit;
-        for(uint i = 0;i < _transfersAmount.length;  i++){
+        for(uint256 i = 0;i < _transfersAmount.length;  i++) {
             totalAmount = totalAmount + _transfersAmount[i];
-            if(totalAmount > transferLimit){
+            if(totalAmount > transferLimit) {
                 isMoreThanTransferLimit = true;
                 break;
             }
@@ -77,3 +76,4 @@ contract LimitTransferGlobalConstraint is GlobalConstraintInterface{
     }
 
 }
+
