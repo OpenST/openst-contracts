@@ -99,7 +99,6 @@ module.exports.transferRule = async (tokenRules) => {
 
 };
 
-
 /**
  * It registers worker with expirationHeight and returns an instance of
  * Organization.

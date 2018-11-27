@@ -93,3 +93,49 @@ module.exports.AccountProvider = class AccountProvider {
         return account;
     }
 };
+
+const receipts = [];
+
+module.exports.logResponse = (response, description) => {
+  receipts.push({
+    receipt     : response.receipt,
+    description : description,
+    response    : response
+  });
+}
+
+module.exports.logReceipt = (receipt, description) => {
+  receipts.push({
+    receipt     : receipt,
+    description : description,
+    response    : null
+  })
+}
+
+module.exports.logTransaction = async (hash, description) => {
+  const receipt = await web3.eth.getTransactionReceipt(hash)
+  await this.logReceipt(receipt, description)
+}
+
+module.exports.printGasStatistics = () => {
+  var totalGasUsed = 0
+
+  console.log("      -----------------------------------------------------");
+  console.log("      Report gas usage\n");
+
+  for (i = 0; i < receipts.length; i++) {
+    const entry = receipts[i]
+
+    totalGasUsed += entry.receipt.gasUsed
+
+    console.log("      " + entry.description.padEnd(45) + entry.receipt.gasUsed)
+  }
+
+  console.log("      -----------------------------------------------------")
+  console.log("      " + "Total gas logged: ".padEnd(45) + totalGasUsed + "\n")
+}
+
+module.exports.clearReceipts = () => {
+  receipts.splice( 0, receipts.length );
+}
+
