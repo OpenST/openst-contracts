@@ -63,16 +63,16 @@ contract LimitTransferGlobalConstraint is GlobalConstraintInterface {
         returns (bool)
     {
         uint256 totalAmount = 0;
-        bool isMoreThanTransferLimit;
+        bool isTransferWithinLimit;
         for(uint256 i = 0;i < _transfersAmount.length;  i++) {
             totalAmount = totalAmount + _transfersAmount[i];
-            if(totalAmount > transferLimit) {
-                isMoreThanTransferLimit = true;
+            if(totalAmount <= transferLimit) {
+                isTransferWithinLimit = true;
                 break;
             }
         }
 
-        return (!(isMoreThanTransferLimit));
+        return isTransferWithinLimit;
     }
 
 }
