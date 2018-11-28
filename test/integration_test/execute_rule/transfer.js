@@ -12,6 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @dev  This is the integration test to perform BT transfers using transfer
+ *        rule contract.
+ *
+ *        Following steps are performed in the test :-
+ *
+ *        - EIP20TokenMock contract is deployed.
+ *        - Organization contract is deployed and worker is set.
+ *        - TokenRules contract is deployed.
+ *         TransferRule contract is deployed and it is registered in TokenRules.
+ *        - TokenHolder contract is deployed by providing the wallets and
+ *           required confirmations.
+ *        - Validation of deployed contract and its parameters are done.
+ *           Below verifications are done:
+ *            - TransferRule registration in TokenRules.
+ *            - TokenRules address and EIP20TokenMock address in TH.
+ *        - Using EIP20TokenMock's setBalance method,tokens are provided to TH.
+ *        - Authorization and Verification of Ephemeral key is done.
+ *        - We generate executable data for TransferRule contract's transferFrom
+ *           method.
+ *        - Relayer calls executeRule method of tokenholder contract.
+ *           After it's execution below verifications are done:
+ *            - RuleExecuted event.
+ *            - tokenholder balance.
+ *            - 'to' address balance.
+ */
 const EthUtils = require('ethereumjs-util'),
   utils = require('../../test_lib/utils'),
   AccountsProvider = utils.AccountProvider,
