@@ -270,7 +270,6 @@ contract('TokenHolder::redeem', async (accounts) => {
 
       await token.setCoGateway(mockRule.address);
 
-
       await Utils.expectRevert(
          tokenHolder.redeem(
           amount,
@@ -365,14 +364,9 @@ contract('TokenHolder::redeem', async (accounts) => {
         { from: registeredWallet0 },
       );
 
-      const keyData = await tokenHolder.ephemeralKeys(
-        ephemeralKeyAddress1,
-      );
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
 
-      assert.isOk(
-        keyData.status.eqn(2),
-        'Ephemeral key should be revoked.',
-      );
+      assert.strictEqual(keyData.status.cmp(new BN(2)), 0);
 
       const {
         mockRule,
@@ -516,13 +510,79 @@ contract('TokenHolder::redeem', async (accounts) => {
       );
     });
 
+    it('Reverts if same signature/nonce is used to call redeem.', async () => {
+      const {
+        tokenHolder
+      } = await setupTokenHolder(
+        accountProvider,
+        ephemeralKeyAddress1,
+        spendingLimit,
+        deltaExpirationHeight,
+      );
+
+      const {
+        mockRule,
+        rsv,
+      } = await prepareRedeemPayableRule(
+        accountProvider,
+        amount,
+        beneficiary,
+        facilitator,
+        gasPrice,
+        gasLimit,
+        redeemerNonce,
+        tokenHolder,
+        nonce,
+        ephemeralPrivateKey1,
+      );
+
+      await token.setCoGateway(mockRule.address);
+
+      const payableValue = 100;
+      await tokenHolder.redeem(
+        amount,
+        beneficiary,
+        gasPrice,
+        gasLimit,
+        redeemerNonce,
+        hashLock,
+        nonce,
+        rsv.v,
+        EthUtils.bufferToHex(rsv.r),
+        EthUtils.bufferToHex(rsv.s),
+        {
+          value: payableValue,
+          from: facilitator,
+        }
+      );
+
+      await Utils.expectRevert(
+        tokenHolder.redeem(
+          amount,
+          beneficiary,
+          gasPrice,
+          gasLimit,
+          redeemerNonce,
+          hashLock,
+          nonce,
+          rsv.v,
+          EthUtils.bufferToHex(rsv.r),
+          EthUtils.bufferToHex(rsv.s),
+          {
+            value: payableValue,
+            from: facilitator,
+          }
+        ),
+        'Should revert as same signature and nonce used to make transaction.',
+        'The next nonce is not provided.'
+      );
+    });
+
   });
 
   describe('Positive Tests', async () => {
-    const accountProvider = new AccountProvider(accounts);
-
-    it('Checks that redeem payable rule is successfully executed.', async () => {
-      const spendingLimit = 50,
+    const accountProvider = new AccountProvider(accounts),
+      spendingLimit = 50,
       deltaExpirationHeight = 100,
       amount = 10,
       beneficiary = accountProvider.get(),
@@ -531,6 +591,8 @@ contract('TokenHolder::redeem', async (accounts) => {
       gasLimit = 10,
       redeemerNonce = 1,
       hashLock = web3.utils.soliditySha3('hl');
+
+    it('Checks that redeem payable rule is successfully executed.', async () => {
 
       const {
               tokenHolder,
@@ -578,12 +640,20 @@ contract('TokenHolder::redeem', async (accounts) => {
         }
       );
 
-      assert.equal(redeemReceipt.receipt.status, true);
+      assert.strictEqual(redeemReceipt.receipt.status, true);
 
-      assert.isOk(
-        (await mockRule.receivedPayableAmount.call()).eqn(payableValue),
+      const updatedPayableValue = await mockRule.receivedPayableAmount.call();
+
+      assert.strictEqual(updatedPayableValue.cmp(new BN(payableValue)), 0);
+
+      const allowance = await (token.allowance.call(
+        tokenHolder.address,
+        mockRule.address)
       );
+
+      assert.strictEqual(allowance.cmp(new BN(0)), 0);
     });
+
   });
 
   describe('Events', async () => {
@@ -630,23 +700,6 @@ contract('TokenHolder::redeem', async (accounts) => {
 
       const payableValue = 100;
 
-      const executionStatus = await tokenHolder.redeem.call(
-        amount,
-        beneficiary,
-        gasPrice,
-        gasLimit,
-        redeemerNonce,
-        hashLock,
-        nonce,
-        rsv.v,
-        EthUtils.bufferToHex(rsv.r),
-        EthUtils.bufferToHex(rsv.s),
-        {
-          value: payableValue,
-          from: facilitator,
-        }
-      );
-
       let redeemReceipt = await tokenHolder.redeem(
         amount,
         beneficiary,
@@ -664,14 +717,9 @@ contract('TokenHolder::redeem', async (accounts) => {
         }
       );
 
-      const events = Event.decodeTransactionResponse(
-        redeemReceipt,
-      );
+      const events = Event.decodeTransactionResponse(redeemReceipt);
 
-      assert.strictEqual(
-        events.length,
-        1,
-      );
+      assert.strictEqual(events.length, 1);
 
       Event.assertEqual(events[0], {
         name: 'RedeemInitiated',
@@ -680,13 +728,13 @@ contract('TokenHolder::redeem', async (accounts) => {
           _amount: new BN(amount),
           _redeemerNonce: new BN(redeemerNonce),
           _ephemeralKey: ephemeralKeyAddress1,
-          _executionStatus: executionStatus
+          _executionStatus: true
         },
       });
 
     });
 
-    it('Verifies execution status is false when msg.value is 0.', async () => {
+    it('Verifies execution status is false when CoGateway execution fails..', async () => {
       const spendingLimit = 50,
         deltaExpirationHeight = 100,
         amount = 10,
@@ -725,25 +773,6 @@ contract('TokenHolder::redeem', async (accounts) => {
 
       await token.setCoGateway(mockRule.address);
 
-      const payableValue = 100;
-
-      const executionStatus = await tokenHolder.redeem.call(
-        amount,
-        beneficiary,
-        gasPrice,
-        gasLimit,
-        redeemerNonce,
-        hashLock,
-        nonce,
-        rsv.v,
-        EthUtils.bufferToHex(rsv.r),
-        EthUtils.bufferToHex(rsv.s),
-        {
-          value: payableValue,
-          from: facilitator,
-        }
-      );
-
       let redeemReceipt = await tokenHolder.redeem(
         amount,
         beneficiary,
@@ -761,14 +790,9 @@ contract('TokenHolder::redeem', async (accounts) => {
         }
       );
 
-      const events = Event.decodeTransactionResponse(
-        redeemReceipt,
-      );
+      const events = Event.decodeTransactionResponse(redeemReceipt);
 
-      assert.strictEqual(
-        events.length,
-        1,
-      );
+      assert.strictEqual(events.length, 1);
 
       Event.assertEqual(events[0], {
         name: 'RedeemInitiated',
