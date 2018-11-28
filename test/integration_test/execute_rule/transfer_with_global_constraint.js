@@ -13,11 +13,30 @@
 // limitations under the License.
 
 /** @dev  This is the integration test with global constraint.
- *        We register a global constraint called 'LimitTransferGlobalConstraint'.
- *        It checks for sum of all the tokens to be transferred is not more than
- *        the set limit.
+ *        Global constraint restricts sum of all the tokens to be transferred
+ *        is not more than the set limit.
  *        In the test, we have set the limit as 200 tokens in LimitTransferGlobalConstraint
  *        contract.But,we try to transfer 250 tokens in a transaction.
+ *
+ *        Following steps are performed in the test :-
+ *
+ *        - EIP20TokenMock contract is deployed.
+ *        - Organization contract is deployed and worker is set.
+ *        - TokenRules contract is deployed.
+ *         TransferRule contract is deployed and it is registered in TokenRules.
+ *        - TokenHolder contract is deployed by providing the wallets and
+ *           required confirmations.
+ *        - LimitTransferGlobalConstraint contract is deployed. It is registered
+ *          in the TokenRules as global constraint. The limit per transaction is
+ *          200 tokens.
+ *        - Using EIP20TokenMock's setBalance method,tokens are provided to TH.
+ *        - We generate executable data for TransferRule contract's transferFrom
+ *           method.
+ *        - Relayer calls executeRule method of tokenholder contract.
+ *           After it's execution below verifications are done:
+ *            - RuleExecuted event.
+ *            - tokenholder balance.
+ *            - 'to' address balance.
  */
 const EthUtils = require('ethereumjs-util'),
   utils = require('../../test_lib/utils'),
@@ -159,7 +178,4 @@ contract('TokenHolder::executeRule', async (accounts) => {
   });
 
 });
-
-
-
 
