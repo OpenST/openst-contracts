@@ -12,6 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @dev  This is the integration test with non-registered rules.
+
+ *        Following steps are performed in the test :-
+ *
+ *        - EIP20TokenMock contract is deployed.
+ *        - Organization contract is deployed and worker is set.
+ *        - TokenRules contract is deployed.
+ *          TransferRule contract is deployed and it is registered in TokenRules.
+ *        - TokenHolder contract is deployed by providing the wallets and
+ *           required confirmations.
+ *        - Using EIP20TokenMock's setBalance method,tokens are provided to TH.
+ *        - A contract i.e. TransferRule is deployed and is not registered in
+ *          TokenRules
+ *        - We generate executable data for TransferRule contract's(which was not
+ *          registered in TokenRules)transferFrom method.
+ *        - Relayer calls executeRule method of tokenholder contract.
+ *           After it's execution below verifications are done:
+ *            - RuleExecuted event.
+ *            - tokenholder balance.
+ *            - 'to' address balance.
+ */
 const EthUtils = require('ethereumjs-util'),
   utils = require('../../test_lib/utils'),
   AccountsProvider = utils.AccountProvider,
@@ -79,6 +100,7 @@ contract('TokenHolder::executeRule', async (accounts) => {
         new BN(amountTransferred),
       );
 
+      // It is not registered in TokenRules.
       transferRule2 = await ExecuteRuleUtils.transferRule(tokenRules.address);
 
       const { rsv } = await ExecuteRuleUtils.getExecuteRuleExTxData(
@@ -101,7 +123,7 @@ contract('TokenHolder::executeRule', async (accounts) => {
         totalBalance,
       );
 
-      let transactionResponse = await tokenHolder.executeRule(
+      const transactionResponse = await tokenHolder.executeRule(
         transferRule2.address,
         transferFromExecutable,
         (currentNonce.toNumber() + 1),
