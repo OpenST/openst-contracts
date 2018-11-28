@@ -15,8 +15,25 @@
 /**
  * @dev This is the integration test for failing the executeRule when tokenholder
  *      has insufficient balance.
- *      In the tests,tokenholder address has 200 BTs. But,transfer of 250 tokens
- *      is initiated. It will fail as tokenholder doesn't have 250 tokens.
+ *      In the tests,TH has 200 BTs. But,transfer of 250 tokens
+ *      is initiated. It will fail as TH doesn't have 250 tokens.
+ *
+ *        Following steps are performed in the test :-
+ *
+ *        - EIP20TokenMock contract is deployed.
+ *        - Organization contract is deployed and worker is set.
+ *        - TokenRules contract is deployed.
+ *         TransferRule contract is deployed and it is registered in TokenRules.
+ *        - TokenHolder contract is deployed by providing the wallets and
+ *           required confirmations.
+ *        - Using EIP20TokenMock's setBalance method,tokens are provided to TH.
+ *        - We generate executable data for TransferRule contract's transferFrom
+ *           method.
+ *        - Relayer calls executeRule method of tokenholder contract.
+ *           After it's execution below verifications are done:
+ *            - RuleExecuted event.
+ *            - tokenholder balance.
+ *            - 'to' address balance.
  */
 const EthUtils = require('ethereumjs-util'),
   utils = require('../../test_lib/utils'),
@@ -96,7 +113,7 @@ contract('TokenHolder::executeRule', async (accounts) => {
         ephemeralPrivateKey1,
       );
 
-      let transactionResponse = await tokenHolder.executeRule(
+      const transactionResponse = await tokenHolder.executeRule(
         transferRule.address,
         transferFromExecutable,
         (currentNonce.toNumber() + 1),
