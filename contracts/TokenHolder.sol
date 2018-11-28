@@ -377,7 +377,8 @@ contract TokenHolder is MultiSigWallet {
      * @param _r R of the signature.
      * @param _s S of the signature.
      *
-     * @return executionStatus_ which is bool status of coGateway.revertRedemption.
+     * @return executionStatus_ which is bool execution status of
+     *         coGateway.revertRedemption.
      */
     function revertRedemption(
         bytes32 _redeemMessageHash,

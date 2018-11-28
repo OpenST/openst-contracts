@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+const BN = require('bn.js');
 const EthUtils = require('ethereumjs-util');
 const web3 = require('../test_lib/web3.js');
 const Utils = require('../test_lib/utils.js');
@@ -187,8 +188,9 @@ async function setupTokenHolder(
 contract('TokenHolder::revertRedemption', async (accounts) => {
 
   describe('Negative Tests', async () => {
-    const accountProvider = new AccountProvider(accounts);
-    const spendingLimit = 50,
+
+    const accountProvider = new AccountProvider(accounts),
+      spendingLimit = 50,
       deltaExpirationHeight = 100,
       payableValue = 100,
       facilitator = accountProvider.get(),
@@ -218,7 +220,6 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
       );
 
       await token.setCoGateway(mockRule.address);
-
 
       await Utils.expectRevert(
         tokenHolder.revertRedemption(
@@ -283,7 +284,8 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
 
     });
 
-    it('Reverts if transaction signed with revoked key.', async () => {
+    it('Reverts if transaction signed with a revoked key.', async () => {
+
       const {
         tokenHolder,
         registeredWallet0,
@@ -299,14 +301,9 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         { from: registeredWallet0 },
       );
 
-      const keyData = await tokenHolder.ephemeralKeys(
-        ephemeralKeyAddress1,
-      );
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1,);
 
-      assert.isOk(
-        keyData.status.eqn(2),
-        'Ephemeral key should be revoked.',
-      );
+      assert.strictEqual(keyData.status.cmp(new BN(2)), 0);
 
       const {
         mockRule,
@@ -336,9 +333,11 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         'Should revert as revertRedemption is signed with authorized expired key.',
         'Ephemeral key is not active.'
       );
+
     });
 
     it('Reverts if data is not signed with valid nonce.', async () => {
+
       const {
         tokenHolder
       } = await setupTokenHolder(
@@ -377,18 +376,76 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         'Should revert as data is not signed with valid nonce.',
         'Ephemeral key is not active.'
       );
+
+    });
+
+    it('Reverts if same signature/nonce is used to call redeem.', async () => {
+
+      const {
+        tokenHolder
+      } = await setupTokenHolder(
+        accountProvider,
+        ephemeralKeyAddress1,
+        spendingLimit,
+        deltaExpirationHeight,
+      );
+
+      const {
+        mockRule,
+        rsv,
+      } = await prepareRevertRedemptionPayableRule(
+        accountProvider,
+        redeemMessageHash,
+        tokenHolder,
+        nonce,
+        ephemeralPrivateKey1,
+      );
+
+      await token.setCoGateway(mockRule.address);
+
+      let redeemReceipt = await tokenHolder.revertRedemption(
+        redeemMessageHash,
+        nonce,
+        rsv.v,
+        EthUtils.bufferToHex(rsv.r),
+        EthUtils.bufferToHex(rsv.s),
+        {
+          value: payableValue,
+          from: facilitator,
+        }
+      );
+
+      assert.strictEqual(redeemReceipt.receipt.status, true);
+
+      await Utils.expectRevert(
+        tokenHolder.revertRedemption(
+          redeemMessageHash,
+          nonce,
+          rsv.v,
+          EthUtils.bufferToHex(rsv.r),
+          EthUtils.bufferToHex(rsv.s),
+          {
+            value: payableValue,
+            from: facilitator,
+          }
+        ),
+        'Should revert as data is not signed with valid nonce.',
+        'The next nonce is not provided.'
+      );
+
     });
 
   });
 
   describe('Positive Tests', async () => {
-    const accountProvider = new AccountProvider(accounts);
+
+    const accountProvider = new AccountProvider(accounts),
+      spendingLimit = 50,
+      deltaExpirationHeight = 100,
+      facilitator = accountProvider.get(),
+      redeemMessageHash = web3.utils.soliditySha3('redeemMessageHash');
 
     it('Checks that revertRedemption payable rule is successfully executed.', async () => {
-      const spendingLimit = 50,
-        deltaExpirationHeight = 100,
-        facilitator = accountProvider.get(),
-        redeemMessageHash = web3.utils.soliditySha3('redeemMessageHash');
 
       const {
         tokenHolder,
@@ -426,23 +483,23 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         }
       );
 
-      assert.equal(redeemReceipt.receipt.status, true);
+      assert.strictEqual(redeemReceipt.receipt.status, true);
+      const contractPayableValue = await mockRule.receivedPayableAmount.call();
+      assert.strictEqual(contractPayableValue.cmp(new BN(payableValue)), 0);
 
-      assert.isOk(
-        (await mockRule.receivedPayableAmount.call()).eqn(payableValue),
-      );
     });
 
   });
 
   describe('Events', async () => {
-    const accountProvider = new AccountProvider(accounts);
+
+    const accountProvider = new AccountProvider(accounts),
+      spendingLimit = 50,
+      deltaExpirationHeight = 100,
+      facilitator = accountProvider.get(),
+      redeemMessageHash = web3.utils.soliditySha3('redeemMessageHash');
 
     it('Verifies emitting of RevertRedemptionInitiated event.', async () => {
-      const spendingLimit = 50,
-        deltaExpirationHeight = 100,
-        facilitator = accountProvider.get(),
-        redeemMessageHash = web3.utils.soliditySha3('redeemMessageHash');
 
       const {
         tokenHolder,
@@ -493,14 +550,9 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         }
       );
 
-      const events = Event.decodeTransactionResponse(
-        redeemReceipt,
-      );
+      const events = Event.decodeTransactionResponse(redeemReceipt,);
 
-      assert.strictEqual(
-        events.length,
-        1,
-      );
+      assert.strictEqual(events.length, 1,);
 
       Event.assertEqual(events[0], {
         name: 'RevertRedemptionInitiated',
@@ -513,11 +565,8 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
 
     });
 
-    it('Checks that TH.revertRedemption execution status is false when msg.value is 0.', async () => {
-      const spendingLimit = 50,
-        deltaExpirationHeight = 100,
-        facilitator = accountProvider.get(),
-        redeemMessageHash = web3.utils.soliditySha3('redeemMessageHash');
+    it('Checks that TH.revertRedemption execution status is false when ' +
+      'when CoGateway execution fails.', async () => {
 
       const {
         tokenHolder,
@@ -557,14 +606,9 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
 
       assert.equal(redeemReceipt.receipt.status, true);
 
-      const events = Event.decodeTransactionResponse(
-        redeemReceipt,
-      );
+      const events = Event.decodeTransactionResponse(redeemReceipt,);
 
-      assert.strictEqual(
-        events.length,
-        1,
-      );
+      assert.strictEqual(events.length, 1,);
 
       Event.assertEqual(events[0], {
         name: 'RevertRedemptionInitiated',
