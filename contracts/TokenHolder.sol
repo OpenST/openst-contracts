@@ -398,10 +398,10 @@ contract TokenHolder is MultiSigWallet {
      *      It's fetched from UtilityToken. As per requirement TokenHolder
      *      should not be tightly integrated with utility token.
      *
+     * @param _amount Redeem amount that will be transferred from tokenholder
+     *                account to beneficiary.
      * @param _beneficiary The address in the origin chain where the tokens
      *                     will be released.
-     * @param _amount Redeem amount that will be transferred from tokenholder
-     *                account.
      * @param _gasPrice Gas price that tokenholder is ready to pay to get the
      *                  redemption process done.
      * @param _gasLimit Gas limit that tokenholder is ready to pay.
@@ -447,13 +447,12 @@ contract TokenHolder is MultiSigWallet {
         );
 
         require(
-            _amount <= getSpendingLimit(ephemeralKey),
+            _amount <= ephemeralKeys[ephemeralKey].spendingLimit,
             "Amount to redeem should be lte to spending limit."
         );
 
-        approveAmount(coGateway, _amount);
-
-        bytes memory data = getCoGatewayRedeemExecutableData(
+        executionStatus_ = executeRedeem(
+            coGateway,
             _amount,
             _beneficiary,
             _gasPrice,
@@ -461,11 +460,6 @@ contract TokenHolder is MultiSigWallet {
             _redeemerNonce,
             _hashLock
         );
-
-        // solium-disable-next-line security/no-call-value
-        executionStatus_ = coGateway.call.value(msg.value)(data);
-
-        approveAmount(coGateway, 0);
 
         emit RedeemInitiated(
             _beneficiary,
@@ -602,7 +596,27 @@ contract TokenHolder is MultiSigWallet {
         );
     }
 
-    /** @notice Constructs data for verification of ephemeral key. */
+    /**
+     * @notice Constructs data and performs verification of ephemeral key.
+     *
+     * @param _amount Redeem amount that will be transferred from tokenholder
+     *                account.
+     * @param _beneficiary The address in the origin chain where the tokens
+     *                     will be released.
+     * @param _gasPrice Gas price that tokenholder is ready to pay to get the
+     *                  redemption process done.
+     * @param _gasLimit Gas limit that tokenholder is ready to pay.
+     * @param _redeemerNonce Nonce of the redeemer address.
+     * @param _coGateway CoGateway contract address.
+     * @param _nonce The nonce of an ephemeral key that was used to sign
+     *               the transaction.
+     * @param _v V of the signature.
+     * @param _r R of the signature.
+     * @param _s S of the signature.
+     *
+     * @return ephemeralKey_ which is bool execution status of
+     *         coGateway.redeem.
+     */
     function verifyRedeemExecutableTransaction(
         uint256 _amount,
         address _beneficiary,
@@ -638,8 +652,25 @@ contract TokenHolder is MultiSigWallet {
         );
     }
 
-    /** @notice Constructs coGateway.redeem executable data. */
-    function getCoGatewayRedeemExecutableData(
+    /**
+     * @notice Executes CoGateway redeem after approving amount to CoGateway.
+     *
+     * @param _coGateway CoGateway contract address.
+     * @param _amount Redeem amount that will be transferred from tokenholder
+     *                account.
+     * @param _beneficiary The address in the origin chain where the tokens
+     *                     will be released.
+     * @param _gasPrice Gas price that tokenholder is ready to pay to get the
+     *                  redemption process done.
+     * @param _gasLimit Gas limit that tokenholder is ready to pay.
+     * @param _redeemerNonce Nonce of the redeemer address.
+     * @param _hashLock Hash Lock provided by the facilitator.
+     *
+     * @return executionStatus_ which is bool execution status of
+     *         coGateway.redeem.
+     */
+    function executeRedeem(
+        address _coGateway,
         uint256 _amount,
         address _beneficiary,
         uint256 _gasPrice,
@@ -648,10 +679,11 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _hashLock
     )
         private
-        view
-        returns (bytes memory)
+        returns (bool executionStatus_)
     {
-        return abi.encodeWithSelector(
+        token.approve(_coGateway, _amount);
+
+        bytes memory data = abi.encodeWithSelector(
             COGATEWAY_REDEEM_CALLPREFIX,
             _amount,
             _beneficiary,
@@ -661,24 +693,11 @@ contract TokenHolder is MultiSigWallet {
             _redeemerNonce,
             _hashLock
         );
-    }
 
-    /** @notice Returns spending limit of an ephemeral key. */
-    function getSpendingLimit(address ephemeralKey)
-        private
-        view
-        returns (uint256)
-    {
-        return ephemeralKeys[ephemeralKey].spendingLimit;
-    }
+        // solium-disable-next-line security/no-call-value
+        executionStatus_ = _coGateway.call.value(msg.value)(data);
 
-    function approveAmount(
-        address _spender,
-        uint256 _amount
-    )
-        private
-    {
-        token.approve(_spender, _amount);
+        token.approve(_coGateway, 0);
     }
 
 }

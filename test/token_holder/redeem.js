@@ -623,6 +623,26 @@ contract('TokenHolder::redeem', async (accounts) => {
       await token.setCoGateway(mockRule.address);
 
       const payableValue = 100;
+
+      let returnedExecutionStatus = await tokenHolder.redeem.call(
+        amount,
+        beneficiary,
+        gasPrice,
+        gasLimit,
+        redeemerNonce,
+        hashLock,
+        nonce,
+        rsv.v,
+        EthUtils.bufferToHex(rsv.r),
+        EthUtils.bufferToHex(rsv.s),
+        {
+          value: payableValue,
+          from: facilitator,
+        }
+      );
+
+      assert.strictEqual(returnedExecutionStatus, true);
+
       let redeemReceipt = await tokenHolder.redeem(
         amount,
         beneficiary,
