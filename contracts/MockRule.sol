@@ -66,7 +66,22 @@ contract MockRule {
         receivedPayableAmount = msg.value;
     }
 
-    /** Mocks CoGateway redeem function */
+    /**
+     * @notice Mocks CoGateway redeem function.
+     *
+     * @param _amount Redeem amount that will be transferred form redeemer
+     *                account.
+     * @param _beneficiary The address in the origin chain where the value
+     *                     tok ens will be released.
+     * @param _facilitator Facilitator address.
+     * @param _gasPrice Gas price that redeemer is ready to pay to get the
+     *                  redemption process done.
+     * @param _gasLimit Gas limit that redeemer is ready to pay
+     * @param _nonce Nonce of the redeemer address.
+     * @param _hashLock Hash Lock provided by the facilitator.
+     *
+     * @return messageHash_ which is unique for each request.
+     */
     function redeem(
         uint256 _amount,
         address _beneficiary,
