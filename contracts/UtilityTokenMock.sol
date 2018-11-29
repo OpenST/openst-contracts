@@ -62,7 +62,11 @@ contract UtilityTokenMock is EIP20TokenMock {
 
     /* External functions */
 
-    /** @notice Sets coGateway address. */
+    /**
+     *  @notice Sets CoGateway address.
+     *
+     *  @param _coGateway Address of CoGateway contract to set.
+     */
     function setCoGateway(address _coGateway)
         external
     {

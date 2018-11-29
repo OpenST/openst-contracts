@@ -66,7 +66,15 @@ contract MockRule {
         receivedPayableAmount = msg.value;
     }
 
-    /** Mocks CoGateway revertRedemption function */
+    /**
+     * @notice Mocks CoGateway revertRedemption function.
+     *
+     * @param _messageHash Message hash.
+     *
+     * @return redeemer_ Redeemer address.
+     * @return redeemerNonce_ Redeemer nonce.
+     * @return amount_ Redeem amount.
+     */
     function revertRedemption(
         bytes32 _messageHash
     )
@@ -78,4 +86,5 @@ contract MockRule {
         receivedPayableAmount = msg.value;
         return (_messageHash, true);
     }
+
 }

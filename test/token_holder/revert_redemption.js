@@ -471,6 +471,21 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
       await token.setCoGateway(mockRule.address);
 
       const payableValue = 100;
+
+      let executionStatus = await tokenHolder.revertRedemption.call(
+        redeemMessageHash,
+        nonce,
+        rsv.v,
+        EthUtils.bufferToHex(rsv.r),
+        EthUtils.bufferToHex(rsv.s),
+        {
+          value: payableValue,
+          from: facilitator,
+        }
+      );
+
+      assert.strictEqual(executionStatus, true);
+
       let redeemReceipt = await tokenHolder.revertRedemption(
         redeemMessageHash,
         nonce,
