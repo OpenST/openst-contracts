@@ -23,13 +23,14 @@
  *        - EIP20TokenMock contract is deployed.
  *        - Organization contract is deployed and worker is set.
  *        - TokenRules contract is deployed.
- *         TransferRule contract is deployed and it is registered in TokenRules.
+ *        - TransferRule contract is deployed and it is registered in TokenRules.
  *        - TokenHolder contract is deployed by providing the wallets and
  *           required confirmations.
  *        - LimitTransferGlobalConstraint contract is deployed. It is registered
  *          in the TokenRules as global constraint. The limit per transaction is
- *          200 tokens.
- *        - Using EIP20TokenMock's setBalance method,tokens are provided to TH.
+ *          set to 200 tokens.
+ *        - Verification of added global constraint is done.
+ *        - Using EIP20TokenMock's setBalance method, tokens are provided to TH.
  *        - We generate executable data for TransferRule contract's transferFrom
  *           method.
  *        - Relayer calls executeRule method of tokenholder contract.
@@ -64,10 +65,11 @@ contract('TokenHolder::executeRule', async (accounts) => {
 
   describe('ExecuteRule integration test', async () => {
 
-    it('Should fail while transferring BTs more than global constraint on max tokens to be transferred', async () => {
+    it('Verifies registration of global constraint in token rules', async () => {
 
       accountProvider = new AccountsProvider(accounts);
 
+      // It is object destructuring.
       ( {
         tokenHolder,
         wallet1,
@@ -87,6 +89,15 @@ contract('TokenHolder::executeRule', async (accounts) => {
         limitTransferGlobalConstraint.address,
         { from: worker },
       );
+
+      assert.strictEqual(
+        await tokenRules.globalConstraints(0),
+        limitTransferGlobalConstraint.address,
+      );
+
+    });
+
+    it('Should fail while transferring BTs more than global constraint on max tokens to be transferred', async () => {
 
       await eip20TokenMock.setBalance(tokenHolder.address, totalBalance);
 
@@ -152,24 +163,25 @@ contract('TokenHolder::executeRule', async (accounts) => {
       // We should check against false here, however current version of web3
       // returns null for false values in event log. After updating web3,
       // this test might fail and we should use false (as intended)
-      assert.equal(events[0].args['_status'], null);
+      assert.strictEqual(events[0].args['_status'], null);
 
       // 'to' address and tokenholder has 0 and 500 tokens even after executeRule
       // execution status is false as we tried to transfer more than the transfer
       // limit set in LimitTransferGlobalConstraint global constraint.
-      assert.equal(
-        (await eip20TokenMock.balanceOf(to)),
+      assert.strictEqual(
+        (await eip20TokenMock.balanceOf(to)).cmp(new BN(0)),
         0,
       );
 
-      assert.equal(
-        (await eip20TokenMock.balanceOf(tokenHolder.address)),
-        totalBalance,
+      assert.strictEqual(
+        (await eip20TokenMock.balanceOf(
+          tokenHolder.address)).cmp(new BN(totalBalance)),
+        0,
       );
 
     });
 
-    it('Gas used', async () => {
+    it('Gas used for executeRule', async () => {
 
       utils.printGasStatistics();
 
