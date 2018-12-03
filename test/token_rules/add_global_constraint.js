@@ -21,29 +21,29 @@ contract('TokenRules::addGlobalConstraint', async () => {
     contract('Negative Tests', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
 
-        it('Reverts if non-organization address is adding constraint.', async () => {
+        it('Reverts if non worker address is adding constraint.', async () => {
             const {
                 tokenRules,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const constraintAddress = accountProvider.get();
 
-            const nonOrganizationAddress = accountProvider.get();
+            const nonWorkerAddress = accountProvider.get();
 
             await Utils.expectRevert(
                 tokenRules.addGlobalConstraint(
                     constraintAddress,
-                    { from: nonOrganizationAddress },
+                    { from: nonWorkerAddress },
                 ),
-                'Should revert as non-organization address is adding constraint.',
-                'Only organization is allowed to call.',
+                'Should revert as non worker address is adding constraint.',
+                'Only whitelisted worker is allowed to call.',
             );
         });
 
         it('Reverts if null address is added as a constraint.', async () => {
             const {
                 tokenRules,
-                organizationAddress,
+                worker,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const constraintAddress = Utils.NULL_ADDRESS;
@@ -51,7 +51,7 @@ contract('TokenRules::addGlobalConstraint', async () => {
             await Utils.expectRevert(
                 tokenRules.addGlobalConstraint(
                     constraintAddress,
-                    { from: organizationAddress },
+                    { from: worker },
                 ),
                 'Should revert as constraint\'s address to add is null.',
                 'Constraint to add is null.',
@@ -61,7 +61,7 @@ contract('TokenRules::addGlobalConstraint', async () => {
         it('Reverts if constraint to add already exists.', async () => {
             const {
                 tokenRules,
-                organizationAddress,
+                worker,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const constraintAddress = accountProvider.get();
@@ -69,13 +69,13 @@ contract('TokenRules::addGlobalConstraint', async () => {
 
             await tokenRules.addGlobalConstraint(
                 constraintAddress,
-                { from: organizationAddress },
+                { from: worker },
             );
 
             await Utils.expectRevert(
                 tokenRules.addGlobalConstraint(
                     existingConstraintAddress,
-                    { from: organizationAddress },
+                    { from: worker },
                 ),
                 'Should revert as constraint to add already exists.',
                 'Constraint to add already exists.',
@@ -89,14 +89,14 @@ contract('TokenRules::addGlobalConstraint', async () => {
         it('Emits GlobalConstraintAdded when adding constraint.', async () => {
             const {
                 tokenRules,
-                organizationAddress,
+                worker,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const constraintAddress = accountProvider.get();
 
             const transactionResponse = await tokenRules.addGlobalConstraint(
                 constraintAddress,
-                { from: organizationAddress },
+                { from: worker },
             );
 
             const events = Event.decodeTransactionResponse(
@@ -123,14 +123,14 @@ contract('TokenRules::addGlobalConstraint', async () => {
         it('Checks that constraint exists after adding.', async () => {
             const {
                 tokenRules,
-                organizationAddress,
+                worker,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const constraintAddress = accountProvider.get();
 
             await tokenRules.addGlobalConstraint(
                 constraintAddress,
-                { from: organizationAddress },
+                { from: worker },
             );
 
             assert.isOk(
