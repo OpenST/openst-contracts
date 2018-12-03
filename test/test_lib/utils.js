@@ -96,6 +96,10 @@ module.exports.AccountProvider = class AccountProvider {
 
 const receipts = [];
 
+/**
+ * It is used to log the transaction response in receipts array which will be
+ * later used to analyse the transaction response.
+ */
 module.exports.logResponse = (response, description) => {
   receipts.push({
     receipt     : response.receipt,
@@ -104,19 +108,10 @@ module.exports.logResponse = (response, description) => {
   });
 }
 
-module.exports.logReceipt = (receipt, description) => {
-  receipts.push({
-    receipt     : receipt,
-    description : description,
-    response    : null
-  })
-}
-
-module.exports.logTransaction = async (hash, description) => {
-  const receipt = await web3.eth.getTransactionReceipt(hash)
-  await this.logReceipt(receipt, description)
-}
-
+/**
+ * It is used to calculate and print the gasUsed in the logged transaction
+ * receipts.
+ */
 module.exports.printGasStatistics = () => {
   var totalGasUsed = 0
 
@@ -135,8 +130,10 @@ module.exports.printGasStatistics = () => {
   console.log("      " + "Total gas logged: ".padEnd(45) + totalGasUsed + "\n")
 }
 
+/**
+ * It is used to remove all logged transaction receipts.
+ */
 module.exports.clearReceipts = () => {
   receipts.splice( 0, receipts.length );
 }
-
 
