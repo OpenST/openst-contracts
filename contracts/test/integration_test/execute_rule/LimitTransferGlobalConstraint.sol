@@ -34,7 +34,7 @@ contract LimitTransferGlobalConstraint is GlobalConstraintInterface {
 
     /* Special Functions */
 
-    constructor(uint256 _transferLimit) {
+    constructor(uint256 _transferLimit) public {
         transferLimit = _transferLimit;
     }
 
@@ -62,6 +62,11 @@ contract LimitTransferGlobalConstraint is GlobalConstraintInterface {
         view
         returns (bool)
     {
+        require(_from != address(0), "From address cannot be null.");
+        require(
+            _transfersTo.length == _transfersAmount.length,
+            "'to' and 'amount' transfer arrays' lengths are not equal."
+        );
         uint256 totalAmount = 0;
         bool isTransferWithinLimit;
         for(uint256 i = 0;i < _transfersAmount.length;  i++) {
