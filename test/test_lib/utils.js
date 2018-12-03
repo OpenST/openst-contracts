@@ -31,65 +31,109 @@ module.exports.isNullAddress = address => address === NULL_ADDRESS;
  * @throws Will fail an assertion if the call or transaction is not reverted.
  */
 module.exports.expectRevert = async (
-    promise, displayMessage, expectedRevertMessage,
+  promise, displayMessage, expectedRevertMessage,
 ) => {
-    try {
-        await promise;
-    } catch (error) {
+  try {
+    await promise;
+  } catch (error) {
+    assert(
+      error.message.search('revert') > -1,
+      `The contract should revert. Instead: ${error.message}`,
+    );
+
+    if (expectedRevertMessage !== undefined) {
+      if (error.reason !== undefined) {
         assert(
-            error.message.search('revert') > -1,
-            `The contract should revert. Instead: ${error.message}`,
+          expectedRevertMessage === error.reason,
+          `\nThe contract should revert with:\n\t"${expectedRevertMessage}" `
+          + `\ninstead received:\n\t"${error.reason}"\n`,
         );
-
-        if (expectedRevertMessage !== undefined) {
-            if (error.reason !== undefined) {
-                assert(
-                    expectedRevertMessage === error.reason,
-                    `\nThe contract should revert with:\n\t"${expectedRevertMessage}" `
-                    + `\ninstead received:\n\t"${error.reason}"\n`,
-                );
-            } else {
-                assert(
-                    error.message.search(expectedRevertMessage) > -1,
-                    `\nThe contract should revert with:\n\t"${expectedRevertMessage}" `
-                    + `\ninstead received:\n\t"${error.message}"\n`,
-                );
-            }
-        }
-
-        return;
+      } else {
+        assert(
+          error.message.search(expectedRevertMessage) > -1,
+          `\nThe contract should revert with:\n\t"${expectedRevertMessage}" `
+          + `\ninstead received:\n\t"${error.message}"\n`,
+        );
+      }
     }
 
-    assert(false, displayMessage);
+    return;
+  }
+
+  assert(false, displayMessage);
 };
 
 module.exports.advanceBlock = () => new Promise((resolve, reject) => {
-    web3.currentProvider.send({
-        jsonrpc: '2.0',
-        method: 'evm_mine',
-        id: new Date().getTime(),
-    }, (err) => {
-        if (err) {
-            return reject(err);
-        }
+  web3.currentProvider.send({
+    jsonrpc: '2.0',
+    method: 'evm_mine',
+    id: new Date().getTime(),
+  }, (err) => {
+    if (err) {
+      return reject(err);
+    }
 
-        const newBlockHash = web3.eth.getBlock('latest').hash;
+    const newBlockHash = web3.eth.getBlock('latest').hash;
 
-        return resolve(newBlockHash);
-    });
+    return resolve(newBlockHash);
+  });
 });
 
 /** Receives accounts list and gives away each time one. */
 module.exports.AccountProvider = class AccountProvider {
-    constructor(accounts) {
-        this.accounts = accounts;
-        this.index = 0;
-    }
+  constructor(accounts) {
+    this.accounts = accounts;
+    this.index = 0;
+  }
 
-    get() {
-        assert(this.index < this.accounts.length);
-        const account = this.accounts[this.index];
-        this.index += 1;
-        return account;
-    }
+  get() {
+    assert(this.index < this.accounts.length);
+    const account = this.accounts[this.index];
+    this.index += 1;
+    return account;
+  }
 };
+
+const receipts = [];
+
+/**
+ * It is used to log the transaction response in receipts array which will be
+ * later used to analyse the transaction response.
+ */
+module.exports.logResponse = (response, description) => {
+  receipts.push({
+    receipt     : response.receipt,
+    description : description,
+    response    : response
+  });
+}
+
+/**
+ * It is used to calculate and print the gasUsed in the logged transaction
+ * receipts.
+ */
+module.exports.printGasStatistics = () => {
+  var totalGasUsed = 0
+
+  console.log("      -----------------------------------------------------");
+  console.log("      Report gas usage\n");
+
+  for (i = 0; i < receipts.length; i++) {
+    const entry = receipts[i]
+
+    totalGasUsed += entry.receipt.gasUsed
+
+    console.log("      " + entry.description.padEnd(45) + entry.receipt.gasUsed)
+  }
+
+  console.log("      -----------------------------------------------------")
+  console.log("      " + "Total gas logged: ".padEnd(45) + totalGasUsed + "\n")
+}
+
+/**
+ * It is used to remove all logged transaction receipts.
+ */
+module.exports.clearReceipts = () => {
+  receipts.splice( 0, receipts.length );
+}
+
