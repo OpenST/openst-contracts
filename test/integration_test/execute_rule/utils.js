@@ -259,3 +259,4 @@ module.exports.getExecuteRuleExTxData = async (
 
   return { msgHash, rsv };
 }
+
