@@ -73,14 +73,14 @@ contract('TokenHolder::executeRule', async (accounts) => {
       await eip20TokenMock.setBalance(tokenHolder.address, totalBalance);
 
       // Verify added rule
-      assert.equal(
+      assert.strictEqual(
         (await tokenRules.rulesByAddress(transferRule.address)).exists,
         true,
       );
 
-      assert.equal((await tokenHolder.tokenRules()), tokenRules.address);
+      assert.strictEqual((await tokenHolder.tokenRules()), tokenRules.address);
 
-      assert.equal((await tokenHolder.token()), eip20TokenMock.address);
+      assert.strictEqual((await tokenHolder.token()), eip20TokenMock.address);
 
     });
 
@@ -113,7 +113,7 @@ contract('TokenHolder::executeRule', async (accounts) => {
 
     });
 
-    it('Execute rule success', async () => {
+    it('Verifies successful execution of execute rule', async () => {
 
       let currentNonce = keyData.nonce,
         amountTransferred = 50;
@@ -147,20 +147,21 @@ contract('TokenHolder::executeRule', async (accounts) => {
       await utils.logResponse(transactionResponse,"ExecuteRule");
 
       // Verify 'to' address balance
-      assert.equal(
-        (await eip20TokenMock.balanceOf(to)),
-        amountTransferred,
+      assert.strictEqual(
+        (await eip20TokenMock.balanceOf(to)).cmp(new BN(amountTransferred)),
+        0,
       );
 
       // Verify tokenholder balance
-      assert.equal(
-        (await eip20TokenMock.balanceOf(tokenHolder.address)),
-        totalBalance - amountTransferred,
+      assert.strictEqual(
+        (await eip20TokenMock.balanceOf(tokenHolder.address)).cmp(
+          new BN(totalBalance - amountTransferred)),
+        0,
       );
 
     });
 
-    it('Total gas used', async () => {
+    it('Gas used for execute rule execution', async () => {
 
       utils.printGasStatistics();
 
