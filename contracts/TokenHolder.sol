@@ -110,10 +110,10 @@ contract TokenHolder is MultiSigWallet {
     );
 
     /**
-     *  Not all coGateway.redeem parameters are signed. HashLock and
-     *  facilitator are not part of data which ephemeral key is signing as this
-     *  information is not known by the user at the time of signing.
-     *  This callPrefix is needed to recover the ephemeral key.
+     *  It's needed because not all coGateway.redeem parameters are signed.
+     *  HashLock and facilitator are not part of data which ephemeral key is
+     *  signing as this information is not known by the user at the time of
+     *  signing. This callPrefix is needed to recover the ephemeral key.
      */
     bytes4 public constant REDEEM_SIGNED_DATA_CALLPREFIX = bytes4(
         keccak256(
@@ -122,10 +122,10 @@ contract TokenHolder is MultiSigWallet {
     );
 
     /**
-     *  Using COGATEWAY_REDEEM_CALLPREFIX CoGateway.Redeem executable data is
+     *  Using COGATEWAY_REDEEM_SELECTOR CoGateway.Redeem executable data is
      *  constructed and called.
      */
-    bytes4 public constant COGATEWAY_REDEEM_CALLPREFIX = bytes4(
+    bytes4 public constant COGATEWAY_REDEEM_SELECTOR = bytes4(
         keccak256(
             "redeem(uint256,address,address,uint256,uint256,uint256,bytes32)"
         )
@@ -405,7 +405,7 @@ contract TokenHolder is MultiSigWallet {
      * @param _gasPrice Gas price that tokenholder is ready to pay to get the
      *                  redemption process done.
      * @param _gasLimit Gas limit that tokenholder is ready to pay.
-     * @param _redeemerNonce Nonce of the redeemer address.
+     * @param _redeemerNonce redeemerNonce stored in coGateway contract.
      * @param _hashLock Hash Lock provided by the facilitator.
      * @param _nonce The nonce of an ephemeral key that was used to sign
      *               the transaction.
@@ -684,7 +684,7 @@ contract TokenHolder is MultiSigWallet {
         token.approve(_coGateway, _amount);
 
         bytes memory data = abi.encodeWithSelector(
-            COGATEWAY_REDEEM_CALLPREFIX,
+            COGATEWAY_REDEEM_SELECTOR,
             _amount,
             _beneficiary,
             msg.sender,

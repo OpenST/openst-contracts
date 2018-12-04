@@ -95,6 +95,9 @@ contract MockRule {
         payable
         returns (bytes32)
     {
+        // Below require is added to test execution failure.
+        // e.g. test case "Verify that TH.redeem execution status is false when
+        // CoGateway execution is failed"
         require(msg.value != uint256(0), "msg.value is 0.");
 
         receivedPayableAmount = msg.value;

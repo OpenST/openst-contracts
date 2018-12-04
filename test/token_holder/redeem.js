@@ -157,10 +157,8 @@ function getRedeemDataToSign(
 }
 
 async function prepareRedeemPayableRule(
-    accountProvider,
     amount,
     beneficiary,
-    facilitator,
     gasPrice,
     gasLimit,
     redeemerNonce,
@@ -169,7 +167,7 @@ async function prepareRedeemPayableRule(
     ephemeralKey,
 )
 {
-  const mockRule = await MockRule.new();
+  const coGateway = await MockRule.new();
 
   const coGatewayRedeemEncodedAbiWithoutHashLock = await getRedeemDataToSign(
       amount,
@@ -181,14 +179,14 @@ async function prepareRedeemPayableRule(
 
   const { msgHash, rsv } = getRedeemSignedData(
     tokenHolder.address,
-    mockRule.address,
+    coGateway.address,
     coGatewayRedeemEncodedAbiWithoutHashLock,
     nonce,
     ephemeralKey,
   );
 
   return {
-    mockRule,
+    coGateway,
     msgHash,
     rsv,
   };
@@ -253,13 +251,11 @@ contract('TokenHolder::redeem', async (accounts) => {
       );
 
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRedeemPayableRule(
-        accountProvider,
         amount,
         beneficiary,
-        facilitator,
         gasPrice,
         gasLimit,
         redeemerNonce,
@@ -268,7 +264,7 @@ contract('TokenHolder::redeem', async (accounts) => {
         ephemeralPrivateKey2,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
       await Utils.expectRevert(
          tokenHolder.redeem(
@@ -308,13 +304,11 @@ contract('TokenHolder::redeem', async (accounts) => {
       }
 
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRedeemPayableRule(
-        accountProvider,
         amount,
         beneficiary,
-        facilitator,
         gasPrice,
         gasLimit,
         redeemerNonce,
@@ -323,7 +317,7 @@ contract('TokenHolder::redeem', async (accounts) => {
         ephemeralPrivateKey2,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
       await Utils.expectRevert(
         tokenHolder.redeem(
@@ -369,13 +363,11 @@ contract('TokenHolder::redeem', async (accounts) => {
       assert.strictEqual(keyData.status.cmp(new BN(2)), 0);
 
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRedeemPayableRule(
-        accountProvider,
         amount,
         beneficiary,
-        facilitator,
         gasPrice,
         gasLimit,
         redeemerNonce,
@@ -384,7 +376,7 @@ contract('TokenHolder::redeem', async (accounts) => {
         ephemeralPrivateKey1,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
       await Utils.expectRevert(
         tokenHolder.redeem(
@@ -420,13 +412,11 @@ contract('TokenHolder::redeem', async (accounts) => {
 
       const amountToRedeem = 100;
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRedeemPayableRule(
-        accountProvider,
         amountToRedeem,
         beneficiary,
-        facilitator,
         gasPrice,
         gasLimit,
         redeemerNonce,
@@ -435,7 +425,7 @@ contract('TokenHolder::redeem', async (accounts) => {
         ephemeralPrivateKey1,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
       await Utils.expectRevert(
         tokenHolder.redeem(
@@ -470,13 +460,11 @@ contract('TokenHolder::redeem', async (accounts) => {
       );
 
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRedeemPayableRule(
-        accountProvider,
         amount,
         beneficiary,
-        facilitator,
         gasPrice,
         gasLimit,
         redeemerNonce,
@@ -485,7 +473,7 @@ contract('TokenHolder::redeem', async (accounts) => {
         ephemeralPrivateKey1,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
       const invalidNonce = 0;
       await Utils.expectRevert(
@@ -521,13 +509,11 @@ contract('TokenHolder::redeem', async (accounts) => {
       );
 
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRedeemPayableRule(
-        accountProvider,
         amount,
         beneficiary,
-        facilitator,
         gasPrice,
         gasLimit,
         redeemerNonce,
@@ -536,7 +522,7 @@ contract('TokenHolder::redeem', async (accounts) => {
         ephemeralPrivateKey1,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
       const payableValue = 100;
       await tokenHolder.redeem(
@@ -605,13 +591,11 @@ contract('TokenHolder::redeem', async (accounts) => {
 
       const nonce = 1;
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRedeemPayableRule(
-        accountProvider,
         amount,
         beneficiary,
-        facilitator,
         gasPrice,
         gasLimit,
         redeemerNonce,
@@ -620,7 +604,7 @@ contract('TokenHolder::redeem', async (accounts) => {
         ephemeralPrivateKey1,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
       const payableValue = 100;
 
@@ -662,13 +646,13 @@ contract('TokenHolder::redeem', async (accounts) => {
 
       assert.strictEqual(redeemReceipt.receipt.status, true);
 
-      const updatedPayableValue = await mockRule.receivedPayableAmount.call();
+      const updatedPayableValue = await coGateway.receivedPayableAmount.call();
 
       assert.strictEqual(updatedPayableValue.cmp(new BN(payableValue)), 0);
 
       const allowance = await (token.allowance.call(
         tokenHolder.address,
-        mockRule.address)
+        coGateway.address)
       );
 
       assert.strictEqual(allowance.cmp(new BN(0)), 0);
@@ -701,13 +685,11 @@ contract('TokenHolder::redeem', async (accounts) => {
 
       const nonce = 1;
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRedeemPayableRule(
-        accountProvider,
         amount,
         beneficiary,
-        facilitator,
         gasPrice,
         gasLimit,
         redeemerNonce,
@@ -716,7 +698,7 @@ contract('TokenHolder::redeem', async (accounts) => {
         ephemeralPrivateKey1,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
       const payableValue = 100;
 
@@ -776,13 +758,11 @@ contract('TokenHolder::redeem', async (accounts) => {
 
       const nonce = 1;
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRedeemPayableRule(
-        accountProvider,
         amount,
         beneficiary,
-        facilitator,
         gasPrice,
         gasLimit,
         redeemerNonce,
@@ -791,7 +771,7 @@ contract('TokenHolder::redeem', async (accounts) => {
         ephemeralPrivateKey1,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
       let redeemReceipt = await tokenHolder.redeem(
         amount,
