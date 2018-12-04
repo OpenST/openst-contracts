@@ -112,15 +112,16 @@ contract('TokenHolder::executeRule', async (accounts) => {
       );
 
       // 'to' address balance before calling executeRule method
-      assert.equal(
-        (await eip20TokenMock.balanceOf(to)),
+      assert.strictEqual(
+        (await eip20TokenMock.balanceOf(to)).cmp(new BN(0)),
         0,
       );
 
       // tokenHolder balance before calling executeRule method
-      assert.equal(
-        (await eip20TokenMock.balanceOf(tokenHolder.address)),
-        totalBalance,
+      assert.strictEqual(
+        (await eip20TokenMock.balanceOf(tokenHolder.address)).cmp(
+          new BN(totalBalance)),
+        0,
       );
 
       const transactionResponse = await tokenHolder.executeRule(
@@ -139,20 +140,21 @@ contract('TokenHolder::executeRule', async (accounts) => {
       // We should check against false here, however current version of web3
       // returns null for false values in event log. After updating web3,
       // this test might fail and we should use false (as intended)
-      assert.equal(events[0].args['_status'], null);
+      assert.strictEqual(events[0].args['_status'], null);
 
       // As the rule 'transferRule2' was not registered, transfer did not
       // take place. So, 'to' address and tokenholder has zero tokens and 500
       // tokens respectively i.e. same number of tokens as it were before
       // 'executeRule' method was called.
-      assert.equal(
-        (await eip20TokenMock.balanceOf(to)),
+      assert.strictEqual(
+        (await eip20TokenMock.balanceOf(to)).cmp(new BN(0)),
         0,
       );
 
-      assert.equal(
-        (await eip20TokenMock.balanceOf(tokenHolder.address)),
-        totalBalance,
+      assert.strictEqual(
+        (await eip20TokenMock.balanceOf(tokenHolder.address)).cmp(
+          new BN(totalBalance)),
+        0,
       );
 
     });
