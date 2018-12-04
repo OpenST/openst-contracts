@@ -405,7 +405,8 @@ contract TokenHolder is MultiSigWallet {
      * @param _gasPrice Gas price that tokenholder is ready to pay to get the
      *                  redemption process done.
      * @param _gasLimit Gas limit that tokenholder is ready to pay.
-     * @param _redeemerNonce redeemerNonce stored in coGateway contract.
+     * @param _redeemerNonce redeemerNonce is nonce of this(current)
+     *                       TokenHolder. It's stored in coGateway contract.
      * @param _hashLock Hash Lock provided by the facilitator.
      * @param _nonce The nonce of an ephemeral key that was used to sign
      *               the transaction.

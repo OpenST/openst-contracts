@@ -30,49 +30,11 @@ const ephemeralPrivateKey2 = '0x634011a05b2f48e2d19aba49a9dbc12766bf7dbd6111ed2a
 
 let token;
 
-
-function getRedeemCallPrefix() {
-  return web3.eth.abi.encodeFunctionSignature({
-    name: 'redeem',
-    type: 'function',
-    inputs: [
-      {
-        type: 'uint256', name: '',
-      },
-      {
-        type: 'address', name: '',
-      },
-      {
-        type: 'uint256', name: '',
-      },
-      {
-        type: 'uint256', name: '',
-      },
-      {
-        type: 'uint256', name: '',
-      },
-      {
-        type: 'bytes32', name: '',
-      },
-      {
-        type: 'uint256', name: '',
-      },
-      {
-        type: 'uint8', name: '',
-      },
-      {
-        type: 'bytes32', name: '',
-      },
-      {
-        type: 'bytes32', name: '',
-      },
-    ],
-  });
-}
-
-function getRedeemSignedData(
-  tokenHolderAddress, ruleAddress, redeemCallData, nonce, ephemeralKey
+async function getRedeemSignedData(
+  tokenHolder, ruleAddress, redeemCallData, nonce, ephemeralKey
 ) {
+
+  let redeemRuleCallPrefix = await tokenHolder.REDEEM_RULE_CALLPREFIX.call();
   const msgHash = web3.utils.soliditySha3(
     {
       t: 'bytes1', v: '0x19',
@@ -81,7 +43,7 @@ function getRedeemSignedData(
       t: 'bytes1', v: '0x0',
     },
     {
-      t: 'address', v: tokenHolderAddress,
+      t: 'address', v: tokenHolder.address,
     },
     {
       t: 'address', v: ruleAddress,
@@ -105,7 +67,7 @@ function getRedeemSignedData(
       t: 'uint8', v: 0,
     },
     {
-      t: 'bytes4', v: getRedeemCallPrefix(),
+      t: 'bytes4', v: redeemRuleCallPrefix,
     },
     {
       t: 'uint8', v: 0,
@@ -177,8 +139,8 @@ async function prepareRedeemPayableRule(
       redeemerNonce
     );
 
-  const { msgHash, rsv } = getRedeemSignedData(
-    tokenHolder.address,
+  const { msgHash, rsv } = await getRedeemSignedData(
+    tokenHolder,
     coGateway.address,
     coGatewayRedeemEncodedAbiWithoutHashLock,
     nonce,
@@ -236,7 +198,6 @@ contract('TokenHolder::redeem', async (accounts) => {
       gasLimit = 10,
       redeemerNonce = 1,
       hashLock = web3.utils.soliditySha3('hl'),
-      payableValue = 100,
       nonce = 1;
 
     it('Reverts if ExTx is signed with non-authorized key.', async () => {
@@ -250,6 +211,8 @@ contract('TokenHolder::redeem', async (accounts) => {
         deltaExpirationHeight,
       );
 
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
+      let nonce = keyData.nonce.add(new BN(1));
       const {
         coGateway,
         rsv,
@@ -265,6 +228,7 @@ contract('TokenHolder::redeem', async (accounts) => {
       );
 
       await token.setCoGateway(coGateway.address);
+      let bounty = await coGateway.BOUNTY.call();
 
       await Utils.expectRevert(
          tokenHolder.redeem(
@@ -279,7 +243,7 @@ contract('TokenHolder::redeem', async (accounts) => {
           EthUtils.bufferToHex(rsv.r),
           EthUtils.bufferToHex(rsv.s),
           {
-            value: payableValue,
+            value: bounty,
             from: facilitator,
           }
       ),
@@ -303,6 +267,9 @@ contract('TokenHolder::redeem', async (accounts) => {
         await Utils.advanceBlock();
       }
 
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
+      let nonce = keyData.nonce.add(new BN(1));
+
       const {
         coGateway,
         rsv,
@@ -318,6 +285,7 @@ contract('TokenHolder::redeem', async (accounts) => {
       );
 
       await token.setCoGateway(coGateway.address);
+      let bounty = await coGateway.BOUNTY.call();
 
       await Utils.expectRevert(
         tokenHolder.redeem(
@@ -332,7 +300,7 @@ contract('TokenHolder::redeem', async (accounts) => {
           EthUtils.bufferToHex(rsv.r),
           EthUtils.bufferToHex(rsv.s),
           {
-            value: payableValue,
+            value: bounty,
             from: facilitator,
           }
         ),
@@ -359,8 +327,9 @@ contract('TokenHolder::redeem', async (accounts) => {
       );
 
       const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
-
       assert.strictEqual(keyData.status.cmp(new BN(2)), 0);
+
+      let nonce = keyData.nonce.add(new BN(1));
 
       const {
         coGateway,
@@ -377,6 +346,7 @@ contract('TokenHolder::redeem', async (accounts) => {
       );
 
       await token.setCoGateway(coGateway.address);
+      let bounty = await coGateway.BOUNTY.call();
 
       await Utils.expectRevert(
         tokenHolder.redeem(
@@ -391,7 +361,7 @@ contract('TokenHolder::redeem', async (accounts) => {
           EthUtils.bufferToHex(rsv.r),
           EthUtils.bufferToHex(rsv.s),
           {
-            value: payableValue,
+            value: bounty,
             from: facilitator,
           }
         ),
@@ -411,6 +381,9 @@ contract('TokenHolder::redeem', async (accounts) => {
       );
 
       const amountToRedeem = 100;
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
+      let nonce = keyData.nonce.add(new BN(1));
+
       const {
         coGateway,
         rsv,
@@ -426,6 +399,7 @@ contract('TokenHolder::redeem', async (accounts) => {
       );
 
       await token.setCoGateway(coGateway.address);
+      let bounty = await coGateway.BOUNTY.call();
 
       await Utils.expectRevert(
         tokenHolder.redeem(
@@ -440,7 +414,7 @@ contract('TokenHolder::redeem', async (accounts) => {
           EthUtils.bufferToHex(rsv.r),
           EthUtils.bufferToHex(rsv.s),
           {
-            value: payableValue,
+            value: bounty,
             from: facilitator,
           }
         ),
@@ -459,6 +433,9 @@ contract('TokenHolder::redeem', async (accounts) => {
         deltaExpirationHeight,
       );
 
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
+      let nonce = keyData.nonce.add(new BN(1));
+
       const {
         coGateway,
         rsv,
@@ -474,6 +451,7 @@ contract('TokenHolder::redeem', async (accounts) => {
       );
 
       await token.setCoGateway(coGateway.address);
+      let bounty = await coGateway.BOUNTY.call();
 
       const invalidNonce = 0;
       await Utils.expectRevert(
@@ -489,7 +467,7 @@ contract('TokenHolder::redeem', async (accounts) => {
           EthUtils.bufferToHex(rsv.r),
           EthUtils.bufferToHex(rsv.s),
           {
-            value: payableValue,
+            value: bounty,
             from: facilitator,
           }
         ),
@@ -508,6 +486,9 @@ contract('TokenHolder::redeem', async (accounts) => {
         deltaExpirationHeight,
       );
 
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
+      let nonce = keyData.nonce.add(new BN(1));
+
       const {
         coGateway,
         rsv,
@@ -523,8 +504,8 @@ contract('TokenHolder::redeem', async (accounts) => {
       );
 
       await token.setCoGateway(coGateway.address);
+      let bounty = await coGateway.BOUNTY.call();
 
-      const payableValue = 100;
       await tokenHolder.redeem(
         amount,
         beneficiary,
@@ -537,7 +518,7 @@ contract('TokenHolder::redeem', async (accounts) => {
         EthUtils.bufferToHex(rsv.r),
         EthUtils.bufferToHex(rsv.s),
         {
-          value: payableValue,
+          value: bounty,
           from: facilitator,
         }
       );
@@ -555,7 +536,7 @@ contract('TokenHolder::redeem', async (accounts) => {
           EthUtils.bufferToHex(rsv.r),
           EthUtils.bufferToHex(rsv.s),
           {
-            value: payableValue,
+            value: bounty,
             from: facilitator,
           }
         ),
@@ -575,6 +556,7 @@ contract('TokenHolder::redeem', async (accounts) => {
       facilitator = accountProvider.get(),
       gasPrice = 10,
       gasLimit = 10,
+      // redeemerNonce is nonce of TokenHolder.It's stored in coGateway contract.
       redeemerNonce = 1,
       hashLock = web3.utils.soliditySha3('hl');
 
@@ -589,7 +571,9 @@ contract('TokenHolder::redeem', async (accounts) => {
         deltaExpirationHeight,
       );
 
-      const nonce = 1;
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
+      let nonce = keyData.nonce.add(new BN(1));
+
       const {
         coGateway,
         rsv,
@@ -605,8 +589,7 @@ contract('TokenHolder::redeem', async (accounts) => {
       );
 
       await token.setCoGateway(coGateway.address);
-
-      const payableValue = 100;
+      let bounty = await coGateway.BOUNTY.call();
 
       let returnedExecutionStatus = await tokenHolder.redeem.call(
         amount,
@@ -620,7 +603,7 @@ contract('TokenHolder::redeem', async (accounts) => {
         EthUtils.bufferToHex(rsv.r),
         EthUtils.bufferToHex(rsv.s),
         {
-          value: payableValue,
+          value: bounty,
           from: facilitator,
         }
       );
@@ -639,7 +622,7 @@ contract('TokenHolder::redeem', async (accounts) => {
         EthUtils.bufferToHex(rsv.r),
         EthUtils.bufferToHex(rsv.s),
         {
-          value: payableValue,
+          value: bounty,
           from: facilitator,
         }
       );
@@ -648,7 +631,7 @@ contract('TokenHolder::redeem', async (accounts) => {
 
       const updatedPayableValue = await coGateway.receivedPayableAmount.call();
 
-      assert.strictEqual(updatedPayableValue.cmp(new BN(payableValue)), 0);
+      assert.strictEqual(updatedPayableValue.cmp(new BN(bounty)), 0);
 
       const allowance = await (token.allowance.call(
         tokenHolder.address,
@@ -683,7 +666,9 @@ contract('TokenHolder::redeem', async (accounts) => {
         deltaExpirationHeight,
       );
 
-      const nonce = 1;
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
+      let nonce = keyData.nonce.add(new BN(1));
+
       const {
         coGateway,
         rsv,
@@ -699,8 +684,7 @@ contract('TokenHolder::redeem', async (accounts) => {
       );
 
       await token.setCoGateway(coGateway.address);
-
-      const payableValue = 100;
+      let bounty = await coGateway.BOUNTY.call();
 
       let redeemReceipt = await tokenHolder.redeem(
         amount,
@@ -714,7 +698,7 @@ contract('TokenHolder::redeem', async (accounts) => {
         EthUtils.bufferToHex(rsv.r),
         EthUtils.bufferToHex(rsv.s),
         {
-          value: payableValue,
+          value: bounty,
           from: facilitator,
         }
       );
@@ -736,7 +720,7 @@ contract('TokenHolder::redeem', async (accounts) => {
 
     });
 
-    it('Verifies execution status is false when CoGateway execution fails..', async () => {
+    it('Verifies that execution status is false when CoGateway execution fails.', async () => {
       const spendingLimit = 50,
         deltaExpirationHeight = 100,
         amount = 10,
@@ -756,7 +740,8 @@ contract('TokenHolder::redeem', async (accounts) => {
         deltaExpirationHeight,
       );
 
-      const nonce = 1;
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
+      let nonce = keyData.nonce.add(new BN(1));
       const {
         coGateway,
         rsv,
@@ -773,6 +758,7 @@ contract('TokenHolder::redeem', async (accounts) => {
 
       await token.setCoGateway(coGateway.address);
 
+      let wrongBounty = 5;
       let redeemReceipt = await tokenHolder.redeem(
         amount,
         beneficiary,
@@ -785,7 +771,7 @@ contract('TokenHolder::redeem', async (accounts) => {
         EthUtils.bufferToHex(rsv.r),
         EthUtils.bufferToHex(rsv.s),
         {
-          value: 0,
+          value: wrongBounty, // Bounty value is 10.
           from: facilitator,
         }
       );

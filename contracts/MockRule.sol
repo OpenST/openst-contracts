@@ -28,6 +28,8 @@ contract MockRule {
         keccak256("pass(address)")
     );
 
+    uint256 constant public BOUNTY = 10;
+
 
     /* Storage */
 
@@ -67,50 +69,32 @@ contract MockRule {
     }
 
     /**
-     * @notice Mocks CoGateway redeem function.
+     * @notice Mocks CoGateway redeem function. Function arguments are not
+     *         named because of compilation warning for unused variables.
      *
-     * @param _amount Redeem amount that will be transferred form redeemer
-     *                account.
-     * @param _beneficiary The address in the origin chain where the value
-     *                     tok ens will be released.
-     * @param _facilitator Facilitator address.
-     * @param _gasPrice Gas price that redeemer is ready to pay to get the
-     *                  redemption process done.
-     * @param _gasLimit Gas limit that redeemer is ready to pay
-     * @param _nonce Nonce of the redeemer address.
-     * @param _hashLock Hash Lock provided by the facilitator.
-     *
-     * @return messageHash_ which is unique for each request.
+     * @return bytes32 which is unique for each request.
      */
     function redeem(
-        uint256 _amount,
-        address _beneficiary,
-        address _facilitator,
-        uint256 _gasPrice,
-        uint256 _gasLimit,
-        uint256 _nonce,
-        bytes32 _hashLock
+        uint256,
+        address,
+        address,
+        uint256,
+        uint256,
+        uint256,
+        bytes32
     )
         public
         payable
         returns (bytes32)
     {
         // Below require is added to test execution failure.
-        // e.g. test case "Verify that TH.redeem execution status is false when
-        // CoGateway execution is failed"
-        require(msg.value != uint256(0), "msg.value is 0.");
+        require(
+            msg.value == BOUNTY,
+            "msg.value must match the bounty amount"
+        );
 
         receivedPayableAmount = msg.value;
-        return keccak256(
-            abi.encodePacked(
-            _amount,
-            _beneficiary,
-            _facilitator,
-            _gasPrice,
-            _gasLimit,
-            _nonce,
-            _hashLock
-            )
-        );
+
+        return keccak256('test');
     }
 }
