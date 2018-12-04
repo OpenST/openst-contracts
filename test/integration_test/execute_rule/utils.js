@@ -20,7 +20,7 @@ const TokenRules = artifacts.require('TokenRules'),
   EthUtils = require('ethereumjs-util');
 
 /**
- * It deploys the contracts,setup workers and registers a rule.
+ * It deploys the contracts, setup workers and registers a rule.
  */
 module.exports.setup = async (accountProvider) => {
 
@@ -259,4 +259,3 @@ module.exports.getExecuteRuleExTxData = async (
 
   return { msgHash, rsv };
 }
-
