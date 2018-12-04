@@ -1,4 +1,4 @@
- // Copyright 2018 OpenST Ltd.
+// Copyright 2018 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ const TokenRules = artifacts.require('TokenRules'),
   EthUtils = require('ethereumjs-util');
 
 /**
- * It deploys the contracts,setup workers and registers a rule.
+ * It deploys the contracts, setup workers and registers a rule.
  */
 module.exports.setup = async (accountProvider) => {
 
@@ -91,6 +91,7 @@ module.exports.tokenRules = async (organization, token) => {
 
 /**
  * It returns an instance of TransferRule contract.
+ *
  */
 module.exports.transferRule = async (tokenRules) => {
 
