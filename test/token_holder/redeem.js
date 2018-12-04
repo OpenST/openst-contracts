@@ -87,34 +87,9 @@ async function getRedeemSignedData(
 
 function getRedeemDataToSign(
   amount, beneficiary, gasPrice, gasLimit, redeemerNonce) {
-  return web3.eth.abi.encodeFunctionCall(
-    {
-      name: 'redeem',
-      type: 'function',
-      inputs: [
-        {
-          type: 'uint256',
-          name: 'amount',
-        },
-        {
-          type: 'address',
-          name: 'beneficiary',
-        },
-        {
-          type: 'uint256',
-          name: 'gasPrice',
-        },
-        {
-          type: 'uint256',
-          name: 'gasLimit',
-        },
-        {
-          type: 'uint256',
-          name: 'redeemerNonce',
-        },
-      ],
-    },
-    [amount, beneficiary, gasPrice, gasLimit, redeemerNonce],
+  return web3.eth.abi.encodeParameters(
+    ['uint256', 'address', 'uint256', 'uint256', 'uint256'],
+    [amount, beneficiary, gasPrice, gasLimit, redeemerNonce]
   );
 }
 
@@ -136,7 +111,8 @@ async function prepareRedeemPayableRule(
       beneficiary,
       gasPrice,
       gasLimit,
-      redeemerNonce
+      redeemerNonce,
+      tokenHolder,
     );
 
   const { msgHash, rsv } = await getRedeemSignedData(

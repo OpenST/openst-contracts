@@ -110,20 +110,8 @@ contract TokenHolder is MultiSigWallet {
     );
 
     /**
-     *  It's needed because not all coGateway.redeem parameters are signed.
-     *  HashLock and facilitator are not part of data which ephemeral key is
-     *  signing as this information is not known by the user at the time of
-     *  signing. This callPrefix is needed to recover the ephemeral key.
-     */
-    bytes4 public constant REDEEM_SIGNED_DATA_CALLPREFIX = bytes4(
-        keccak256(
-            "redeem(uint256,address,uint256,uint256,uint256)"
-        )
-    );
-
-    /**
-     *  Using COGATEWAY_REDEEM_SELECTOR CoGateway.Redeem executable data is
-     *  constructed and called.
+     *  Using COGATEWAY_REDEEM_SELECTOR CoGateway.Redeem executable calldata is
+     *  constructed.
      */
     bytes4 public constant COGATEWAY_REDEEM_SELECTOR = bytes4(
         keccak256(
@@ -600,6 +588,11 @@ contract TokenHolder is MultiSigWallet {
     /**
      * @notice Constructs data and performs verification of ephemeral key.
      *
+     * @dev redeemData doesn't include all coGateway.redeem parameters.
+     *  HashLock and facilitator are not part of data which ephemeral key is
+     *  signing as this information is not known by the user at the time of
+     *  signing. redeemData is needed to recover the ephemeral key.
+     *
      * @param _amount Redeem amount that will be transferred from tokenholder
      *                account.
      * @param _beneficiary The address in the origin chain where the tokens
@@ -633,8 +626,7 @@ contract TokenHolder is MultiSigWallet {
         private
         returns (address ephemeralKey_)
     {
-        bytes memory redeemData = abi.encodeWithSelector(
-            REDEEM_SIGNED_DATA_CALLPREFIX,
+        bytes memory redeemData = abi.encode(
             _amount,
             _beneficiary,
             _gasPrice,
