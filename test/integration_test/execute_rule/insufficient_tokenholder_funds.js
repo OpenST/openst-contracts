@@ -58,7 +58,7 @@ contract('TokenHolder::executeRule', async (accounts) => {
 
   describe('ExecuteRule integration test', async () => {
 
-    it('Should fail when tokenholder has insufficient balance', async () => {
+    it('Verifies that execution status is false when tokenholder has insufficient balance', async () => {
 
       accountProvider = new AccountsProvider(accounts);
 
