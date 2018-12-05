@@ -55,7 +55,7 @@ async function setupTokenHolder(
   };
 }
 
-contract('TokenHolder::redeem', async (accounts) => {
+contract('TokenHolder::getCoGateway', async (accounts) => {
 
   describe('Positive Tests', async () => {
     const accountProvider = new AccountProvider(accounts),
