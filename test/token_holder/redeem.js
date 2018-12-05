@@ -31,7 +31,7 @@ const ephemeralPrivateKey2 = '0x634011a05b2f48e2d19aba49a9dbc12766bf7dbd6111ed2a
 let token;
 
 async function getRedeemSignedData(
-  tokenHolder, ruleAddress, redeemCallData, nonce, ephemeralKey
+  tokenHolder, coGatewayAddress, redeemCallData, nonce, ephemeralKey
 ) {
 
   let redeemRuleCallPrefix = await tokenHolder.REDEEM_RULE_CALLPREFIX.call();
@@ -46,7 +46,7 @@ async function getRedeemSignedData(
       t: 'address', v: tokenHolder.address,
     },
     {
-      t: 'address', v: ruleAddress,
+      t: 'address', v: coGatewayAddress,
     },
     {
       t: 'uint8', v: 0,
