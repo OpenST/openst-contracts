@@ -420,7 +420,7 @@ contract TokenHolder is MultiSigWallet {
         payable
         returns (bool executionStatus_)
     {
-        address coGateway = UtilityTokenRequiredInterface(token).coGateway();
+        address coGateway = getCoGateway();
 
         address ephemeralKey = verifyRedeemExecutableTransaction(
             _amount,
@@ -496,6 +496,22 @@ contract TokenHolder is MultiSigWallet {
         keyData.expirationHeight = _expirationHeight;
         keyData.nonce = 0;
         keyData.status = AuthorizationStatus.AUTHORIZED;
+    }
+
+    /**
+     * @notice Fetches CoGateway Address from UtilityToken.
+     *
+     * @dev Using this public method user can know coGateway address which is
+     *      needed for signing data in redeem and revertRedemption.
+     *
+     * @return CoGateway Address.
+     */
+    function getCoGateway()
+        public
+        view
+        returns (address)
+    {
+        return UtilityTokenRequiredInterface(token).coGateway();
     }
 
 
