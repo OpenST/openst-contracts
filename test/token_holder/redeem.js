@@ -106,19 +106,18 @@ async function prepareRedeemPayableRule(
 {
   const coGateway = await MockRule.new();
 
-  const coGatewayRedeemEncodedAbiWithoutHashLock = await getRedeemDataToSign(
+  const dataToSign = await getRedeemDataToSign(
       amount,
       beneficiary,
       gasPrice,
       gasLimit,
       redeemerNonce,
-      tokenHolder,
     );
 
   const { msgHash, rsv } = await getRedeemSignedData(
     tokenHolder,
     coGateway.address,
-    coGatewayRedeemEncodedAbiWithoutHashLock,
+    dataToSign,
     nonce,
     ephemeralKey,
   );
