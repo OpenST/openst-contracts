@@ -28,6 +28,8 @@ contract MockRule {
         keccak256("pass(address)")
     );
 
+    uint256 constant public BOUNTY = 10;
+
 
     /* Storage */
 
@@ -67,6 +69,36 @@ contract MockRule {
     }
 
     /**
+     * @notice Mocks CoGateway redeem function. Function arguments are not
+     *         named because of compilation warning for unused variables.
+     *
+     * @return bytes32 which is unique for each request.
+     */
+    function redeem(
+        uint256,
+        address,
+        address,
+        uint256,
+        uint256,
+        uint256,
+        bytes32
+    )
+        public
+        payable
+        returns (bytes32)
+    {
+        // Below require is added to test execution failure.
+        require(
+            msg.value == BOUNTY,
+            "msg.value must match the bounty amount"
+        );
+
+        receivedPayableAmount = msg.value;
+
+        return bytes32(0);
+    }
+
+    /**
      * @notice Mocks CoGateway revertRedemption function.
      *
      * @param _messageHash Message hash.
@@ -78,13 +110,12 @@ contract MockRule {
     function revertRedemption(
         bytes32 _messageHash
     )
-        payable
-        public
-        returns (bytes32, bool)
+    payable
+    public
+    returns (bytes32, bool)
     {
         require(msg.value != uint256(0), "msg.value is 0.");
         receivedPayableAmount = msg.value;
         return (_messageHash, true);
     }
-
 }

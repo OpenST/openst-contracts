@@ -22,7 +22,7 @@ pragma solidity ^0.4.23;
  */
 interface CoGatewayRedeemInterface {
 
-    /* Public functions */
+	/* Public functions */
 
     /**
      * @notice Initiates the redemption process.
@@ -50,17 +50,17 @@ interface CoGatewayRedeemInterface {
      * @return messageHash_ which is unique for each request.
      */
     function redeem(
-        uint256 _amount,
-        address _beneficiary,
-        address _facilitator,
-        uint256 _gasPrice,
-        uint256 _gasLimit,
-        uint256 _nonce,
-        bytes32 _hashLock
-    )
-        external
-        payable
-        returns (bytes32 messageHash_);
+		uint256 _amount,
+		address _beneficiary,
+		address _facilitator,
+		uint256 _gasPrice,
+		uint256 _gasLimit,
+		uint256 _nonce,
+		bytes32 _hashLock
+	)
+		external
+		payable
+		returns (bytes32 messageHash_);
 
     /**
      * @notice Revert redemption to stop the redeem process. Only redeemer can
@@ -74,14 +74,14 @@ interface CoGatewayRedeemInterface {
      * @return redeemerNonce_ Redeemer nonce
      * @return amount_ Redeem amount
      */
-    function revertRedemption(
-        bytes32 _messageHash
-    )
-        payable
-        external
-        returns (
-            address redeemer_,
-            uint256 redeemerNonce_,
-            uint256 amount_
-        );
+	function revertRedemption(
+		bytes32 _messageHash
+	)
+		payable
+		external
+		returns (
+			address redeemer_,
+			uint256 redeemerNonce_,
+			uint256 amount_
+		);
 }

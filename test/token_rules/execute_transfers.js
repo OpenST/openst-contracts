@@ -25,13 +25,14 @@ async function happyPath(accountProvider) {
         tokenRules,
         organizationAddress,
         token,
+        worker,
     } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
     const passingConstraint1 = await PassingConstraint.new();
 
     await tokenRules.addGlobalConstraint(
         passingConstraint1.address,
-        { from: organizationAddress },
+        { from: worker },
     );
 
     const ruleAddress0 = accountProvider.get();
@@ -39,7 +40,7 @@ async function happyPath(accountProvider) {
         'ruleName0',
         ruleAddress0,
         'ruleAbi0',
-        { from: organizationAddress },
+        { from: worker },
     );
     await token.setBalance(ruleAddress0, 100);
 
@@ -71,6 +72,7 @@ async function happyPath(accountProvider) {
         ruleAddress0,
         transfersTo,
         transfersAmount,
+        worker,
     };
 }
 
@@ -158,13 +160,14 @@ contract('TokenRules::executeTransfers', async () => {
                 ruleAddress0,
                 transfersTo,
                 transfersAmount,
+                worker,
             } = await happyPath(accountProvider);
 
             const failingConstraint1 = await FailingConstraint.new();
 
             await tokenRules.addGlobalConstraint(
                 failingConstraint1.address,
-                { from: organizationAddress },
+                { from: worker },
             );
 
             await utils.expectRevert(

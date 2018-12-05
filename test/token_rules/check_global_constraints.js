@@ -53,7 +53,7 @@ contract('TokenRules::checkGlobalConstraints', async () => {
         it('Passes if 2 registered constraints are passing.', async () => {
             const {
                 tokenRules,
-                organizationAddress,
+                worker,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const transferTo0 = accountProvider.get();
@@ -65,19 +65,19 @@ contract('TokenRules::checkGlobalConstraints', async () => {
 
             await tokenRules.addGlobalConstraint(
                 passingConstraint1.address,
-                { from: organizationAddress },
+                { from: worker },
             );
 
             await tokenRules.addGlobalConstraint(
                 passingConstraint2.address,
-                { from: organizationAddress },
+                { from: worker },
             );
 
             const status = await tokenRules.checkGlobalConstraints.call(
                 accountProvider.get(),
                 transfersTo,
                 transfersAmount,
-                { from: organizationAddress },
+                { from: worker },
             );
 
             assert.isOk(
@@ -89,7 +89,7 @@ contract('TokenRules::checkGlobalConstraints', async () => {
         it('Fails if there is 1 passing and 1 failing constraint.', async () => {
             const {
                 tokenRules,
-                organizationAddress,
+                worker,
             } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
             const transferTo0 = accountProvider.get();
@@ -101,19 +101,19 @@ contract('TokenRules::checkGlobalConstraints', async () => {
 
             await tokenRules.addGlobalConstraint(
                 passingConstraint1.address,
-                { from: organizationAddress },
+                { from: worker },
             );
 
             await tokenRules.addGlobalConstraint(
                 failingConstraint1.address,
-                { from: organizationAddress },
+                { from: worker },
             );
 
             const status = await tokenRules.checkGlobalConstraints.call(
                 accountProvider.get(),
                 transfersTo,
                 transfersAmount,
-                { from: organizationAddress },
+                { from: worker },
             );
 
             assert.isNotOk(
