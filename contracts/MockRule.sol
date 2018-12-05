@@ -95,6 +95,6 @@ contract MockRule {
 
         receivedPayableAmount = msg.value;
 
-        return keccak256('test');
+        return bytes32(0);
     }
 }
