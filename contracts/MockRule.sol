@@ -29,6 +29,7 @@ contract MockRule {
     );
 
     uint256 constant public BOUNTY = 10;
+    uint256 constant public PENALTY = 10;
 
 
     /* Storage */
@@ -99,23 +100,30 @@ contract MockRule {
     }
 
     /**
-     * @notice Mocks CoGateway revertRedemption function.
-     *
-     * @param _messageHash Message hash.
+     * @notice Mocks CoGateway revertRedemption function. Function arguments
+     *         are not named because of compilation warning for unused
+     *         variables.
      *
      * @return redeemer_ Redeemer address.
      * @return redeemerNonce_ Redeemer nonce.
      * @return amount_ Redeem amount.
      */
     function revertRedemption(
-        bytes32 _messageHash
+        bytes32
     )
-    payable
-    public
-    returns (bytes32, bool)
+        public
+        payable
+        returns (bytes32, bool)
     {
-        require(msg.value != uint256(0), "msg.value is 0.");
+        // Below added to test executionStatus failure.
+        require(
+            msg.value == PENALTY,
+            "msg.value must match the penalty amount"
+        );
+
         receivedPayableAmount = msg.value;
-        return (_messageHash, true);
+
+        return (bytes32(0), true);
     }
+
 }

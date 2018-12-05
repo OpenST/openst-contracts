@@ -30,34 +30,10 @@ const ephemeralPrivateKey2 = '0x634011a05b2f48e2d19aba49a9dbc12766bf7dbd6111ed2a
 
 let token;
 
-
-function getRevertRedemptionCallPrefix() {
-  return web3.eth.abi.encodeFunctionSignature({
-    name: 'revertRedemption',
-    type: 'function',
-    inputs: [
-      {
-        type: 'bytes32', name: '',
-      },
-      {
-        type: 'uint256', name: '',
-      },
-      {
-        type: 'uint8', name: '',
-      },
-      {
-        type: 'bytes32', name: '',
-      },
-      {
-        type: 'bytes32', name: '',
-      },
-    ],
-  });
-}
-
-function getRevertRedemptionSignedData(
-  tokenHolderAddress, ruleAddress, revertRedemptionCallData, nonce, ephemeralKey
+async function getRevertRedemptionSignedData(
+  tokenHolder, coGatewayAddress, revertRedemptionCallData, nonce, ephemeralKey
 ) {
+  let revertRedemptionCallPrefix = await tokenHolder.REVERT_REDEMPTION_RULE_CALLPREFIX.call();
   const msgHash = web3.utils.soliditySha3(
     {
       t: 'bytes1', v: '0x19',
@@ -66,10 +42,10 @@ function getRevertRedemptionSignedData(
       t: 'bytes1', v: '0x0',
     },
     {
-      t: 'address', v: tokenHolderAddress,
+      t: 'address', v: tokenHolder.address,
     },
     {
-      t: 'address', v: ruleAddress,
+      t: 'address', v: coGatewayAddress,
     },
     {
       t: 'uint8', v: 0,
@@ -90,7 +66,7 @@ function getRevertRedemptionSignedData(
       t: 'uint8', v: 0,
     },
     {
-      t: 'bytes4', v: getRevertRedemptionCallPrefix(),
+      t: 'bytes4', v: revertRedemptionCallPrefix,
     },
     {
       t: 'uint8', v: 0,
@@ -133,22 +109,22 @@ async function prepareRevertRedemptionPayableRule(
   ephemeralKey,
 )
 {
-  const mockRule = await MockRule.new();
+  const coGateway = await MockRule.new();
 
   const coGatewayRevertRedemptionEncodedAbi = await getRevertRedemptionDataToSign(
     messageHash
   );
 
-  const { msgHash, rsv } = getRevertRedemptionSignedData(
-    tokenHolder.address,
-    mockRule.address,
+  const { msgHash, rsv } = await getRevertRedemptionSignedData(
+    tokenHolder,
+    coGateway.address,
     coGatewayRevertRedemptionEncodedAbi,
     nonce,
     ephemeralKey,
   );
 
   return {
-    mockRule,
+    coGateway,
     msgHash,
     rsv,
   };
@@ -192,9 +168,8 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
     const accountProvider = new AccountProvider(accounts),
       spendingLimit = 50,
       deltaExpirationHeight = 100,
-      payableValue = 100,
+      penalty = 10,
       facilitator = accountProvider.get(),
-      nonce = 1,
       redeemMessageHash = web3.utils.soliditySha3('redeemMessageHash');
 
     it('Reverts if ExTx is signed with non-authorized key.', async () => {
@@ -208,8 +183,11 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         deltaExpirationHeight,
       );
 
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
+      let nonce = keyData.nonce.add(new BN(1));
+
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRevertRedemptionPayableRule(
         accountProvider,
@@ -219,7 +197,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         ephemeralPrivateKey2,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
       await Utils.expectRevert(
         tokenHolder.revertRedemption(
@@ -229,7 +207,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
           EthUtils.bufferToHex(rsv.r),
           EthUtils.bufferToHex(rsv.s),
           {
-            value: payableValue,
+            value: penalty,
             from: facilitator,
           }
         ),
@@ -253,8 +231,11 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         await Utils.advanceBlock();
       }
 
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
+      let nonce = keyData.nonce.add(new BN(1));
+
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRevertRedemptionPayableRule(
         accountProvider,
@@ -264,7 +245,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         ephemeralPrivateKey1,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
       await Utils.expectRevert(
         tokenHolder.revertRedemption(
@@ -274,7 +255,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
           EthUtils.bufferToHex(rsv.r),
           EthUtils.bufferToHex(rsv.s),
           {
-            value: payableValue,
+            value: penalty,
             from: facilitator,
           }
         ),
@@ -302,11 +283,12 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
       );
 
       const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1,);
+      let nonce = keyData.nonce.add(new BN(1));
 
       assert.strictEqual(keyData.status.cmp(new BN(2)), 0);
 
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRevertRedemptionPayableRule(
         accountProvider,
@@ -316,7 +298,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         ephemeralPrivateKey1,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
       await Utils.expectRevert(
         tokenHolder.revertRedemption(
@@ -326,7 +308,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
           EthUtils.bufferToHex(rsv.r),
           EthUtils.bufferToHex(rsv.s),
           {
-            value: payableValue,
+            value: penalty,
             from: facilitator,
           }
         ),
@@ -347,8 +329,11 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         deltaExpirationHeight,
       );
 
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
+      let nonce = keyData.nonce.add(new BN(1));
+
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRevertRedemptionPayableRule(
         accountProvider,
@@ -358,7 +343,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         ephemeralPrivateKey1,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
       const invalidNonce = 0;
       await Utils.expectRevert(
@@ -369,7 +354,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
           EthUtils.bufferToHex(rsv.r),
           EthUtils.bufferToHex(rsv.s),
           {
-            value: payableValue,
+            value: penalty,
             from: facilitator,
           }
         ),
@@ -390,8 +375,11 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         deltaExpirationHeight,
       );
 
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
+      let nonce = keyData.nonce.add(new BN(1));
+
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRevertRedemptionPayableRule(
         accountProvider,
@@ -401,7 +389,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         ephemeralPrivateKey1,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
       let redeemReceipt = await tokenHolder.revertRedemption(
         redeemMessageHash,
@@ -410,7 +398,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         EthUtils.bufferToHex(rsv.r),
         EthUtils.bufferToHex(rsv.s),
         {
-          value: payableValue,
+          value: penalty,
           from: facilitator,
         }
       );
@@ -425,7 +413,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
           EthUtils.bufferToHex(rsv.r),
           EthUtils.bufferToHex(rsv.s),
           {
-            value: payableValue,
+            value: penalty,
             from: facilitator,
           }
         ),
@@ -456,9 +444,11 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         deltaExpirationHeight,
       );
 
-      const nonce = 1;
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
+      let nonce = keyData.nonce.add(new BN(1));
+
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRevertRedemptionPayableRule(
         accountProvider,
@@ -468,9 +458,9 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         ephemeralPrivateKey1,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
-      const payableValue = 100;
+      const penalty = 10;
 
       let executionStatus = await tokenHolder.revertRedemption.call(
         redeemMessageHash,
@@ -479,7 +469,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         EthUtils.bufferToHex(rsv.r),
         EthUtils.bufferToHex(rsv.s),
         {
-          value: payableValue,
+          value: penalty,
           from: facilitator,
         }
       );
@@ -493,14 +483,14 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         EthUtils.bufferToHex(rsv.r),
         EthUtils.bufferToHex(rsv.s),
         {
-          value: payableValue,
+          value: penalty,
           from: facilitator,
         }
       );
 
       assert.strictEqual(redeemReceipt.receipt.status, true);
-      const contractPayableValue = await mockRule.receivedPayableAmount.call();
-      assert.strictEqual(contractPayableValue.cmp(new BN(payableValue)), 0);
+      const contractPenalty = await coGateway.receivedPayableAmount.call();
+      assert.strictEqual(contractPenalty.cmp(new BN(penalty)), 0);
 
     });
 
@@ -525,9 +515,11 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         deltaExpirationHeight,
       );
 
-      const nonce = 1;
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
+      let nonce = keyData.nonce.add(new BN(1));
+
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRevertRedemptionPayableRule(
         accountProvider,
@@ -537,9 +529,9 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         ephemeralPrivateKey1,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
-      const payableValue = 100;
+      const penalty = 10;
 
       const executionStatus = await tokenHolder.revertRedemption.call(
         redeemMessageHash,
@@ -548,7 +540,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         EthUtils.bufferToHex(rsv.r),
         EthUtils.bufferToHex(rsv.s),
         {
-          value: payableValue,
+          value: penalty,
           from: facilitator,
         }
       );
@@ -560,7 +552,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         EthUtils.bufferToHex(rsv.r),
         EthUtils.bufferToHex(rsv.s),
         {
-          value: payableValue,
+          value: penalty,
           from: facilitator,
         }
       );
@@ -592,9 +584,11 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         deltaExpirationHeight,
       );
 
-      const nonce = 1;
+      const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
+      let nonce = keyData.nonce.add(new BN(1));
+
       const {
-        mockRule,
+        coGateway,
         rsv,
       } = await prepareRevertRedemptionPayableRule(
         accountProvider,
@@ -604,9 +598,10 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         ephemeralPrivateKey1,
       );
 
-      await token.setCoGateway(mockRule.address);
+      await token.setCoGateway(coGateway.address);
 
-      const payableValue = 0;
+      // Penalty is leass than actual penalty value.
+      const penalty = 5;
       let redeemReceipt = await tokenHolder.revertRedemption(
         redeemMessageHash,
         nonce,
@@ -614,7 +609,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
         EthUtils.bufferToHex(rsv.r),
         EthUtils.bufferToHex(rsv.s),
         {
-          value: payableValue,
+          value: penalty,
           from: facilitator,
         }
       );

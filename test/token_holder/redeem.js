@@ -172,8 +172,7 @@ contract('TokenHolder::redeem', async (accounts) => {
       gasPrice = 10,
       gasLimit = 10,
       redeemerNonce = 1,
-      hashLock = web3.utils.soliditySha3('hl'),
-      nonce = 1;
+      hashLock = web3.utils.soliditySha3('hl');
 
     it('Reverts if ExTx is signed with non-authorized key.', async () => {
 

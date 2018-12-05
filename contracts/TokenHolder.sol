@@ -136,10 +136,10 @@ contract TokenHolder is MultiSigWallet {
     );
 
     /**
-     *  Using COGATEWAY_REVERT_REDEMPTION_CALLPREFIX CoGateway.RevertRedemption
+     *  Using COGATEWAY_REVERT_REDEMPTION_SELECTOR CoGateway.RevertRedemption
      *  executable data is constructed and called.
      */
-    bytes4 public constant COGATEWAY_REVERT_REDEMPTION_CALLPREFIX = bytes4(
+    bytes4 public constant COGATEWAY_REVERT_REDEMPTION_SELECTOR = bytes4(
         keccak256(
             "revertRedemption(bytes32)"
         )
@@ -517,12 +517,12 @@ contract TokenHolder is MultiSigWallet {
     )
         public
         payable
-    returns (bool executionStatus_)
+        returns (bool executionStatus_)
     {
-        address coGateway = UtilityTokenRequiredInterface(token).coGateway();
+        address coGateway = getCoGateway();
 
         bytes memory data = abi.encodeWithSelector(
-            COGATEWAY_REVERT_REDEMPTION_CALLPREFIX,
+            COGATEWAY_REVERT_REDEMPTION_SELECTOR,
             _redeemMessageHash
         );
 
