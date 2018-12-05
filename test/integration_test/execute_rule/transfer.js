@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/** @dev  This is the integration test to perform BT transfers using transfer
+/**
+ * @dev  This is the integration test to perform BT transfers using transfer
  *        rule contract.
  *
  *        Following steps are performed in the test :-
@@ -105,11 +106,11 @@ contract('TokenHolder::executeRule', async (accounts) => {
       );
 
       // Verify the authorization of key
-      assert.equal(keyData.status, 1);
+      assert.strictEqual((keyData.status).cmp(new BN(1)), 0);
 
-      assert.equal(keyData.expirationHeight, expirationHeight);
+      assert.strictEqual((keyData.expirationHeight).cmp(new BN(expirationHeight)), 0);
 
-      assert.equal(keyData.spendingLimit, spendingLimit);
+      assert.strictEqual((keyData.spendingLimit).cmp(new BN(spendingLimit)), 0);
 
     });
 
@@ -161,7 +162,7 @@ contract('TokenHolder::executeRule', async (accounts) => {
 
     });
 
-    it('Gas used for execute rule execution', async () => {
+    it('Prints gas used for execute rule execution', async () => {
 
       utils.printGasStatistics();
 
@@ -170,3 +171,4 @@ contract('TokenHolder::executeRule', async (accounts) => {
   });
 
 });
+
