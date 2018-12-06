@@ -413,6 +413,9 @@ contract TokenHolder is MultiSigWallet {
      *      It's fetched from UtilityToken. As per requirement TokenHolder
      *      should not be tightly integrated with utility token.
      *
+     *      Reason for using .call is to consume(increment) ephemeral key
+     *      nonce in case CoGateway.redeem fails.
+     *
      * @param _amount Redeem amount that will be transferred from tokenholder
      *                account to beneficiary.
      * @param _beneficiary The address in the origin chain where the tokens
@@ -492,6 +495,9 @@ contract TokenHolder is MultiSigWallet {
      * @dev Function validates executable signed data by checking that the
      *      specified signature matches one of the
      *      authorized (non-expired) ephemeral keys.
+     *
+     *      Reason for using .call is to consume(increment) ephemeral key
+     *      nonce in case CoGateway.revertRedemption fails.
      *
      *      Function requires:
      *          - Ephemeral key is authorized.

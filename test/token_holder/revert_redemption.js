@@ -111,14 +111,14 @@ async function prepareRevertRedemptionPayableRule(
 {
   const coGateway = await MockRule.new();
 
-  const coGatewayRevertRedemptionEncodedAbi = await getRevertRedemptionDataToSign(
+  const dataToSign = await getRevertRedemptionDataToSign(
     messageHash
   );
 
   const { msgHash, rsv } = await getRevertRedemptionSignedData(
     tokenHolder,
     coGateway.address,
-    coGatewayRevertRedemptionEncodedAbi,
+    dataToSign,
     nonce,
     ephemeralKey,
   );
@@ -573,7 +573,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
     });
 
     it('Checks that TH.revertRedemption execution status is false when ' +
-      'when CoGateway execution fails.', async () => {
+      'CoGateway execution fails.', async () => {
 
       const {
         tokenHolder,
@@ -585,14 +585,15 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
       );
 
       const keyData = await tokenHolder.ephemeralKeys(ephemeralKeyAddress1);
-      let nonce = keyData.nonce.add(new BN(1));
+      let nonce = keyData.nonce.add(new BN(1)),
+        nullRedeemMessageHash = web3.utils.fromAscii(null);
 
       const {
         coGateway,
         rsv,
       } = await prepareRevertRedemptionPayableRule(
         accountProvider,
-        redeemMessageHash,
+        nullRedeemMessageHash,
         tokenHolder,
         nonce,
         ephemeralPrivateKey1,
@@ -600,10 +601,10 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
 
       await token.setCoGateway(coGateway.address);
 
-      // Penalty is leass than actual penalty value.
-      const penalty = 5;
+      // Penalty is less than actual penalty value.
+      const penalty = 10;
       let redeemReceipt = await tokenHolder.revertRedemption(
-        redeemMessageHash,
+        nullRedeemMessageHash, // Blank bytes32 value.
         nonce,
         rsv.v,
         EthUtils.bufferToHex(rsv.r),
@@ -623,7 +624,7 @@ contract('TokenHolder::revertRedemption', async (accounts) => {
       Event.assertEqual(events[0], {
         name: 'RevertRedemptionInitiated',
         args: {
-          _redeemMessageHash: redeemMessageHash,
+          _redeemMessageHash: Utils.NULL_BYTES32,
           _ephemeralKey: ephemeralKeyAddress1,
           _executionStatus: null // web3 Returns null when execution status is false.
         },

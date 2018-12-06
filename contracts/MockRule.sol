@@ -29,7 +29,6 @@ contract MockRule {
     );
 
     uint256 constant public BOUNTY = 10;
-    uint256 constant public PENALTY = 10;
 
 
     /* Storage */
@@ -104,21 +103,23 @@ contract MockRule {
      *         are not named because of compilation warning for unused
      *         variables.
      *
+     * @param _messageHash Message hash.
+     *
      * @return redeemer_ Redeemer address.
      * @return redeemerNonce_ Redeemer nonce.
      * @return amount_ Redeem amount.
      */
     function revertRedemption(
-        bytes32
+        bytes32 _messageHash
     )
         public
         payable
         returns (bytes32, bool)
     {
-        // Below added to test executionStatus failure.
+        // Below is added to test executionStatus failure.
         require(
-            msg.value == PENALTY,
-            "msg.value must match the penalty amount"
+            _messageHash != bytes32(0),
+            "Message hash must not be zero."
         );
 
         receivedPayableAmount = msg.value;
