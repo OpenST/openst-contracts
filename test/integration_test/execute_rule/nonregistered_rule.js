@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/** @dev  This is the integration test with non-registered rules.
-
+/**
+ * @dev  This is the integration test with non-registered rules.
+ *
  *        Following steps are performed in the test :-
  *
  *        - EIP20TokenMock contract is deployed.
@@ -52,11 +53,19 @@ contract('TokenHolder::executeRule', async (accounts) => {
     ephemeralKeyAddress1,
     keyData,
     totalBalance = 500,
-    transferRule2;
+    nonRegisteredRule,
+    currentBlockNumber,
+    expirationHeight,
+    spendingLimit,
+    transferFromExecutable,
+    nextAvailableNonce,
+    currentNonce,
+    amountTransferred,
+    to;
 
   describe('ExecuteRule integration test', async () => {
 
-    it('Should fail when non-registered rule calls executerule', async () => {
+    it('Check non-registered rule address in TokenRules', async () => {
 
       accountProvider = new AccountsProvider(accounts);
 
@@ -73,7 +82,7 @@ contract('TokenHolder::executeRule', async (accounts) => {
       ephemeralPrivateKey1 = '0xa8225c01ceeaf01d7bc7c1b1b929037bd4050967c5730c0b854263121b8399f3';
       ephemeralKeyAddress1 = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
 
-      let currentBlockNumber = await web3.eth.getBlockNumber(),
+      currentBlockNumber = await web3.eth.getBlockNumber(),
         expirationHeight = currentBlockNumber + 50,
         spendingLimit = 200;
 
@@ -88,36 +97,45 @@ contract('TokenHolder::executeRule', async (accounts) => {
         ephemeralKeyAddress1,
       );
 
-      let currentNonce = keyData.nonce,
+      currentNonce = keyData.nonce,
         amountTransferred = 50;
 
-      let nextAvailableNonce = currentNonce.toNumber() + 1;
-      const to = accountProvider.get();
+      nextAvailableNonce = currentNonce.toNumber() + 1;
+      to = accountProvider.get();
 
-      const transferFromExecutable = await ExecuteRuleUtils.generateTransferFromExecutable(
+      transferFromExecutable = await ExecuteRuleUtils.generateTransferFromExecutable(
         tokenHolder.address,
         to,
         new BN(amountTransferred),
       );
 
       // It is not registered in TokenRules.
-      transferRule2 = await ExecuteRuleUtils.transferRule(tokenRules.address);
-
+      nonRegisteredRule = await ExecuteRuleUtils.transferRule(tokenRules.address);
+    
+      assert.strictEqual(
+          (await tokenRules.rulesByAddress(nonRegisteredRule.address)).exists,
+          false,
+      );
+    
+    });
+    
+    it('Should fail when non-registered rule calls executerule', async () => {
+      
       const { rsv } = await ExecuteRuleUtils.getExecuteRuleExTxData(
         tokenHolder.address,
-        transferRule2.address,
+        nonRegisteredRule.address,
         transferFromExecutable,
         new BN(nextAvailableNonce),
         ephemeralPrivateKey1,
       );
 
-      // 'to' address balance before calling executeRule method
+      // 'to' address balance before calling executeRule method.
       assert.strictEqual(
         (await eip20TokenMock.balanceOf(to)).cmp(new BN(0)),
         0,
       );
 
-      // tokenHolder balance before calling executeRule method
+      // 'tokenHolder' balance before calling executeRule method.
       assert.strictEqual(
         (await eip20TokenMock.balanceOf(tokenHolder.address)).cmp(
           new BN(totalBalance)),
@@ -125,7 +143,7 @@ contract('TokenHolder::executeRule', async (accounts) => {
       );
 
       const transactionResponse = await tokenHolder.executeRule(
-        transferRule2.address,
+        nonRegisteredRule.address,
         transferFromExecutable,
         (currentNonce.toNumber() + 1),
         rsv.v,
@@ -139,10 +157,10 @@ contract('TokenHolder::executeRule', async (accounts) => {
 
       // We should check against false here, however current version of web3
       // returns null for false values in event log. After updating web3,
-      // this test might fail and we should use false (as intended)
+      // this test might fail and we should use false (as intended).
       assert.strictEqual(events[0].args['_status'], null);
 
-      // As the rule 'transferRule2' was not registered, transfer did not
+      // As the rule 'nonRegisteredRule' was not registered, transfer did not
       // take place. So, 'to' address and tokenholder has zero tokens and 500
       // tokens respectively i.e. same number of tokens as it were before
       // 'executeRule' method was called.
