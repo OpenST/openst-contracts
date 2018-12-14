@@ -16,22 +16,45 @@ const BN = require('bn.js');
 const EthUtils = require('ethereumjs-util');
 const web3 = require('../test_lib/web3.js');
 const Utils = require('../test_lib/utils.js');
+const { TokenHolderUtils } = require('./utils.js');
 const { Event } = require('../test_lib/event_decoder');
 const { AccountProvider } = require('../test_lib/utils.js');
 
-const TokenHolder = artifacts.require('TokenHolder');
-const MockRule = artifacts.require('MockRule');
-const TokenRulesMock = artifacts.require('TokenRulesMock');
-const EIP20TokenMock = artifacts.require('EIP20TokenMock');
+const RuleMock = artifacts.require('RuleMock');
 
-const ephemeralPrivateKey1 = '0xa8225c01ceeaf01d7bc7c1b1b929037bd4050967c5730c0b854263121b8399f3';
-const ephemeralKeyAddress1 = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
-const ephemeralPrivateKey2 = '0x634011a05b2f48e2d19aba49a9dbc12766bf7dbd6111ed2abb2621c92e8cfad9';
+const sessionPublicKey1 = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
+const sessionPrivateKey1 = '0xa8225c01ceeaf01d7bc7c1b1b929037bd4050967c5730c0b854263121b8399f3';
+const sessionPublicKey2 = '0xBbfd1BF77dA692abc82357aC001415b98d123d17';
+const sessionPrivateKey2 = '0x6817f551bbc3e12b8fe36787ab192c921390d6176a3324ed02f96935a370bc41';
 
-let token;
+function generateTokenHolderAuthorizeSessionFunctionData(
+    sessionKey, spendingLimit, expirationHeight,
+) {
+    return web3.eth.abi.encodeFunctionCall(
+        {
 
-function generateEIP20PassData(spender, value) {
+            name: 'authorizeSession',
+            type: 'function',
+            inputs: [
+                {
+                    type: 'address',
+                    name: 'sessionKey',
+                },
+                {
+                    type: 'uint256',
+                    name: 'spendingLimit',
+                },
+                {
+                    type: 'uint256',
+                    name: 'expirationHeight',
+                },
+            ],
+        },
+        [sessionKey, spendingLimit, expirationHeight],
+    );
+}
 
+function generateUtilityTokenApproveFunctionData(spender, value) {
     return web3.eth.abi.encodeFunctionCall(
         {
 
@@ -40,20 +63,19 @@ function generateEIP20PassData(spender, value) {
             inputs: [
                 {
                     type: 'address',
-                    name: 'spender'
+                    name: 'spender',
                 },
                 {
                     type: 'uint256',
-                    name: 'value'
-                }
-            ]
+                    name: 'value',
+                },
+            ],
         },
-        [spender, value]
+        [spender, value],
     );
-
 }
 
-function generateMockRulePassActionData(value) {
+function generateMockRulePassFunctionData(value) {
     return web3.eth.abi.encodeFunctionCall(
         {
             name: 'pass',
@@ -69,7 +91,7 @@ function generateMockRulePassActionData(value) {
     );
 }
 
-function generateMockRulePassPayableActionData(value) {
+function generateMockRulePassPayableFunctionData(value) {
     return web3.eth.abi.encodeFunctionCall(
         {
             name: 'passPayable',
@@ -85,7 +107,7 @@ function generateMockRulePassPayableActionData(value) {
     );
 }
 
-function generateMockRuleFailActionData(value) {
+function generateMockRuleFailFunctionData(value) {
     return web3.eth.abi.encodeFunctionCall(
         {
             name: 'fail',
@@ -101,7 +123,7 @@ function generateMockRuleFailActionData(value) {
     );
 }
 
-function generateExecuteRuleCallPrefix() {
+function generateTokenHolderExecuteRuleCallPrefix() {
     return web3.eth.abi.encodeFunctionSignature({
         name: 'executeRule',
         type: 'function',
@@ -128,200 +150,157 @@ function generateExecuteRuleCallPrefix() {
     });
 }
 
-function getExecuteRuleExTxHash(
-    tokenHolderAddress, ruleAddress, ruleData, nonce,
+async function generateTokenHolderAuthorizeSessionFunctionExTx(
+    tokenHolder, nonce, sessionPrivateKey,
+    newSessionPublicKey, newSessionSpendingLimit, newSessionExpirationHeight,
 ) {
-    return web3.utils.soliditySha3(
-        {
-            t: 'bytes1', v: '0x19',
-        },
-        {
-            t: 'bytes1', v: '0x0',
-        },
-        {
-            t: 'address', v: tokenHolderAddress,
-        },
-        {
-            t: 'address', v: ruleAddress,
-        },
-        {
-            t: 'uint8', v: 0,
-        },
-        {
-            t: 'bytes32', v: web3.utils.keccak256(ruleData),
-        },
-        {
-            t: 'uint256', v: nonce,
-        },
-        {
-            t: 'uint8', v: 0,
-        },
-        {
-            t: 'uint8', v: 0,
-        },
-        {
-            t: 'uint8', v: 0,
-        },
-        {
-            t: 'bytes4', v: generateExecuteRuleCallPrefix(),
-        },
-        {
-            t: 'uint8', v: 0,
-        },
-        {
-            t: 'bytes32', v: '0x0',
-        },
-    );
-}
-
-function getExecuteRuleExTxData(
-    _tokenHolderAddress, _ruleAddress, _ruleData, _nonce, _ephemeralKey,
-) {
-    const msgHash = getExecuteRuleExTxHash(
-        _tokenHolderAddress, _ruleAddress, _ruleData, _nonce,
+    const tokenHolderAuthorizeSessionFunctionData = generateTokenHolderAuthorizeSessionFunctionData(
+        newSessionPublicKey, newSessionSpendingLimit, newSessionExpirationHeight,
     );
 
-    const rsv = EthUtils.ecsign(
-        EthUtils.toBuffer(msgHash),
-        EthUtils.toBuffer(_ephemeralKey),
-    );
-
-    return { msgHash, rsv };
-}
-
-async function createTokenHolder(
-    accountProvider, _ephemeralKeyAddress, _spendingLimit, _deltaExpirationHeight,
-) {
-    token = await EIP20TokenMock.new(1, 1, 'OST', 'Open Simple Token', 1);
-    const tokenRules = await TokenRulesMock.new();
-    const required = 1;
-    const registeredWallet0 = accountProvider.get();
-    const wallets = [registeredWallet0];
-
-    const tokenHolder = await TokenHolder.new(
-        token.address,
-        tokenRules.address,
-        wallets,
-        required,
-    );
-
-    const blockNumber = await web3.eth.getBlockNumber();
-
-    await tokenHolder.submitAuthorizeSession(
-        _ephemeralKeyAddress,
-        _spendingLimit,
-        blockNumber + _deltaExpirationHeight,
-        { from: registeredWallet0 },
+    const { exTxHash, exTxSignature } = Utils.generateExTx(
+        tokenHolder.address,
+        tokenHolder.address,
+        tokenHolderAuthorizeSessionFunctionData,
+        nonce,
+        generateTokenHolderExecuteRuleCallPrefix(),
+        sessionPrivateKey,
     );
 
     return {
+        tokenHolderAuthorizeSessionFunctionData,
+        exTxHash,
+        exTxSignature,
+    };
+}
+
+async function generateUtilityTokenApproveFunctionExTx(
+    tokenHolder, nonce, sessionPrivateKey,
+    spender, amount,
+) {
+    const utilityTokenApproveFunctionData = generateUtilityTokenApproveFunctionData(
+        spender, amount,
+    );
+
+    const tokenAddress = await tokenHolder.token();
+
+    const { exTxHash, exTxSignature } = Utils.generateExTx(
+        tokenHolder.address,
+        tokenAddress,
+        utilityTokenApproveFunctionData,
+        nonce,
+        generateTokenHolderExecuteRuleCallPrefix(),
+        sessionPrivateKey,
+    );
+
+    return {
+        utilityTokenApproveFunctionData,
+        exTxHash,
+        exTxSignature,
+    };
+}
+
+async function generateMockRulePassFunctionExTx(
+    tokenHolder, nonce, sessionKey,
+    mockRule, mockRuleValue,
+) {
+    const mockRulePassFunctionData = generateMockRulePassFunctionData(
+        mockRuleValue,
+    );
+
+    const { exTxHash, exTxSignature } = Utils.generateExTx(
+        tokenHolder.address,
+        mockRule.address,
+        mockRulePassFunctionData,
+        nonce,
+        generateTokenHolderExecuteRuleCallPrefix(),
+        sessionKey,
+    );
+
+    return {
+        mockRulePassFunctionData,
+        exTxHash,
+        exTxSignature,
+    };
+}
+
+async function generateMockRulePassPayableFunctionExTx(
+    tokenHolder, nonce, sessionKey,
+    mockRule, mockRuleValue,
+) {
+    const mockRulePassPayableFunctionData = generateMockRulePassPayableFunctionData(
+        mockRuleValue,
+    );
+
+    const { exTxHash, exTxSignature } = Utils.generateExTx(
+        tokenHolder.address,
+        mockRule.address,
+        mockRulePassPayableFunctionData,
+        nonce,
+        generateTokenHolderExecuteRuleCallPrefix(),
+        sessionKey,
+    );
+
+    return {
+        mockRulePassPayableFunctionData,
+        exTxHash,
+        exTxSignature,
+    };
+}
+
+async function generateMockRuleFailFunctionExTx(
+    tokenHolder, nonce, sessionKey,
+    mockRule, mockRuleValue,
+) {
+    const mockRuleFailFunctionData = generateMockRuleFailFunctionData(
+        mockRuleValue,
+    );
+
+    const { exTxHash, exTxSignature } = Utils.generateExTx(
+        tokenHolder.address,
+        mockRule.address,
+        mockRuleFailFunctionData,
+        nonce,
+        generateTokenHolderExecuteRuleCallPrefix(),
+        sessionKey,
+    );
+
+    return {
+        mockRuleFailFunctionData,
+        exTxHash,
+        exTxSignature,
+    };
+}
+
+async function prepare(
+    accountProvider,
+    spendingLimit, deltaExpirationHeight,
+    sessionPublicKeyToAuthorize,
+) {
+    const { utilityToken } = await TokenHolderUtils.createUtilityMockToken();
+
+    const { tokenRules } = await TokenHolderUtils.createMockTokenRules();
+
+    const {
+        tokenHolderOwnerAddress,
         tokenHolder,
-        registeredWallet0,
-    };
-}
-
-async function prepareEIP20PassData(
-    accountProvider, tokenHolder, nonce, ephemeralKey,
-) {
-
-    const spender = accountProvider.get();
-    const amount = 100;
-    const eip20PassActionData = generateEIP20PassData(
-        spender, amount
+    } = await TokenHolderUtils.createTokenHolder(
+        accountProvider,
+        utilityToken, tokenRules,
+        spendingLimit, deltaExpirationHeight,
+        sessionPublicKeyToAuthorize,
     );
 
-    const { msgHash, rsv } = getExecuteRuleExTxData(
-        tokenHolder.address,
-        token.address,
-        eip20PassActionData,
-        nonce,
-        ephemeralKey
+    await TokenHolderUtils.authorizeSessionKey(
+        tokenHolder, tokenHolderOwnerAddress,
+        sessionPublicKeyToAuthorize, spendingLimit, deltaExpirationHeight,
     );
 
     return {
-        token,
-        spender,
-        eip20PassActionData,
-        msgHash,
-        rsv
-    };
-}
-
-async function preparePassRule(
-    accountProvider, tokenHolder, nonce, ephemeralKey,
-) {
-    const mockRule = await MockRule.new();
-    const mockRuleValue = accountProvider.get();
-    const mockRulePassActionData = generateMockRulePassActionData(
-        mockRuleValue,
-    );
-
-    const { msgHash, rsv } = getExecuteRuleExTxData(
-        tokenHolder.address,
-        mockRule.address,
-        mockRulePassActionData,
-        nonce,
-        ephemeralKey,
-    );
-
-    return {
-        mockRule,
-        mockRuleValue,
-        mockRulePassActionData,
-        msgHash,
-        rsv,
-    };
-}
-
-async function preparePassPayableRule(
-    accountProvider, tokenHolder, nonce, ephemeralKey,
-) {
-    const mockRule = await MockRule.new();
-    const mockRuleValue = accountProvider.get();
-    const mockRulePassActionData = generateMockRulePassPayableActionData(
-        mockRuleValue,
-    );
-
-    const { msgHash, rsv } = getExecuteRuleExTxData(
-        tokenHolder.address,
-        mockRule.address,
-        mockRulePassActionData,
-        nonce,
-        ephemeralKey,
-    );
-
-    return {
-        mockRule,
-        mockRuleValue,
-        mockRulePassActionData,
-        msgHash,
-        rsv,
-    };
-}
-
-async function prepareFailRule(
-    accountProvider, tokenHolder, nonce, ephemeralKey,
-) {
-    const mockRule = await MockRule.new();
-    const mockRuleValue = accountProvider.get();
-    const mockRuleFailActionData = generateMockRuleFailActionData(
-        mockRuleValue,
-    );
-
-    const { msgHash, rsv } = getExecuteRuleExTxData(
-        tokenHolder.address,
-        mockRule.address,
-        mockRuleFailActionData,
-        nonce,
-        ephemeralKey,
-    );
-
-    return {
-        mockRule,
-        mockRuleValue,
-        mockRuleFailActionData,
-        msgHash,
-        rsv,
+        utilityToken,
+        tokenRules,
+        tokenHolderOwnerAddress,
+        tokenHolder,
     };
 }
 
@@ -330,62 +309,66 @@ contract('TokenHolder::executeRule', async () => {
         const accountProvider = new AccountProvider(accounts);
 
         it('Reverts if ExTx is signed with non-authorized key.', async () => {
-            const spendingLimit = 10;
-            const deltaExpirationHeight = 50;
-
-            const { tokenHolder } = await createTokenHolder(
+            const {
+                tokenHolder,
+            } = await prepare(
                 accountProvider,
-                ephemeralKeyAddress1,
-                spendingLimit,
-                deltaExpirationHeight,
+                10, /* spendingLimit */
+                50, /* deltaExpirationHeight */
+                sessionPublicKey1,
             );
 
             const nonce = 1;
+
+            const mockRule = await RuleMock.new();
+            const mockRuleValue = accountProvider.get();
+
             const {
+                mockRulePassFunctionData,
+                exTxSignature,
+            } = await generateMockRulePassFunctionExTx(
+                tokenHolder, nonce, sessionPrivateKey2,
                 mockRule,
-                mockRulePassActionData,
-                rsv,
-            } = await preparePassRule(
-                accountProvider,
-                tokenHolder,
-                nonce,
-                ephemeralPrivateKey2,
+                mockRuleValue,
             );
 
             await Utils.expectRevert(
                 tokenHolder.executeRule(
                     mockRule.address,
-                    mockRulePassActionData,
+                    mockRulePassFunctionData,
                     nonce,
-                    rsv.v,
-                    EthUtils.bufferToHex(rsv.r),
-                    EthUtils.bufferToHex(rsv.s),
+                    exTxSignature.v,
+                    EthUtils.bufferToHex(exTxSignature.r),
+                    EthUtils.bufferToHex(exTxSignature.s),
                 ),
                 'Should revert as ExTx is signed with non-authorized key.',
-                'Ephemeral key is not active.',
+                'Session key is not active.',
             );
         });
 
         it('Reverts if ExTx is signed with authorized but expired key.', async () => {
-            const spendingLimit = 10;
             const deltaExpirationHeight = 10;
-            const { tokenHolder } = await createTokenHolder(
+            const {
+                tokenHolder,
+            } = await prepare(
                 accountProvider,
-                ephemeralKeyAddress1,
-                spendingLimit,
+                10, /* spendingLimit */
                 deltaExpirationHeight,
+                sessionPublicKey1,
             );
 
             const nonce = 1;
+
+            const mockRule = await RuleMock.new();
+            const mockRuleValue = accountProvider.get();
+
             const {
+                mockRulePassFunctionData,
+                exTxSignature,
+            } = await generateMockRulePassFunctionExTx(
+                tokenHolder, nonce, sessionPrivateKey2,
                 mockRule,
-                mockRulePassActionData,
-                rsv,
-            } = await preparePassRule(
-                accountProvider,
-                tokenHolder,
-                nonce,
-                ephemeralPrivateKey2,
+                mockRuleValue,
             );
 
             for (let i = 0; i < deltaExpirationHeight; i += 1) {
@@ -396,139 +379,139 @@ contract('TokenHolder::executeRule', async () => {
             await Utils.expectRevert(
                 tokenHolder.executeRule(
                     mockRule.address,
-                    mockRulePassActionData,
+                    mockRulePassFunctionData,
                     nonce,
-                    rsv.v,
-                    EthUtils.bufferToHex(rsv.r),
-                    EthUtils.bufferToHex(rsv.s),
+                    exTxSignature.v,
+                    EthUtils.bufferToHex(exTxSignature.r),
+                    EthUtils.bufferToHex(exTxSignature.s),
                 ),
                 'Should revert as transaction is signed with expired key.',
-                'Ephemeral key is not active.',
+                'Session key is not active.',
             );
         });
 
-        it('Reverts if transaction signed with revoked key.', async () => {
-            const spendingLimit = 10;
-            const deltaExpirationHeight = 50;
+        it('Reverts if ExTx is signed with revoked key.', async () => {
             const {
                 tokenHolder,
-                registeredWallet0,
-            } = await createTokenHolder(
+                tokenHolderOwnerAddress,
+            } = await prepare(
                 accountProvider,
-                ephemeralKeyAddress1,
-                spendingLimit,
-                deltaExpirationHeight,
+                10, /* spendingLimit */
+                50, /* deltaExpirationHeight */
+                sessionPublicKey1,
             );
 
             await tokenHolder.revokeSession(
-                ephemeralKeyAddress1,
-                { from: registeredWallet0 },
+                sessionPublicKey1,
+                { from: tokenHolderOwnerAddress },
             );
 
-            const keyData = await tokenHolder.ephemeralKeys(
-                ephemeralKeyAddress1,
+            const keyData = await tokenHolder.sessionKeys(
+                sessionPublicKey1,
             );
 
             assert.isOk(
                 // AuthorizationStatus.REVOKED == 2
                 keyData.status.eqn(2),
-                'Because of 1-wallet-1-required setup key should be revoked.',
             );
 
             const nonce = 1;
+
+            const mockRule = await RuleMock.new();
+            const mockRuleValue = accountProvider.get();
+
             const {
+                mockRulePassFunctionData,
+                exTxSignature,
+            } = await generateMockRulePassFunctionExTx(
+                tokenHolder, nonce, sessionPrivateKey2,
                 mockRule,
-                mockRulePassActionData,
-                rsv,
-            } = await preparePassRule(
-                accountProvider,
-                tokenHolder,
-                nonce,
-                ephemeralPrivateKey1,
+                mockRuleValue,
             );
 
             await Utils.expectRevert(
                 tokenHolder.executeRule(
                     mockRule.address,
-                    mockRulePassActionData,
+                    mockRulePassFunctionData,
                     nonce,
-                    rsv.v,
-                    EthUtils.bufferToHex(rsv.r),
-                    EthUtils.bufferToHex(rsv.s),
+                    exTxSignature.v,
+                    EthUtils.bufferToHex(exTxSignature.r),
+                    EthUtils.bufferToHex(exTxSignature.s),
                 ),
                 'Should revert as transaction is signed with revoked key.',
-                'Ephemeral key is not active.',
+                'Session key is not active.',
             );
         });
 
-        it('Reverts if to address is EIP20 token', async () => {
-            const spendingLimit = 10;
-            const deltaExpirationHeight = 50;
-            const { tokenHolder } = await createTokenHolder(
+        it('Reverts if "to" address is the utility token address.', async () => {
+            const {
+                utilityToken,
+                tokenHolder,
+            } = await prepare(
                 accountProvider,
-                ephemeralKeyAddress1,
-                spendingLimit,
-                deltaExpirationHeight,
+                10, /* spendingLimit */
+                50, /* deltaExpirationHeight */
+                sessionPublicKey1,
             );
 
-            // Correct nonce is 1.
             const nonce = 1;
+
             const {
-                token: EIP20Token,
-                eip20PassActionData: eip20TokenBalanceOfData,
-                rsv: rsv,
-            } = await prepareEIP20PassData(
-                accountProvider,
-                tokenHolder,
-                nonce,
-                ephemeralPrivateKey1,
+                utilityTokenApproveFunctionData,
+                exTxSignature,
+            } = await generateUtilityTokenApproveFunctionExTx(
+                tokenHolder, nonce, sessionPrivateKey1,
+                accountProvider.get(), /* spender */
+                1, /* amount */
             );
 
             await Utils.expectRevert(
                 tokenHolder.executeRule(
-                    EIP20Token.address,
-                    eip20TokenBalanceOfData,
+                    utilityToken.address,
+                    utilityTokenApproveFunctionData,
                     nonce,
-                    rsv.v,
-                    EthUtils.bufferToHex(rsv.r),
-                    EthUtils.bufferToHex(rsv.s),
+                    exTxSignature.v,
+                    EthUtils.bufferToHex(exTxSignature.r),
+                    EthUtils.bufferToHex(exTxSignature.s),
                 ),
-                'Should revert if to address is EIP20 token.',
-                'to address can\'t be EIP20 token.'
+                'Should revert if "to" address is utility token address.',
+                '\'to\' address is utility token address.',
             );
-
         });
+
         it('Reverts if ExTx is signed with a wrong nonce.', async () => {
-            const spendingLimit = 10;
-            const deltaExpirationHeight = 50;
-            const { tokenHolder } = await createTokenHolder(
+            const {
+                tokenHolder,
+            } = await prepare(
                 accountProvider,
-                ephemeralKeyAddress1,
-                spendingLimit,
-                deltaExpirationHeight,
+                10, /* spendingLimit */
+                50, /* deltaExpirationHeight */
+                sessionPublicKey1,
             );
 
             // Correct nonce is 1.
             const invalidNonce0 = 0;
+
+            const mockRule0 = await RuleMock.new();
+            const mockRuleValue0 = accountProvider.get();
+
             const {
-                mockRule: mockRule0,
-                mockRulePassActionData: mockRulePassActionData0,
-                rsv: rsv0,
-            } = await preparePassRule(
-                accountProvider,
-                tokenHolder,
-                invalidNonce0,
-                ephemeralPrivateKey1,
+                mockRulePassFunctionData: mockRulePassFunctionData0,
+                exTxSignature: exTxSignature0,
+            } = await generateMockRulePassFunctionExTx(
+                tokenHolder, invalidNonce0, sessionPrivateKey1,
+                mockRule0,
+                mockRuleValue0,
             );
 
             await Utils.expectRevert(
                 tokenHolder.executeRule(
                     mockRule0.address,
-                    mockRulePassActionData0,
+                    mockRulePassFunctionData0,
                     invalidNonce0,
-                    rsv0.v,
-                    EthUtils.bufferToHex(rsv0.r),
-                    EthUtils.bufferToHex(rsv0.s),
+                    exTxSignature0.v,
+                    EthUtils.bufferToHex(exTxSignature0.r),
+                    EthUtils.bufferToHex(exTxSignature0.s),
                 ),
                 'Should revert as ExTx is signed with a wrong nonce.',
                 'The next nonce is not provided.',
@@ -536,63 +519,66 @@ contract('TokenHolder::executeRule', async () => {
 
             // correct nonce is 1.
             const invalidNonce2 = 2;
+
+            const mockRule2 = await RuleMock.new();
+            const mockRuleValue2 = accountProvider.get();
+
             const {
-                mockRule: mockRule2,
-                mockRulePassActionData: mockRulePassActionData2,
-                rsv: rsv2,
-            } = await preparePassRule(
-                accountProvider,
-                tokenHolder,
-                invalidNonce2,
-                ephemeralPrivateKey1,
+                mockRulePassFunctionData: mockRulePassFunctionData2,
+                exTxSignature: exTxSignature2,
+            } = await generateMockRulePassFunctionExTx(
+                tokenHolder, invalidNonce2, sessionPrivateKey1,
+                mockRule2,
+                mockRuleValue2,
             );
 
             await Utils.expectRevert(
                 tokenHolder.executeRule(
                     mockRule2.address,
-                    mockRulePassActionData2,
+                    mockRulePassFunctionData2,
                     invalidNonce2,
-                    rsv2.v,
-                    EthUtils.bufferToHex(rsv2.r),
-                    EthUtils.bufferToHex(rsv2.s),
+                    exTxSignature2.v,
+                    EthUtils.bufferToHex(exTxSignature2.r),
+                    EthUtils.bufferToHex(exTxSignature2.s),
                 ),
                 'Should revert as ExTx is signed with a wrong nonce.',
                 'The next nonce is not provided.',
             );
         });
 
-        it('Reverts if ExTx targets itself (TokenHolder)', async () => {
-            const spendingLimit = 10;
-            const deltaExpirationHeight = 50;
-            const { tokenHolder } = await createTokenHolder(
+        it('Reverts if "to" is TokenHolder address itself', async () => {
+            const {
+                tokenHolder,
+            } = await prepare(
                 accountProvider,
-                ephemeralKeyAddress1,
-                spendingLimit,
-                deltaExpirationHeight,
+                10, /* spendingLimit */
+                50, /* deltaExpirationHeight */
+                sessionPublicKey1,
             );
 
             const nonce = 1;
+
             const {
-                mockRulePassActionData: mockRulePassActionData,
-                rsv: rsv,
-            } = await preparePassRule(
-                accountProvider,
-                tokenHolder,
-                nonce,
-                ephemeralPrivateKey1,
+                tokenHolderAuthorizeSessionFunctionData,
+                exTxSignature,
+            } = await generateTokenHolderAuthorizeSessionFunctionExTx(
+                tokenHolder, nonce, sessionPrivateKey1,
+                sessionPublicKey2, /* new session key. */
+                20, /* spending limit for new session. */
+                200, /* expiration height for new session. */
             );
 
             await Utils.expectRevert(
                 tokenHolder.executeRule(
                     tokenHolder.address,
-                    mockRulePassActionData,
+                    tokenHolderAuthorizeSessionFunctionData,
                     nonce,
-                    rsv.v,
-                    EthUtils.bufferToHex(rsv.r),
-                    EthUtils.bufferToHex(rsv.s),
+                    exTxSignature.v,
+                    EthUtils.bufferToHex(exTxSignature.r),
+                    EthUtils.bufferToHex(exTxSignature.s),
                 ),
-                'Should revert as ExTx target is TokenHolder itself.',
-                'to address can\'t be TokenHolder itself.',
+                'Should revert if "to" address is TokenHolder address itself.',
+                '\'to\' address is TokenHolder address itself.',
             );
         });
     });
@@ -601,35 +587,37 @@ contract('TokenHolder::executeRule', async () => {
         const accountProvider = new AccountProvider(accounts);
 
         it('Emits RuleExecuted event with successful execution status.', async () => {
-            const spendingLimit = 10;
-            const deltaExpirationHeight = 50;
-            const { tokenHolder } = await createTokenHolder(
+            const {
+                tokenHolder,
+            } = await prepare(
                 accountProvider,
-                ephemeralKeyAddress1,
-                spendingLimit,
-                deltaExpirationHeight,
+                10, /* spendingLimit */
+                50, /* deltaExpirationHeight */
+                sessionPublicKey1,
             );
 
+            // correct nonce is 1.
             const nonce = 1;
+
+            const mockRule = await RuleMock.new();
+            const mockRuleValue = accountProvider.get();
+
             const {
-                mockRule,
-                mockRulePassActionData,
-                msgHash,
-                rsv,
-            } = await preparePassRule(
-                accountProvider,
-                tokenHolder,
-                nonce,
-                ephemeralPrivateKey1,
+                mockRulePassFunctionData,
+                exTxHash,
+                exTxSignature,
+            } = await generateMockRulePassFunctionExTx(
+                tokenHolder, nonce, sessionPrivateKey1,
+                mockRule, mockRuleValue,
             );
 
             const transactionResponse = await tokenHolder.executeRule(
                 mockRule.address,
-                mockRulePassActionData,
+                mockRulePassFunctionData,
                 nonce,
-                rsv.v,
-                EthUtils.bufferToHex(rsv.r),
-                EthUtils.bufferToHex(rsv.s),
+                exTxSignature.v,
+                EthUtils.bufferToHex(exTxSignature.r),
+                EthUtils.bufferToHex(exTxSignature.s),
             );
 
             const events = Event.decodeTransactionResponse(
@@ -642,49 +630,52 @@ contract('TokenHolder::executeRule', async () => {
             );
 
             const passCallPrefix = await mockRule.PASS_CALLPREFIX.call();
+
             Event.assertEqual(events[0], {
                 name: 'RuleExecuted',
                 args: {
                     _to: mockRule.address,
                     _functionSelector: passCallPrefix,
-                    _ephemeralKey: ephemeralKeyAddress1,
+                    _sessionKey: sessionPublicKey1,
                     _nonce: new BN(nonce),
-                    _messageHash: msgHash,
+                    _messageHash: exTxHash,
                     _status: true,
                 },
             });
         });
 
         it('Emits RuleExecuted event with failed execution status.', async () => {
-            const spendingLimit = 10;
-            const deltaExpirationHeight = 50;
-            const { tokenHolder } = await createTokenHolder(
+            const {
+                tokenHolder,
+            } = await prepare(
                 accountProvider,
-                ephemeralKeyAddress1,
-                spendingLimit,
-                deltaExpirationHeight,
+                10, /* spendingLimit */
+                50, /* deltaExpirationHeight */
+                sessionPublicKey1,
             );
 
+            // correct nonce is 1.
             const nonce = 1;
+
+            const mockRule = await RuleMock.new();
+            const mockRuleValue = accountProvider.get();
+
             const {
-                mockRule,
-                mockRuleFailActionData,
-                msgHash,
-                rsv,
-            } = await prepareFailRule(
-                accountProvider,
-                tokenHolder,
-                nonce,
-                ephemeralPrivateKey1,
+                mockRuleFailFunctionData,
+                exTxHash,
+                exTxSignature,
+            } = await generateMockRuleFailFunctionExTx(
+                tokenHolder, nonce, sessionPrivateKey1,
+                mockRule, mockRuleValue,
             );
 
             const transactionResponse = await tokenHolder.executeRule(
                 mockRule.address,
-                mockRuleFailActionData,
+                mockRuleFailFunctionData,
                 nonce,
-                rsv.v,
-                EthUtils.bufferToHex(rsv.r),
-                EthUtils.bufferToHex(rsv.s),
+                exTxSignature.v,
+                EthUtils.bufferToHex(exTxSignature.r),
+                EthUtils.bufferToHex(exTxSignature.s),
             );
 
             const events = Event.decodeTransactionResponse(
@@ -701,9 +692,9 @@ contract('TokenHolder::executeRule', async () => {
                 args: {
                     _to: mockRule.address,
                     _functionSelector: await mockRule.FAIL_CALLPREFIX.call(),
-                    _ephemeralKey: ephemeralKeyAddress1,
+                    _sessionKey: sessionPublicKey1,
                     _nonce: new BN(nonce),
-                    _messageHash: msgHash,
+                    _messageHash: exTxHash,
                     // We should check against false here, however
                     // current version of web3 returns null for false values
                     // in event log. After updating web3, this test might
@@ -718,35 +709,36 @@ contract('TokenHolder::executeRule', async () => {
         const accountProvider = new AccountProvider(accounts);
 
         it('Checks that rule is actually executed.', async () => {
-            const spendingLimit = 10;
-            const deltaExpirationHeight = 50;
-            const { tokenHolder } = await createTokenHolder(
+            const {
+                tokenHolder,
+            } = await prepare(
                 accountProvider,
-                ephemeralKeyAddress1,
-                spendingLimit,
-                deltaExpirationHeight,
+                10, /* spendingLimit */
+                50, /* deltaExpirationHeight */
+                sessionPublicKey1,
             );
 
+            // correct nonce is 1.
             const nonce = 1;
+
+            const mockRule = await RuleMock.new();
+            const mockRuleValue = accountProvider.get();
+
             const {
-                mockRule,
-                mockRuleValue,
-                mockRulePassActionData,
-                rsv,
-            } = await preparePassRule(
-                accountProvider,
-                tokenHolder,
-                nonce,
-                ephemeralPrivateKey1,
+                mockRulePassFunctionData,
+                exTxSignature,
+            } = await generateMockRulePassFunctionExTx(
+                tokenHolder, nonce, sessionPrivateKey1,
+                mockRule, mockRuleValue,
             );
 
             await tokenHolder.executeRule(
                 mockRule.address,
-                mockRulePassActionData,
+                mockRulePassFunctionData,
                 nonce,
-                rsv.v,
-                EthUtils.bufferToHex(rsv.r),
-                EthUtils.bufferToHex(rsv.s),
+                exTxSignature.v,
+                EthUtils.bufferToHex(exTxSignature.r),
+                EthUtils.bufferToHex(exTxSignature.s),
             );
 
             assert.strictEqual(
@@ -756,36 +748,37 @@ contract('TokenHolder::executeRule', async () => {
         });
 
         it('Checks that payable rule is actually executed.', async () => {
-            const spendingLimit = 10;
-            const deltaExpirationHeight = 50;
-            const { tokenHolder } = await createTokenHolder(
+            const {
+                tokenHolder,
+            } = await prepare(
                 accountProvider,
-                ephemeralKeyAddress1,
-                spendingLimit,
-                deltaExpirationHeight,
+                10, /* spendingLimit */
+                50, /* deltaExpirationHeight */
+                sessionPublicKey1,
             );
 
+            // correct nonce is 1.
             const nonce = 1;
+
+            const mockRule = await RuleMock.new();
+            const mockRuleValue = accountProvider.get();
+
             const {
-                mockRule,
-                mockRuleValue,
-                mockRulePassActionData,
-                rsv,
-            } = await preparePassPayableRule(
-                accountProvider,
-                tokenHolder,
-                nonce,
-                ephemeralPrivateKey1,
+                mockRulePassPayableFunctionData,
+                exTxSignature,
+            } = await generateMockRulePassPayableFunctionExTx(
+                tokenHolder, nonce, sessionPrivateKey1,
+                mockRule, mockRuleValue,
             );
 
             const payableValue = 111;
             await tokenHolder.executeRule(
                 mockRule.address,
-                mockRulePassActionData,
+                mockRulePassPayableFunctionData,
                 nonce,
-                rsv.v,
-                EthUtils.bufferToHex(rsv.r),
-                EthUtils.bufferToHex(rsv.s),
+                exTxSignature.v,
+                EthUtils.bufferToHex(exTxSignature.r),
+                EthUtils.bufferToHex(exTxSignature.s),
                 {
                     value: payableValue,
                 },
@@ -806,34 +799,36 @@ contract('TokenHolder::executeRule', async () => {
         const accountProvider = new AccountProvider(accounts);
 
         it('Checks that return value is true in case of successfull execution.', async () => {
-            const spendingLimit = 10;
-            const deltaExpirationHeight = 50;
-            const { tokenHolder } = await createTokenHolder(
+            const {
+                tokenHolder,
+            } = await prepare(
                 accountProvider,
-                ephemeralKeyAddress1,
-                spendingLimit,
-                deltaExpirationHeight,
+                10, /* spendingLimit */
+                50, /* deltaExpirationHeight */
+                sessionPublicKey1,
             );
 
+            // correct nonce is 1.
             const nonce = 1;
+
+            const mockRule = await RuleMock.new();
+            const mockRuleValue = accountProvider.get();
+
             const {
-                mockRule,
-                mockRulePassActionData,
-                rsv,
-            } = await preparePassRule(
-                accountProvider,
-                tokenHolder,
-                nonce,
-                ephemeralPrivateKey1,
+                mockRulePassFunctionData,
+                exTxSignature,
+            } = await generateMockRulePassFunctionExTx(
+                tokenHolder, nonce, sessionPrivateKey1,
+                mockRule, mockRuleValue,
             );
 
             const executionStatus = await tokenHolder.executeRule.call(
                 mockRule.address,
-                mockRulePassActionData,
+                mockRulePassFunctionData,
                 nonce,
-                rsv.v,
-                EthUtils.bufferToHex(rsv.r),
-                EthUtils.bufferToHex(rsv.s),
+                exTxSignature.v,
+                EthUtils.bufferToHex(exTxSignature.r),
+                EthUtils.bufferToHex(exTxSignature.s),
             );
 
             assert.isOk(
@@ -842,34 +837,36 @@ contract('TokenHolder::executeRule', async () => {
         });
 
         it('Checks that return value is true in case of failing execution.', async () => {
-            const spendingLimit = 10;
-            const deltaExpirationHeight = 50;
-            const { tokenHolder } = await createTokenHolder(
+            const {
+                tokenHolder,
+            } = await prepare(
                 accountProvider,
-                ephemeralKeyAddress1,
-                spendingLimit,
-                deltaExpirationHeight,
+                10, /* spendingLimit */
+                50, /* deltaExpirationHeight */
+                sessionPublicKey1,
             );
 
+            // correct nonce is 1.
             const nonce = 1;
+
+            const mockRule = await RuleMock.new();
+            const mockRuleValue = accountProvider.get();
+
             const {
-                mockRule,
-                mockRuleFailActionData,
-                rsv,
-            } = await prepareFailRule(
-                accountProvider,
-                tokenHolder,
-                nonce,
-                ephemeralPrivateKey1,
+                mockRuleFailFunctionData,
+                exTxSignature,
+            } = await generateMockRuleFailFunctionExTx(
+                tokenHolder, nonce, sessionPrivateKey1,
+                mockRule, mockRuleValue,
             );
 
             const executionStatus = await tokenHolder.executeRule.call(
                 mockRule.address,
-                mockRuleFailActionData,
+                mockRuleFailFunctionData,
                 nonce,
-                rsv.v,
-                EthUtils.bufferToHex(rsv.r),
-                EthUtils.bufferToHex(rsv.s),
+                exTxSignature.v,
+                EthUtils.bufferToHex(exTxSignature.r),
+                EthUtils.bufferToHex(exTxSignature.s),
             );
 
             assert.isNotOk(

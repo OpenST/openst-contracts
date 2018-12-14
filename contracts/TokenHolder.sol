@@ -17,7 +17,6 @@ pragma solidity ^0.4.23;
 import "./SafeMath.sol";
 import "./EIP20TokenInterface.sol";
 import "./UtilityTokenRequiredInterface.sol";
-import "./MultiSigWallet.sol";
 import "./TokenRules.sol";
 
 
@@ -26,10 +25,10 @@ import "./TokenRules.sol";
  *
  * @notice Implements executable transactions (EIP-1077) for users to interact
  *         with token rules. It enables users to authorise sessions for
- *         ephemeral keys that dapps and mainstream applications can use to
+ *         session keys that dapps and mainstream applications can use to
  *         generate token events on-chain.
  */
-contract TokenHolder is MultiSigWallet {
+contract TokenHolder {
 
     /* Usings */
 
@@ -38,32 +37,26 @@ contract TokenHolder is MultiSigWallet {
 
     /* Events */
 
-    event SessionAuthorizationSubmitted(
-        uint256 indexed _transactionID,
-        address _ephemeralKey,
-        uint256 _spendingLimit,
-        uint256 _expirationHeight
-    );
-
     event SessionRevoked(
-        address _ephemeralKey
+        address _sessionKey
     );
 
     event RuleExecuted(
         address indexed _to,
         bytes4 _functionSelector,
-        address _ephemeralKey,
+        address _sessionKey,
         uint256 _nonce,
         bytes32 _messageHash,
         bool _status
     );
 
-    event RedeemInitiated(
-        address _beneficiary,
-        uint256 _amount,
-        uint256 _redeemerNonce,
-        address _ephemeralKey,
-        bool _executionStatus
+    event RedeemExecuted(
+        address indexed _to,
+        bytes4 _functionSelector,
+        address _sessionKey,
+        uint256 _nonce,
+        bytes32 _messageHash,
+        bool _status
     );
 
 
@@ -78,8 +71,8 @@ contract TokenHolder is MultiSigWallet {
 
     /* Structs */
 
-    /** expirationHeight is the block number at which ephemeralKey expires. */
-    struct EphemeralKeyData {
+    /** expirationHeight is the block number at which sessionKey expires. */
+    struct SessionKeyData {
         uint256 spendingLimit;
         uint256 nonce;
         uint256 expirationHeight;
@@ -89,33 +82,21 @@ contract TokenHolder is MultiSigWallet {
 
     /* Constants */
 
-    bytes4 constant public AUTHORIZE_SESSION_CALLPREFIX = bytes4(
-        keccak256("authorizeSession(address,uint256,uint256)")
-    );
-
     bytes4 public constant EXECUTE_RULE_CALLPREFIX = bytes4(
         keccak256(
             "executeRule(address,bytes,uint256,uint8,bytes32,bytes32)"
         )
     );
 
-    /**
-     *  TH redeem function call prefix needed to verify signed data as per
-     *  EIP1077 proposal.
-     */
-    bytes4 public constant REDEEM_RULE_CALLPREFIX = bytes4(
+    bytes4 public constant EXECUTE_REDEEM_CALLPREFIX = bytes4(
         keccak256(
-            "redeem(uint256,address,uint256,uint256,uint256,bytes32,uint256,uint8,bytes32,bytes32)"
+            "executeRedeem(address,bytes,uint256,uint8,bytes32,bytes32)"
         )
     );
 
-    /**
-     *  Using COGATEWAY_REDEEM_SELECTOR CoGateway.Redeem executable calldata is
-     *  constructed.
-     */
-    bytes4 public constant COGATEWAY_REDEEM_SELECTOR = bytes4(
+    bytes4 public constant COGATEWAY_REDEEM_CALLPREFIX = bytes4(
         keccak256(
-            "redeem(uint256,address,address,uint256,uint256,uint256,bytes32)"
+            "redeem(uint256,address,uint256,uint256,uint256,bytes32)"
         )
     );
 
@@ -124,12 +105,21 @@ contract TokenHolder is MultiSigWallet {
 
     EIP20TokenInterface public token;
 
-    mapping(address /* key */ => EphemeralKeyData) public ephemeralKeys;
+    mapping(address /* key */ => SessionKeyData) public sessionKeys;
 
     address public tokenRules;
 
+    address public owner;
+
 
     /* Modifiers */
+
+    modifier onlyOwner()
+    {
+        require(msg.sender == owner, "Only owner is allowed to call.");
+
+        _;
+    }
 
     modifier keyIsNotNull(address _key)
     {
@@ -140,7 +130,7 @@ contract TokenHolder is MultiSigWallet {
     /** Requires that key is in authorized state. */
     modifier keyIsAuthorized(address _key)
     {
-        AuthorizationStatus status = ephemeralKeys[_key].status;
+        AuthorizationStatus status = sessionKeys[_key].status;
         require(
             status == AuthorizationStatus.AUTHORIZED,
             "Key is not authorized."
@@ -151,7 +141,7 @@ contract TokenHolder is MultiSigWallet {
     /** Requires that key was not authorized. */
     modifier keyDoesNotExist(address _key)
     {
-        AuthorizationStatus status = ephemeralKeys[_key].status;
+        AuthorizationStatus status = sessionKeys[_key].status;
         require(
             status == AuthorizationStatus.NOT_AUTHORIZED,
             "Key exists."
@@ -166,20 +156,18 @@ contract TokenHolder is MultiSigWallet {
      * @dev Constructor requires:
      *          - EIP20 token address is not null.
      *          - Token rules address is not null.
+     *          - Owner address is not null.
      *
      * @param _token EIP20 token contract address deployed for an economy.
      * @param _tokenRules Token rules contract address.
-     * @param _wallets array of wallet addresses.
-     * @param _required No of requirements for multi sig wallet.
+     * @param _owner The contract's owner address.
      */
     constructor(
         EIP20TokenInterface _token,
         address _tokenRules,
-        address[] _wallets,
-        uint256 _required
+        address _owner
     )
         public
-        MultiSigWallet(_wallets, _required)
     {
         require(
             _token != address(0),
@@ -189,100 +177,91 @@ contract TokenHolder is MultiSigWallet {
             _tokenRules != address(0),
             "TokenRules contract address is null."
         );
+        require(
+            _owner != address(0),
+            "Owner address is null."
+        );
+
         token = _token;
         tokenRules = _tokenRules;
+        owner = _owner;
     }
 
 
     /* External Functions */
 
-    /**
-     * @notice Submits a transaction for a session authorization with
-     *         the specified ephemeral key.
-     *
-     * @dev Function requires:
-     *          - Only registered wallet can call.
-     *          - The key is not null.
-     *          - The key does not exist.
-     *          - Expiration height is bigger than the current block height.
-     *
-     * @param _ephemeralKey Ephemeral key to authorize.
-     * @param _spendingLimit Spending limit of the key.
-     * @param _expirationHeight Expiration height of the ephemeral key.
-     *
-     * @return transactionID_ Newly created transaction id.
-     */
-    function submitAuthorizeSession(
-        address _ephemeralKey,
+    function authorizeSession(
+        address _sessionKey,
         uint256 _spendingLimit,
         uint256 _expirationHeight
     )
-        public
-        onlyWallet
-        keyIsNotNull(_ephemeralKey)
-        keyDoesNotExist(_ephemeralKey)
-        returns (uint256 transactionID_)
+        external
+        onlyOwner
+        keyIsNotNull(_sessionKey)
+        keyDoesNotExist(_sessionKey)
     {
         require(
             _expirationHeight > block.number,
             "Expiration height is lte to the current block height."
         );
 
-        transactionID_ = addTransaction(
-            address(this),
-            abi.encodeWithSelector(
-                AUTHORIZE_SESSION_CALLPREFIX,
-                _ephemeralKey,
-                _spendingLimit,
-                _expirationHeight
-            )
-        );
+        SessionKeyData storage keyData = sessionKeys[_sessionKey];
 
-        emit SessionAuthorizationSubmitted(
-            transactionID_,
-            _ephemeralKey,
-            _spendingLimit,
-            _expirationHeight
-        );
-
-        confirmTransaction(transactionID_);
+        keyData.spendingLimit = _spendingLimit;
+        keyData.expirationHeight = _expirationHeight;
+        keyData.nonce = 0;
+        keyData.status = AuthorizationStatus.AUTHORIZED;
     }
 
     /**
-     * @notice Revokes session for the specified ephemeral key.
+     * @notice Revokes session for the specified session key.
      *
      * @dev Function revokes the key even if it has expired.
      *      Function requires:
-     *          - Only registered wallet can call.
+     *          - Only owner can call.
      *          - The key is authorized.
      *
-     * @param _ephemeralKey Ephemeral key to revoke.
+     * @param _sessionKey Session key to revoke.
      */
-    function revokeSession(address _ephemeralKey)
+    function revokeSession(address _sessionKey)
         external
-        onlyWallet
-        keyIsAuthorized(_ephemeralKey)
+        onlyOwner
+        keyIsAuthorized(_sessionKey)
     {
-        ephemeralKeys[_ephemeralKey].status = AuthorizationStatus.REVOKED;
+        sessionKeys[_sessionKey].status = AuthorizationStatus.REVOKED;
 
-        emit SessionRevoked(_ephemeralKey);
+        emit SessionRevoked(_sessionKey);
     }
 
+    /**
+     * @notice Revokes session for the msg.sender as session key.
+     *
+     * @dev Function revokes the key even if it has expired.
+     *      Function requires:
+     *          - The session key (msg.sender) is authorized.
+     *
+     */
+    function revokeSession()
+        external
+        keyIsAuthorized(msg.sender)
+    {
+        sessionKeys[msg.sender].status = AuthorizationStatus.REVOKED;
 
-    /* Public Functions */
+        emit SessionRevoked(msg.sender);
+    }
 
     /**
-     * @notice Evaluates executable transaction signed by an ephemeral key.
+     * @notice Evaluates executable transaction signed by a session key.
      *
      * @dev As a first step, function validates executable transaction by
      *      checking that the specified signature matches one of the
-     *      authorized (non-expired) ephemeral keys.
+     *      authorized (non-expired) session keys.
      *
      *      On success, function executes transaction by calling:
      *          _to.call(_data);
      *
      *      Before execution, it approves the tokenRules as a spender
-     *      for ephemeralKey.spendingLimit amount. This allowance is cleared
+     *      for sessionKey.spendingLimit amount. This allowance is cleared
      *      after execution.
      *
      *      Function requires:
@@ -295,7 +274,7 @@ contract TokenHolder is MultiSigWallet {
      *            upon.
      * @param _data The payload of a function to be executed in the target
      *              contract.
-     * @param _nonce The nonce of an ephemeral key that was used to sign
+     * @param _nonce The nonce of an session key that was used to sign
      *               the transaction.
      *
      * @return executeStatus_ True in case of successfull execution of the
@@ -309,19 +288,23 @@ contract TokenHolder is MultiSigWallet {
         bytes32 _r,
         bytes32 _s
     )
-        public
+        external
         payable
         returns (bool executionStatus_)
     {
-        require(_to != address(token),"to address can't be EIP20 token.");
+        require(
+            _to != address(token),
+            "'to' address is utility token address."
+        );
+
         require(
             _to != address(this),
-            "to address can't be TokenHolder itself."
+            "'to' address is TokenHolder address itself."
         );
 
         bytes32 messageHash = bytes32(0);
-        address ephemeralKey = address(0);
-        (messageHash, ephemeralKey) = verifyExecutableTransaction(
+        address sessionKey = address(0);
+        (messageHash, sessionKey) = verifyExecutableTransaction(
             EXECUTE_RULE_CALLPREFIX,
             _to,
             _data,
@@ -331,13 +314,13 @@ contract TokenHolder is MultiSigWallet {
             _s
         );
 
-        EphemeralKeyData storage ephemeralKeyData = ephemeralKeys[ephemeralKey];
+        SessionKeyData storage sessionKeyData = sessionKeys[sessionKey];
 
         TokenRules(tokenRules).allowTransfers();
 
         token.approve(
             tokenRules,
-            ephemeralKeyData.spendingLimit
+            sessionKeyData.spendingLimit
         );
 
         // solium-disable-next-line security/no-call-value
@@ -352,112 +335,69 @@ contract TokenHolder is MultiSigWallet {
         emit RuleExecuted(
             _to,
             functionSelector,
-            ephemeralKey,
+            sessionKey,
             _nonce,
             messageHash,
             executionStatus_
         );
     }
 
-    /**
-     * @notice Redeems the amount to the beneficiary.
-     *
-     * @dev Function validates executable signed data by checking that the
-     *      specified signature matches one of the
-     *      authorized (non-expired) ephemeral keys.
-     *
-     *      HashLock and facilitator is not part of data which ephemeral key
-     *      is signing. User signs the data and facilitator calls redeem.
-     *      Facilitator calling redeem should provide his HashLock.
-     *
-     *      In order to redeem, tokenholder needs to approve CoGateway
-     *      contract for the redemption limit. Redeem is a payable
-     *      function. The bounty is transferred in base token.
-     *
-     *      Function requires:
-     *          - Ephemeral key is authorized.
-     *          - Ephemeral key nonce is valid.
-     *          - Redemption limit is more or equal to amount to redeem.
-     *
-     *      Update redeem signature after _facilitator argument is removed
-     *      from CoGateway.redeem() in mosaic-contracts.
-     *
-     *      CoGateway contract address is needed for redeem functionality.
-     *      It's fetched from UtilityToken. As per requirement TokenHolder
-     *      should not be tightly integrated with utility token.
-     *
-     * @param _amount Redeem amount that will be transferred from tokenholder
-     *                account to beneficiary.
-     * @param _beneficiary The address in the origin chain where the tokens
-     *                     will be released.
-     * @param _gasPrice Gas price that tokenholder is ready to pay to get the
-     *                  redemption process done.
-     * @param _gasLimit Gas limit that tokenholder is ready to pay.
-     * @param _redeemerNonce redeemerNonce is nonce of this(current)
-     *                       TokenHolder. It's stored in coGateway contract.
-     * @param _hashLock Hash Lock provided by the facilitator.
-     * @param _nonce The nonce of an ephemeral key that was used to sign
-     *               the transaction.
-     * @param _v V of the signature.
-     * @param _r R of the signature.
-     * @param _s S of the signature.
-     *
-     * @return executionStatus_ which is bool status of coGateway.redeem.
-     */
-    function redeem(
-        uint256 _amount,
-        address _beneficiary,
-        uint256 _gasPrice,
-        uint256 _gasLimit,
-        uint256 _redeemerNonce,
-        bytes32 _hashLock,
+    function executeRedeem(
+        address _to,
+        bytes _data,
         uint256 _nonce,
         uint8 _v,
         bytes32 _r,
         bytes32 _s
     )
-        public
+        external
         payable
         returns (bool executionStatus_)
     {
-        address coGateway = getCoGateway();
+        address coGateway = UtilityTokenRequiredInterface(token).coGateway();
 
-        address ephemeralKey = verifyRedeemExecutableTransaction(
-            _amount,
-            _beneficiary,
-            _gasPrice,
-            _gasLimit,
-            _redeemerNonce,
-            coGateway,
+        require(_to == coGateway,"'to' address is not coGateway address.");
+
+        bytes4 functionSelector = bytesToBytes4(_data);
+
+        require(
+            functionSelector == COGATEWAY_REDEEM_CALLPREFIX,
+            "Retrieved function selector does not match to CoGateway::redeem."
+        );
+
+        bytes32 messageHash = bytes32(0);
+        address sessionKey = address(0);
+        (messageHash, sessionKey) = verifyExecutableTransaction(
+            EXECUTE_REDEEM_CALLPREFIX,
+            _to,
+            _data,
             _nonce,
             _v,
             _r,
             _s
         );
 
-        require(
-            _amount <= ephemeralKeys[ephemeralKey].spendingLimit,
-            "Amount to redeem should be lte to spending limit."
-        );
+        SessionKeyData storage sessionKeyData = sessionKeys[sessionKey];
 
-        executionStatus_ = executeRedeem(
-            coGateway,
-            _amount,
-            _beneficiary,
-            _gasPrice,
-            _gasLimit,
-            _redeemerNonce,
-            _hashLock
-        );
+        token.approve(_to, sessionKeyData.spendingLimit);
 
-        emit RedeemInitiated(
-            _beneficiary,
-            _amount,
-            _redeemerNonce,
-            ephemeralKey,
+        // solium-disable-next-line security/no-call-value
+        executionStatus_ = _to.call.value(msg.value)(_data);
+
+        token.approve(_to, 0);
+
+        emit RedeemExecuted(
+            _to,
+            functionSelector,
+            sessionKey,
+            _nonce,
+            messageHash,
             executionStatus_
         );
     }
+
+
+    /* Public Functions */
 
     /**
      * @dev Retrieves the first 4 bytes of input byte array into byte4.
@@ -473,45 +413,6 @@ contract TokenHolder is MultiSigWallet {
         for (uint8 i = 0; i < 4; i++) {
             out_ |= bytes4(_input[i] & 0xFF) >> (i * 8);
         }
-    }
-
-    function authorizeSession(
-        address _ephemeralKey,
-        uint256 _spendingLimit,
-        uint256 _expirationHeight
-    )
-        public
-        onlyMultisig
-        keyIsNotNull(_ephemeralKey)
-        keyDoesNotExist(_ephemeralKey)
-    {
-        require(
-            _expirationHeight > block.number,
-            "Expiration height is lte to the current block height."
-        );
-
-        EphemeralKeyData storage keyData = ephemeralKeys[_ephemeralKey];
-
-        keyData.spendingLimit = _spendingLimit;
-        keyData.expirationHeight = _expirationHeight;
-        keyData.nonce = 0;
-        keyData.status = AuthorizationStatus.AUTHORIZED;
-    }
-
-    /**
-     * @notice Fetches CoGateway Address from UtilityToken.
-     *
-     * @dev Using this public method user can know coGateway address which is
-     *      needed for signing data in redeem and revertRedemption.
-     *
-     * @return CoGateway Address.
-     */
-    function getCoGateway()
-        public
-        view
-        returns (address)
-    {
-        return UtilityTokenRequiredInterface(token).coGateway();
     }
 
 
@@ -538,12 +439,12 @@ contract TokenHolder is MultiSigWallet {
 
         key_ = ecrecover(messageHash_, _v, _r, _s);
 
-        EphemeralKeyData storage keyData = ephemeralKeys[key_];
+        SessionKeyData storage keyData = sessionKeys[key_];
 
         require(
             keyData.status == AuthorizationStatus.AUTHORIZED &&
             keyData.expirationHeight > block.number,
-            "Ephemeral key is not active."
+            "Session key is not active."
         );
 
         uint256 expectedNonce = keyData.nonce.add(1);
@@ -600,113 +501,4 @@ contract TokenHolder is MultiSigWallet {
             )
         );
     }
-
-    /**
-     * @notice Constructs data and performs verification of ephemeral key.
-     *
-     * @dev redeemData doesn't include all coGateway.redeem parameters.
-     *  HashLock and facilitator are not part of data which ephemeral key is
-     *  signing as this information is not known by the user at the time of
-     *  signing. redeemData is needed to recover the ephemeral key.
-     *
-     * @param _amount Redeem amount that will be transferred from tokenholder
-     *                account.
-     * @param _beneficiary The address in the origin chain where the tokens
-     *                     will be released.
-     * @param _gasPrice Gas price that tokenholder is ready to pay to get the
-     *                  redemption process done.
-     * @param _gasLimit Gas limit that tokenholder is ready to pay.
-     * @param _redeemerNonce Nonce of the redeemer address.
-     * @param _coGateway CoGateway contract address.
-     * @param _nonce The nonce of an ephemeral key that was used to sign
-     *               the transaction.
-     * @param _v V of the signature.
-     * @param _r R of the signature.
-     * @param _s S of the signature.
-     *
-     * @return ephemeralKey_ which is bool execution status of
-     *         coGateway.redeem.
-     */
-    function verifyRedeemExecutableTransaction(
-        uint256 _amount,
-        address _beneficiary,
-        uint256 _gasPrice,
-        uint256 _gasLimit,
-        uint256 _redeemerNonce,
-        address _coGateway,
-        uint256 _nonce,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    )
-        private
-        returns (address ephemeralKey_)
-    {
-        bytes memory redeemData = abi.encode(
-            _amount,
-            _beneficiary,
-            _gasPrice,
-            _gasLimit,
-            _redeemerNonce
-        );
-
-        (, ephemeralKey_) = verifyExecutableTransaction(
-            REDEEM_RULE_CALLPREFIX,
-            _coGateway,
-            redeemData,
-            _nonce,
-            _v,
-            _r,
-            _s
-        );
-    }
-
-    /**
-     * @notice Executes CoGateway redeem after approving amount to CoGateway.
-     *
-     * @param _coGateway CoGateway contract address.
-     * @param _amount Redeem amount that will be transferred from tokenholder
-     *                account.
-     * @param _beneficiary The address in the origin chain where the tokens
-     *                     will be released.
-     * @param _gasPrice Gas price that tokenholder is ready to pay to get the
-     *                  redemption process done.
-     * @param _gasLimit Gas limit that tokenholder is ready to pay.
-     * @param _redeemerNonce Nonce of the redeemer address.
-     * @param _hashLock Hash Lock provided by the facilitator.
-     *
-     * @return executionStatus_ which is bool execution status of
-     *         coGateway.redeem.
-     */
-    function executeRedeem(
-        address _coGateway,
-        uint256 _amount,
-        address _beneficiary,
-        uint256 _gasPrice,
-        uint256 _gasLimit,
-        uint256 _redeemerNonce,
-        bytes32 _hashLock
-    )
-        private
-        returns (bool executionStatus_)
-    {
-        token.approve(_coGateway, _amount);
-
-        bytes memory data = abi.encodeWithSelector(
-            COGATEWAY_REDEEM_SELECTOR,
-            _amount,
-            _beneficiary,
-            msg.sender,
-            _gasPrice,
-            _gasLimit,
-            _redeemerNonce,
-            _hashLock
-        );
-
-        // solium-disable-next-line security/no-call-value
-        executionStatus_ = _coGateway.call.value(msg.value)(data);
-
-        token.approve(_coGateway, 0);
-    }
-
 }
