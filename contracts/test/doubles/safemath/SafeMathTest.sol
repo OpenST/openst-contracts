@@ -1,22 +1,21 @@
-pragma solidity ^0.4.24;
-import "../../SafeMath.sol";
+pragma solidity ^0.4.23;
+
+import "../../../SafeMath.sol";
 
 /**
  * It is used to test SafeMath contract.
  */
 contract SafeMathTest {
 
-    /**
-     * @dev Multiplies two numbers, reverts on overflow.
-     */
+    /* Public Functions */
+
+    /** @dev Multiplies two numbers, reverts on overflow.*/
     function mul(uint256 a, uint256 b)
         public
         pure
         returns (uint256)
     {
-
         return SafeMath.mul(a,b);
-
     }
 
     /**
@@ -28,9 +27,7 @@ contract SafeMathTest {
         pure
         returns (uint256)
     {
-
         return SafeMath.div(a,b);
-
     }
 
     /**
@@ -42,9 +39,7 @@ contract SafeMathTest {
         pure
         returns (uint256)
     {
-
         return SafeMath.sub(a,b);
-
     }
 
     /**
@@ -55,9 +50,7 @@ contract SafeMathTest {
         pure
         returns (uint256)
     {
-
         return SafeMath.add(a,b);
-
     }
 
     /**
@@ -69,9 +62,7 @@ contract SafeMathTest {
         pure
         returns (uint256)
     {
-
         return SafeMath.mod(a,b);
-
     }
 
 }

@@ -17,9 +17,6 @@ const utils = require('../test_lib/utils.js');
 const { AccountProvider } = require('../test_lib/utils');
 const TokenRulesUtils = require('./utils.js');
 
-const PassingConstraint = artifacts.require('TokenRulesPassingGlobalConstraint.sol');
-const FailingConstraint = artifacts.require('TokenRulesFailingGlobalConstraint.sol');
-
 async function happyPath(accountProvider) {
     const {
         tokenRules,
@@ -28,13 +25,6 @@ async function happyPath(accountProvider) {
         worker,
     } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
-    const passingConstraint1 = await PassingConstraint.new();
-
-    await tokenRules.addGlobalConstraint(
-        passingConstraint1.address,
-        { from: worker },
-    );
-
     const ruleAddress0 = accountProvider.get();
     await tokenRules.registerRule(
         'ruleName0',
@@ -42,11 +32,11 @@ async function happyPath(accountProvider) {
         'ruleAbi0',
         { from: worker },
     );
-    await token.setBalance(ruleAddress0, 100);
+    await token.increaseBalance(ruleAddress0, 100);
 
     const tokenHolder = accountProvider.get();
     const spendingLimit = 100;
-    await token.setBalance(tokenHolder, 100);
+    await token.increaseBalance(tokenHolder, 100);
     await token.approve(
         tokenRules.address,
         spendingLimit,
@@ -67,7 +57,6 @@ async function happyPath(accountProvider) {
         tokenRules,
         organizationAddress,
         token,
-        passingConstraint1,
         tokenHolder,
         ruleAddress0,
         transfersTo,
@@ -149,36 +138,6 @@ contract('TokenRules::executeTransfers', async () => {
                 'Should revert as transfers "to" and "amount" arrays length '
                 + 'are not equal.',
                 '\'to\' and \'amount\' transfer arrays\' lengths are not equal.',
-            );
-        });
-
-        it('Reverts if constraints do not fulfill.', async () => {
-            const {
-                tokenRules,
-                organizationAddress,
-                tokenHolder,
-                ruleAddress0,
-                transfersTo,
-                transfersAmount,
-                worker,
-            } = await happyPath(accountProvider);
-
-            const failingConstraint1 = await FailingConstraint.new();
-
-            await tokenRules.addGlobalConstraint(
-                failingConstraint1.address,
-                { from: worker },
-            );
-
-            await utils.expectRevert(
-                tokenRules.executeTransfers(
-                    tokenHolder,
-                    transfersTo,
-                    transfersAmount,
-                    { from: ruleAddress0 },
-                ),
-                'Should revert as one of the constraints will fail.',
-                'Constraints not fullfilled.',
             );
         });
     });
