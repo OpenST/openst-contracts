@@ -12,58 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const web3 = require('../test_lib/web3.js');
 const utils = require('../test_lib/utils.js');
+const { TokenHolderUtils } = require('./utils.js');
 const { Event } = require('../test_lib/event_decoder');
 const { AccountProvider } = require('../test_lib/utils.js');
 
-const TokenHolder = artifacts.require('TokenHolder');
+const sessionPublicKey = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
 
-async function createTokenHolder(
+async function prepare(
     accountProvider,
+    spendingLimit, deltaExpirationHeight,
+    sessionPublicKeyToAuthorize,
 ) {
-    const required = 1;
+    const { utilityToken } = await TokenHolderUtils.createUtilityMockToken();
 
-    const registeredWallet0 = accountProvider.get();
+    const { tokenRules } = await TokenHolderUtils.createMockTokenRules();
 
-    const wallets = [registeredWallet0];
-
-    const tokenAddress = accountProvider.get();
-    const tokenRulesAddress = accountProvider.get();
-
-    const tokenHolder = await TokenHolder.new(
-        tokenAddress, tokenRulesAddress, wallets, required,
-    );
-
-    return {
-        tokenHolder,
-        registeredWallet0,
-    };
-}
-
-async function prepareTokenHolder(
-    accountProvider, ephemeralKey,
-) {
     const {
+        tokenHolderOwnerAddress,
         tokenHolder,
-        registeredWallet0,
-    } = await createTokenHolder(accountProvider);
+    } = await TokenHolderUtils.createTokenHolder(
+        accountProvider,
+        utilityToken, tokenRules,
+        spendingLimit, deltaExpirationHeight,
+        sessionPublicKeyToAuthorize,
+    );
 
-    const spendingLimit = 1;
-    const expirationHeight = (await web3.eth.getBlockNumber()) + 10;
-
-    await tokenHolder.submitAuthorizeSession(
-        ephemeralKey,
-        spendingLimit,
-        expirationHeight,
-        {
-            from: registeredWallet0,
-        },
+    await TokenHolderUtils.authorizeSessionKey(
+        tokenHolder, tokenHolderOwnerAddress,
+        sessionPublicKeyToAuthorize, spendingLimit, deltaExpirationHeight,
     );
 
     return {
+        utilityToken,
+        tokenRules,
+        tokenHolderOwnerAddress,
         tokenHolder,
-        registeredWallet0,
     };
 }
 
@@ -71,37 +55,45 @@ contract('TokenHolder::revokeSession', async () => {
     contract('Negative Tests', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
 
-        it('Reverts if non-registered wallet calls.', async () => {
-            const ephemeralKey = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
-
+        it('Reverts if non-owner address calls.', async () => {
             const {
                 tokenHolder,
-            } = await prepareTokenHolder(accountProvider, ephemeralKey);
+            } = await prepare(
+                accountProvider,
+                10 /* spendingLimit */,
+                50 /* deltaExpirationHeight */,
+                sessionPublicKey,
+            );
 
             await utils.expectRevert(
                 tokenHolder.revokeSession(
-                    ephemeralKey,
+                    sessionPublicKey,
                     {
                         from: accountProvider.get(),
                     },
                 ),
-                'Should revert as non-registered wallet calls.',
-                'Only wallet is allowed to call.',
+                'Should revert as non-owner address calls.',
+                'Only owner is allowed to call.',
             );
         });
 
         it('Reverts if key to revoke does not exist.', async () => {
             const {
                 tokenHolder,
-                registeredWallet0,
-            } = await createTokenHolder(accountProvider);
+                tokenHolderOwnerAddress,
+            } = await prepare(
+                accountProvider,
+                10 /* spendingLimit */,
+                50 /* deltaExpirationHeight */,
+                sessionPublicKey,
+            );
 
-            const ephemeralKey = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
+            const nonAuthorizedSessionKey = '0xADdB68e734D215D1fBFc44bBcaE42fAc2047DDec';
 
             await utils.expectRevert(
                 tokenHolder.revokeSession(
-                    ephemeralKey,
-                    { from: registeredWallet0 },
+                    nonAuthorizedSessionKey,
+                    { from: tokenHolderOwnerAddress },
                 ),
                 'Should revert as key to revoke does not exist.',
                 'Key is not authorized.',
@@ -109,22 +101,25 @@ contract('TokenHolder::revokeSession', async () => {
         });
 
         it('Reverts if key to revoke is already revoked.', async () => {
-            const ephemeralKey = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
-
             const {
                 tokenHolder,
-                registeredWallet0,
-            } = await prepareTokenHolder(accountProvider, ephemeralKey);
+                tokenHolderOwnerAddress,
+            } = await prepare(
+                accountProvider,
+                10 /* spendingLimit */,
+                50 /* deltaExpirationHeight */,
+                sessionPublicKey,
+            );
 
             await tokenHolder.revokeSession(
-                ephemeralKey,
-                { from: registeredWallet0 },
+                sessionPublicKey,
+                { from: tokenHolderOwnerAddress },
             );
 
             await utils.expectRevert(
                 tokenHolder.revokeSession(
-                    ephemeralKey,
-                    { from: registeredWallet0 },
+                    sessionPublicKey,
+                    { from: tokenHolderOwnerAddress },
                 ),
                 'Should revert as key to revoke was already revoked.',
                 'Key is not authorized.',
@@ -136,16 +131,19 @@ contract('TokenHolder::revokeSession', async () => {
         const accountProvider = new AccountProvider(accounts);
 
         it('Emits SessionRevoked event.', async () => {
-            const ephemeralKey = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
-
             const {
                 tokenHolder,
-                registeredWallet0,
-            } = await prepareTokenHolder(accountProvider, ephemeralKey);
+                tokenHolderOwnerAddress,
+            } = await prepare(
+                accountProvider,
+                10 /* spendingLimit */,
+                50 /* deltaExpirationHeight */,
+                sessionPublicKey,
+            );
 
             const transactionResponse = await tokenHolder.revokeSession(
-                ephemeralKey,
-                { from: registeredWallet0 },
+                sessionPublicKey,
+                { from: tokenHolderOwnerAddress },
             );
 
             const events = Event.decodeTransactionResponse(
@@ -161,7 +159,7 @@ contract('TokenHolder::revokeSession', async () => {
             Event.assertEqual(events[0], {
                 name: 'SessionRevoked',
                 args: {
-                    _ephemeralKey: ephemeralKey,
+                    _sessionKey: sessionPublicKey,
                 },
             });
         });
@@ -171,14 +169,17 @@ contract('TokenHolder::revokeSession', async () => {
         const accountProvider = new AccountProvider(accounts);
 
         it('Checks that key is revoked after successfull revocation.', async () => {
-            const ephemeralKey = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
-
             const {
                 tokenHolder,
-                registeredWallet0,
-            } = await prepareTokenHolder(accountProvider, ephemeralKey);
+                tokenHolderOwnerAddress,
+            } = await prepare(
+                accountProvider,
+                10 /* spendingLimit */,
+                50 /* deltaExpirationHeight */,
+                sessionPublicKey,
+            );
 
-            let keyData = await tokenHolder.ephemeralKeys.call(ephemeralKey);
+            let keyData = await tokenHolder.sessionKeys.call(sessionPublicKey);
 
             assert.isOk(
                 // TokenHolder.AuthorizationStatus.AUTHORIZED == 1
@@ -186,11 +187,11 @@ contract('TokenHolder::revokeSession', async () => {
             );
 
             await tokenHolder.revokeSession(
-                ephemeralKey,
-                { from: registeredWallet0 },
+                sessionPublicKey,
+                { from: tokenHolderOwnerAddress },
             );
 
-            keyData = await tokenHolder.ephemeralKeys.call(ephemeralKey);
+            keyData = await tokenHolder.sessionKeys.call(sessionPublicKey);
 
             assert.isOk(
                 // TokenHolder.AuthorizationStatus.REVOKED == 2

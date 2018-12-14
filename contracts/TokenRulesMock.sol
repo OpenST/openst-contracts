@@ -5,9 +5,14 @@ contract TokenRulesMock {
     /* Storage */
 
     mapping (address => bool) public allowedTransfers;
+
     address public from;
-    address[] public transferTo;
-    uint256[] public transferAmount;
+
+    address[] public transfersTo;
+    uint256 public transfersToLength;
+
+    uint256[] public transfersAmount;
+    uint256 public transfersAmountLength;
 
 
     /* External Functions */
@@ -31,11 +36,13 @@ contract TokenRulesMock {
     )
         external
     {
-
         from = _from;
-        transferTo = _transfersTo;
-        transferAmount = _transfersAmount;
 
+        transfersTo = _transfersTo;
+        transfersToLength = _transfersTo.length;
+
+        transfersAmount = _transfersAmount;
+        transfersAmountLength = _transfersAmount.length;
     }
 
 }
