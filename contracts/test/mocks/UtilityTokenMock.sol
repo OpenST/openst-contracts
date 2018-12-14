@@ -17,7 +17,6 @@ pragma solidity ^0.4.23;
 
 import "./EIP20TokenMock.sol";
 
-
 /**
  * @title EIP20TokenMock contract.
  *
@@ -25,38 +24,26 @@ import "./EIP20TokenMock.sol";
  */
 contract UtilityTokenMock is EIP20TokenMock {
 
+    /* Storage */
+
     address public coGateway;
 
 
-    /* Special functions */
+    /* Special Functions */
 
     /**
-     *  @notice Contract constructor.
-     *
-     *  @param _conversionRate conversion rate of the token.
-     *  @param _conversionRateDecimals conversion decimal of the token.
      *  @param _symbol Symbol of the token.
      *  @param _name Name of the token.
      *  @param _decimals Decimal places of the token.
      */
     constructor(
-        uint256 _conversionRate,
-        uint8 _conversionRateDecimals,
         string _symbol,
         string _name,
         uint8 _decimals
     )
-        EIP20TokenMock(
-            _conversionRate,
-            _conversionRateDecimals,
-            _symbol,
-            _name,
-            _decimals
-        )
+        EIP20TokenMock(_symbol, _name, _decimals)
         public
     {
-        conversionRate = _conversionRate;
-        conversionRateDecimals = _conversionRateDecimals;
     }
 
 

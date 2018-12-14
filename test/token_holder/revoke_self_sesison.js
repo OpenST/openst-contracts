@@ -17,16 +17,15 @@ const { TokenHolderUtils } = require('./utils.js');
 const { Event } = require('../test_lib/event_decoder');
 const { AccountProvider } = require('../test_lib/utils.js');
 
-const sessionPublicKey = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
-
 async function prepare(
     accountProvider,
     spendingLimit, deltaExpirationHeight,
-    sessionPublicKeyToAuthorize,
 ) {
     const { utilityToken } = await TokenHolderUtils.createUtilityMockToken();
 
     const { tokenRules } = await TokenHolderUtils.createMockTokenRules();
+
+    const authorizedSessionPublicKey = accountProvider.get();
 
     const {
         tokenHolderOwnerAddress,
@@ -35,12 +34,12 @@ async function prepare(
         accountProvider,
         utilityToken, tokenRules,
         spendingLimit, deltaExpirationHeight,
-        sessionPublicKeyToAuthorize,
+        authorizedSessionPublicKey,
     );
 
     await TokenHolderUtils.authorizeSessionKey(
         tokenHolder, tokenHolderOwnerAddress,
-        sessionPublicKeyToAuthorize, spendingLimit, deltaExpirationHeight,
+        authorizedSessionPublicKey, spendingLimit, deltaExpirationHeight,
     );
 
     return {
@@ -48,54 +47,30 @@ async function prepare(
         tokenRules,
         tokenHolderOwnerAddress,
         tokenHolder,
+        authorizedSessionPublicKey,
     };
 }
 
-contract('TokenHolder::revokeSession', async () => {
+contract('TokenHolder::revokeSelfSession', async () => {
     contract('Negative Tests', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
 
-        it('Reverts if non-owner address calls.', async () => {
+        it('Reverts if caller is not a registered session key.', async () => {
             const {
                 tokenHolder,
             } = await prepare(
                 accountProvider,
                 10 /* spendingLimit */,
                 50 /* deltaExpirationHeight */,
-                sessionPublicKey,
             );
 
             await utils.expectRevert(
-                tokenHolder.revokeSession(
-                    sessionPublicKey,
+                tokenHolder.revokeSelfSession(
                     {
                         from: accountProvider.get(),
                     },
                 ),
-                'Should revert as non-owner address calls.',
-                'Only owner is allowed to call.',
-            );
-        });
-
-        it('Reverts if key to revoke does not exist.', async () => {
-            const {
-                tokenHolder,
-                tokenHolderOwnerAddress,
-            } = await prepare(
-                accountProvider,
-                10 /* spendingLimit */,
-                50 /* deltaExpirationHeight */,
-                sessionPublicKey,
-            );
-
-            const nonAuthorizedSessionKey = '0xADdB68e734D215D1fBFc44bBcaE42fAc2047DDec';
-
-            await utils.expectRevert(
-                tokenHolder.revokeSession(
-                    nonAuthorizedSessionKey,
-                    { from: tokenHolderOwnerAddress },
-                ),
-                'Should revert as key to revoke does not exist.',
+                'Should revert as caller is not a registered session key.',
                 'Key is not authorized.',
             );
         });
@@ -103,23 +78,20 @@ contract('TokenHolder::revokeSession', async () => {
         it('Reverts if key to revoke is already revoked.', async () => {
             const {
                 tokenHolder,
-                tokenHolderOwnerAddress,
+                authorizedSessionPublicKey,
             } = await prepare(
                 accountProvider,
                 10 /* spendingLimit */,
                 50 /* deltaExpirationHeight */,
-                sessionPublicKey,
             );
 
-            await tokenHolder.revokeSession(
-                sessionPublicKey,
-                { from: tokenHolderOwnerAddress },
+            await tokenHolder.revokeSelfSession(
+                { from: authorizedSessionPublicKey },
             );
 
             await utils.expectRevert(
-                tokenHolder.revokeSession(
-                    sessionPublicKey,
-                    { from: tokenHolderOwnerAddress },
+                tokenHolder.revokeSelfSession(
+                    { from: authorizedSessionPublicKey },
                 ),
                 'Should revert as key to revoke was already revoked.',
                 'Key is not authorized.',
@@ -133,17 +105,15 @@ contract('TokenHolder::revokeSession', async () => {
         it('Emits SessionRevoked event.', async () => {
             const {
                 tokenHolder,
-                tokenHolderOwnerAddress,
+                authorizedSessionPublicKey,
             } = await prepare(
                 accountProvider,
                 10 /* spendingLimit */,
                 50 /* deltaExpirationHeight */,
-                sessionPublicKey,
             );
 
-            const transactionResponse = await tokenHolder.revokeSession(
-                sessionPublicKey,
-                { from: tokenHolderOwnerAddress },
+            const transactionResponse = await tokenHolder.revokeSelfSession(
+                { from: authorizedSessionPublicKey },
             );
 
             const events = Event.decodeTransactionResponse(
@@ -159,7 +129,7 @@ contract('TokenHolder::revokeSession', async () => {
             Event.assertEqual(events[0], {
                 name: 'SessionRevoked',
                 args: {
-                    _sessionKey: sessionPublicKey,
+                    _sessionKey: authorizedSessionPublicKey,
                 },
             });
         });
@@ -171,27 +141,29 @@ contract('TokenHolder::revokeSession', async () => {
         it('Checks that key is revoked after successfull revocation.', async () => {
             const {
                 tokenHolder,
-                tokenHolderOwnerAddress,
+                authorizedSessionPublicKey,
             } = await prepare(
                 accountProvider,
                 10 /* spendingLimit */,
                 50 /* deltaExpirationHeight */,
-                sessionPublicKey,
             );
 
-            let keyData = await tokenHolder.sessionKeys.call(sessionPublicKey);
+            let keyData = await tokenHolder.sessionKeys.call(
+                authorizedSessionPublicKey,
+            );
 
             assert.isOk(
                 // TokenHolder.AuthorizationStatus.AUTHORIZED == 1
                 keyData.status.eqn(1),
             );
 
-            await tokenHolder.revokeSession(
-                sessionPublicKey,
-                { from: tokenHolderOwnerAddress },
+            await tokenHolder.revokeSelfSession(
+                { from: authorizedSessionPublicKey },
             );
 
-            keyData = await tokenHolder.sessionKeys.call(sessionPublicKey);
+            keyData = await tokenHolder.sessionKeys.call(
+                authorizedSessionPublicKey,
+            );
 
             assert.isOk(
                 // TokenHolder.AuthorizationStatus.REVOKED == 2

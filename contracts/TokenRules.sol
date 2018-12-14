@@ -14,7 +14,6 @@ pragma solidity ^0.4.23;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "./GlobalConstraintInterface.sol";
 import "./SafeMath.sol";
 import "./EIP20TokenInterface.sol";
 import "./Organized.sol";
@@ -32,11 +31,9 @@ import "./Organized.sol";
  *      execution of the rule (amount is limited by spendingLimit registered
  *      during an authorizaiton of an ephemeral key.). TokenHolder will
  *      clear this allowance after execution.
- *      Before execution of transfers from TokenHolder, TokenRules will
- *      check that all global constraints are satisified.
+ *      Before execution of transfers from TokenHolder.
  *      During a execution, rule can call TokenRules.executeTransfers()
- *      function only once. This allows global constraints to be checked
- *      on complete list of transfers.
+ *      function only once.
  */
 contract TokenRules is Organized {
 
@@ -51,11 +48,6 @@ contract TokenRules is Organized {
         string _ruleName,
         address _ruleAddress
     );
-
-    event GlobalConstraintAdded(address _globalConstraintAddress);
-
-    event GlobalConstraintRemoved(address _globalConstraintAddress);
-
 
     /* Structs */
 
@@ -88,9 +80,6 @@ contract TokenRules is Organized {
 
     /** Mapping from a rule name hash to the index in the `rules` array. */
     mapping (bytes32 => RuleIndex) public rulesByNameHash;
-
-    /** Contains a list of all registered global constraints. */
-    address[] public globalConstraints;
 
     EIP20TokenInterface public token;
 
@@ -214,8 +203,6 @@ contract TokenRules is Organized {
      *            TokenRules will set this allowance back, hence, only
      *            one call is allowed per execution session.
      *          - _transfersTo and _transfersAmount arrays length should match.
-     *          - All globally registered constraints should satisfy before
-     *            execution.
      *
      * @param _from An address from which transfer is done.
      * @param _transfersTo List of addresses to transfer.
@@ -239,11 +226,6 @@ contract TokenRules is Organized {
             "'to' and 'amount' transfer arrays' lengths are not equal."
         );
 
-        require(
-            checkGlobalConstraints(_from, _transfersTo, _transfersAmount),
-            "Constraints not fullfilled."
-        );
-
         for(uint256 i = 0; i < _transfersTo.length; ++i) {
             token.transferFrom(
                 _from,
@@ -253,139 +235,5 @@ contract TokenRules is Organized {
         }
 
         allowedTransfers[_from] = false;
-    }
-
-    /**
-     * @notice Registers a constraint to check globally before
-     *         executing transfers.
-     *
-     * @dev Function requires:
-     *          - Only worker can call.
-     *          - Constraint address is not null.
-     *          - Constraint is not registered.
-     */
-    function addGlobalConstraint(
-        address _globalConstraintAddress
-    )
-        external
-        onlyWorker
-    {
-        require(
-            _globalConstraintAddress != address(0),
-            "Constraint to add is null."
-        );
-
-        uint256 index = findGlobalConstraintIndex(_globalConstraintAddress);
-
-        require(
-            index == globalConstraints.length,
-            "Constraint to add already exists."
-        );
-
-        globalConstraints.push(_globalConstraintAddress);
-
-        emit GlobalConstraintAdded(_globalConstraintAddress);
-    }
-
-    /**
-     * @dev Function requires:
-     *          - Only worker can call.
-     *          - Constraint exists.
-     */
-    function removeGlobalConstraint(
-        address _globalConstraintAddress
-    )
-        external
-        onlyWorker
-    {
-        uint256 index = findGlobalConstraintIndex(_globalConstraintAddress);
-
-        require(
-            index != globalConstraints.length,
-            "Constraint to remove does not exist."
-        );
-
-        removeGlobalConstraintByIndex(index);
-
-        emit GlobalConstraintRemoved(_globalConstraintAddress);
-    }
-
-
-    /* Public Functions */
-
-    function globalConstraintCount()
-        public
-        view
-        returns (uint256)
-    {
-        return globalConstraints.length;
-    }
-
-    /**
-     * @dev Function requires:
-     *          - _transfersTo and _transfersAmount arrays length should match.
-     *
-     * @return Returns true, if all registered global constraints
-     *         are satisfied, otherwise false.
-     */
-    function checkGlobalConstraints(
-        address _from,
-        address[] _transfersTo,
-        uint256[] _transfersAmount
-    )
-        public
-        view
-        returns (bool _passed)
-    {
-        require(
-            _transfersTo.length == _transfersAmount.length,
-            "'to' and 'amount' transfer arrays' lengths are not equal."
-        );
-
-        _passed = true;
-
-        for(uint256 i = 0; i < globalConstraints.length && _passed; ++i) {
-            _passed = GlobalConstraintInterface(globalConstraints[i]).check(
-                _from,
-                _transfersTo,
-                _transfersAmount
-            );
-        }
-    }
-
-
-    /* Private Functions */
-
-    /**
-     * @dev Finds index of constraint.
-     *
-     * @param _constraint Constraint to find in constraints array.
-     *
-     * @return index_ Returns index of the constraint if exists,
-     *                otherwise returns constraints.length.
-     */
-    function findGlobalConstraintIndex(address _constraint)
-        private
-        view
-        returns (uint256 index_)
-    {
-        index_ = 0;
-        while(
-            index_ < globalConstraints.length &&
-            globalConstraints[index_] != _constraint
-        )
-        {
-            ++index_;
-        }
-    }
-
-    function removeGlobalConstraintByIndex(uint256 _index)
-        private
-    {
-        require(_index < globalConstraints.length, "Index is out of range.");
-
-        uint256 lastElementIndex = globalConstraints.length - 1;
-        globalConstraints[_index] = globalConstraints[lastElementIndex];
-        --globalConstraints.length;
     }
 }
