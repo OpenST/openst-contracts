@@ -198,11 +198,6 @@ contract TokenRules is Organized {
      *      accounts corresponding amounts.
      *      Function requires:
      *          - Only registered rule can call.
-     *          - An account from which (_from) transfer will be done should
-     *            allow this transfer by calling to TokenRules.allowTransfers().
-     *            TokenRules will set this allowance back, hence, only
-     *            one call is allowed per execution session.
-     *          - _transfersTo and _transfersAmount arrays length should match.
      *
      * @param _from An address from which transfer is done.
      * @param _transfersTo List of addresses to transfer.
@@ -215,6 +210,49 @@ contract TokenRules is Organized {
     )
         external
         onlyRule
+    {
+        _executeTransfers(_from, _transfersTo, _transfersAmount);
+    }
+
+    /**
+     * @dev Transfers from the caller's account to all beneficiary
+     *      accounts corresponding amounts.
+     *
+     * @param _transfersTo List of addresses to transfer.
+     * @param _transfersAmount List of amounts to transfer.
+     */
+    function executeSelfTransfers(
+        address[] _transfersTo,
+        uint256[] _transfersAmount
+    )
+        external
+    {
+        _executeTransfers(msg.sender, _transfersTo, _transfersAmount);
+    }
+
+
+    /* Private Functions */
+
+    /**
+     * @dev Transfers from the specified account to all beneficiary
+     *      accounts corresponding amounts.
+     *      Function requires:
+     *          - An account from which (_from) transfer will be done should
+     *            allow this transfer by calling to TokenRules.allowTransfers().
+     *            TokenRules will set this allowance back, hence, only
+     *            one call is allowed per execution session.
+     *          - _transfersTo and _transfersAmount arrays length should match.
+     *
+     * @param _from An address from which transfer is done.
+     * @param _transfersTo List of addresses to transfer.
+     * @param _transfersAmount List of amounts to transfer.
+     */
+    function _executeTransfers(
+        address _from,
+        address[] _transfersTo,
+        uint256[] _transfersAmount
+    )
+        private
     {
         require(
             allowedTransfers[_from],
