@@ -253,13 +253,13 @@ contract TokenHolder {
     }
 
     /**
-     * @notice Revokes session for the msg.sender as session key.
+     * @notice Logout session of the msg.sender.
      *
      * @dev Function revokes the key even if it has expired.
      *      Function requires:
      *          - The session key (msg.sender) is authorized.
      */
-    function revokeSelfSession()
+    function logout()
         external
         keyIsAuthorized(msg.sender)
     {

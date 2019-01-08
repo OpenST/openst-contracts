@@ -51,7 +51,7 @@ async function prepare(
     };
 }
 
-contract('TokenHolder::revokeSelfSession', async () => {
+contract('TokenHolder::logout', async () => {
     contract('Negative Tests', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
 
@@ -65,7 +65,7 @@ contract('TokenHolder::revokeSelfSession', async () => {
             );
 
             await utils.expectRevert(
-                tokenHolder.revokeSelfSession(
+                tokenHolder.logout(
                     {
                         from: accountProvider.get(),
                     },
@@ -85,12 +85,12 @@ contract('TokenHolder::revokeSelfSession', async () => {
                 50 /* deltaExpirationHeight */,
             );
 
-            await tokenHolder.revokeSelfSession(
+            await tokenHolder.logout(
                 { from: authorizedSessionPublicKey },
             );
 
             await utils.expectRevert(
-                tokenHolder.revokeSelfSession(
+                tokenHolder.logout(
                     { from: authorizedSessionPublicKey },
                 ),
                 'Should revert as key to revoke was already revoked.',
@@ -112,7 +112,7 @@ contract('TokenHolder::revokeSelfSession', async () => {
                 50 /* deltaExpirationHeight */,
             );
 
-            const transactionResponse = await tokenHolder.revokeSelfSession(
+            const transactionResponse = await tokenHolder.logout(
                 { from: authorizedSessionPublicKey },
             );
 
@@ -157,7 +157,7 @@ contract('TokenHolder::revokeSelfSession', async () => {
                 keyData.status.eqn(1),
             );
 
-            await tokenHolder.revokeSelfSession(
+            await tokenHolder.logout(
                 { from: authorizedSessionPublicKey },
             );
 
