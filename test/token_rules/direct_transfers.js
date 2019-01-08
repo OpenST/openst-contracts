@@ -55,7 +55,7 @@ async function happyPath(accountProvider) {
     };
 }
 
-contract('TokenRules::executeSelfTransfers', async () => {
+contract('TokenRules::directTransfers', async () => {
     contract('Negative Tests', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
 
@@ -72,7 +72,7 @@ contract('TokenRules::executeSelfTransfers', async () => {
             );
 
             await utils.expectRevert(
-                tokenRules.executeSelfTransfers(
+                tokenRules.directTransfers(
                     transfersTo,
                     transfersAmount,
                     { from: tokenHolder },
@@ -93,7 +93,7 @@ contract('TokenRules::executeSelfTransfers', async () => {
             const transfersAmount = [];
 
             await utils.expectRevert(
-                tokenRules.executeSelfTransfers(
+                tokenRules.directTransfers(
                     transfersTo,
                     transfersAmount,
                     { from: tokenHolder },
@@ -134,7 +134,7 @@ contract('TokenRules::executeSelfTransfers', async () => {
             // For test validity perspective, we should not fail in this case.
             assert(tokenHolderInitialBalance.gte(transfersAmountSum));
 
-            await tokenRules.executeSelfTransfers(
+            await tokenRules.directTransfers(
                 transfersTo,
                 transfersAmount,
                 { from: tokenHolder },
@@ -174,7 +174,7 @@ contract('TokenRules::executeSelfTransfers', async () => {
                 { from: tokenHolder },
             );
 
-            await tokenRules.executeSelfTransfers(
+            await tokenRules.directTransfers(
                 transfersTo,
                 transfersAmount,
                 { from: tokenHolder },

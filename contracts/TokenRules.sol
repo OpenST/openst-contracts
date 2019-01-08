@@ -221,7 +221,7 @@ contract TokenRules is Organized {
      * @param _transfersTo List of addresses to transfer.
      * @param _transfersAmount List of amounts to transfer.
      */
-    function executeSelfTransfers(
+    function directTransfers(
         address[] _transfersTo,
         uint256[] _transfersAmount
     )
