@@ -20,7 +20,7 @@ const { TokenHolderUtils } = require('./utils.js');
 const { Event } = require('../test_lib/event_decoder');
 const { AccountProvider } = require('../test_lib/utils.js');
 
-const RuleMock = artifacts.require('RuleMock');
+const CustomRuleDouble = artifacts.require('CustomRuleDouble');
 
 const sessionPublicKey1 = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
 const sessionPrivateKey1 = '0xa8225c01ceeaf01d7bc7c1b1b929037bd4050967c5730c0b854263121b8399f3';
@@ -320,7 +320,7 @@ contract('TokenHolder::executeRule', async () => {
 
             const nonce = 1;
 
-            const mockRule = await RuleMock.new();
+            const mockRule = await CustomRuleDouble.new();
             const mockRuleValue = accountProvider.get();
 
             const {
@@ -359,7 +359,7 @@ contract('TokenHolder::executeRule', async () => {
 
             const nonce = 1;
 
-            const mockRule = await RuleMock.new();
+            const mockRule = await CustomRuleDouble.new();
             const mockRuleValue = accountProvider.get();
 
             const {
@@ -417,7 +417,7 @@ contract('TokenHolder::executeRule', async () => {
 
             const nonce = 1;
 
-            const mockRule = await RuleMock.new();
+            const mockRule = await CustomRuleDouble.new();
             const mockRuleValue = accountProvider.get();
 
             const {
@@ -492,7 +492,7 @@ contract('TokenHolder::executeRule', async () => {
             // Correct nonce is 1.
             const invalidNonce0 = 0;
 
-            const mockRule0 = await RuleMock.new();
+            const mockRule0 = await CustomRuleDouble.new();
             const mockRuleValue0 = accountProvider.get();
 
             const {
@@ -520,7 +520,7 @@ contract('TokenHolder::executeRule', async () => {
             // correct nonce is 1.
             const invalidNonce2 = 2;
 
-            const mockRule2 = await RuleMock.new();
+            const mockRule2 = await CustomRuleDouble.new();
             const mockRuleValue2 = accountProvider.get();
 
             const {
@@ -599,7 +599,7 @@ contract('TokenHolder::executeRule', async () => {
             // correct nonce is 1.
             const nonce = 1;
 
-            const mockRule = await RuleMock.new();
+            const mockRule = await CustomRuleDouble.new();
             const mockRuleValue = accountProvider.get();
 
             const {
@@ -657,7 +657,7 @@ contract('TokenHolder::executeRule', async () => {
             // correct nonce is 1.
             const nonce = 1;
 
-            const mockRule = await RuleMock.new();
+            const mockRule = await CustomRuleDouble.new();
             const mockRuleValue = accountProvider.get();
 
             const {
@@ -721,7 +721,7 @@ contract('TokenHolder::executeRule', async () => {
             // correct nonce is 1.
             const nonce = 1;
 
-            const mockRule = await RuleMock.new();
+            const mockRule = await CustomRuleDouble.new();
             const mockRuleValue = accountProvider.get();
 
             const {
@@ -742,7 +742,7 @@ contract('TokenHolder::executeRule', async () => {
             );
 
             assert.strictEqual(
-                (await mockRule.value.call()),
+                (await mockRule.recordedValue.call()),
                 mockRuleValue,
             );
         });
@@ -760,7 +760,7 @@ contract('TokenHolder::executeRule', async () => {
             // correct nonce is 1.
             const nonce = 1;
 
-            const mockRule = await RuleMock.new();
+            const mockRule = await CustomRuleDouble.new();
             const mockRuleValue = accountProvider.get();
 
             const {
@@ -785,12 +785,12 @@ contract('TokenHolder::executeRule', async () => {
             );
 
             assert.strictEqual(
-                (await mockRule.value.call()),
+                (await mockRule.recordedValue.call()),
                 mockRuleValue,
             );
 
             assert.isOk(
-                (await mockRule.receivedPayableAmount.call()).eqn(payableValue),
+                (await mockRule.recordedPayedAmount.call()).eqn(payableValue),
             );
         });
     });
@@ -811,7 +811,7 @@ contract('TokenHolder::executeRule', async () => {
             // correct nonce is 1.
             const nonce = 1;
 
-            const mockRule = await RuleMock.new();
+            const mockRule = await CustomRuleDouble.new();
             const mockRuleValue = accountProvider.get();
 
             const {
@@ -849,7 +849,7 @@ contract('TokenHolder::executeRule', async () => {
             // correct nonce is 1.
             const nonce = 1;
 
-            const mockRule = await RuleMock.new();
+            const mockRule = await CustomRuleDouble.new();
             const mockRuleValue = accountProvider.get();
 
             const {

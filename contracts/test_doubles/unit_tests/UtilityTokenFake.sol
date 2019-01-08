@@ -15,14 +15,14 @@ pragma solidity ^0.4.23;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "./EIP20TokenMock.sol";
+import "./EIP20TokenFake.sol";
 
 /**
  * @title EIP20TokenMock contract.
  *
  * @notice Provides EIP20Token with mock functionality to facilitate testing.
  */
-contract UtilityTokenMock is EIP20TokenMock {
+contract UtilityTokenFake is EIP20TokenFake {
 
     /* Storage */
 
@@ -41,7 +41,7 @@ contract UtilityTokenMock is EIP20TokenMock {
         string _name,
         uint8 _decimals
     )
-        EIP20TokenMock(_symbol, _name, _decimals)
+        EIP20TokenFake(_symbol, _name, _decimals)
         public
     {
     }

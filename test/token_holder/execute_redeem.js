@@ -20,7 +20,7 @@ const { TokenHolderUtils } = require('./utils.js');
 const { Event } = require('../test_lib/event_decoder');
 const { AccountProvider } = require('../test_lib/utils.js');
 
-const CoGatewayMock = artifacts.require('CoGatewayMock.sol');
+const CoGatewaySpy = artifacts.require('CoGatewaySpy.sol');
 
 const sessionPublicKey1 = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
 const sessionPrivateKey1 = '0xa8225c01ceeaf01d7bc7c1b1b929037bd4050967c5730c0b854263121b8399f3';
@@ -116,7 +116,7 @@ async function prepare(
         sessionPublicKeyToAuthorize, spendingLimit, deltaExpirationHeight,
     );
 
-    const coGateway = await CoGatewayMock.new();
+    const coGateway = await CoGatewaySpy.new();
 
     await utilityToken.setCoGateway(coGateway.address);
 
@@ -467,7 +467,7 @@ contract('TokenHolder::redeem', async (accounts) => {
 
             assert.isOk(redeemReceipt.receipt.status);
 
-            const updatedPayableValue = await coGateway.receivedPayableAmount.call();
+            const updatedPayableValue = await coGateway.recordedPayedAmount.call();
 
             assert.isOk(
                 updatedPayableValue.eqn(bounty),
@@ -584,7 +584,7 @@ contract('TokenHolder::redeem', async (accounts) => {
                 amount, beneficiary, gasPrice, gasLimit, redeemerNonce, hashLock,
             );
 
-            await coGateway.makeRedeemToFail();
+            await coGateway.makeRedemptionToFail();
 
             const transactionResponse = await tokenHolder.executeRedeem(
                 coGateway.address,

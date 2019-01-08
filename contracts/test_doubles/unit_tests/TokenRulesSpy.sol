@@ -1,18 +1,18 @@
 pragma solidity ^0.4.23;
 
-contract TokenRulesMock {
+contract TokenRulesSpy {
 
     /* Storage */
 
     mapping (address => bool) public allowedTransfers;
 
-    address public from;
+    address public recordedFrom;
 
-    address[] public transfersTo;
-    uint256 public transfersToLength;
+    address[] public recordedTransfersTo;
+    uint256 public recordedTransfersToLength;
 
-    uint256[] public transfersAmount;
-    uint256 public transfersAmountLength;
+    uint256[] public recordedTransfersAmount;
+    uint256 public recordedTransfersAmountLength;
 
 
     /* External Functions */
@@ -36,13 +36,13 @@ contract TokenRulesMock {
     )
         external
     {
-        from = _from;
+        recordedFrom = _from;
 
-        transfersTo = _transfersTo;
-        transfersToLength = _transfersTo.length;
+        recordedTransfersTo = _transfersTo;
+        recordedTransfersToLength = _transfersTo.length;
 
-        transfersAmount = _transfersAmount;
-        transfersAmountLength = _transfersAmount.length;
+        recordedTransfersAmount = _transfersAmount;
+        recordedTransfersAmountLength = _transfersAmount.length;
     }
 
 }

@@ -1,6 +1,6 @@
 const TokenHolder = artifacts.require('TokenHolder');
-const TokenRulesMock = artifacts.require('TokenRulesMock');
-const UtilityTokenMock = artifacts.require('UtilityTokenMock');
+const TokenRulesSpy = artifacts.require('TokenRulesSpy');
+const UtilityTokenFake = artifacts.require('UtilityTokenFake');
 
 const web3 = require('../test_lib/web3.js');
 
@@ -20,7 +20,7 @@ class TokenHolderUtils {
     }
 
     static async createUtilityMockToken() {
-        const utilityToken = await UtilityTokenMock.new(
+        const utilityToken = await UtilityTokenFake.new(
             'OST', 'Open Simple Token', 1,
         );
 
@@ -28,7 +28,7 @@ class TokenHolderUtils {
     }
 
     static async createMockTokenRules() {
-        const tokenRules = await TokenRulesMock.new();
+        const tokenRules = await TokenRulesSpy.new();
 
         return { tokenRules };
     }

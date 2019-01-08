@@ -16,7 +16,7 @@ pragma solidity ^0.4.23;
 // limitations under the License.
 
 
-contract RuleMock {
+contract CustomRuleDouble {
 
     /* Constants */
 
@@ -31,8 +31,8 @@ contract RuleMock {
 
     /* Storage */
 
-    address public value;
-    uint256 public receivedPayableAmount;
+    address public recordedValue;
+    uint256 public recordedPayedAmount;
 
 
     /* Public Functions */
@@ -42,7 +42,7 @@ contract RuleMock {
     )
         public
     {
-        value = _value;
+        recordedValue = _value;
         revert("The function should fail by throwing.");
     }
 
@@ -52,7 +52,7 @@ contract RuleMock {
         public
     {
         require(_value != address(0), "Value is null.");
-        value = _value;
+        recordedValue = _value;
     }
 
     function passPayable(
@@ -62,8 +62,8 @@ contract RuleMock {
         payable
     {
         require(_value != address(0), "Value is null.");
-        value = _value;
-        receivedPayableAmount = msg.value;
+        recordedValue = _value;
+        recordedPayedAmount = msg.value;
     }
 
 }

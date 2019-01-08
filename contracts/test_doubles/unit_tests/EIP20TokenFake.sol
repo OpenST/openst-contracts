@@ -19,7 +19,7 @@ import "../../EIP20TokenInterface.sol";
 import "../../SafeMath.sol";
 
 
-contract EIP20TokenMock is EIP20TokenInterface {
+contract EIP20TokenFake is EIP20TokenInterface {
 
     /* Usings */
 

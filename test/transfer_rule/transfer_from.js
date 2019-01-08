@@ -15,7 +15,7 @@
 const { AccountProvider } = require('../test_lib/utils.js');
 
 const TransferRule = artifacts.require('TransferRule');
-const TokenRulesMock = artifacts.require('TokenRulesMock');
+const TokenRulesSpy = artifacts.require('TokenRulesSpy');
 
 contract('TransferRule::transferFrom', async (accounts) => {
     const accountProvider = new AccountProvider(accounts);
@@ -30,7 +30,7 @@ contract('TransferRule::transferFrom', async (accounts) => {
         const expectedAmount = 10;
         const expectedTransfersAmountLength = 1;
 
-        const tokenRules = await TokenRulesMock.new();
+        const tokenRules = await TokenRulesSpy.new();
 
         const transferRule = await TransferRule.new(tokenRules.address);
 
@@ -38,13 +38,13 @@ contract('TransferRule::transferFrom', async (accounts) => {
             expectedFromAddress, expectedToAddress, expectedAmount,
         );
 
-        const actualFromAddress = await tokenRules.from.call();
+        const actualFromAddress = await tokenRules.recordedFrom.call();
 
-        const actualToAddress = await tokenRules.transfersTo.call(0);
-        const actualTransfersToLength = await tokenRules.transfersToLength.call();
+        const actualToAddress = await tokenRules.recordedTransfersTo.call(0);
+        const actualTransfersToLength = await tokenRules.recordedTransfersToLength.call();
 
-        const actualAmount = await tokenRules.transfersAmount.call(0);
-        const actualTransfersAmountLength = await tokenRules.transfersAmountLength.call();
+        const actualAmount = await tokenRules.recordedTransfersAmount.call(0);
+        const actualTransfersAmountLength = await tokenRules.recordedTransfersAmountLength.call();
 
         assert.strictEqual(
             actualFromAddress,

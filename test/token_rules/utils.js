@@ -14,7 +14,7 @@
 
 const web3 = require('../test_lib/web3.js');
 
-const EIP20TokenMock = artifacts.require('EIP20TokenMock');
+const EIP20TokenFake = artifacts.require('EIP20TokenFake');
 const TokenRules = artifacts.require('TokenRules');
 const Organization = artifacts.require('Organization');
 
@@ -26,7 +26,7 @@ const Organization = artifacts.require('Organization');
  *      - decimals: 1
  */
 module.exports.createEIP20Token = async () => {
-    const token = await EIP20TokenMock.new(
+    const token = await EIP20TokenFake.new(
         'OST', 'Open Simple Token', 1,
     );
 
