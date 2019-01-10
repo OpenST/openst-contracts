@@ -20,7 +20,7 @@ import "./TokenRules.sol";
 import "./SafeMath.sol";
 
 
-contract PricerRule {
+contract PricerRule is Organized {
 
     /* Usings */
 
@@ -30,7 +30,7 @@ contract PricerRule {
     /* Storage */
 
     /**
-     * @dev The code of the base of the economy.
+     * @dev The code of the base currency of the economy.
      */
     bytes3 public baseCurrencyCode;
 
@@ -56,10 +56,13 @@ contract PricerRule {
     TokenRules private tokenRules;
 
     /**
-     * @dev Mapping from all-uppercase pay-currency code (according ISO 4217)
-     *      to corresponding price oracle.
+     * @dev Mapping from pay-currency code to corresponding price oracle.
+     *      The mapped price oracle's base currency code should be the economy
+     *      base currency code (see baseCurrencyCode storage variable)
+     *      and the quote currency code should be the corresponding pay-currency
+     *      code.
      */
-    mapping(bytes3 => PriceOracleInterface) private payCurrencyPriceOracles;
+    mapping(bytes3 => PriceOracleInterface) private baseCurrencyPriceOracles;
 
     /**
      * @dev Mapping from pay-currency code to price difference accepatance
@@ -67,7 +70,7 @@ contract PricerRule {
      *      pay-currency is presented, that is checked against current price of
      *      pay-currenency wrt stored acceptance margin.
      */
-    mapping(bytes3 => uint256) private payCurrencyPriceAcceptanceMargins;
+    mapping(bytes3 => uint256) private baseCurrencyPriceAcceptanceMargins;
 
 
     /* Special Functions */
@@ -83,6 +86,7 @@ contract PricerRule {
      *            token is not 0.
      *          - The economy token rules address is not null.
      *
+     * @param _organization Organization address.
      * @param _eip20Token The economy token address.
      * @param _baseCurrencyCode The economy base currency code.
      * @param _conversionRate The conversion rate from the economy base currency
@@ -92,12 +96,14 @@ contract PricerRule {
      * @param _tokenRules The economy token rules address.
      */
     constructor(
+        OrganizationInterface _organization,
         address _eip20Token,
         bytes3 _baseCurrencyCode,
         uint256 _conversionRate,
         uint8 _conversionRateDecimals,
         address _tokenRules
     )
+        Organized(_organization)
         public
     {
         require(_eip20Token != address(0), "EIP20 Token address is null.");
@@ -124,7 +130,7 @@ contract PricerRule {
 
         eip20Token = EIP20TokenInterface(_eip20Token);
 
-        conversionRateDecimalsFromBaseCurrencyToToken = _conversionRate;
+        conversionRateFromBaseCurrencyToToken = _conversionRate;
 
         conversionRateDecimalsFromBaseCurrencyToToken = _conversionRateDecimals;
 
@@ -134,6 +140,20 @@ contract PricerRule {
 
     /* External Functions */
 
+    /**
+     * @notice Transfers from the msg.sender account to the specified addresses
+     *         an amount of the economy tokens equivalent (after conversion) to
+     *         the specified amounts in pay currency.
+     *
+     * @dev Function requires:
+     *          - The lengths of arrays of beneficiaries and amounts are equal.
+     *          - The intended price of the base currency in the pay currency
+     *            wrt the current price is in the registered acceptance margin.
+     *
+     * @param _payCurrencyCode Currency code of the specified amounts.
+     * @param _baseCurrencyIntendedPrice The intended price of the base currency
+     *                                   used during conversion within function.
+     */
     function pay(
         bytes3 _payCurrencyCode,
         uint256 _baseCurrencyIntendedPrice,
@@ -142,7 +162,7 @@ contract PricerRule {
     )
         external
     {
-        uint256 _baseCurrencyCurrentPrice = getBaseCurrencyPrice(
+        uint256 baseCurrencyCurrentPrice = getBaseCurrencyPrice(
             _payCurrencyCode
         );
 
@@ -154,8 +174,8 @@ contract PricerRule {
         require(
             isPriceInRange(
                 _baseCurrencyIntendedPrice,
-                _baseCurrencyCurrentPrice,
-                payCurrencyPriceAcceptanceMargins[_payCurrencyCode]
+                baseCurrencyCurrentPrice,
+                baseCurrencyPriceAcceptanceMargins[_payCurrencyCode]
             ),
             "Intended price is not in the accepted margin wrt current price."
         );
@@ -166,37 +186,77 @@ contract PricerRule {
                 msg.sender,
                 _toList[i],
                 convertPayCurrencyToToken(
-                    _amountList[i],
-                    _baseCurrencyIntendedPrice
+                    _baseCurrencyIntendedPrice,
+                    _amountList[i]
                 )
             );
         }
     }
 
+    /**
+     * @notice Adds a new price oracle.
+     *
+     * @dev Function requires:
+     *          - Only organization's workers are allowed to call the function.
+     *          - The proposed price oracle's address is not null.
+     *          - The proposed price oracle's base currency code is
+     *            equal to the economy base currency code specified in this
+     *            contract constructor.
+     *          - The proposed price oracle does not exist.
+     *          - The proposed price oracle's quote currency code is not null.
+     *
+     * @param _priceOracleAddress The proposed price oracle's address to add.
+     */
     function addPriceOracle(
-        bytes3 _payCurrencyCode,
-        address _priceOracle
+        address _priceOracleAddress
     )
         external
+        onlyWorker
     {
         require(
-            _payCurrencyCode != bytes3(0),
-            "Pay currency code is null."
+            _priceOracleAddress != address(0),
+            "Price oracle address is null."
         );
 
-        require(_priceOracle != address(0), "Price oracle address is null.");
+        PriceOracleInterface priceOracle = PriceOracleInterface(
+            _priceOracleAddress
+        );
 
-        payCurrencyPriceOracles[
-            _payCurrencyCode
-        ] = PriceOracleInterface(_priceOracle);
+        bytes3 payCurrencyCode = priceOracle.getQuoteCurrencyCode();
+
+        require(
+            payCurrencyCode != bytes3(0),
+            "Price oracle's quote currency code is null."
+        );
+
+        require(
+            baseCurrencyPriceOracles[payCurrencyCode] == address(0),
+            "Price oracle already exists."
+        );
+
+        require(
+            priceOracle.getBaseCurrencyCode() == baseCurrencyCode,
+            "Price oracle's base currency code does not match."
+        );
+
+        baseCurrencyPriceOracles[payCurrencyCode] = priceOracle;
     }
 
+    /**
+     * @notice Removes the price oracle for the specified pay currency code.
+     *
+     * @dev Function requires:
+     *          - Only organization's workers are allowed to call the function.
+     *          - Price oracle matching with the specified pay currency code
+     *            exists.
+     */
     function removePriceOracle(
         bytes3 _payCurrencyCode
     )
         external
+        onlyWorker
     {
-        PriceOracleInterface priceOracle = payCurrencyPriceOracles[
+        PriceOracleInterface priceOracle = baseCurrencyPriceOracles[
             _payCurrencyCode
         ];
 
@@ -205,29 +265,52 @@ contract PricerRule {
             "Price oracle to remove does not exist."
         );
 
-        delete payCurrencyPriceOracles[_payCurrencyCode];
+        delete baseCurrencyPriceOracles[_payCurrencyCode];
     }
 
+    /**
+     * @notice Adds an acceptance margin of the base currency price in the
+     *         specified pay currency.
+     *
+     * @dev Function requires:
+     *          - Only organization's workers are allowed to call the function.
+     *          - The specified pay currency code is not null.
+     */
     function addAcceptanceMargin(
         bytes3 _payCurrencyCode,
         uint256 _acceptanceMargin
     )
         external
+        onlyWorker
     {
         require(
             _payCurrencyCode != bytes3(0),
             "Pay currency code is null."
         );
 
-        payCurrencyPriceAcceptanceMargins[_payCurrencyCode] = _acceptanceMargin;
+        baseCurrencyPriceAcceptanceMargins[_payCurrencyCode] = _acceptanceMargin;
     }
 
+    /**
+     * @notice Removes an acceptance margin of the base currency price in the
+     *         specified pay currency.
+     *
+     * @dev Function requires:
+     *          - Only organization's workers are allowed to call the function.
+     *          - The specified pay currency code is not null.
+     */
     function removeAcceptanceMargin(
         bytes3 _payCurrencyCode
     )
         external
+        onlyWorker
     {
-        delete payCurrencyPriceAcceptanceMargins[_payCurrencyCode];
+        require(
+            _payCurrencyCode != bytes3(0),
+            "Pay currency code is null."
+        );
+
+        delete baseCurrencyPriceAcceptanceMargins[_payCurrencyCode];
     }
 
 
@@ -240,7 +323,7 @@ contract PricerRule {
         view
         returns(uint256)
     {
-        PriceOracleInterface priceOracle = payCurrencyPriceOracles[
+        PriceOracleInterface priceOracle = baseCurrencyPriceOracles[
             _payCurrencyCode
         ];
 
@@ -253,8 +336,8 @@ contract PricerRule {
     }
 
     function convertPayCurrencyToToken(
-        uint256 _payCurrencyAmount,
-        uint256 _baseCurrencyPriceInPayCurrency
+        uint256 _baseCurrencyPriceInPayCurrency,
+        uint256 _payCurrencyAmount
     )
         private
         view

@@ -18,11 +18,21 @@ interface PriceOracleInterface {
 
     /** External Functions */
 
+    /**
+     * @notice Returns base currency code.
+     *
+     * @dev Base currency code is not according to ISO 4217 or other standard.
+     */
     function getBaseCurrencyCode()
         external
         view
         returns (bytes3);
 
+    /**
+     * @notice Returns quote currency code.
+     *
+     * @dev Quote currency code is not according to ISO 4217 or other standard.
+     */
     function getQuoteCurrencyCode()
         external
         view
