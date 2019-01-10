@@ -38,21 +38,25 @@ module.exports.createEIP20Token = async () => {
  *      (tokenRules, organizationAddress, token)
  */
 module.exports.createTokenEconomy = async (accountProvider) => {
-    const owner = accountProvider.get();
-    const worker = accountProvider.get();
-    const organization = await Organization.new({ from: owner });
-    const expirationHeight = (await web3.eth.getBlockNumber()) + 100;
-    await organization.setWorker(worker, expirationHeight, { from: owner });
+    const organizationOwner = accountProvider.get();
+    const organizationWorker = accountProvider.get();
+    const organization = await Organization.new({ from: organizationOwner });
+    const expirationHeight = (await web3.eth.getBlockNumber()) + 100000;
+    await organization.setWorker(organizationWorker, expirationHeight, { from: organizationOwner });
     const token = await this.createEIP20Token();
 
     const tokenRules = await TokenRules.new(
         organization.address, token.address,
     );
+
+    await tokenRules.enableDirectTransfers({ from: organizationWorker });
+
     const organizationAddress = organization.address;
     return {
         tokenRules,
         organizationAddress,
         token,
-        worker,
+        organizationOwner,
+        organizationWorker,
     };
 };

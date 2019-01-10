@@ -91,6 +91,8 @@ contract TokenRules is Organized {
      */
     mapping (address => bool) public allowedTransfers;
 
+    bool areDirectTransfersEnabled;
+
 
     /* Modifiers */
 
@@ -100,6 +102,16 @@ contract TokenRules is Organized {
             rulesByAddress[msg.sender].exists,
             "Only registered rule is allowed to call."
         );
+        _;
+    }
+
+    modifier directTransfersAreEnabled {
+
+        require(
+            areDirectTransfersEnabled,
+            "Direct transfers are not allowed."
+        );
+
         _;
     }
 
@@ -120,6 +132,8 @@ contract TokenRules is Organized {
         require(_token != address(0), "Token address is null.");
 
         token = _token;
+
+        areDirectTransfersEnabled = false;
     }
 
 
@@ -214,9 +228,25 @@ contract TokenRules is Organized {
         _executeTransfers(_from, _transfersTo, _transfersAmount);
     }
 
+    function enableDirectTransfers()
+        external
+        onlyWorker
+    {
+        areDirectTransfersEnabled = true;
+    }
+
+    function disableDirectTransfers()
+        external
+        onlyWorker
+    {
+        areDirectTransfersEnabled = false;
+    }
+
     /**
      * @dev Transfers from the caller's account to all beneficiary
      *      accounts corresponding amounts.
+     *      Function requires:
+     *          - Direct transfers are enabled by organization.
      *
      * @param _transfersTo List of addresses to transfer.
      * @param _transfersAmount List of amounts to transfer.
@@ -226,6 +256,7 @@ contract TokenRules is Organized {
         uint256[] _transfersAmount
     )
         external
+        directTransfersAreEnabled
     {
         _executeTransfers(msg.sender, _transfersTo, _transfersAmount);
     }

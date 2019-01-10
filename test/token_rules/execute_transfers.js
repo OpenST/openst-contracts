@@ -22,7 +22,7 @@ async function happyPath(accountProvider) {
         tokenRules,
         organizationAddress,
         token,
-        worker,
+        organizationWorker,
     } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
     const ruleAddress0 = accountProvider.get();
@@ -30,7 +30,7 @@ async function happyPath(accountProvider) {
         'ruleName0',
         ruleAddress0,
         'ruleAbi0',
-        { from: worker },
+        { from: organizationWorker },
     );
     await token.increaseBalance(ruleAddress0, 100);
 
@@ -61,7 +61,7 @@ async function happyPath(accountProvider) {
         ruleAddress0,
         transfersTo,
         transfersAmount,
-        worker,
+        organizationWorker,
     };
 }
 
