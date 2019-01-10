@@ -27,6 +27,26 @@ contract PricerRule is Organized {
     using SafeMath for uint256;
 
 
+    /* Events */
+
+    event PriceOracleAdded(
+        address _priceOracle
+    );
+
+    event PriceOracleRemoved(
+        address _priceOracle
+    );
+
+    event AcceptanceMarginAdded(
+        bytes3 _quoteCurrencyCode,
+        uint256 acceptanceMargin
+    );
+
+    event AcceptanceMarginRemoved(
+        bytes3 _quoteCurrencyCode
+    );
+
+
     /* Storage */
 
     /**
@@ -240,6 +260,8 @@ contract PricerRule is Organized {
         );
 
         baseCurrencyPriceOracles[payCurrencyCode] = priceOracle;
+
+        emit PriceOracleAdded(priceOracle);
     }
 
     /**
@@ -266,6 +288,8 @@ contract PricerRule is Organized {
         );
 
         delete baseCurrencyPriceOracles[_payCurrencyCode];
+
+        emit PriceOracleRemoved(priceOracle);
     }
 
     /**
@@ -289,6 +313,11 @@ contract PricerRule is Organized {
         );
 
         baseCurrencyPriceAcceptanceMargins[_payCurrencyCode] = _acceptanceMargin;
+
+        emit AcceptanceMarginAdded(
+            _payCurrencyCode,
+            _acceptanceMargin
+        );
     }
 
     /**
@@ -311,6 +340,8 @@ contract PricerRule is Organized {
         );
 
         delete baseCurrencyPriceAcceptanceMargins[_payCurrencyCode];
+
+        emit AcceptanceMarginRemoved(_payCurrencyCode);
     }
 
 

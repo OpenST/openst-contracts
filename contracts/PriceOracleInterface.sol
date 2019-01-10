@@ -16,6 +16,16 @@ pragma solidity ^0.4.23;
 
 interface PriceOracleInterface {
 
+    /** Events */
+
+    event PriceUpdated(
+        bytes3 indexed _baseCurrencyCode,
+        bytes3 _quoteCurrencyCode,
+        uint256 _price,
+        uint256 expirationHeight
+    );
+
+
     /** External Functions */
 
     /**
@@ -39,6 +49,14 @@ interface PriceOracleInterface {
         returns (bytes3);
 
     /**
+     * @notice Returns the expiration height of the price.
+     */
+    function getExpirationHeight()
+        external
+        view
+        returns (uint256);
+
+    /**
      * @notice Returns an amount of the quote currency needed to purchase
      *         one unit of the base currency.
      *
@@ -51,5 +69,5 @@ interface PriceOracleInterface {
     function getPrice()
         external
         view
-        returns(uint256);
+        returns (uint256);
 }
