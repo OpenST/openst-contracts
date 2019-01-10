@@ -94,8 +94,8 @@ contract PricerRule {
     constructor(
         address _eip20Token,
         bytes3 _baseCurrencyCode,
-        uint256 _conversionRateFromBaseCurrencyToToken,
-        uint8 _conversionRateDecimalsFromBaseCurrencyToToken,
+        uint256 _conversionRate,
+        uint8 _conversionRateDecimals,
         address _tokenRules
     )
         public
@@ -108,12 +108,12 @@ contract PricerRule {
         );
 
         require(
-            _conversionRateFromBaseCurrencyToToken != 0,
+            _conversionRate != 0,
             "Conversion rate from the base currency to the token is 0."
         );
 
         require(
-            _conversionRateDecimalsFromBaseCurrencyToToken != 0,
+            _conversionRateDecimals != 0,
             "Conversion rate's decimals from the base currency to the token is 0."
         );
 
@@ -124,11 +124,9 @@ contract PricerRule {
 
         eip20Token = EIP20TokenInterface(_eip20Token);
 
-        conversionRateDecimalsFromBaseCurrencyToToken
-            = _conversionRateDecimalsFromBaseCurrencyToToken;
+        conversionRateDecimalsFromBaseCurrencyToToken = _conversionRate;
 
-        conversionRateDecimalsFromBaseCurrencyToToken
-            = _conversionRateDecimalsFromBaseCurrencyToToken;
+        conversionRateDecimalsFromBaseCurrencyToToken = _conversionRateDecimals;
 
         tokenRules = TokenRules(_tokenRules);
     }

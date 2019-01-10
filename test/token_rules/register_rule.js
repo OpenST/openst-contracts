@@ -42,7 +42,7 @@ contract('TokenRules::registerRule', async () => {
                     { from: nonWorkerAddress },
                 ),
                 'Should revert as non worker address calls.',
-                'Only whitelisted worker is allowed to call.',
+                'Only whitelisted workers are allowed to call this method.',
             );
         });
         it('Reverts if rule name is empty.', async () => {

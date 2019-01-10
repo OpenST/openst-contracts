@@ -123,7 +123,7 @@ contract TokenRules is Organized {
      *          - Token address is not null.
      */
     constructor(
-        OrganizationIsWorkerInterface _organization,
+        OrganizationInterface _organization,
         EIP20TokenInterface _token
     )
         Organized(_organization)
@@ -245,8 +245,6 @@ contract TokenRules is Organized {
     /**
      * @dev Transfers from the caller's account to all beneficiary
      *      accounts corresponding amounts.
-     *      Function requires:
-     *          - Direct transfers are enabled by organization.
      *
      * @param _transfersTo List of addresses to transfer.
      * @param _transfersAmount List of amounts to transfer.

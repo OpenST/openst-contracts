@@ -24,7 +24,10 @@ contract('TokenRules::constructor', async () => {
 
         it('Reverts if token is null.', async () => {
             const owner = accountProvider.get();
-            const organization = await Organization.new({from: owner});
+            const organization = await Organization.new(
+                owner, owner, [], 0,
+                { from: accountProvider.get() },
+            );
             const token = utils.NULL_ADDRESS;
 
             await utils.expectRevert(
@@ -40,7 +43,10 @@ contract('TokenRules::constructor', async () => {
 
         it('Checks that passed arguments are set correctly.', async () => {
             const owner = accountProvider.get();
-            const organization = await Organization.new({ from: owner });
+            const organization = await Organization.new(
+                owner, owner, [], 0,
+                { from: accountProvider.get() },
+            );
             const token = accountProvider.get();
 
             const tokenRules = await TokenRules.new(organization.address, token);

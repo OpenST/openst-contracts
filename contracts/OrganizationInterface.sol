@@ -13,79 +13,42 @@ pragma solidity ^0.4.23;
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+//
+// ----------------------------------------------------------------------------
+//
+// http://www.simpletoken.org/
+//
+// ----------------------------------------------------------------------------
 
 /**
- *  @title OrganizationInterface.
- *
- *  @notice Provides organization interface.
+ *  @title OrganizationInterface provides methods to check if an address is
+ *         currently registered as an active participant in the organization.
  */
 interface OrganizationInterface {
 
-    /* Events */
-
-    event OwnershipTransferInitiated(address indexed _proposedOwner);
-
-    event OwnershipTransferCompleted(address indexed _newOwner);
-
-    event AdminAddressChanged(address indexed _newAdmin);
-
-    event WorkerSet(
-        address indexed _worker,
-        uint256 _expirationHeight,
-        uint256 _remainingHeight
-    );
-
-    event WorkerUnset(address indexed _worker, bool _wasSet);
-
-
-    /* External Functions */
-
     /**
-     * @notice Initiates ownership transfer to proposed owner.
+     * @notice Checks if an address is currently registered as the organization.
      *
-     * @param _proposedOwner Proposed owner address.
+     * @param _organization Address to check.
      *
-     * @return True on successful execution.
+     * @return isOrganization_ True if the given address represents the
+     *                         organization. Returns false otherwise.
      */
-    function initiateOwnershipTransfer(address _proposedOwner)
+    function isOrganization(
+        address _organization
+    )
         external
-        returns (bool);
+        view
+        returns (bool isOrganization_);
 
     /**
-     * @notice Complete ownership transfer to proposed owner.
+     * @notice Checks if an address is currently registered as an active worker.
      *
-     * @return True on successful execution.
+     * @param _worker Address to check.
+     *
+     * @return isWorker_ True if the given address is a registered, active
+     *                   worker. Returns false otherwise.
      */
-    function completeOwnershipTransfer() external returns (bool);
+    function isWorker(address _worker) external view returns (bool isWorker_);
 
-    /**
-     * @notice Sets admin address.
-     *
-     * @param _admin Admin address to be added.
-     *
-     * @return True on successful execution.
-     */
-    function setAdmin(address _admin) external returns (bool);
-
-    /**
-     * @notice Sets worker and its expiration height.
-     *
-     * @param _worker Worker address to be added.
-     * @param _expirationHeight Expiration height of worker.
-     *
-     * @return Remaining height for which worker is active.
-     */
-    function setWorker(address _worker, uint256 _expirationHeight)
-        external
-        returns (uint256);
-
-    /**
-     * @notice Removes a worker.
-     *
-     * @param _worker Worker address to be removed.
-     *
-     * @return True if the worker existed else returns false.
-     */
-    function unsetWorker(address _worker) external returns (bool);
 }

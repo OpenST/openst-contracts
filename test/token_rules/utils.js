@@ -40,9 +40,14 @@ module.exports.createEIP20Token = async () => {
 module.exports.createTokenEconomy = async (accountProvider) => {
     const organizationOwner = accountProvider.get();
     const organizationWorker = accountProvider.get();
-    const organization = await Organization.new({ from: organizationOwner });
-    const expirationHeight = (await web3.eth.getBlockNumber()) + 100000;
-    await organization.setWorker(organizationWorker, expirationHeight, { from: organizationOwner });
+    const organization = await Organization.new(
+        organizationOwner,
+        organizationOwner,
+        [organizationWorker],
+        (await web3.eth.getBlockNumber()) + 100000,
+        { from: accountProvider.get() },
+    );
+
     const token = await this.createEIP20Token();
 
     const tokenRules = await TokenRules.new(

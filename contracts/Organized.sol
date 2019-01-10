@@ -13,9 +13,14 @@ pragma solidity ^0.4.23;
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// ----------------------------------------------------------------------------
+//
+// http://www.simpletoken.org/
+//
+// ----------------------------------------------------------------------------
 
-import "./OrganizationIsWorkerInterface.sol";
-
+import "./OrganizationInterface.sol";
 
 /**
  * @title Organized contract.
@@ -25,41 +30,47 @@ import "./OrganizationIsWorkerInterface.sol";
  */
 contract Organized {
 
+
     /* Storage */
 
-    /**
-     * OrganizationIsWorkerInterface of Organization contract which holds all the
-     * keys needed to administer the economy.
-     */
-    OrganizationIsWorkerInterface public organization;
+    /** Organization which holds all the keys needed to administer the economy. */
+    OrganizationInterface public organization;
 
 
     /* Modifiers */
+
+    modifier onlyOrganization()
+    {
+        require(
+            organization.isOrganization(msg.sender),
+            "Only the organization is allowed to call this method."
+        );
+
+        _;
+    }
 
     modifier onlyWorker()
     {
         require(
             organization.isWorker(msg.sender),
-            "Only whitelisted worker is allowed to call."
+            "Only whitelisted workers are allowed to call this method."
         );
+
         _;
     }
 
 
-    /* Special Functions */
+    /* Constructor */
 
     /**
-     * @dev Constructor requires:
-     *          - organization contract address is not null.
+     * @notice Sets the address of the organization contract.
      *
-     * @param _organization Organization contract address containing
-     *        different administration keys.
+     * @param _organization A contract that manages worker keys.
      */
-    constructor(OrganizationIsWorkerInterface _organization) public
-    {
+    constructor(OrganizationInterface _organization) public {
         require(
-            _organization != address(0),
-            "Organization contract address is null."
+            address(_organization) != address(0),
+            "Organization contract address must not be zero."
         );
 
         organization = _organization;
