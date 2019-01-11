@@ -20,11 +20,11 @@ contract PriceOracleFake is PriceOracleInterface {
 
     /* Storage */
 
-    bytes3 baseCurrencyCode;
+    bytes3 mBaseCurrencyCode;
 
-    bytes3 quoteCurrencyCode;
+    bytes3 mQuoteCurrencyCode;
 
-    uint256 price;
+    uint256 mPrice;
 
 
     /* Special */
@@ -51,11 +51,11 @@ contract PriceOracleFake is PriceOracleInterface {
             "Initial price is 0."
         );
 
-        baseCurrencyCode = _baseCurrencyCode;
+        mBaseCurrencyCode = _baseCurrencyCode;
 
-        quoteCurrencyCode = _quoteCurrencyCode;
+        mQuoteCurrencyCode = _quoteCurrencyCode;
 
-        price = _initialPrice;
+        mPrice = _initialPrice;
     }
 
     /* External Functions */
@@ -67,9 +67,9 @@ contract PriceOracleFake is PriceOracleInterface {
     {
         require(_price != 0, "Price is 0.");
 
-        price = _price;
+        mPrice = _price;
 
-        emit PriceUpdated(price);
+        emit PriceUpdated(mPrice);
     }
 
     /**
@@ -77,12 +77,12 @@ contract PriceOracleFake is PriceOracleInterface {
      *
      * @dev Base currency code is not according to ISO 4217 or other standard.
      */
-    function getBaseCurrencyCode()
+    function baseCurrencyCode()
         external
         view
         returns (bytes3)
     {
-        return baseCurrencyCode;
+        return mBaseCurrencyCode;
     }
 
     /**
@@ -90,12 +90,12 @@ contract PriceOracleFake is PriceOracleInterface {
      *
      * @dev Quote currency code is not according to ISO 4217 or other standard.
      */
-    function getQuoteCurrencyCode()
+    function quoteCurrencyCode()
         external
         view
         returns (bytes3)
     {
-        return quoteCurrencyCode;
+        return mQuoteCurrencyCode;
     }
 
     /**
@@ -108,11 +108,11 @@ contract PriceOracleFake is PriceOracleInterface {
      * @return An amount of the quote currency needed to purchase one unit of
      *         the base base currency.
      */
-    function getPrice()
+    function price()
         external
         view
         returns (uint256)
     {
-        return price;
+        return mPrice;
     }
 }

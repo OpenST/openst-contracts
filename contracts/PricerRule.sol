@@ -37,7 +37,7 @@ contract PricerRule is Organized {
         address _priceOracle
     );
 
-    event AcceptanceMarginAdded(
+    event AcceptanceMarginSet(
         bytes3 _quoteCurrencyCode,
         uint256 acceptanceMargin
     );
@@ -161,6 +161,7 @@ contract PricerRule is Organized {
      *         the specified amounts in pay currency.
      *
      * @dev Function requires:
+     *          - From address is not null.
      *          - The lengths of arrays of beneficiaries and amounts are equal.
      *          - The intended price of the base currency in the pay currency
      *            wrt the current price is in the registered acceptance margin.
@@ -170,20 +171,26 @@ contract PricerRule is Organized {
      *                                   used during conversion within function.
      */
     function pay(
-        bytes3 _payCurrencyCode,
-        uint256 _baseCurrencyIntendedPrice,
+        address _from,
         address[] _toList,
-        uint256[] _amountList
+        uint256[] _amountList,
+        bytes3 _payCurrencyCode,
+        uint256 _baseCurrencyIntendedPrice
     )
         external
     {
-        uint256 baseCurrencyCurrentPrice = getBaseCurrencyPrice(
-            _payCurrencyCode
+        require(
+            _from != address(0),
+            "From address is null."
         );
 
         require(
             _toList.length == _amountList.length,
             "'to' and 'amount' transfer arrays' lengths are not equal."
+        );
+
+        uint256 baseCurrencyCurrentPrice = baseCurrencyPrice(
+            _payCurrencyCode
         );
 
         require(
@@ -195,17 +202,20 @@ contract PricerRule is Organized {
             "Intended price is not in the accepted margin wrt current price."
         );
 
-        for(uint256 i = 0; i < _toList.length; ++i) {
+        uint256[] memory convertedAmounts = new uint256[](_amountList.length);
 
-            eip20Token.transferFrom(
-                msg.sender,
-                _toList[i],
-                convertPayCurrencyToToken(
-                    _baseCurrencyIntendedPrice,
-                    _amountList[i]
-                )
+        for(uint256 i = 0; i < _amountList.length; ++i) {
+            convertedAmounts[i] = convertPayCurrencyToToken(
+                _baseCurrencyIntendedPrice,
+                _amountList[i]
             );
         }
+
+        tokenRules.executeTransfers(
+            _from,
+            _toList,
+            convertedAmounts
+        );
     }
 
     /**
@@ -232,7 +242,7 @@ contract PricerRule is Organized {
             "Price oracle address is null."
         );
 
-        bytes3 payCurrencyCode = _priceOracle.getQuoteCurrencyCode();
+        bytes3 payCurrencyCode = _priceOracle.quoteCurrencyCode();
 
         require(
             baseCurrencyPriceOracles[payCurrencyCode] == address(0),
@@ -240,7 +250,7 @@ contract PricerRule is Organized {
         );
 
         require(
-            _priceOracle.getBaseCurrencyCode() == baseCurrencyCode,
+            _priceOracle.baseCurrencyCode() == baseCurrencyCode,
             "Price oracle's base currency code does not match."
         );
 
@@ -278,14 +288,14 @@ contract PricerRule is Organized {
     }
 
     /**
-     * @notice Adds an acceptance margin of the base currency price in the
+     * @notice Sets an acceptance margin of the base currency price in the
      *         specified pay currency.
      *
      * @dev Function requires:
      *          - Only organization's workers are allowed to call the function.
      *          - The specified pay currency code is not null.
      */
-    function addAcceptanceMargin(
+    function setAcceptanceMargin(
         bytes3 _payCurrencyCode,
         uint256 _acceptanceMargin
     )
@@ -299,7 +309,7 @@ contract PricerRule is Organized {
 
         baseCurrencyPriceAcceptanceMargins[_payCurrencyCode] = _acceptanceMargin;
 
-        emit AcceptanceMarginAdded(
+        emit AcceptanceMarginSet(
             _payCurrencyCode,
             _acceptanceMargin
         );
@@ -332,7 +342,7 @@ contract PricerRule is Organized {
 
     /* Private Functions */
 
-    function getBaseCurrencyPrice(
+    function baseCurrencyPrice(
         bytes3 _payCurrencyCode
     )
         private
@@ -348,7 +358,7 @@ contract PricerRule is Organized {
             "Price oracle for the specified currency code does not exist."
         );
 
-        return priceOracle.getPrice();
+        return priceOracle.price();
     }
 
     function convertPayCurrencyToToken(
