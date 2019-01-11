@@ -73,7 +73,7 @@ contract PricerRule is Organized {
     /**
      * @dev Token rules address of the economy.
      */
-    TokenRules private tokenRules;
+    TokenRules public tokenRules;
 
     /**
      * @dev Mapping from pay-currency code to corresponding price oracle.
@@ -82,7 +82,7 @@ contract PricerRule is Organized {
      *      and the quote currency code should be the corresponding pay-currency
      *      code.
      */
-    mapping(bytes3 => PriceOracleInterface) private baseCurrencyPriceOracles;
+    mapping(bytes3 => PriceOracleInterface) public baseCurrencyPriceOracles;
 
     /**
      * @dev Mapping from pay-currency code to price difference accepatance
@@ -90,7 +90,7 @@ contract PricerRule is Organized {
      *      pay-currency is presented, that is checked against current price of
      *      pay-currenency wrt stored acceptance margin.
      */
-    mapping(bytes3 => uint256) private baseCurrencyPriceAcceptanceMargins;
+    mapping(bytes3 => uint256) public baseCurrencyPriceAcceptanceMargins;
 
 
     /* Special Functions */
@@ -102,8 +102,6 @@ contract PricerRule is Organized {
      *          - The economy token address is not null.
      *          - The base currency code is not empty.
      *          - Conversion rate from the base currency to the token is not 0.
-     *          - Conversion rate's decimals from the base currency to the
-     *            token is not 0.
      *          - The economy token rules address is not null.
      *
      * @param _organization Organization address.
@@ -126,7 +124,7 @@ contract PricerRule is Organized {
         Organized(_organization)
         public
     {
-        require(_eip20Token != address(0), "EIP20 Token address is null.");
+        require(_eip20Token != address(0), "Token address is null.");
 
         require(
             _baseCurrencyCode != bytes3(0),
@@ -139,16 +137,13 @@ contract PricerRule is Organized {
         );
 
         require(
-            _conversionRateDecimals != 0,
-            "Conversion rate's decimals from the base currency to the token is 0."
-        );
-
-        require(
             _tokenRules != address(0),
             "Token rules address is null."
         );
 
         eip20Token = EIP20TokenInterface(_eip20Token);
+
+        baseCurrencyCode = _baseCurrencyCode;
 
         conversionRateFromBaseCurrencyToToken = _conversionRate;
 
@@ -223,31 +218,21 @@ contract PricerRule is Organized {
      *            equal to the economy base currency code specified in this
      *            contract constructor.
      *          - The proposed price oracle does not exist.
-     *          - The proposed price oracle's quote currency code is not null.
      *
-     * @param _priceOracleAddress The proposed price oracle's address to add.
+     * @param _priceOracle The proposed price oracle.
      */
     function addPriceOracle(
-        address _priceOracleAddress
+        PriceOracleInterface _priceOracle
     )
         external
         onlyWorker
     {
         require(
-            _priceOracleAddress != address(0),
+            _priceOracle != address(0),
             "Price oracle address is null."
         );
 
-        PriceOracleInterface priceOracle = PriceOracleInterface(
-            _priceOracleAddress
-        );
-
-        bytes3 payCurrencyCode = priceOracle.getQuoteCurrencyCode();
-
-        require(
-            payCurrencyCode != bytes3(0),
-            "Price oracle's quote currency code is null."
-        );
+        bytes3 payCurrencyCode = _priceOracle.getQuoteCurrencyCode();
 
         require(
             baseCurrencyPriceOracles[payCurrencyCode] == address(0),
@@ -255,13 +240,13 @@ contract PricerRule is Organized {
         );
 
         require(
-            priceOracle.getBaseCurrencyCode() == baseCurrencyCode,
+            _priceOracle.getBaseCurrencyCode() == baseCurrencyCode,
             "Price oracle's base currency code does not match."
         );
 
-        baseCurrencyPriceOracles[payCurrencyCode] = priceOracle;
+        baseCurrencyPriceOracles[payCurrencyCode] = _priceOracle;
 
-        emit PriceOracleAdded(priceOracle);
+        emit PriceOracleAdded(_priceOracle);
     }
 
     /**

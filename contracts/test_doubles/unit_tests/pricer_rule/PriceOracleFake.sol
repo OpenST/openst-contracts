@@ -14,16 +14,63 @@ pragma solidity ^0.4.23;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-interface PriceOracleInterface {
+import "../../../PriceOracleInterface.sol";
 
-    /* Events */
+contract PriceOracleFake is PriceOracleInterface {
 
-    event PriceUpdated(
-        uint256 _price
-    );
+    /* Storage */
 
+    bytes3 baseCurrencyCode;
+
+    bytes3 quoteCurrencyCode;
+
+    uint256 price;
+
+
+    /* Special */
+
+    constructor(
+        bytes3 _baseCurrencyCode,
+        bytes3 _quoteCurrencyCode,
+        uint256 _initialPrice
+    )
+        public
+    {
+        require(
+            _baseCurrencyCode != bytes3(0),
+            "Base currency code is empty."
+        );
+
+        require(
+            _quoteCurrencyCode != bytes3(0),
+            "Quote currency code is empty."
+        );
+
+        require(
+            _initialPrice != 0,
+            "Initial price is 0."
+        );
+
+        baseCurrencyCode = _baseCurrencyCode;
+
+        quoteCurrencyCode = _quoteCurrencyCode;
+
+        price = _initialPrice;
+    }
 
     /* External Functions */
+
+    function setPrice(
+        uint256 _price
+    )
+        external
+    {
+        require(_price != 0, "Price is 0.");
+
+        price = _price;
+
+        emit PriceUpdated(price);
+    }
 
     /**
      * @notice Returns base currency code.
@@ -33,7 +80,10 @@ interface PriceOracleInterface {
     function getBaseCurrencyCode()
         external
         view
-        returns (bytes3);
+        returns (bytes3)
+    {
+        return baseCurrencyCode;
+    }
 
     /**
      * @notice Returns quote currency code.
@@ -43,7 +93,10 @@ interface PriceOracleInterface {
     function getQuoteCurrencyCode()
         external
         view
-        returns (bytes3);
+        returns (bytes3)
+    {
+        return quoteCurrencyCode;
+    }
 
     /**
      * @notice Returns an amount of the quote currency needed to purchase
@@ -58,5 +111,8 @@ interface PriceOracleInterface {
     function getPrice()
         external
         view
-        returns (uint256);
+        returns (uint256)
+    {
+        return price;
+    }
 }
