@@ -39,7 +39,7 @@ contract PricerRule is Organized {
 
     event AcceptanceMarginSet(
         bytes3 _quoteCurrencyCode,
-        uint256 acceptanceMargin
+        uint256 _acceptanceMargin
     );
 
     event AcceptanceMarginRemoved(
