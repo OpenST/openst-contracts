@@ -242,7 +242,7 @@ contract PricerRule is Organized {
             "Price oracle address is null."
         );
 
-        bytes3 payCurrencyCode = _priceOracle.quoteCurrencyCode();
+        bytes3 payCurrencyCode = _priceOracle.quoteCurrency();
 
         require(
             baseCurrencyPriceOracles[payCurrencyCode] == address(0),
@@ -250,7 +250,7 @@ contract PricerRule is Organized {
         );
 
         require(
-            _priceOracle.baseCurrencyCode() == baseCurrencyCode,
+            _priceOracle.baseCurrency() == baseCurrencyCode,
             "Price oracle's base currency code does not match."
         );
 
@@ -288,8 +288,8 @@ contract PricerRule is Organized {
     }
 
     /**
-     * @notice Sets an acceptance margin of the base currency price in the
-     *         specified pay currency.
+     * @notice Sets an acceptance margin for the base currency price per pay
+     *         currency.
      *
      * @dev Function requires:
      *          - Only organization's workers are allowed to call the function.
@@ -358,7 +358,7 @@ contract PricerRule is Organized {
             "Price oracle for the specified currency code does not exist."
         );
 
-        return priceOracle.price();
+        return priceOracle.getPrice();
     }
 
     function convertPayCurrencyToToken(

@@ -20,11 +20,11 @@ contract PriceOracleFake is PriceOracleInterface {
 
     /* Storage */
 
-    bytes3 mBaseCurrencyCode;
+    bytes3 baseCurrencyCode;
 
-    bytes3 mQuoteCurrencyCode;
+    bytes3 quoteCurrencyCode;
 
-    uint256 mPrice;
+    uint256 price;
 
 
     /* Special */
@@ -51,11 +51,11 @@ contract PriceOracleFake is PriceOracleInterface {
             "Initial price is 0."
         );
 
-        mBaseCurrencyCode = _baseCurrencyCode;
+        baseCurrencyCode = _baseCurrencyCode;
 
-        mQuoteCurrencyCode = _quoteCurrencyCode;
+        quoteCurrencyCode = _quoteCurrencyCode;
 
-        mPrice = _initialPrice;
+        price = _initialPrice;
     }
 
     /* External Functions */
@@ -67,9 +67,9 @@ contract PriceOracleFake is PriceOracleInterface {
     {
         require(_price != 0, "Price is 0.");
 
-        mPrice = _price;
+        price = _price;
 
-        emit PriceUpdated(mPrice);
+        emit PriceUpdated(price);
     }
 
     /**
@@ -77,12 +77,12 @@ contract PriceOracleFake is PriceOracleInterface {
      *
      * @dev Base currency code is not according to ISO 4217 or other standard.
      */
-    function baseCurrencyCode()
+    function baseCurrency()
         external
         view
         returns (bytes3)
     {
-        return mBaseCurrencyCode;
+        return baseCurrencyCode;
     }
 
     /**
@@ -90,12 +90,12 @@ contract PriceOracleFake is PriceOracleInterface {
      *
      * @dev Quote currency code is not according to ISO 4217 or other standard.
      */
-    function quoteCurrencyCode()
+    function quoteCurrency()
         external
         view
         returns (bytes3)
     {
-        return mQuoteCurrencyCode;
+        return quoteCurrencyCode;
     }
 
     /**
@@ -108,11 +108,11 @@ contract PriceOracleFake is PriceOracleInterface {
      * @return An amount of the quote currency needed to purchase one unit of
      *         the base base currency.
      */
-    function price()
+    function getPrice()
         external
         view
         returns (uint256)
     {
-        return mPrice;
+        return price;
     }
 }

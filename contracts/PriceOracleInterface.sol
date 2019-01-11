@@ -30,7 +30,7 @@ interface PriceOracleInterface {
      *
      * @dev Base currency code is not according to ISO 4217 or other standard.
      */
-    function baseCurrencyCode()
+    function baseCurrency()
         external
         view
         returns (bytes3);
@@ -40,7 +40,7 @@ interface PriceOracleInterface {
      *
      * @dev Quote currency code is not according to ISO 4217 or other standard.
      */
-    function quoteCurrencyCode()
+    function quoteCurrency()
         external
         view
         returns (bytes3);
@@ -55,7 +55,7 @@ interface PriceOracleInterface {
      * @return An amount of the quote currency needed to purchase one unit of
      *         the base base currency.
      */
-    function price()
+    function getPrice()
         external
         view
         returns (uint256);
