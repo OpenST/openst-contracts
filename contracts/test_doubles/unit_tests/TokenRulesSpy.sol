@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.0;
 
 contract TokenRulesSpy {
 
@@ -31,8 +31,8 @@ contract TokenRulesSpy {
 
     function executeTransfers(
         address _from,
-        address[] _transfersTo,
-        uint256[] _transfersAmount
+        address[] calldata _transfersTo,
+        uint256[] calldata _transfersAmount
     )
         external
     {

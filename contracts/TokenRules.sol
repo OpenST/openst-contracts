@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.0;
 
 // Copyright 2018 OpenST Ltd.
 //
@@ -129,7 +129,7 @@ contract TokenRules is Organized {
         Organized(_organization)
         public
     {
-        require(_token != address(0), "Token address is null.");
+        require(address(_token) != address(0), "Token address is null.");
 
         token = _token;
 
@@ -153,9 +153,9 @@ contract TokenRules is Organized {
      * @param _ruleAbi The abi of the rule to register.
      */
     function registerRule(
-        string _ruleName,
+        string calldata _ruleName,
         address _ruleAddress,
-        string _ruleAbi
+        string calldata _ruleAbi
     )
         external
         onlyWorker
@@ -219,8 +219,8 @@ contract TokenRules is Organized {
      */
     function executeTransfers(
         address _from,
-        address[] _transfersTo,
-        uint256[] _transfersAmount
+        address[] calldata _transfersTo,
+        uint256[] calldata _transfersAmount
     )
         external
         onlyRule
@@ -250,8 +250,8 @@ contract TokenRules is Organized {
      * @param _transfersAmount List of amounts to transfer.
      */
     function directTransfers(
-        address[] _transfersTo,
-        uint256[] _transfersAmount
+        address[] calldata _transfersTo,
+        uint256[] calldata _transfersAmount
     )
         external
         directTransfersAreEnabled
@@ -278,8 +278,8 @@ contract TokenRules is Organized {
      */
     function _executeTransfers(
         address _from,
-        address[] _transfersTo,
-        uint256[] _transfersAmount
+        address[] memory _transfersTo,
+        uint256[] memory _transfersAmount
     )
         private
     {

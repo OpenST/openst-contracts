@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.0;
 
 // Copyright 2018 OpenST Ltd.
 //
@@ -172,8 +172,8 @@ contract PricerRule is Organized {
      */
     function pay(
         address _from,
-        address[] _toList,
-        uint256[] _amountList,
+        address[] calldata _toList,
+        uint256[] calldata _amountList,
         bytes3 _payCurrencyCode,
         uint256 _baseCurrencyIntendedPrice
     )
@@ -238,14 +238,14 @@ contract PricerRule is Organized {
         onlyWorker
     {
         require(
-            _priceOracle != address(0),
+            address(_priceOracle) != address(0),
             "Price oracle address is null."
         );
 
         bytes3 payCurrencyCode = _priceOracle.quoteCurrency();
 
         require(
-            baseCurrencyPriceOracles[payCurrencyCode] == address(0),
+            address(baseCurrencyPriceOracles[payCurrencyCode]) == address(0),
             "Price oracle already exists."
         );
 
@@ -256,7 +256,7 @@ contract PricerRule is Organized {
 
         baseCurrencyPriceOracles[payCurrencyCode] = _priceOracle;
 
-        emit PriceOracleAdded(_priceOracle);
+        emit PriceOracleAdded(address(_priceOracle));
     }
 
     /**
@@ -278,13 +278,13 @@ contract PricerRule is Organized {
         ];
 
         require(
-            priceOracle != address(0),
+            address(priceOracle) != address(0),
             "Price oracle to remove does not exist."
         );
 
         delete baseCurrencyPriceOracles[_payCurrencyCode];
 
-        emit PriceOracleRemoved(priceOracle);
+        emit PriceOracleRemoved(address(priceOracle));
     }
 
     /**
@@ -354,7 +354,7 @@ contract PricerRule is Organized {
         ];
 
         require(
-            priceOracle != address(0),
+            address(priceOracle) != address(0),
             "Price oracle for the specified currency code does not exist."
         );
 

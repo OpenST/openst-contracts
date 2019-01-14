@@ -611,11 +611,7 @@ contract('TokenHolder::redeem', async (accounts) => {
                     _sessionKey: sessionPublicKey1,
                     _nonce: new BN(tokenHolderNonce),
                     _messageHash: exTxHash,
-                    // We should check against false here, however
-                    // current version of web3 returns null for false values
-                    // in event log. After updating web3, this test might
-                    // fail and we should use false (as intended).
-                    _status: null,
+                    _status: false,
                 },
             });
         });

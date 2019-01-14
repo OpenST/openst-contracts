@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.0;
 
 // Copyright 2018 OpenST Ltd.
 //
@@ -39,9 +39,9 @@ interface EIP20TokenInterface {
 
     /* External Functions */
 
-    function name() external view returns (string);
+    function name() external view returns (string memory);
 
-    function symbol() external view returns (string);
+    function symbol() external view returns (string memory);
 
     function decimals() external view returns (uint8);
 

@@ -1,5 +1,5 @@
 /* solhint-disable-next-line compiler-fixed */
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.0;
 
 // Copyright 2018 OpenST Ltd.
 //
@@ -37,8 +37,8 @@ contract UtilityTokenFake is EIP20TokenFake {
      *  @param _decimals Decimal places of the token.
      */
     constructor(
-        string _symbol,
-        string _name,
+        string memory _symbol,
+        string memory _name,
         uint8 _decimals
     )
         EIP20TokenFake(_symbol, _name, _decimals)

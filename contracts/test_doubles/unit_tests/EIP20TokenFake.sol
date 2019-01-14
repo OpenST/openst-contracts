@@ -1,5 +1,5 @@
 /* solhint-disable-next-line compiler-fixed */
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.0;
 
 // Copyright 2018 OpenST Ltd.
 //
@@ -49,7 +49,7 @@ contract EIP20TokenFake is EIP20TokenInterface {
      * @param _name Name of the token.
      * @param _decimals Decimal places of the token.
      */
-    constructor(string _symbol, string _name, uint8 _decimals)
+    constructor(string memory _symbol, string memory _name, uint8 _decimals)
         public
     {
         tokenTotalSupply = 0;
@@ -67,7 +67,7 @@ contract EIP20TokenFake is EIP20TokenInterface {
      *
      * @return Name of the EIP20 token.
      */
-    function name() external view returns (string) {
+    function name() external view returns (string memory) {
         return tokenName;
     }
 
@@ -76,7 +76,7 @@ contract EIP20TokenFake is EIP20TokenInterface {
      *
      * @return Symbol of the EIP20 token.
      */
-    function symbol() external view returns (string) {
+    function symbol() external view returns (string memory) {
         return tokenSymbol;
     }
 

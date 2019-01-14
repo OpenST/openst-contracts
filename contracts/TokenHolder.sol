@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.0;
 
 // Copyright 2018 OpenST Ltd.
 //
@@ -174,7 +174,7 @@ contract TokenHolder {
         public
     {
         require(
-            _token != address(0),
+            address(_token) != address(0),
             "Token contract address is null."
         );
         require(
@@ -300,7 +300,7 @@ contract TokenHolder {
      */
     function executeRule(
         address _to,
-        bytes _data,
+        bytes calldata _data,
         uint256 _nonce,
         uint8 _v,
         bytes32 _r,
@@ -341,8 +341,9 @@ contract TokenHolder {
             sessionKeyData.spendingLimit
         );
 
+        bytes memory returnData;
         // solium-disable-next-line security/no-call-value
-        executionStatus_ = _to.call.value(msg.value)(_data);
+        (executionStatus_, returnData) = _to.call.value(msg.value)(_data);
 
         token.approve(tokenRules, 0);
 
@@ -362,7 +363,7 @@ contract TokenHolder {
 
     function executeRedeem(
         address _to,
-        bytes _data,
+        bytes calldata _data,
         uint256 _nonce,
         uint8 _v,
         bytes32 _r,
@@ -372,7 +373,9 @@ contract TokenHolder {
         payable
         returns (bool executionStatus_)
     {
-        address coGateway = UtilityTokenRequiredInterface(token).coGateway();
+        address coGateway = UtilityTokenRequiredInterface(
+            address(token)
+        ).coGateway();
 
         require(_to == coGateway,"'to' address is not coGateway address.");
 
@@ -399,8 +402,10 @@ contract TokenHolder {
 
         token.approve(_to, sessionKeyData.spendingLimit);
 
+        bytes memory returnData;
         // solium-disable-next-line security/no-call-value
-        executionStatus_ = _to.call.value(msg.value)(_data);
+        (executionStatus_, returnData) = _to.call.value(msg.value)(_data);
+
 
         token.approve(_to, 0);
 
@@ -422,7 +427,7 @@ contract TokenHolder {
      *      Function requires:
      *          - Input byte array's length is greater than or equal to 4.
      */
-    function bytesToBytes4(bytes _input) public pure returns (bytes4 out_) {
+    function bytesToBytes4(bytes memory _input) public pure returns (bytes4 out_) {
         require(
             _input.length >= 4,
             "Input bytes length is less than 4."
@@ -439,7 +444,7 @@ contract TokenHolder {
     function verifyExecutableTransaction(
         bytes4 _callPrefix,
         address _to,
-        bytes _data,
+        bytes memory _data,
         uint256 _nonce,
         uint8 _v,
         bytes32 _r,
