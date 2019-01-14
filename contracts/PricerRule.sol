@@ -199,7 +199,7 @@ contract PricerRule is Organized {
                 baseCurrencyCurrentPrice,
                 baseCurrencyPriceAcceptanceMargins[_payCurrencyCode]
             ),
-            "Intended price is not in the accepted margin wrt current price."
+            "Intended price is not in the acceptable margin wrt current price."
         );
 
         uint256[] memory convertedAmounts = new uint256[](_amountList.length);

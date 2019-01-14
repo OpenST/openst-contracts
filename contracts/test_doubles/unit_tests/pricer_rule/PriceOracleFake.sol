@@ -26,13 +26,16 @@ contract PriceOracleFake is PriceOracleInterface {
 
     uint256 price;
 
+    uint256 expirationHeight;
+
 
     /* Special */
 
     constructor(
         bytes3 _baseCurrencyCode,
         bytes3 _quoteCurrencyCode,
-        uint256 _initialPrice
+        uint256 _initialPrice,
+        uint256 _expirationHeight
     )
         public
     {
@@ -46,31 +49,15 @@ contract PriceOracleFake is PriceOracleInterface {
             "Quote currency code is empty."
         );
 
-        require(
-            _initialPrice != 0,
-            "Initial price is 0."
-        );
-
         baseCurrencyCode = _baseCurrencyCode;
 
         quoteCurrencyCode = _quoteCurrencyCode;
 
-        price = _initialPrice;
+        setPrice(_initialPrice, _expirationHeight);
     }
+
 
     /* External Functions */
-
-    function setPrice(
-        uint256 _price
-    )
-        external
-    {
-        require(_price != 0, "Price is 0.");
-
-        price = _price;
-
-        emit PriceUpdated(price);
-    }
 
     /**
      * @notice Returns base currency code.
@@ -113,6 +100,34 @@ contract PriceOracleFake is PriceOracleInterface {
         view
         returns (uint256)
     {
+        require(
+            expirationHeight > block.number,
+            "Price expiration height is lte to the current block height."
+        );
+
         return price;
+    }
+
+
+    /* Public Functions */
+
+    function setPrice(
+        uint256 _price,
+        uint256 _expirationHeight
+    )
+        public
+    {
+        require(_price != 0, "Price is 0.");
+
+        require(
+            _expirationHeight > block.number,
+            "Price expiration height is lte to the current block height."
+        );
+
+        price = _price;
+
+        expirationHeight = _expirationHeight;
+
+        emit PriceUpdated(price);
     }
 }

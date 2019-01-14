@@ -79,6 +79,7 @@ contract('PricerRule::add_price_oracle', async () => {
                 web3.utils.stringToHex(anotherBaseCurrencyCode),
                 web3.utils.stringToHex(quoteCurrencyCode),
                 100, // initial price
+                (await web3.eth.getBlockNumber()) + 10000, // expiration height
             );
 
             await Utils.expectRevert(
@@ -110,6 +111,7 @@ contract('PricerRule::add_price_oracle', async () => {
                 web3.utils.stringToHex(baseCurrencyCode),
                 web3.utils.stringToHex(quoteCurrencyCode),
                 100, // initial price
+                (await web3.eth.getBlockNumber()) + 10000, // expiration height
             );
 
             await Utils.expectRevert(

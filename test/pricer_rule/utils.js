@@ -71,9 +71,9 @@ module.exports.createTokenEconomy = async (accountProvider) => {
 
     const baseCurrencyCode = 'OST';
 
-    const conversionRate = 10;
+    const conversionRate = 315;
 
-    const conversionRateDecimals = 1;
+    const conversionRateDecimals = 2;
 
     const pricerRule = await PricerRule.new(
         organization.address,
@@ -85,12 +85,14 @@ module.exports.createTokenEconomy = async (accountProvider) => {
     );
 
     const quoteCurrencyCode = 'EUR';
-    const initialPrice = 11;
+    const priceOracleInitialPrice = 11;
+    const initialPriceExpirationHeight = (await web3.eth.getBlockNumber()) + 10000;
 
     const priceOracle = await PriceOracleFake.new(
         web3.utils.stringToHex(baseCurrencyCode),
         web3.utils.stringToHex(quoteCurrencyCode),
-        initialPrice,
+        priceOracleInitialPrice,
+        initialPriceExpirationHeight,
     );
 
     return {
@@ -104,7 +106,7 @@ module.exports.createTokenEconomy = async (accountProvider) => {
         conversionRateDecimals,
         pricerRule,
         quoteCurrencyCode,
-        initialPrice,
+        priceOracleInitialPrice,
         priceOracle,
     };
 };
