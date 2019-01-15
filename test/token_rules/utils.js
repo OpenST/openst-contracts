@@ -57,10 +57,11 @@ module.exports.createTokenEconomy = async (accountProvider) => {
     await tokenRules.enableDirectTransfers({ from: organizationWorker });
 
     const organizationAddress = organization.address;
+
     return {
         tokenRules,
-        organizationAddress,
         token,
+        organizationAddress,
         organizationOwner,
         organizationWorker,
     };

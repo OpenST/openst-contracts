@@ -41,7 +41,7 @@ contract('TokenRules::constructor', async () => {
     contract('Storage', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
 
-        it('Checks that passed arguments are set correctly.', async () => {
+        it('Checks initialization of the contract\'s storage.', async () => {
             const owner = accountProvider.get();
             const organization = await Organization.new(
                 owner, owner, [], 0,
@@ -52,8 +52,13 @@ contract('TokenRules::constructor', async () => {
             const tokenRules = await TokenRules.new(organization.address, token);
 
             assert.strictEqual(
-                (await tokenRules.token.call()),
+                await tokenRules.token.call(),
                 token,
+            );
+
+            assert.strictEqual(
+                await tokenRules.areDirectTransfersEnabled.call(),
+                false,
             );
         });
     });

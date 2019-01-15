@@ -91,7 +91,7 @@ contract TokenRules is Organized {
      */
     mapping (address => bool) public allowedTransfers;
 
-    bool areDirectTransfersEnabled;
+    bool public areDirectTransfersEnabled;
 
 
     /* Modifiers */
@@ -228,6 +228,14 @@ contract TokenRules is Organized {
         _executeTransfers(_from, _transfersTo, _transfersAmount);
     }
 
+    /**
+     * @notice Enables direct transfers from token rules.
+     *
+     * @dev Function requires:
+     *          - Only organization worker is allowed to call.
+     *
+     * \see directTransfers()
+     */
     function enableDirectTransfers()
         external
         onlyWorker
@@ -235,6 +243,14 @@ contract TokenRules is Organized {
         areDirectTransfersEnabled = true;
     }
 
+    /**
+     * @notice Disables direct transfers from token rules.
+     *
+     * @dev Function requires:
+     *          - Only organization worker is allowed to call.
+     *
+     * \see directTransfers()
+     */
     function disableDirectTransfers()
         external
         onlyWorker
