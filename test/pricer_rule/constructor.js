@@ -35,6 +35,7 @@ contract('PricerRule::constructor', async () => {
                     web3.utils.stringToHex('OST'), // base currency code
                     1, // conversion rate
                     0, // conversion rate decimals
+                    0, // price oracles required decimals number
                     accountProvider.get(), // token rules
                 ),
                 'Should revert as the economy token address is null.',
@@ -54,6 +55,7 @@ contract('PricerRule::constructor', async () => {
                     web3.utils.stringToHex(''), // base currency code
                     1, // conversion rate
                     0, // conversion rate decimals
+                    0, // price oracles required decimals number
                     accountProvider.get(), // token rules
                 ),
                 'Should revert as the base currency code is null.',
@@ -73,6 +75,7 @@ contract('PricerRule::constructor', async () => {
                     web3.utils.stringToHex('OST'), // base currency code
                     0, // conversion rate
                     0, // conversion rate decimals
+                    0, // price oracles required decimals number
                     accountProvider.get(), // token rules
                 ),
                 'Should revert as the conversion rate from the base currency to the token is 0.',
@@ -92,6 +95,7 @@ contract('PricerRule::constructor', async () => {
                     web3.utils.stringToHex('OST'), // base currency code
                     1, // conversion rate
                     0, // conversion rate decimals
+                    0, // price oracles required decimals number
                     Utils.NULL_ADDRESS, // token rules
                 ),
                 'Should revert as token rules is null.',
@@ -116,6 +120,7 @@ contract('PricerRule::constructor', async () => {
                 web3.utils.stringToHex('OST'), // base currency code
                 10, // conversion rate
                 1, // conversion rate decimals
+                2, // price oracles required decimals number
                 tokenRules, // token rules
             );
 
@@ -145,6 +150,10 @@ contract('PricerRule::constructor', async () => {
 
             assert.isOk(
                 (await pricerRule.conversionRateDecimalsFromBaseCurrencyToToken.call()).eqn(1),
+            );
+
+            assert.isOk(
+                (await pricerRule.requiredPriceOracleDecimals.call()).eqn(2),
             );
 
             assert.strictEqual(

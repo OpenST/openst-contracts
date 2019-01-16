@@ -75,12 +75,15 @@ module.exports.createTokenEconomy = async (accountProvider) => {
 
     const conversionRateDecimals = 2;
 
+    const requiredPriceOracleDecimals = 7;
+
     const pricerRule = await PricerRule.new(
         organization.address,
         token.address,
         web3.utils.stringToHex(baseCurrencyCode.toString()),
         conversionRate,
         conversionRateDecimals,
+        requiredPriceOracleDecimals,
         tokenRules.address,
     );
 
@@ -91,6 +94,7 @@ module.exports.createTokenEconomy = async (accountProvider) => {
     const priceOracle = await PriceOracleFake.new(
         web3.utils.stringToHex(baseCurrencyCode),
         web3.utils.stringToHex(quoteCurrencyCode),
+        requiredPriceOracleDecimals,
         priceOracleInitialPrice,
         initialPriceExpirationHeight,
     );
@@ -104,6 +108,7 @@ module.exports.createTokenEconomy = async (accountProvider) => {
         baseCurrencyCode,
         conversionRate,
         conversionRateDecimals,
+        requiredPriceOracleDecimals,
         pricerRule,
         quoteCurrencyCode,
         priceOracleInitialPrice,

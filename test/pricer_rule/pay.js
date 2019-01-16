@@ -17,7 +17,6 @@ const web3 = require('../test_lib/web3.js');
 const Utils = require('../test_lib/utils');
 const PricerRuleUtils = require('./utils.js');
 const { AccountProvider } = require('../test_lib/utils');
-const { Event } = require('../test_lib/event_decoder');
 
 async function prepare(accountProvider) {
     const r = await PricerRuleUtils.createTokenEconomy(accountProvider);
@@ -33,7 +32,7 @@ async function prepare(accountProvider) {
         { from: r.fromAddress },
     );
 
-    r.spendingLimit = 111;
+    r.spendingLimit = 1000000;
 
     r.token.approve(
         r.tokenRules.address,
@@ -65,8 +64,8 @@ contract('PricerRule::pay', async () => {
             await Utils.expectRevert(
                 pricerRule.pay(
                     Utils.NULL_ADDRESS,
-                    [], // 'to' addresses
-                    [], // amounts
+                    [accountProvider.get()], // 'to' addresses
+                    [1], // amounts
                     web3.utils.stringToHex(quoteCurrencyCode),
                     priceOracleInitialPrice,
                     { from: accountProvider.get() },
@@ -191,6 +190,34 @@ contract('PricerRule::pay', async () => {
                 'Price expiration height is lte to the current block height.',
             );
         });
+
+        it('Reverts if an price oracle returns 0 price.', async () => {
+            const {
+                pricerRule,
+                quoteCurrencyCode,
+                priceOracleInitialPrice,
+                priceOracle,
+                fromAddress,
+            } = await prepare(accountProvider);
+
+            await priceOracle.setPrice(
+                0,
+                (await web3.eth.getBlockNumber()) + 10000,
+            );
+
+            await Utils.expectRevert(
+                pricerRule.pay(
+                    fromAddress,
+                    [accountProvider.get()], // 'to' addresses
+                    [2], // amounts
+                    web3.utils.stringToHex(quoteCurrencyCode),
+                    priceOracleInitialPrice,
+                    { from: accountProvider.get() },
+                ),
+                'Should revert as the price oracle returns 0 as price.',
+                'Base currency price in pay currency is 0.',
+            );
+        });
     });
 
     contract('Positive Paths', async (accounts) => {
@@ -202,33 +229,33 @@ contract('PricerRule::pay', async () => {
                 tokenRules,
                 conversionRate,
                 conversionRateDecimals,
+                requiredPriceOracleDecimals,
                 pricerRule,
                 quoteCurrencyCode,
-                priceOracleInitialPrice,
                 priceOracle,
                 fromAddress,
             } = await prepare(accountProvider);
 
-            const oraclePrice = 2;
+            const oraclePriceBN = new BN(4 * (10 ** requiredPriceOracleDecimals));
             await priceOracle.setPrice(
-                oraclePrice,
+                oraclePriceBN.toNumber(),
                 (await web3.eth.getBlockNumber()) + 10000,
             );
 
 
-            const acceptanceMargin = 5;
+            const acceptanceMarginBN = new BN(3 * (10 ** requiredPriceOracleDecimals));
             await pricerRule.setAcceptanceMargin(
                 web3.utils.stringToHex(quoteCurrencyCode),
-                acceptanceMargin,
+                acceptanceMarginBN.toNumber(),
                 { from: organizationWorker },
             );
 
             const to1 = accountProvider.get();
             const to2 = accountProvider.get();
-            const amount1BN = new BN(11 * (10 ** 12));
-            const amount2BN = new BN(7 * (10 ** 12));
+            const amount1BN = new BN(11 * (10 ** requiredPriceOracleDecimals));
+            const amount2BN = new BN(7 * (10 ** requiredPriceOracleDecimals));
 
-            const intendedPriceBN = new BN(oraclePrice + acceptanceMargin);
+            const intendedPriceBN = oraclePriceBN.add(acceptanceMarginBN);
 
             await pricerRule.pay(
                 fromAddress,
@@ -240,10 +267,10 @@ contract('PricerRule::pay', async () => {
             );
 
             const convertedAmount1BN = convertPayCurrencyToToken(
-                amount1BN, intendedPriceBN, new BN(conversionRate), new BN(conversionRateDecimals),
+                amount1BN, oraclePriceBN, new BN(conversionRate), new BN(conversionRateDecimals),
             );
             const convertedAmount2BN = convertPayCurrencyToToken(
-                amount2BN, intendedPriceBN, new BN(conversionRate), new BN(conversionRateDecimals),
+                amount2BN, oraclePriceBN, new BN(conversionRate), new BN(conversionRateDecimals),
             );
 
 

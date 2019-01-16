@@ -45,21 +45,35 @@ contract TokenHolder {
         address _sessionKey
     );
 
+    /**
+     * @dev Rule's hash is calculated by:
+     *          keccak256(
+     *               abi.encodePacked(
+     *                   to, // rule's address
+     *                   keccak(data), // data is rule's payload
+     *                   nonce, // non-used nonce for the specific session key
+     *                   v, r, s // signature
+     *               )
+     *           )
+     */
     event RuleExecuted(
-        address indexed _to,
-        bytes4 _functionSelector,
-        address _sessionKey,
-        uint256 _nonce,
-        bytes32 _messageHash,
+        bytes32 _ruleHash,
         bool _status
     );
 
+    /**
+     * @dev Redemption's hash is calculated by:
+     *          keccak256(
+     *               abi.encodePacked(
+     *                   to, // cogateway's address
+     *                   keccak(data), // data is cogateway::redeem function's payload
+     *                   nonce, // non-used nonce for the specific session key
+     *                   v, r, s // signature
+     *               )
+     *           )
+     */
     event RedeemExecuted(
-        address indexed _to,
-        bytes4 _functionSelector,
-        address _sessionKey,
-        uint256 _nonce,
-        bytes32 _messageHash,
+        bytes32 _redemptionHash,
         bool _status
     );
 
@@ -349,14 +363,19 @@ contract TokenHolder {
 
         TokenRules(tokenRules).disallowTransfers();
 
-        bytes4 functionSelector = bytesToBytes4(_data);
+        bytes32 ruleHash = keccak256(
+            abi.encodePacked(
+                _to,
+                keccak256(_data),
+                _nonce,
+                _v,
+                _r,
+                _s
+            )
+        );
 
         emit RuleExecuted(
-            _to,
-            functionSelector,
-            sessionKey,
-            _nonce,
-            messageHash,
+            ruleHash,
             executionStatus_
         );
     }
@@ -406,15 +425,21 @@ contract TokenHolder {
         // solium-disable-next-line security/no-call-value
         (executionStatus_, returnData) = _to.call.value(msg.value)(_data);
 
-
         token.approve(_to, 0);
 
+        bytes32 redemptionHash = keccak256(
+            abi.encodePacked(
+                _to,
+                keccak256(_data),
+                _nonce,
+                _v,
+                _r,
+                _s
+            )
+        );
+
         emit RedeemExecuted(
-            _to,
-            functionSelector,
-            sessionKey,
-            _nonce,
-            messageHash,
+            redemptionHash,
             executionStatus_
         );
     }

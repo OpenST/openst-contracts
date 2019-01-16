@@ -27,6 +27,32 @@ const sessionPrivateKey1 = '0xa8225c01ceeaf01d7bc7c1b1b929037bd4050967c5730c0b85
 const sessionPublicKey2 = '0xBbfd1BF77dA692abc82357aC001415b98d123d17';
 const sessionPrivateKey2 = '0x6817f551bbc3e12b8fe36787ab192c921390d6176a3324ed02f96935a370bc41';
 
+function generateRuleHash(
+    to, data, nonce, v, r, s,
+) {
+    return web3.utils.soliditySha3(
+        {
+            t: 'address', v: to,
+        },
+        {
+            t: 'bytes32', v: web3.utils.keccak256(data),
+        },
+        {
+            t: 'uint256', v: nonce,
+        },
+        {
+            t: 'uint8', v,
+        },
+        {
+            t: 'bytes32', v: r,
+        },
+        {
+            t: 'bytes32', v: s,
+        },
+
+    );
+}
+
 function generateTokenHolderAuthorizeSessionFunctionData(
     sessionKey, spendingLimit, expirationHeight,
 ) {
@@ -604,7 +630,6 @@ contract('TokenHolder::executeRule', async () => {
 
             const {
                 mockRulePassFunctionData,
-                exTxHash,
                 exTxSignature,
             } = await generateMockRulePassFunctionExTx(
                 tokenHolder, nonce, sessionPrivateKey1,
@@ -629,16 +654,17 @@ contract('TokenHolder::executeRule', async () => {
                 1,
             );
 
-            const passCallPrefix = await mockRule.PASS_CALLPREFIX.call();
-
             Event.assertEqual(events[0], {
                 name: 'RuleExecuted',
                 args: {
-                    _to: mockRule.address,
-                    _functionSelector: passCallPrefix,
-                    _sessionKey: sessionPublicKey1,
-                    _nonce: new BN(nonce),
-                    _messageHash: exTxHash,
+                    _ruleHash: generateRuleHash(
+                        mockRule.address,
+                        mockRulePassFunctionData,
+                        nonce,
+                        exTxSignature.v,
+                        EthUtils.bufferToHex(exTxSignature.r),
+                        EthUtils.bufferToHex(exTxSignature.s),
+                    ),
                     _status: true,
                 },
             });
@@ -662,7 +688,6 @@ contract('TokenHolder::executeRule', async () => {
 
             const {
                 mockRuleFailFunctionData,
-                exTxHash,
                 exTxSignature,
             } = await generateMockRuleFailFunctionExTx(
                 tokenHolder, nonce, sessionPrivateKey1,
@@ -690,11 +715,14 @@ contract('TokenHolder::executeRule', async () => {
             Event.assertEqual(events[0], {
                 name: 'RuleExecuted',
                 args: {
-                    _to: mockRule.address,
-                    _functionSelector: await mockRule.FAIL_CALLPREFIX.call(),
-                    _sessionKey: sessionPublicKey1,
-                    _nonce: new BN(nonce),
-                    _messageHash: exTxHash,
+                    _ruleHash: generateRuleHash(
+                        mockRule.address,
+                        mockRuleFailFunctionData,
+                        nonce,
+                        exTxSignature.v,
+                        EthUtils.bufferToHex(exTxSignature.r),
+                        EthUtils.bufferToHex(exTxSignature.s),
+                    ),
                     _status: false,
                 },
             });

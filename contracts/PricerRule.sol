@@ -71,6 +71,11 @@ contract PricerRule is Organized {
     uint256 public conversionRateDecimalsFromBaseCurrencyToToken;
 
     /**
+     * @dev Required decimals for price oracles.
+     */
+    uint8 public requiredPriceOracleDecimals;
+
+    /**
      * @dev Token rules address of the economy.
      */
     TokenRules public tokenRules;
@@ -111,6 +116,7 @@ contract PricerRule is Organized {
      *                        to the token.
      * @param _conversionRateDecimals The conversion rate's decimals from the
      *                                economy base currency to the token.
+     * @param _requiredPriceOracleDecimals Required decimals for price oracles.
      * @param _tokenRules The economy token rules address.
      */
     constructor(
@@ -119,6 +125,7 @@ contract PricerRule is Organized {
         bytes3 _baseCurrencyCode,
         uint256 _conversionRate,
         uint8 _conversionRateDecimals,
+        uint8 _requiredPriceOracleDecimals,
         address _tokenRules
     )
         Organized(_organization)
@@ -148,6 +155,8 @@ contract PricerRule is Organized {
         conversionRateFromBaseCurrencyToToken = _conversionRate;
 
         conversionRateDecimalsFromBaseCurrencyToToken = _conversionRateDecimals;
+
+        requiredPriceOracleDecimals = _requiredPriceOracleDecimals;
 
         tokenRules = TokenRules(_tokenRules);
     }
@@ -189,8 +198,17 @@ contract PricerRule is Organized {
             "'to' and 'amount' transfer arrays' lengths are not equal."
         );
 
+        if (_toList.length == 0) {
+            return;
+        }
+
         uint256 baseCurrencyCurrentPrice = baseCurrencyPrice(
             _payCurrencyCode
+        );
+
+        require(
+            baseCurrencyCurrentPrice != 0,
+            "Base currency price in pay currency is 0."
         );
 
         require(
@@ -206,7 +224,7 @@ contract PricerRule is Organized {
 
         for(uint256 i = 0; i < _amountList.length; ++i) {
             convertedAmounts[i] = convertPayCurrencyToToken(
-                _baseCurrencyIntendedPrice,
+                baseCurrencyCurrentPrice,
                 _amountList[i]
             );
         }
@@ -228,6 +246,8 @@ contract PricerRule is Organized {
      *            equal to the economy base currency code specified in this
      *            contract constructor.
      *          - The proposed price oracle does not exist.
+     *          - The proposed price oracle decimals number is equal to
+     *            the contract required price oracle decimals number.
      *
      * @param _priceOracle The proposed price oracle.
      */
@@ -240,6 +260,11 @@ contract PricerRule is Organized {
         require(
             address(_priceOracle) != address(0),
             "Price oracle address is null."
+        );
+
+        require(
+            _priceOracle.decimals() == requiredPriceOracleDecimals,
+            "Price oracle decimals number is difference from the required one."
         );
 
         bytes3 payCurrencyCode = _priceOracle.quoteCurrency();

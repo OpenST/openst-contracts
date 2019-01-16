@@ -46,8 +46,16 @@ interface PriceOracleInterface {
         returns (bytes3);
 
     /**
-     * @notice Returns an amount of the quote currency needed to purchase
-     *         one unit of the base currency.
+     * @notice Returns quote currency decimals.
+     */
+    function decimals()
+        external
+        view
+        returns (uint8);
+
+    /**
+     * @notice Returns an amount of the quote currency (see decimals()) needed
+     *         to purchase one unit of the base currency.
      *
      * @dev Function throws an exception if the price is invalid, for example,
      *      was not set, or became outdated, etc.

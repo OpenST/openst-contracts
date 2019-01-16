@@ -28,12 +28,15 @@ contract PriceOracleFake is PriceOracleInterface {
 
     uint256 expirationHeight;
 
+    uint8 quoteCurrencyDecimals;
+
 
     /* Special */
 
     constructor(
         bytes3 _baseCurrencyCode,
         bytes3 _quoteCurrencyCode,
+        uint8 _quoteCurrencyDecimals,
         uint256 _initialPrice,
         uint256 _expirationHeight
     )
@@ -52,6 +55,8 @@ contract PriceOracleFake is PriceOracleInterface {
         baseCurrencyCode = _baseCurrencyCode;
 
         quoteCurrencyCode = _quoteCurrencyCode;
+
+        quoteCurrencyDecimals = _quoteCurrencyDecimals;
 
         setPrice(_initialPrice, _expirationHeight);
     }
@@ -86,6 +91,17 @@ contract PriceOracleFake is PriceOracleInterface {
     }
 
     /**
+     * @notice Returns quote currency decimals.
+     */
+    function decimals()
+        external
+        view
+        returns(uint8)
+    {
+        return quoteCurrencyDecimals;
+    }
+
+    /**
      * @notice Returns an amount of the quote currency needed to purchase
      *         one unit of the base currency.
      *
@@ -117,8 +133,6 @@ contract PriceOracleFake is PriceOracleInterface {
     )
         public
     {
-        require(_price != 0, "Price is 0.");
-
         require(
             _expirationHeight > block.number,
             "Price expiration height is lte to the current block height."

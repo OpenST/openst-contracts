@@ -27,6 +27,32 @@ const sessionPrivateKey1 = '0xa8225c01ceeaf01d7bc7c1b1b929037bd4050967c5730c0b85
 // const sessionPublicKey2 = '0xBbfd1BF77dA692abc82357aC001415b98d123d17';
 const sessionPrivateKey2 = '0x6817f551bbc3e12b8fe36787ab192c921390d6176a3324ed02f96935a370bc41';
 
+function generateRedemptionHash(
+    to, data, nonce, v, r, s,
+) {
+    return web3.utils.soliditySha3(
+        {
+            t: 'address', v: to,
+        },
+        {
+            t: 'bytes32', v: web3.utils.keccak256(data),
+        },
+        {
+            t: 'uint256', v: nonce,
+        },
+        {
+            t: 'uint8', v,
+        },
+        {
+            t: 'bytes32', v: r,
+        },
+        {
+            t: 'bytes32', v: s,
+        },
+
+    );
+}
+
 function generateTokenHolderexecuteRedemptionFunctionCallPrefix() {
     return web3.eth.abi.encodeFunctionSignature({
         name: 'executeRedemption',
@@ -512,7 +538,6 @@ contract('TokenHolder::redeem', async (accounts) => {
 
             const {
                 coGatewayRedeemFunctionData,
-                exTxHash,
                 exTxSignature,
             } = await generateCoGatewayRedeemFunctionExTx(
                 tokenHolder,
@@ -542,11 +567,14 @@ contract('TokenHolder::redeem', async (accounts) => {
             Event.assertEqual(events[0], {
                 name: 'RedeemExecuted',
                 args: {
-                    _to: coGateway.address,
-                    _functionSelector: await tokenHolder.COGATEWAY_REDEEM_CALLPREFIX.call(),
-                    _sessionKey: sessionPublicKey1,
-                    _nonce: new BN(tokenHolderNonce),
-                    _messageHash: exTxHash,
+                    _redemptionHash: generateRedemptionHash(
+                        coGateway.address,
+                        coGatewayRedeemFunctionData,
+                        redeemerNonce,
+                        exTxSignature.v,
+                        EthUtils.bufferToHex(exTxSignature.r),
+                        EthUtils.bufferToHex(exTxSignature.s),
+                    ),
                     _status: true,
                 },
             });
@@ -574,7 +602,6 @@ contract('TokenHolder::redeem', async (accounts) => {
 
             const {
                 coGatewayRedeemFunctionData,
-                exTxHash,
                 exTxSignature,
             } = await generateCoGatewayRedeemFunctionExTx(
                 tokenHolder,
@@ -606,11 +633,14 @@ contract('TokenHolder::redeem', async (accounts) => {
             Event.assertEqual(events[0], {
                 name: 'RedeemExecuted',
                 args: {
-                    _to: coGateway.address,
-                    _functionSelector: await tokenHolder.COGATEWAY_REDEEM_CALLPREFIX.call(),
-                    _sessionKey: sessionPublicKey1,
-                    _nonce: new BN(tokenHolderNonce),
-                    _messageHash: exTxHash,
+                    _redemptionHash: generateRedemptionHash(
+                        coGateway.address,
+                        coGatewayRedeemFunctionData,
+                        redeemerNonce,
+                        exTxSignature.v,
+                        EthUtils.bufferToHex(exTxSignature.r),
+                        EthUtils.bufferToHex(exTxSignature.s),
+                    ),
                     _status: false,
                 },
             });

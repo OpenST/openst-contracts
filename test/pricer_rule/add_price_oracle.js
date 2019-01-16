@@ -58,11 +58,38 @@ contract('PricerRule::add_price_oracle', async () => {
             );
         });
 
+        it('Reverts as the proposed price oracle decimals number is invalid.', async () => {
+            const {
+                organizationWorker,
+                baseCurrencyCode,
+                requiredPriceOracleDecimals,
+                pricerRule,
+            } = await PricerRuleUtils.createTokenEconomy(accountProvider);
+
+            const priceOracle = await PriceOracleFake.new(
+                web3.utils.stringToHex(baseCurrencyCode),
+                web3.utils.stringToHex('BTC'),
+                requiredPriceOracleDecimals + 1,
+                1, // price oracle initial price
+                (await web3.eth.getBlockNumber()) + 10000, // expiration height
+            );
+
+            await Utils.expectRevert(
+                pricerRule.addPriceOracle(
+                    priceOracle.address,
+                    { from: organizationWorker },
+                ),
+                'Should revert as the proposed price oracle decimals number is invalid.',
+                'Price oracle decimals number is difference from the required one.',
+            );
+        });
+
         it('Reverts as the proposed price oracle base currency code does not '
         + 'match with pricer base currency.', async () => {
             const {
                 organizationWorker,
                 baseCurrencyCode,
+                requiredPriceOracleDecimals,
                 pricerRule,
                 quoteCurrencyCode,
             } = await PricerRuleUtils.createTokenEconomy(accountProvider);
@@ -78,6 +105,7 @@ contract('PricerRule::add_price_oracle', async () => {
             const priceOracle = await PriceOracleFake.new(
                 web3.utils.stringToHex(anotherBaseCurrencyCode),
                 web3.utils.stringToHex(quoteCurrencyCode),
+                requiredPriceOracleDecimals,
                 100, // initial price
                 (await web3.eth.getBlockNumber()) + 10000, // expiration height
             );
@@ -97,6 +125,7 @@ contract('PricerRule::add_price_oracle', async () => {
             const {
                 organizationWorker,
                 baseCurrencyCode,
+                requiredPriceOracleDecimals,
                 pricerRule,
                 priceOracle,
                 quoteCurrencyCode,
@@ -110,6 +139,7 @@ contract('PricerRule::add_price_oracle', async () => {
             const priceOracle2 = await PriceOracleFake.new(
                 web3.utils.stringToHex(baseCurrencyCode),
                 web3.utils.stringToHex(quoteCurrencyCode),
+                requiredPriceOracleDecimals,
                 100, // initial price
                 (await web3.eth.getBlockNumber()) + 10000, // expiration height
             );
@@ -139,7 +169,6 @@ contract('PricerRule::add_price_oracle', async () => {
                 priceOracle.address,
                 { from: organizationWorker },
             );
-
 
             const events = Event.decodeTransactionResponse(
                 response,
