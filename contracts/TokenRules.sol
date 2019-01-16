@@ -24,12 +24,12 @@ import "./Organized.sol";
  *         from a token holder accounts.
  *
  * @dev TokenHolder.executeRule() function will execute any rule that are
- *      signed by an authorized and non-expired ephemeral key.
+ *      signed by an authorized and non-expired session key.
  *      However, only the rules, that are registered in TokenRules
  *      can initiate transfers of token from TokenHolder to other beneficiaries.
  *      TokenHolder is going to allow TokenRules as a spender before
  *      execution of the rule (amount is limited by spendingLimit registered
- *      during an authorizaiton of an ephemeral key.). TokenHolder will
+ *      during an authorizaiton of an session key.). TokenHolder will
  *      clear this allowance after execution.
  *      Before execution of transfers from TokenHolder.
  *      During a execution, rule can call TokenRules.executeTransfers()

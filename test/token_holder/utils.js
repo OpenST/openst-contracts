@@ -6,14 +6,14 @@ const web3 = require('../test_lib/web3.js');
 
 class TokenHolderUtils {
     static async submitAuthorizeSession(
-        tokenHolder, ephemeralKey, spendingLimit, expirationHeight, options,
+        tokenHolder, sessionKey, spendingLimit, expirationHeight, options,
     ) {
         const transactionID = await tokenHolder.submitAuthorizeSession.call(
-            ephemeralKey, spendingLimit, expirationHeight, options,
+            sessionKey, spendingLimit, expirationHeight, options,
         );
 
         await tokenHolder.submitAuthorizeSession(
-            ephemeralKey, spendingLimit, expirationHeight, options,
+            sessionKey, spendingLimit, expirationHeight, options,
         );
 
         return transactionID;
