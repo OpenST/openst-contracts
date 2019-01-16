@@ -27,9 +27,9 @@ const sessionPrivateKey1 = '0xa8225c01ceeaf01d7bc7c1b1b929037bd4050967c5730c0b85
 // const sessionPublicKey2 = '0xBbfd1BF77dA692abc82357aC001415b98d123d17';
 const sessionPrivateKey2 = '0x6817f551bbc3e12b8fe36787ab192c921390d6176a3324ed02f96935a370bc41';
 
-function generateTokenHolderExecuteRedeemFunctionCallPrefix() {
+function generateTokenHolderexecuteRedemptionFunctionCallPrefix() {
     return web3.eth.abi.encodeFunctionSignature({
-        name: 'executeRedeem',
+        name: 'executeRedemption',
         type: 'function',
         inputs: [
             {
@@ -145,7 +145,7 @@ async function generateCoGatewayRedeemFunctionExTx(
         coGateway.address,
         coGatewayRedeemFunctionData,
         tokenHolderNonce,
-        generateTokenHolderExecuteRedeemFunctionCallPrefix(),
+        generateTokenHolderexecuteRedemptionFunctionCallPrefix(),
         sessionPrivateKey,
     );
 
@@ -192,7 +192,7 @@ contract('TokenHolder::redeem', async (accounts) => {
             );
 
             await Utils.expectRevert(
-                tokenHolder.executeRedeem(
+                tokenHolder.executeRedemption(
                     coGateway.address,
                     coGatewayRedeemFunctionData,
                     tokenHolderNonce,
@@ -247,7 +247,7 @@ contract('TokenHolder::redeem', async (accounts) => {
             }
 
             await Utils.expectRevert(
-                tokenHolder.executeRedeem(
+                tokenHolder.executeRedemption(
                     coGateway.address,
                     coGatewayRedeemFunctionData,
                     tokenHolderNonce,
@@ -302,7 +302,7 @@ contract('TokenHolder::redeem', async (accounts) => {
             );
 
             await Utils.expectRevert(
-                tokenHolder.executeRedeem(
+                tokenHolder.executeRedemption(
                     coGateway.address,
                     coGatewayRedeemFunctionData,
                     tokenHolderNonce,
@@ -352,7 +352,7 @@ contract('TokenHolder::redeem', async (accounts) => {
             );
 
             await Utils.expectRevert(
-                tokenHolder.executeRedeem(
+                tokenHolder.executeRedemption(
                     coGateway.address,
                     coGatewayRedeemFunctionData0,
                     tokenHolderInvalidNonce0,
@@ -383,7 +383,7 @@ contract('TokenHolder::redeem', async (accounts) => {
             );
 
             await Utils.expectRevert(
-                tokenHolder.executeRedeem(
+                tokenHolder.executeRedemption(
                     coGateway.address,
                     coGatewayRedeemFunctionData2,
                     tokenHolderInvalidNonce2,
@@ -437,7 +437,7 @@ contract('TokenHolder::redeem', async (accounts) => {
 
             const bounty = 1;
 
-            const executionStatus = await tokenHolder.executeRedeem.call(
+            const executionStatus = await tokenHolder.executeRedemption.call(
                 coGateway.address,
                 coGatewayRedeemFunctionData,
                 tokenHolderNonce,
@@ -452,7 +452,7 @@ contract('TokenHolder::redeem', async (accounts) => {
 
             assert.isOk(executionStatus);
 
-            const redeemReceipt = await tokenHolder.executeRedeem(
+            const redeemReceipt = await tokenHolder.executeRedemption(
                 coGateway.address,
                 coGatewayRedeemFunctionData,
                 tokenHolderNonce,
@@ -522,7 +522,7 @@ contract('TokenHolder::redeem', async (accounts) => {
                 amount, beneficiary, gasPrice, gasLimit, redeemerNonce, hashLock,
             );
 
-            const transactionResponse = await tokenHolder.executeRedeem(
+            const transactionResponse = await tokenHolder.executeRedemption(
                 coGateway.address,
                 coGatewayRedeemFunctionData,
                 tokenHolderNonce,
@@ -586,7 +586,7 @@ contract('TokenHolder::redeem', async (accounts) => {
 
             await coGateway.makeRedemptionToFail();
 
-            const transactionResponse = await tokenHolder.executeRedeem(
+            const transactionResponse = await tokenHolder.executeRedemption(
                 coGateway.address,
                 coGatewayRedeemFunctionData,
                 tokenHolderNonce,

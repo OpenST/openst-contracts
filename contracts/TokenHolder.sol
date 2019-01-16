@@ -94,7 +94,7 @@ contract TokenHolder {
 
     bytes4 public constant EXECUTE_REDEEM_CALLPREFIX = bytes4(
         keccak256(
-            "executeRedeem(address,bytes,uint256,uint8,bytes32,bytes32)"
+            "executeRedemption(address,bytes,uint256,uint8,bytes32,bytes32)"
         )
     );
 
@@ -361,7 +361,7 @@ contract TokenHolder {
         );
     }
 
-    function executeRedeem(
+    function executeRedemption(
         address _to,
         bytes calldata _data,
         uint256 _nonce,
