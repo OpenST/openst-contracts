@@ -125,6 +125,11 @@ contract('PricerRule::constructor', async () => {
             );
 
             assert.strictEqual(
+                (await pricerRule.baseCurrencyCode.call()),
+                web3.utils.stringToHex('OST'),
+            );
+
+            assert.strictEqual(
                 (await pricerRule.eip20Token.call()),
                 token,
             );
