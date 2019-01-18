@@ -23,11 +23,7 @@ contract('TokenHolder::constructor', async () => {
         const accountProvider = new AccountProvider(accounts);
 
         it('Reverts if token address is null.', async () => {
-            const required = 1;
-            const registeredWallet0 = accountProvider.get();
-
-            const wallets = [registeredWallet0];
-
+            const ownerAddress = accountProvider.get();
             const tokenAddress = utils.NULL_ADDRESS;
             const tokenRulesAddress = accountProvider.get();
 
@@ -35,8 +31,7 @@ contract('TokenHolder::constructor', async () => {
                 TokenHolder.new(
                     tokenAddress,
                     tokenRulesAddress,
-                    wallets,
-                    required,
+                    ownerAddress,
                 ),
                 'Should revert as token address is null.',
                 'Token contract address is null.',
@@ -44,11 +39,7 @@ contract('TokenHolder::constructor', async () => {
         });
 
         it('Reverts if token rules is null.', async () => {
-            const required = 1;
-            const registeredWallet0 = accountProvider.get();
-
-            const wallets = [registeredWallet0];
-
+            const ownerAddress = accountProvider.get();
             const tokenAddress = accountProvider.get();
             const tokenRulesAddress = utils.NULL_ADDRESS;
 
@@ -56,11 +47,26 @@ contract('TokenHolder::constructor', async () => {
                 TokenHolder.new(
                     tokenAddress,
                     tokenRulesAddress,
-                    wallets,
-                    required,
+                    ownerAddress,
                 ),
                 'Should revert as token rules address is null.',
                 'TokenRules contract address is null.',
+            );
+        });
+
+        it('Reverts if owner address is null.', async () => {
+            const ownerAddress = utils.NULL_ADDRESS;
+            const tokenAddress = accountProvider.get();
+            const tokenRulesAddress = accountProvider.get();
+
+            await utils.expectRevert(
+                TokenHolder.new(
+                    tokenAddress,
+                    tokenRulesAddress,
+                    ownerAddress,
+                ),
+                'Should revert as owner address is null.',
+                'Owner address is null.',
             );
         });
     });
@@ -69,19 +75,14 @@ contract('TokenHolder::constructor', async () => {
         const accountProvider = new AccountProvider(accounts);
 
         it('Checks that passed arguments are set correctly.', async () => {
-            const required = 1;
-            const registeredWallet0 = accountProvider.get();
-
-            const wallets = [registeredWallet0];
-
+            const ownerAddress = accountProvider.get();
             const tokenAddress = accountProvider.get();
             const tokenRulesAddress = accountProvider.get();
 
             const tokenHolder = await TokenHolder.new(
                 tokenAddress,
                 tokenRulesAddress,
-                wallets,
-                required,
+                ownerAddress,
             );
 
             assert.strictEqual(
@@ -92,6 +93,11 @@ contract('TokenHolder::constructor', async () => {
             assert.strictEqual(
                 (await tokenHolder.tokenRules.call()),
                 tokenRulesAddress,
+            );
+
+            assert.strictEqual(
+                (await tokenHolder.owner.call()),
+                ownerAddress,
             );
         });
     });

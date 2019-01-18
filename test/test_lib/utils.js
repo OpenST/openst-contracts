@@ -12,128 +12,152 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+const BN = require('bn.js');
 const assert = require('assert');
+const EthUtils = require('ethereumjs-util');
 const web3 = require('./web3.js');
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-module.exports.NULL_ADDRESS = NULL_ADDRESS;
+const MAX_UINT256 = new BN(2).pow(new BN(256)).sub(new BN(1));
 
-module.exports.isNullAddress = address => address === NULL_ADDRESS;
+const generateExTxHash = (
+    from, to, data, nonce, callPrefix,
+) => web3.utils.soliditySha3(
+    {
+        t: 'bytes1', v: '0x19',
+    },
+    {
+        t: 'bytes1', v: '0x0',
+    },
+    {
+        t: 'address', v: from,
+    },
+    {
+        t: 'address', v: to,
+    },
+    {
+        t: 'uint8', v: 0,
+    },
+    {
+        t: 'bytes32', v: web3.utils.keccak256(data),
+    },
+    {
+        t: 'uint256', v: nonce,
+    },
+    {
+        t: 'uint8', v: 0,
+    },
+    {
+        t: 'uint8', v: 0,
+    },
+    {
+        t: 'uint8', v: 0,
+    },
+    {
+        t: 'bytes4', v: callPrefix,
+    },
+    {
+        t: 'uint8', v: 0,
+    },
+    {
+        t: 'bytes32', v: '0x0',
+    },
+);
 
-/**
- * Asserts that a call or transaction reverts.
- *
- * @param {promise} promise The call or transaction.
- * @param {string} expectedMessage Optional. If given, the revert message will
- *                                 be checked to contain this string.
- *
- * @throws Will fail an assertion if the call or transaction is not reverted.
- */
-module.exports.expectRevert = async (
-  promise, displayMessage, expectedRevertMessage,
-) => {
-  try {
-    await promise;
-  } catch (error) {
-    assert(
-      error.message.search('revert') > -1,
-      `The contract should revert. Instead: ${error.message}`,
-    );
+module.exports = {
 
-    if (expectedRevertMessage !== undefined) {
-      if (error.reason !== undefined) {
-        assert(
-          expectedRevertMessage === error.reason,
-          `\nThe contract should revert with:\n\t"${expectedRevertMessage}" `
-          + `\ninstead received:\n\t"${error.reason}"\n`,
+    NULL_ADDRESS,
+
+    MAX_UINT256,
+
+    isNullAddress: address => address === NULL_ADDRESS,
+
+    /**
+     * Asserts that a call or transaction reverts.
+     *
+     * @param {promise} promise The call or transaction.
+     * @param {string} expectedMessage Optional. If given, the revert message will
+     *                                 be checked to contain this string.
+     *
+     * @throws Will fail an assertion if the call or transaction is not reverted.
+     */
+    expectRevert: async (
+        promise, displayMessage, expectedRevertMessage,
+    ) => {
+        try {
+            await promise;
+        } catch (error) {
+            assert(
+                error.message.search('revert') > -1,
+                `The contract should revert. Instead: ${error.message}`,
+            );
+
+            if (expectedRevertMessage !== undefined) {
+                if (error.reason !== undefined) {
+                    assert(
+                        expectedRevertMessage === error.reason,
+                        `\nThe contract should revert with:\n\t"${expectedRevertMessage}" `
+            + `\ninstead received:\n\t"${error.reason}"\n`,
+                    );
+                } else {
+                    assert(
+                        error.message.search(expectedRevertMessage) > -1,
+                        `\nThe contract should revert with:\n\t"${expectedRevertMessage}" `
+            + `\ninstead received:\n\t"${error.message}"\n`,
+                    );
+                }
+            }
+
+            return;
+        }
+
+        assert(false, displayMessage);
+    },
+
+    advanceBlock: () => new Promise((resolve, reject) => {
+        web3.currentProvider.send({
+            jsonrpc: '2.0',
+            method: 'evm_mine',
+            id: new Date().getTime(),
+        }, (err) => {
+            if (err) {
+                return reject(err);
+            }
+
+            const newBlockHash = web3.eth.getBlock('latest').hash;
+
+            return resolve(newBlockHash);
+        });
+    }),
+
+    /** Receives accounts list and gives away each time one. */
+    AccountProvider: class AccountProvider {
+        constructor(accounts) {
+            this.accounts = accounts;
+            this.index = 0;
+        }
+
+        get() {
+            assert(this.index < this.accounts.length);
+            const account = this.accounts[this.index];
+            this.index += 1;
+            return account;
+        }
+    },
+
+    generateExTx: (
+        from, to, data, nonce, callPrefix, sessionPrivateKey,
+    ) => {
+        const exTxHash = generateExTxHash(
+            from, to, data, nonce, callPrefix,
         );
-      } else {
-        assert(
-          error.message.search(expectedRevertMessage) > -1,
-          `\nThe contract should revert with:\n\t"${expectedRevertMessage}" `
-          + `\ninstead received:\n\t"${error.message}"\n`,
+
+        const exTxSignature = EthUtils.ecsign(
+            EthUtils.toBuffer(exTxHash),
+            EthUtils.toBuffer(sessionPrivateKey),
         );
-      }
-    }
 
-    return;
-  }
-
-  assert(false, displayMessage);
+        return { exTxHash, exTxSignature };
+    },
 };
-
-module.exports.advanceBlock = () => new Promise((resolve, reject) => {
-  web3.currentProvider.send({
-    jsonrpc: '2.0',
-    method: 'evm_mine',
-    id: new Date().getTime(),
-  }, (err) => {
-    if (err) {
-      return reject(err);
-    }
-
-    const newBlockHash = web3.eth.getBlock('latest').hash;
-
-    return resolve(newBlockHash);
-  });
-});
-
-/** Receives accounts list and gives away each time one. */
-module.exports.AccountProvider = class AccountProvider {
-  constructor(accounts) {
-    this.accounts = accounts;
-    this.index = 0;
-  }
-
-  get() {
-    assert(this.index < this.accounts.length);
-    const account = this.accounts[this.index];
-    this.index += 1;
-    return account;
-  }
-};
-
-const receipts = [];
-
-/**
- * It is used to log the transaction response in receipts array which will be
- * later used to analyse the transaction response.
- */
-module.exports.logResponse = (response, description) => {
-  receipts.push({
-    receipt     : response.receipt,
-    description : description,
-    response    : response
-  });
-}
-
-/**
- * It is used to calculate and print the gasUsed in the logged transaction
- * receipts.
- */
-module.exports.printGasStatistics = () => {
-  var totalGasUsed = 0
-
-  console.log("      -----------------------------------------------------");
-  console.log("      Report gas usage\n");
-
-  for (i = 0; i < receipts.length; i++) {
-    const entry = receipts[i]
-
-    totalGasUsed += entry.receipt.gasUsed
-
-    console.log("      " + entry.description.padEnd(45) + entry.receipt.gasUsed)
-  }
-
-  console.log("      -----------------------------------------------------")
-  console.log("      " + "Total gas logged: ".padEnd(45) + totalGasUsed + "\n")
-}
-
-/**
- * It is used to remove all logged transaction receipts.
- */
-module.exports.clearReceipts = () => {
-  receipts.splice( 0, receipts.length );
-}
-

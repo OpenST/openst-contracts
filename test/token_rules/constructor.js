@@ -24,7 +24,10 @@ contract('TokenRules::constructor', async () => {
 
         it('Reverts if token is null.', async () => {
             const owner = accountProvider.get();
-            const organization = await Organization.new({from: owner});
+            const organization = await Organization.new(
+                owner, owner, [], 0,
+                { from: accountProvider.get() },
+            );
             const token = utils.NULL_ADDRESS;
 
             await utils.expectRevert(
@@ -38,16 +41,24 @@ contract('TokenRules::constructor', async () => {
     contract('Storage', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
 
-        it('Checks that passed arguments are set correctly.', async () => {
+        it('Checks initialization of the contract\'s storage.', async () => {
             const owner = accountProvider.get();
-            const organization = await Organization.new({ from: owner });
+            const organization = await Organization.new(
+                owner, owner, [], 0,
+                { from: accountProvider.get() },
+            );
             const token = accountProvider.get();
 
             const tokenRules = await TokenRules.new(organization.address, token);
 
             assert.strictEqual(
-                (await tokenRules.token.call()),
+                await tokenRules.token.call(),
                 token,
+            );
+
+            assert.strictEqual(
+                await tokenRules.areDirectTransfersEnabled.call(),
+                false,
             );
         });
     });

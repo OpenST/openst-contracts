@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.0;
 
 
 // Copyright 2018 OpenST Ltd.
@@ -19,12 +19,12 @@ import "./TokenRules.sol";
 
 contract TransferRule {
 
-    /* Variables */
+    /* Storage */
 
-    TokenRules tokenRules;
+    TokenRules public tokenRules;
 
 
-    /* Functions */
+    /* Special Functions */
 
     constructor (
         address _tokenRules
@@ -35,13 +35,15 @@ contract TransferRule {
         tokenRules = TokenRules(_tokenRules);
     }
 
+
+    /* External Functions */
+
     function transferFrom (
         address _from,
         address _to,
         uint256 _amount
     )
-        public
-        returns (bool)
+        external
     {
         address[] memory transfersTo = new address[](1);
         transfersTo[0] = _to;
@@ -54,7 +56,5 @@ contract TransferRule {
             transfersTo,
             transfersAmount
         );
-
-        return true;
     }
 }

@@ -1,5 +1,5 @@
 /* solhint-disable-next-line compiler-fixed */
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.0;
 
 // Copyright 2017 OpenST Ltd.
 //
@@ -16,18 +16,15 @@ pragma solidity ^0.4.23;
 // limitations under the License.
 
 /**
- *  @title UtilityTokenRequiredInterface contract.
- *
- *  @notice Provides minimum required function signatures of utility token.
+ *  @title Provides the minimum required interface for utility token.
  */
-contract UtilityTokenRequiredInterface {
+interface UtilityTokenRequiredInterface {
 
-    /* Public functions */
+    /* External Functions */
 
-    /** @notice Returns coGateway address. */
-    function coGateway()
-        public
-        view
-        returns (address);
+    /**
+     * @notice Returns coGateway address of utility token.
+     */
+    function coGateway() external view returns (address);
 
 }

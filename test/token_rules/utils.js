@@ -12,40 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const EIP20TokenMock = artifacts.require('EIP20TokenMock');
+const web3 = require('../test_lib/web3.js');
+
+const EIP20TokenFake = artifacts.require('EIP20TokenFake');
 const TokenRules = artifacts.require('TokenRules');
 const Organization = artifacts.require('Organization');
 
 /**
  * Creates an EIP20 instance to be used during TokenRules::executeTransfers
  * function's testing with the following defaults:
- *      - conversionRate: 1
- *      - conversionRateDecimals: 1
  *      - symbol: 'OST'
  *      - name: 'Open Simple Token'
  *      - decimals: 1
  */
 module.exports.createEIP20Token = async () => {
-    const token = await EIP20TokenMock.new(
-        1, 1, 'OST', 'Open Simple Token', 1,
+    const token = await EIP20TokenFake.new(
+        'OST', 'Open Simple Token', 1,
     );
 
     return token;
-};
-
-/** Returns true if the specified constraint exists, otherwise false. */
-module.exports.constraintExists = async (tokenRules, constraintAddress) => {
-    const constraintCount = await tokenRules.globalConstraintCount.call();
-
-    for (let i = 0; i < constraintCount; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
-        const c = await tokenRules.globalConstraints.call(i);
-        if (c === constraintAddress) {
-            return true;
-        }
-    }
-
-    return false;
 };
 
 /**
@@ -53,21 +38,31 @@ module.exports.constraintExists = async (tokenRules, constraintAddress) => {
  *      (tokenRules, organizationAddress, token)
  */
 module.exports.createTokenEconomy = async (accountProvider) => {
-    const owner = accountProvider.get();
-    const worker = accountProvider.get();
-    const organization = await Organization.new({from: owner});
-    const expirationHeight = (await web3.eth.getBlockNumber()) + 100;
-    await organization.setWorker(worker, expirationHeight, {from: owner});
+    const organizationOwner = accountProvider.get();
+    const organizationWorker = accountProvider.get();
+    const organization = await Organization.new(
+        organizationOwner,
+        organizationOwner,
+        [organizationWorker],
+        (await web3.eth.getBlockNumber()) + 100000,
+        { from: accountProvider.get() },
+    );
+
     const token = await this.createEIP20Token();
 
     const tokenRules = await TokenRules.new(
         organization.address, token.address,
     );
+
+    await tokenRules.enableDirectTransfers({ from: organizationWorker });
+
     const organizationAddress = organization.address;
+
     return {
         tokenRules,
-        organizationAddress,
         token,
-        worker,
+        organizationAddress,
+        organizationOwner,
+        organizationWorker,
     };
 };

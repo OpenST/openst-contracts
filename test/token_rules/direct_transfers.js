@@ -22,17 +22,8 @@ async function happyPath(accountProvider) {
         tokenRules,
         organizationAddress,
         token,
-        organizationWorker,
+        worker,
     } = await TokenRulesUtils.createTokenEconomy(accountProvider);
-
-    const ruleAddress0 = accountProvider.get();
-    await tokenRules.registerRule(
-        'ruleName0',
-        ruleAddress0,
-        'ruleAbi0',
-        { from: organizationWorker },
-    );
-    await token.increaseBalance(ruleAddress0, 100);
 
     const tokenHolder = accountProvider.get();
     const spendingLimit = 100;
@@ -58,45 +49,20 @@ async function happyPath(accountProvider) {
         organizationAddress,
         token,
         tokenHolder,
-        ruleAddress0,
         transfersTo,
         transfersAmount,
-        organizationWorker,
+        worker,
     };
 }
 
-contract('TokenRules::executeTransfers', async () => {
+contract('TokenRules::directTransfers', async () => {
     contract('Negative Tests', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
-        it('Reverts if non-registered rule calls.', async () => {
+
+        it('Reverts if caller\'s account has not allowed transfers.', async () => {
             const {
                 tokenRules,
                 tokenHolder,
-                transfersTo,
-                transfersAmount,
-            } = await happyPath(accountProvider);
-
-            const nonRegisteredRuleAddress = accountProvider.get();
-
-            await utils.expectRevert(
-                tokenRules.executeTransfers(
-                    tokenHolder,
-                    transfersTo,
-                    transfersAmount,
-                    {
-                        from: nonRegisteredRuleAddress,
-                    },
-                ),
-                'Should revert as non registered rule is calling.',
-                'Only registered rule is allowed to call.',
-            );
-        });
-
-        it('Reverts if "from" account has not allowed transfers.', async () => {
-            const {
-                tokenRules,
-                tokenHolder,
-                ruleAddress0,
                 transfersTo,
                 transfersAmount,
             } = await happyPath(accountProvider);
@@ -106,13 +72,12 @@ contract('TokenRules::executeTransfers', async () => {
             );
 
             await utils.expectRevert(
-                tokenRules.executeTransfers(
-                    tokenHolder,
+                tokenRules.directTransfers(
                     transfersTo,
                     transfersAmount,
-                    { from: ruleAddress0 },
+                    { from: tokenHolder },
                 ),
-                'Should revert as "from" account has not allowed transfers.',
+                'Should revert as caller\'s account has not allowed transfers.',
                 'Transfers from the address are not allowed.',
             );
         });
@@ -121,7 +86,6 @@ contract('TokenRules::executeTransfers', async () => {
             const {
                 tokenRules,
                 tokenHolder,
-                ruleAddress0,
             } = await happyPath(accountProvider);
 
             const transferTo0 = accountProvider.get();
@@ -129,11 +93,10 @@ contract('TokenRules::executeTransfers', async () => {
             const transfersAmount = [];
 
             await utils.expectRevert(
-                tokenRules.executeTransfers(
-                    tokenHolder,
+                tokenRules.directTransfers(
                     transfersTo,
                     transfersAmount,
-                    { from: ruleAddress0 },
+                    { from: tokenHolder },
                 ),
                 'Should revert as transfers "to" and "amount" arrays length '
                 + 'are not equal.',
@@ -150,7 +113,6 @@ contract('TokenRules::executeTransfers', async () => {
                 tokenRules,
                 token,
                 tokenHolder,
-                ruleAddress0,
                 transfersTo,
                 transfersAmount,
             } = await happyPath(accountProvider);
@@ -172,11 +134,10 @@ contract('TokenRules::executeTransfers', async () => {
             // For test validity perspective, we should not fail in this case.
             assert(tokenHolderInitialBalance.gte(transfersAmountSum));
 
-            await tokenRules.executeTransfers(
-                tokenHolder,
+            await tokenRules.directTransfers(
                 transfersTo,
                 transfersAmount,
-                { from: ruleAddress0 },
+                { from: tokenHolder },
             );
 
             assert.strictEqual(
@@ -205,7 +166,6 @@ contract('TokenRules::executeTransfers', async () => {
             const {
                 tokenRules,
                 tokenHolder,
-                ruleAddress0,
                 transfersTo,
                 transfersAmount,
             } = await happyPath(accountProvider);
@@ -214,11 +174,10 @@ contract('TokenRules::executeTransfers', async () => {
                 { from: tokenHolder },
             );
 
-            await tokenRules.executeTransfers(
-                tokenHolder,
+            await tokenRules.directTransfers(
                 transfersTo,
                 transfersAmount,
-                { from: ruleAddress0 },
+                { from: tokenHolder },
             );
 
             assert.isNotOk(
