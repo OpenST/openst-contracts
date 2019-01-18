@@ -46,34 +46,21 @@ contract TokenHolder {
     );
 
     /**
-     * @dev Rule's hash is calculated by:
-     *          keccak256(
-     *               abi.encodePacked(
-     *                   to, // rule's address
-     *                   keccak(data), // data is rule's payload
-     *                   nonce, // non-used nonce for the specific session key
-     *                   v, r, s // signature
-     *               )
-     *           )
+     * @param _messageHash Executed rule message hash according to EIP-1077.
+     * @param _status Rule execution's status.
      */
     event RuleExecuted(
-        bytes32 _ruleHash,
+        bytes32 _messageHash,
         bool _status
     );
 
     /**
-     * @dev Redemption's hash is calculated by:
-     *          keccak256(
-     *               abi.encodePacked(
-     *                   to, // cogateway's address
-     *                   keccak(data), // data is cogateway::redeem function's payload
-     *                   nonce, // non-used nonce for the specific session key
-     *                   v, r, s // signature
-     *               )
-     *           )
+     * @param _messageHash Executed redemption request message hash according
+     *                 to EIP-1077.
+     * @param _status Redemption execution's status.
      */
-    event RedeemExecuted(
-        bytes32 _redemptionHash,
+    event RedemptionExecuted(
+        bytes32 _messageHash,
         bool _status
     );
 
@@ -106,15 +93,9 @@ contract TokenHolder {
         )
     );
 
-    bytes4 public constant EXECUTE_REDEEM_CALLPREFIX = bytes4(
+    bytes4 public constant EXECUTE_REDEMPTION_CALLPREFIX = bytes4(
         keccak256(
             "executeRedemption(address,bytes,uint256,uint8,bytes32,bytes32)"
-        )
-    );
-
-    bytes4 public constant COGATEWAY_REDEEM_CALLPREFIX = bytes4(
-        keccak256(
-            "redeem(uint256,address,uint256,uint256,uint256,bytes32)"
         )
     );
 
@@ -148,9 +129,8 @@ contract TokenHolder {
     /** Requires that key is in authorized state. */
     modifier keyIsAuthorized(address _key)
     {
-        AuthorizationStatus status = sessionKeys[_key].status;
         require(
-            status == AuthorizationStatus.AUTHORIZED,
+            sessionKeys[_key].status == AuthorizationStatus.AUTHORIZED,
             "Key is not authorized."
         );
         _;
@@ -159,9 +139,8 @@ contract TokenHolder {
     /** Requires that key was not authorized. */
     modifier keyDoesNotExist(address _key)
     {
-        AuthorizationStatus status = sessionKeys[_key].status;
         require(
-            status == AuthorizationStatus.NOT_AUTHORIZED,
+            sessionKeys[_key].status == AuthorizationStatus.NOT_AUTHORIZED,
             "Key exists."
         );
         _;
@@ -298,9 +277,8 @@ contract TokenHolder {
      *
      *      Function requires:
      *          - _to address cannot be EIP20 Token.
-     *          - The key used to sign data is authorized and have not expired.
-     *          - nonce matches the next available one (+1 of the last
-     *            used one).
+     *          - key used to sign data is authorized and have not expired.
+     *          - nonce is equal to the stored nonce value.
      *
      * @param _to The target contract address the transaction will be executed
      *            upon.
@@ -316,9 +294,9 @@ contract TokenHolder {
         address _to,
         bytes calldata _data,
         uint256 _nonce,
-        uint8 _v,
         bytes32 _r,
-        bytes32 _s
+        bytes32 _s,
+        uint8 _v
     )
         external
         payable
@@ -334,16 +312,14 @@ contract TokenHolder {
             "'to' address is TokenHolder address itself."
         );
 
-        bytes32 messageHash = bytes32(0);
-        address sessionKey = address(0);
-        (messageHash, sessionKey) = verifyExecutableTransaction(
+        (bytes32 messageHash, address sessionKey) = verifyExecutableTransaction(
             EXECUTE_RULE_CALLPREFIX,
             _to,
             _data,
             _nonce,
-            _v,
             _r,
-            _s
+            _s,
+            _v
         );
 
         SessionKeyData storage sessionKeyData = sessionKeys[sessionKey];
@@ -363,19 +339,8 @@ contract TokenHolder {
 
         TokenRules(tokenRules).disallowTransfers();
 
-        bytes32 ruleHash = keccak256(
-            abi.encodePacked(
-                _to,
-                keccak256(_data),
-                _nonce,
-                _v,
-                _r,
-                _s
-            )
-        );
-
         emit RuleExecuted(
-            ruleHash,
+            messageHash,
             executionStatus_
         );
     }
@@ -384,9 +349,9 @@ contract TokenHolder {
         address _to,
         bytes calldata _data,
         uint256 _nonce,
-        uint8 _v,
         bytes32 _r,
-        bytes32 _s
+        bytes32 _s,
+        uint8 _v
     )
         external
         payable
@@ -398,23 +363,14 @@ contract TokenHolder {
 
         require(_to == coGateway,"'to' address is not coGateway address.");
 
-        bytes4 functionSelector = bytesToBytes4(_data);
-
-        require(
-            functionSelector == COGATEWAY_REDEEM_CALLPREFIX,
-            "Retrieved function selector does not match to CoGateway::redeem."
-        );
-
-        bytes32 messageHash = bytes32(0);
-        address sessionKey = address(0);
-        (messageHash, sessionKey) = verifyExecutableTransaction(
-            EXECUTE_REDEEM_CALLPREFIX,
+        (bytes32 messageHash, address sessionKey) = verifyExecutableTransaction(
+            EXECUTE_REDEMPTION_CALLPREFIX,
             _to,
             _data,
             _nonce,
-            _v,
             _r,
-            _s
+            _s,
+            _v
         );
 
         SessionKeyData storage sessionKeyData = sessionKeys[sessionKey];
@@ -427,40 +383,10 @@ contract TokenHolder {
 
         token.approve(_to, 0);
 
-        bytes32 redemptionHash = keccak256(
-            abi.encodePacked(
-                _to,
-                keccak256(_data),
-                _nonce,
-                _v,
-                _r,
-                _s
-            )
-        );
-
-        emit RedeemExecuted(
-            redemptionHash,
+        emit RedemptionExecuted(
+            messageHash,
             executionStatus_
         );
-    }
-
-
-    /* Public Functions */
-
-    /**
-     * @dev Retrieves the first 4 bytes of input byte array into byte4.
-     *      Function requires:
-     *          - Input byte array's length is greater than or equal to 4.
-     */
-    function bytesToBytes4(bytes memory _input) public pure returns (bytes4 out_) {
-        require(
-            _input.length >= 4,
-            "Input bytes length is less than 4."
-        );
-
-        for (uint8 i = 0; i < 4; i++) {
-            out_ |= bytes4(_input[i] & 0xFF) >> (i * 8);
-        }
     }
 
 
@@ -471,9 +397,9 @@ contract TokenHolder {
         address _to,
         bytes memory _data,
         uint256 _nonce,
-        uint8 _v,
         bytes32 _r,
-        bytes32 _s
+        bytes32 _s,
+        uint8 _v
     )
         private
         returns (bytes32 messageHash_, address key_)
@@ -489,20 +415,22 @@ contract TokenHolder {
 
         SessionKeyData storage keyData = sessionKeys[key_];
 
+        // The following check appears here and not higher in the stack,
+        // as session key is only retrieved here, after calculation
+        // of message hash according EIP-1077 and retriving the key
+        // from the signature (_r, _s, _v).
         require(
             keyData.status == AuthorizationStatus.AUTHORIZED &&
             keyData.expirationHeight > block.number,
             "Session key is not active."
         );
 
-        uint256 expectedNonce = keyData.nonce.add(1);
-
         require(
-            _nonce == expectedNonce,
-            "The next nonce is not provided."
+            _nonce == keyData.nonce,
+            "Incorrect nonce is specified."
         );
 
-        keyData.nonce = expectedNonce;
+        keyData.nonce = keyData.nonce.add(1);
     }
 
     /**
