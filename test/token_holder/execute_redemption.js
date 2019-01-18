@@ -513,7 +513,7 @@ contract('TokenHolder::redeem', async (accounts) => {
             Event.assertEqual(events[0], {
                 name: 'RedemptionExecuted',
                 args: {
-                    _msgHash: exTxHash,
+                    _messageHash: exTxHash,
                     _status: true,
                 },
             });
@@ -573,7 +573,7 @@ contract('TokenHolder::redeem', async (accounts) => {
             Event.assertEqual(events[0], {
                 name: 'RedemptionExecuted',
                 args: {
-                    _msgHash: exTxHash,
+                    _messageHash: exTxHash,
                     _status: false,
                 },
             });

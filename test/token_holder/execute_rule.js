@@ -604,7 +604,7 @@ contract('TokenHolder::executeRule', async () => {
             Event.assertEqual(events[0], {
                 name: 'RuleExecuted',
                 args: {
-                    _msgHash: exTxHash,
+                    _messageHash: exTxHash,
                     _status: true,
                 },
             });
@@ -656,7 +656,7 @@ contract('TokenHolder::executeRule', async () => {
             Event.assertEqual(events[0], {
                 name: 'RuleExecuted',
                 args: {
-                    _msgHash: exTxHash,
+                    _messageHash: exTxHash,
                     _status: false,
                 },
             });

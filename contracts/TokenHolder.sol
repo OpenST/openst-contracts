@@ -46,21 +46,21 @@ contract TokenHolder {
     );
 
     /**
-     * @param _msgHash Executed rule message hash according to EIP-1077.
+     * @param _messageHash Executed rule message hash according to EIP-1077.
      * @param _status Rule execution's status.
      */
     event RuleExecuted(
-        bytes32 _msgHash,
+        bytes32 _messageHash,
         bool _status
     );
 
     /**
-     * @param _msgHash Executed redemption request message hash according
+     * @param _messageHash Executed redemption request message hash according
      *                 to EIP-1077.
      * @param _status Redemption execution's status.
      */
     event RedemptionExecuted(
-        bytes32 _msgHash,
+        bytes32 _messageHash,
         bool _status
     );
 
@@ -277,7 +277,7 @@ contract TokenHolder {
      *
      *      Function requires:
      *          - _to address cannot be EIP20 Token.
-     *          - The key used to sign data is authorized and have not expired.
+     *          - key used to sign data is authorized and have not expired.
      *          - nonce is equal to the stored nonce value.
      *
      * @param _to The target contract address the transaction will be executed
