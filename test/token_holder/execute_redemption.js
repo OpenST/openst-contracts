@@ -27,31 +27,6 @@ const sessionPrivateKey1 = '0xa8225c01ceeaf01d7bc7c1b1b929037bd4050967c5730c0b85
 // const sessionPublicKey2 = '0xBbfd1BF77dA692abc82357aC001415b98d123d17';
 const sessionPrivateKey2 = '0x6817f551bbc3e12b8fe36787ab192c921390d6176a3324ed02f96935a370bc41';
 
-function generateRedemptionHash(
-    to, data, nonce, v, r, s,
-) {
-    return web3.utils.soliditySha3(
-        {
-            t: 'address', v: to,
-        },
-        {
-            t: 'bytes32', v: web3.utils.keccak256(data),
-        },
-        {
-            t: 'uint256', v: nonce,
-        },
-        {
-            t: 'uint8', v,
-        },
-        {
-            t: 'bytes32', v: r,
-        },
-        {
-            t: 'bytes32', v: s,
-        },
-
-    );
-}
 
 function generateTokenHolderexecuteRedemptionFunctionCallPrefix() {
     return web3.eth.abi.encodeFunctionSignature({
@@ -197,7 +172,7 @@ contract('TokenHolder::redeem', async (accounts) => {
                 sessionPublicKey1,
             );
 
-            const tokenHolderNonce = 1;
+            const tokenHolderNonce = 0;
 
             const amount = 10;
             const beneficiary = accountProvider.get();
@@ -222,9 +197,9 @@ contract('TokenHolder::redeem', async (accounts) => {
                     coGateway.address,
                     coGatewayRedeemFunctionData,
                     tokenHolderNonce,
-                    exTxSignature.v,
                     EthUtils.bufferToHex(exTxSignature.r),
                     EthUtils.bufferToHex(exTxSignature.s),
+                    exTxSignature.v,
                     {
                         from: accountProvider.get(),
                         value: 1 /* bounty */,
@@ -247,7 +222,7 @@ contract('TokenHolder::redeem', async (accounts) => {
                 sessionPublicKey1,
             );
 
-            const tokenHolderNonce = 1;
+            const tokenHolderNonce = 0;
 
             const amount = 10;
             const beneficiary = accountProvider.get();
@@ -277,9 +252,9 @@ contract('TokenHolder::redeem', async (accounts) => {
                     coGateway.address,
                     coGatewayRedeemFunctionData,
                     tokenHolderNonce,
-                    exTxSignature.v,
                     EthUtils.bufferToHex(exTxSignature.r),
                     EthUtils.bufferToHex(exTxSignature.s),
+                    exTxSignature.v,
                     {
                         from: accountProvider.get(),
                         value: 1 /* bounty */,
@@ -302,7 +277,7 @@ contract('TokenHolder::redeem', async (accounts) => {
                 sessionPublicKey1,
             );
 
-            const tokenHolderNonce = 1;
+            const tokenHolderNonce = 0;
 
             const amount = 10;
             const beneficiary = accountProvider.get();
@@ -332,9 +307,9 @@ contract('TokenHolder::redeem', async (accounts) => {
                     coGateway.address,
                     coGatewayRedeemFunctionData,
                     tokenHolderNonce,
-                    exTxSignature.v,
                     EthUtils.bufferToHex(exTxSignature.r),
                     EthUtils.bufferToHex(exTxSignature.s),
+                    exTxSignature.v,
                     {
                         from: accountProvider.get(),
                         value: 1 /* bounty */,
@@ -363,15 +338,15 @@ contract('TokenHolder::redeem', async (accounts) => {
             const redeemerNonce = 1;
             const hashLock = web3.utils.soliditySha3('hash-lock');
 
-            // Correct nonce is 1.
-            const tokenHolderInvalidNonce0 = 0;
+            // Correct nonce is 0.
+            const tokenHolderInvalidNonce = 1;
 
             const {
                 coGatewayRedeemFunctionData: coGatewayRedeemFunctionData0,
                 exTxSignature: exTxSignature0,
             } = await generateCoGatewayRedeemFunctionExTx(
                 tokenHolder,
-                tokenHolderInvalidNonce0,
+                tokenHolderInvalidNonce,
                 sessionPrivateKey1,
                 coGateway,
                 amount, beneficiary, gasPrice, gasLimit, redeemerNonce, hashLock,
@@ -381,51 +356,21 @@ contract('TokenHolder::redeem', async (accounts) => {
                 tokenHolder.executeRedemption(
                     coGateway.address,
                     coGatewayRedeemFunctionData0,
-                    tokenHolderInvalidNonce0,
-                    exTxSignature0.v,
+                    tokenHolderInvalidNonce,
                     EthUtils.bufferToHex(exTxSignature0.r),
                     EthUtils.bufferToHex(exTxSignature0.s),
+                    exTxSignature0.v,
                     {
                         from: accountProvider.get(),
                         value: 1 /* bounty */,
                     },
                 ),
                 'Should revert as ExTx is signed with an invalid nonce.',
-                'The next nonce is not provided.',
-            );
-
-            // Correct nonce is 1.
-            const tokenHolderInvalidNonce2 = 2;
-
-            const {
-                coGatewayRedeemFunctionData: coGatewayRedeemFunctionData2,
-                exTxSignature: exTxSignature2,
-            } = await generateCoGatewayRedeemFunctionExTx(
-                tokenHolder,
-                tokenHolderInvalidNonce2,
-                sessionPrivateKey1,
-                coGateway,
-                amount, beneficiary, gasPrice, gasLimit, redeemerNonce, hashLock,
-            );
-
-            await Utils.expectRevert(
-                tokenHolder.executeRedemption(
-                    coGateway.address,
-                    coGatewayRedeemFunctionData2,
-                    tokenHolderInvalidNonce2,
-                    exTxSignature2.v,
-                    EthUtils.bufferToHex(exTxSignature2.r),
-                    EthUtils.bufferToHex(exTxSignature2.s),
-                    {
-                        from: accountProvider.get(),
-                        value: 1 /* bounty */,
-                    },
-                ),
-                'Should revert as ExTx is signed with an invalid nonce.',
-                'The next nonce is not provided.',
+                'Incorrect nonce is specified.',
             );
         });
     });
+
     contract('Redeem Executed', async () => {
         const accountProvider = new AccountProvider(accounts);
 
@@ -448,7 +393,7 @@ contract('TokenHolder::redeem', async (accounts) => {
             const redeemerNonce = 1;
             const hashLock = web3.utils.soliditySha3('hash-lock');
 
-            const tokenHolderNonce = 1;
+            const tokenHolderNonce = 0;
 
             const {
                 coGatewayRedeemFunctionData,
@@ -467,9 +412,9 @@ contract('TokenHolder::redeem', async (accounts) => {
                 coGateway.address,
                 coGatewayRedeemFunctionData,
                 tokenHolderNonce,
-                exTxSignature.v,
                 EthUtils.bufferToHex(exTxSignature.r),
                 EthUtils.bufferToHex(exTxSignature.s),
+                exTxSignature.v,
                 {
                     from: accountProvider.get(),
                     value: bounty,
@@ -482,9 +427,9 @@ contract('TokenHolder::redeem', async (accounts) => {
                 coGateway.address,
                 coGatewayRedeemFunctionData,
                 tokenHolderNonce,
-                exTxSignature.v,
                 EthUtils.bufferToHex(exTxSignature.r),
                 EthUtils.bufferToHex(exTxSignature.s),
+                exTxSignature.v,
                 {
                     from: accountProvider.get(),
                     value: bounty,
@@ -534,10 +479,11 @@ contract('TokenHolder::redeem', async (accounts) => {
             const redeemerNonce = 1;
             const hashLock = web3.utils.soliditySha3('hash-lock');
 
-            const tokenHolderNonce = 1;
+            const tokenHolderNonce = 0;
 
             const {
                 coGatewayRedeemFunctionData,
+                exTxHash,
                 exTxSignature,
             } = await generateCoGatewayRedeemFunctionExTx(
                 tokenHolder,
@@ -551,9 +497,9 @@ contract('TokenHolder::redeem', async (accounts) => {
                 coGateway.address,
                 coGatewayRedeemFunctionData,
                 tokenHolderNonce,
-                exTxSignature.v,
                 EthUtils.bufferToHex(exTxSignature.r),
                 EthUtils.bufferToHex(exTxSignature.s),
+                exTxSignature.v,
                 {
                     from: accountProvider.get(),
                     value: 1,
@@ -565,16 +511,9 @@ contract('TokenHolder::redeem', async (accounts) => {
             assert.strictEqual(events.length, 1);
 
             Event.assertEqual(events[0], {
-                name: 'RedeemExecuted',
+                name: 'RedemptionExecuted',
                 args: {
-                    _redemptionHash: generateRedemptionHash(
-                        coGateway.address,
-                        coGatewayRedeemFunctionData,
-                        redeemerNonce,
-                        exTxSignature.v,
-                        EthUtils.bufferToHex(exTxSignature.r),
-                        EthUtils.bufferToHex(exTxSignature.s),
-                    ),
+                    _msgHash: exTxHash,
                     _status: true,
                 },
             });
@@ -598,10 +537,11 @@ contract('TokenHolder::redeem', async (accounts) => {
             const redeemerNonce = 1;
             const hashLock = web3.utils.soliditySha3('hash-lock');
 
-            const tokenHolderNonce = 1;
+            const tokenHolderNonce = 0;
 
             const {
                 coGatewayRedeemFunctionData,
+                exTxHash,
                 exTxSignature,
             } = await generateCoGatewayRedeemFunctionExTx(
                 tokenHolder,
@@ -617,9 +557,9 @@ contract('TokenHolder::redeem', async (accounts) => {
                 coGateway.address,
                 coGatewayRedeemFunctionData,
                 tokenHolderNonce,
-                exTxSignature.v,
                 EthUtils.bufferToHex(exTxSignature.r),
                 EthUtils.bufferToHex(exTxSignature.s),
+                exTxSignature.v,
                 {
                     from: accountProvider.get(),
                     value: 1,
@@ -631,19 +571,222 @@ contract('TokenHolder::redeem', async (accounts) => {
             assert.strictEqual(events.length, 1);
 
             Event.assertEqual(events[0], {
-                name: 'RedeemExecuted',
+                name: 'RedemptionExecuted',
                 args: {
-                    _redemptionHash: generateRedemptionHash(
-                        coGateway.address,
-                        coGatewayRedeemFunctionData,
-                        redeemerNonce,
-                        exTxSignature.v,
-                        EthUtils.bufferToHex(exTxSignature.r),
-                        EthUtils.bufferToHex(exTxSignature.s),
-                    ),
+                    _msgHash: exTxHash,
                     _status: false,
                 },
             });
+        });
+    });
+
+    contract('Returned Execution Status', async () => {
+        const accountProvider = new AccountProvider(accounts);
+
+        it('Checks that return value is true in case of successfull execution.', async () => {
+            const {
+                tokenHolder,
+                coGateway,
+            } = await prepare(
+                accountProvider,
+                50, /* spendingLimit */
+                100, /* deltaExpirationHeight */
+                sessionPublicKey1,
+            );
+
+            const amount = 10;
+            const beneficiary = accountProvider.get();
+            const gasPrice = 10;
+            const gasLimit = 100;
+            const redeemerNonce = 1;
+            const hashLock = web3.utils.soliditySha3('hash-lock');
+
+            const tokenHolderNonce = 0;
+
+            const {
+                coGatewayRedeemFunctionData,
+                exTxSignature,
+            } = await generateCoGatewayRedeemFunctionExTx(
+                tokenHolder,
+                tokenHolderNonce,
+                sessionPrivateKey1,
+                coGateway,
+                amount, beneficiary, gasPrice, gasLimit, redeemerNonce, hashLock,
+            );
+
+            const executionStatus = await tokenHolder.executeRedemption.call(
+                coGateway.address,
+                coGatewayRedeemFunctionData,
+                tokenHolderNonce,
+                EthUtils.bufferToHex(exTxSignature.r),
+                EthUtils.bufferToHex(exTxSignature.s),
+                exTxSignature.v,
+                {
+                    from: accountProvider.get(),
+                    value: 1,
+                },
+            );
+
+            assert.isOk(
+                executionStatus,
+            );
+        });
+
+        it('Checks that return value is false in case of failing execution.', async () => {
+            const {
+                tokenHolder,
+                coGateway,
+            } = await prepare(
+                accountProvider,
+                50, /* spendingLimit */
+                100, /* deltaExpirationHeight */
+                sessionPublicKey1,
+            );
+
+            const amount = 10;
+            const beneficiary = accountProvider.get();
+            const gasPrice = 10;
+            const gasLimit = 100;
+            const redeemerNonce = 1;
+            const hashLock = web3.utils.soliditySha3('hash-lock');
+
+            const tokenHolderNonce = 0;
+
+            const {
+                coGatewayRedeemFunctionData,
+                exTxSignature,
+            } = await generateCoGatewayRedeemFunctionExTx(
+                tokenHolder,
+                tokenHolderNonce,
+                sessionPrivateKey1,
+                coGateway,
+                amount, beneficiary, gasPrice, gasLimit, redeemerNonce, hashLock,
+            );
+
+            await coGateway.makeRedemptionToFail();
+
+            const executionStatus = await tokenHolder.executeRedemption.call(
+                coGateway.address,
+                coGatewayRedeemFunctionData,
+                tokenHolderNonce,
+                EthUtils.bufferToHex(exTxSignature.r),
+                EthUtils.bufferToHex(exTxSignature.s),
+                exTxSignature.v,
+                {
+                    from: accountProvider.get(),
+                    value: 1,
+                },
+            );
+
+            assert.isNotOk(
+                executionStatus,
+            );
+        });
+    });
+
+    contract('Nonce handling', async () => {
+        const accountProvider = new AccountProvider(accounts);
+
+        it('Checks that nonce is incremented in case of successfull execution.', async () => {
+            const {
+                tokenHolder,
+                coGateway,
+            } = await prepare(
+                accountProvider,
+                50, /* spendingLimit */
+                100, /* deltaExpirationHeight */
+                sessionPublicKey1,
+            );
+
+            const amount = 10;
+            const beneficiary = accountProvider.get();
+            const gasPrice = 10;
+            const gasLimit = 100;
+            const redeemerNonce = 1;
+            const hashLock = web3.utils.soliditySha3('hash-lock');
+
+            const tokenHolderNonce = 0;
+
+            const {
+                coGatewayRedeemFunctionData,
+                exTxSignature,
+            } = await generateCoGatewayRedeemFunctionExTx(
+                tokenHolder,
+                tokenHolderNonce,
+                sessionPrivateKey1,
+                coGateway,
+                amount, beneficiary, gasPrice, gasLimit, redeemerNonce, hashLock,
+            );
+
+            await tokenHolder.executeRedemption(
+                coGateway.address,
+                coGatewayRedeemFunctionData,
+                tokenHolderNonce,
+                EthUtils.bufferToHex(exTxSignature.r),
+                EthUtils.bufferToHex(exTxSignature.s),
+                exTxSignature.v,
+                {
+                    from: accountProvider.get(),
+                    value: 1,
+                },
+            );
+
+            // Checks that nonce is updated.
+            assert.isOk(
+                (await tokenHolder.sessionKeys.call(sessionPublicKey1)).nonce.eqn(1),
+            );
+        });
+
+        it('Checks that return value is false in case of failing execution.', async () => {
+            const {
+                tokenHolder,
+                coGateway,
+            } = await prepare(
+                accountProvider,
+                50, /* spendingLimit */
+                100, /* deltaExpirationHeight */
+                sessionPublicKey1,
+            );
+
+            const amount = 10;
+            const beneficiary = accountProvider.get();
+            const gasPrice = 10;
+            const gasLimit = 100;
+            const redeemerNonce = 1;
+            const hashLock = web3.utils.soliditySha3('hash-lock');
+
+            const tokenHolderNonce = 0;
+
+            const {
+                coGatewayRedeemFunctionData,
+                exTxSignature,
+            } = await generateCoGatewayRedeemFunctionExTx(
+                tokenHolder,
+                tokenHolderNonce,
+                sessionPrivateKey1,
+                coGateway,
+                amount, beneficiary, gasPrice, gasLimit, redeemerNonce, hashLock,
+            );
+
+            await coGateway.makeRedemptionToFail();
+
+            await tokenHolder.executeRedemption(
+                coGateway.address,
+                coGatewayRedeemFunctionData,
+                tokenHolderNonce,
+                EthUtils.bufferToHex(exTxSignature.r),
+                EthUtils.bufferToHex(exTxSignature.s),
+                exTxSignature.v,
+                {
+                    from: accountProvider.get(),
+                    value: 1,
+                },
+            );
+
+            // Checks that nonce is updated.
+            assert.isOk(
+                (await tokenHolder.sessionKeys.call(sessionPublicKey1)).nonce.eqn(1),
+            );
         });
     });
 });

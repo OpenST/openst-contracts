@@ -133,7 +133,7 @@ contract TokenRules is Organized {
 
         token = _token;
 
-        areDirectTransfersEnabled = false;
+        areDirectTransfersEnabled = true;
     }
 
 

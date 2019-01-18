@@ -58,7 +58,7 @@ contract('TokenRules::constructor', async () => {
 
             assert.strictEqual(
                 await tokenRules.areDirectTransfersEnabled.call(),
-                false,
+                true,
             );
         });
     });
