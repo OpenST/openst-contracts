@@ -102,6 +102,16 @@ contract TokenHolder {
 
     /* Storage */
 
+    /**
+     * @dev THIS STORAGE VARIABLE *MUST* BE ALWAYS THE FIRST STORAGE
+     *      ELEMENT FOR THIS CONTRACT.
+     *
+     *      This contract is proxied and acts as a master copy for a proxy
+     *      contract. The proxing is done only for saving a gas during
+     *      deployment, and importantly proxying is not be upgradable.
+     */
+    address reservedStorageSlotForProxy;
+
     EIP20TokenInterface public token;
 
     mapping(address /* key */ => SessionKeyData) public sessionKeys;
@@ -147,11 +157,20 @@ contract TokenHolder {
     }
 
 
-    /* Special Functions */
+    /* External Functions */
 
     /**
-     * @dev Constructor requires:
-     *          - EIP20 token address is not null.
+     * @notice Setups an already deployed contract.
+     *
+     * @dev The function acts as a "constructor" to the contact and initializes
+     *      its internals. As this contract serves as a master copy for
+     *      TokenHolder proxy contracts, the proxy contracts should initialize
+     *      themselves by calling this function, which will initialize proxy
+     *      contracts storage internals.
+     *
+     *      Function requires:
+     *          - It can be called only once for this contract.
+     *          - Token address is not null.
      *          - Token rules address is not null.
      *          - Owner address is not null.
      *
@@ -159,13 +178,21 @@ contract TokenHolder {
      * @param _tokenRules Token rules contract address.
      * @param _owner The contract's owner address.
      */
-    constructor(
+    function setup(
         EIP20TokenInterface _token,
         address _tokenRules,
         address _owner
     )
-        public
+        external
     {
+        // Assures that function can be called only once.
+        require(
+            address(token) == address(0) &&
+            address(owner) == address(0) &&
+            address(tokenRules) == address(0),
+            "Contract has been already setup."
+        );
+
         require(
             address(_token) != address(0),
             "Token contract address is null."
@@ -183,9 +210,6 @@ contract TokenHolder {
         tokenRules = _tokenRules;
         owner = _owner;
     }
-
-
-    /* External Functions */
 
     /**
      * @notice Authorizes a session.

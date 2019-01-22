@@ -14,21 +14,24 @@
 
 
 const utils = require('../test_lib/utils.js');
+const web3 = require('../test_lib/web3.js');
 const { AccountProvider } = require('../test_lib/utils.js');
 
 const TokenHolder = artifacts.require('TokenHolder');
 
-contract('TokenHolder::constructor', async () => {
+contract('TokenHolder::setup', async () => {
     contract('Negative Tests', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
 
         it('Reverts if token address is null.', async () => {
+            const tokenHolder = await TokenHolder.new();
+
             const ownerAddress = accountProvider.get();
             const tokenAddress = utils.NULL_ADDRESS;
             const tokenRulesAddress = accountProvider.get();
 
             await utils.expectRevert(
-                TokenHolder.new(
+                tokenHolder.setup(
                     tokenAddress,
                     tokenRulesAddress,
                     ownerAddress,
@@ -39,12 +42,14 @@ contract('TokenHolder::constructor', async () => {
         });
 
         it('Reverts if token rules is null.', async () => {
+            const tokenHolder = await TokenHolder.new();
+
             const ownerAddress = accountProvider.get();
             const tokenAddress = accountProvider.get();
             const tokenRulesAddress = utils.NULL_ADDRESS;
 
             await utils.expectRevert(
-                TokenHolder.new(
+                tokenHolder.setup(
                     tokenAddress,
                     tokenRulesAddress,
                     ownerAddress,
@@ -55,12 +60,14 @@ contract('TokenHolder::constructor', async () => {
         });
 
         it('Reverts if owner address is null.', async () => {
+            const tokenHolder = await TokenHolder.new();
+
             const ownerAddress = utils.NULL_ADDRESS;
             const tokenAddress = accountProvider.get();
             const tokenRulesAddress = accountProvider.get();
 
             await utils.expectRevert(
-                TokenHolder.new(
+                tokenHolder.setup(
                     tokenAddress,
                     tokenRulesAddress,
                     ownerAddress,
@@ -69,17 +76,54 @@ contract('TokenHolder::constructor', async () => {
                 'Owner address is null.',
             );
         });
+
+        it('Reverts if setup is called second time.', async () => {
+            const tokenHolder = await TokenHolder.new();
+
+            const ownerAddress = accountProvider.get();
+            const tokenAddress = accountProvider.get();
+            const tokenRulesAddress = accountProvider.get();
+
+            await tokenHolder.setup(
+                tokenAddress,
+                tokenRulesAddress,
+                ownerAddress,
+            );
+
+            await utils.expectRevert(
+                tokenHolder.setup(
+                    tokenAddress,
+                    tokenRulesAddress,
+                    ownerAddress,
+                ),
+                'Should revert as setup() is called second time.',
+                'Contract has been already setup.',
+            );
+
+            // Testing with different inputs.
+            await utils.expectRevert(
+                tokenHolder.setup(
+                    accountProvider.get(),
+                    accountProvider.get(),
+                    accountProvider.get(),
+                ),
+                'Should revert as setup() is called second time.',
+                'Contract has been already setup.',
+            );
+        });
     });
 
     contract('Storage', async (accounts) => {
         const accountProvider = new AccountProvider(accounts);
 
         it('Checks that passed arguments are set correctly.', async () => {
+            const tokenHolder = await TokenHolder.new();
+
             const ownerAddress = accountProvider.get();
             const tokenAddress = accountProvider.get();
             const tokenRulesAddress = accountProvider.get();
 
-            const tokenHolder = await TokenHolder.new(
+            await tokenHolder.setup(
                 tokenAddress,
                 tokenRulesAddress,
                 ownerAddress,
@@ -98,6 +142,26 @@ contract('TokenHolder::constructor', async () => {
             assert.strictEqual(
                 (await tokenHolder.owner.call()),
                 ownerAddress,
+            );
+        });
+
+        it('Checks storage elements order to assure reserved '
+        + 'slot for proxy is valid.', async () => {
+            const tokenHolder = await TokenHolder.new();
+
+            const tokenAddress = accountProvider.get();
+            const tokenRulesAddress = accountProvider.get();
+            const ownerAddress = accountProvider.get();
+
+            await tokenHolder.setup(
+                tokenAddress,
+                tokenRulesAddress,
+                ownerAddress,
+            );
+
+            assert.strictEqual(
+                (await web3.eth.getStorageAt(tokenHolder.address, 0)),
+                '0x00',
             );
         });
     });

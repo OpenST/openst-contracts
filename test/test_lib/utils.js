@@ -160,4 +160,33 @@ module.exports = {
 
         return { exTxHash, exTxSignature };
     },
+
+    getParamFromTxEvent: (
+        transaction, contractAddress, eventName, paramName,
+    ) => {
+        assert(
+            typeof transaction === 'object'
+            && !Array.isArray(transaction)
+            && transaction !== null,
+        );
+        assert(eventName !== '');
+        assert(contractAddress !== '');
+
+        const { logs } = transaction;
+
+        const filteredLogs = logs.filter(
+            l => l.event === eventName && l.address === contractAddress,
+        );
+
+        assert(
+            filteredLogs.length === 1,
+            'Too many entries found after filtering the logs.',
+        );
+
+        const param = filteredLogs[0].args[paramName];
+
+        assert(typeof param !== 'undefined');
+
+        return param;
+    },
 };

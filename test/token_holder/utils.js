@@ -5,20 +5,6 @@ const UtilityTokenFake = artifacts.require('UtilityTokenFake');
 const web3 = require('../test_lib/web3.js');
 
 class TokenHolderUtils {
-    static async submitAuthorizeSession(
-        tokenHolder, sessionKey, spendingLimit, expirationHeight, options,
-    ) {
-        const transactionID = await tokenHolder.submitAuthorizeSession.call(
-            sessionKey, spendingLimit, expirationHeight, options,
-        );
-
-        await tokenHolder.submitAuthorizeSession(
-            sessionKey, spendingLimit, expirationHeight, options,
-        );
-
-        return transactionID;
-    }
-
     static async createUtilityMockToken() {
         const utilityToken = await UtilityTokenFake.new(
             'OST', 'Open Simple Token', 1,
@@ -39,7 +25,8 @@ class TokenHolderUtils {
     ) {
         const tokenHolderOwnerAddress = accountProvider.get();
 
-        const tokenHolder = await TokenHolder.new(
+        const tokenHolder = await TokenHolder.new();
+        await tokenHolder.setup(
             utilityTokenMock.address,
             tokenRulesMock.address,
             tokenHolderOwnerAddress,
