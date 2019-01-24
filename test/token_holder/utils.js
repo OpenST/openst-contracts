@@ -30,6 +30,9 @@ class TokenHolderUtils {
             utilityTokenMock.address,
             tokenRulesMock.address,
             tokenHolderOwnerAddress,
+            [],
+            [],
+            [],
         );
 
         return {

@@ -44,7 +44,7 @@ contract UserWalletFactory {
     /** The callprefix of the TokenHolder::setup function. */
     bytes4 public constant TOKENHOLDER_SETUP_CALLPREFIX = bytes4(
         keccak256(
-            "setup(address,address,address)"
+            "setup(address,address,address,address[],uint256[],uint256[])"
         )
     );
 
@@ -64,6 +64,9 @@ contract UserWalletFactory {
     *                               holder.
     * @param _token The address of the economy token.
     * @param _tokenRules The address of the token rules.
+    * @param _sessionKeys Session key addresses to authorize.
+    * @param _sessionKeysSpendingLimits Session keys' spending limits.
+    * @param _sessionKeysExpirationHeights Session keys' expiration heights.
     *
     * @return gnosisSafeProxy_ A newly created gnosis safe's proxy address.
     * @return tokenHolderProxy_ A newly created token holder's proxy address.
@@ -73,7 +76,10 @@ contract UserWalletFactory {
         bytes calldata _gnosisSafeData,
         address _tokenHolderMasterCopy,
         address _token,
-        address _tokenRules
+        address _tokenRules,
+        address[] calldata _sessionKeys,
+        uint256[] calldata _sessionKeysSpendingLimits,
+        uint256[] calldata _sessionKeysExpirationHeights
     )
         external
         returns (Proxy gnosisSafeProxy_, Proxy tokenHolderProxy_)
@@ -87,7 +93,10 @@ contract UserWalletFactory {
             TOKENHOLDER_SETUP_CALLPREFIX,
             _token,
             _tokenRules,
-            gnosisSafeProxy_
+            gnosisSafeProxy_,
+            _sessionKeys,
+            _sessionKeysSpendingLimits,
+            _sessionKeysExpirationHeights
         );
         callProxyData(tokenHolderProxy_, tokenHolderData);
 

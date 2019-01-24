@@ -79,8 +79,8 @@ contract TokenHolder {
     /** expirationHeight is the block number at which sessionKey expires. */
     struct SessionKeyData {
         uint256 spendingLimit;
-        uint256 nonce;
         uint256 expirationHeight;
+        uint256 nonce;
         AuthorizationStatus status;
     }
 
@@ -173,15 +173,23 @@ contract TokenHolder {
      *          - Token address is not null.
      *          - Token rules address is not null.
      *          - Owner address is not null.
+     *          - Session key addresses, spending limits and expiration height
+     *            arrays lengths are equal.
      *
      * @param _token EIP20 token contract address deployed for an economy.
      * @param _tokenRules Token rules contract address.
      * @param _owner The contract's owner address.
+     * @param _sessionKeys Session key addresses to authorize.
+     * @param _sessionKeysSpendingLimits Session keys' spending limits.
+     * @param _sessionKeysExpirationHeights Session keys' expiration heights.
      */
     function setup(
         EIP20TokenInterface _token,
         address _tokenRules,
-        address _owner
+        address _owner,
+        address[] calldata _sessionKeys,
+        uint256[] calldata _sessionKeysSpendingLimits,
+        uint256[] calldata _sessionKeysExpirationHeights
     )
         external
     {
@@ -206,9 +214,27 @@ contract TokenHolder {
             "Owner address is null."
         );
 
+        require(
+            _sessionKeys.length == _sessionKeysSpendingLimits.length,
+            "Session keys and spending limits arrays lengths are different."
+        );
+
+        require(
+            _sessionKeys.length == _sessionKeysExpirationHeights.length,
+            "Session keys and expiration heights arrays lengths are different."
+        );
+
         token = _token;
         tokenRules = _tokenRules;
         owner = _owner;
+
+        for (uint256 i = 0; i < _sessionKeys.length; ++i) {
+            _authorizeSession(
+                _sessionKeys[i],
+                _sessionKeysSpendingLimits[i],
+                _sessionKeysExpirationHeights[i]
+            );
+        }
     }
 
     /**
@@ -234,19 +260,7 @@ contract TokenHolder {
         keyIsNotNull(_sessionKey)
         keyDoesNotExist(_sessionKey)
     {
-        require(
-            _expirationHeight > block.number,
-            "Expiration height is lte to the current block height."
-        );
-
-        SessionKeyData storage keyData = sessionKeys[_sessionKey];
-
-        keyData.spendingLimit = _spendingLimit;
-        keyData.expirationHeight = _expirationHeight;
-        keyData.nonce = 0;
-        keyData.status = AuthorizationStatus.AUTHORIZED;
-
-        emit SessionAuthorized(_sessionKey);
+        _authorizeSession(_sessionKey, _spendingLimit, _expirationHeight);
     }
 
     /**
@@ -415,6 +429,30 @@ contract TokenHolder {
 
 
     /* Private Functions */
+
+    function _authorizeSession(
+        address _sessionKey,
+        uint256 _spendingLimit,
+        uint256 _expirationHeight
+    )
+        private
+        keyIsNotNull(_sessionKey)
+        keyDoesNotExist(_sessionKey)
+    {
+        require(
+            _expirationHeight > block.number,
+            "Expiration height is lte to the current block height."
+        );
+
+        SessionKeyData storage keyData = sessionKeys[_sessionKey];
+
+        keyData.spendingLimit = _spendingLimit;
+        keyData.expirationHeight = _expirationHeight;
+        keyData.nonce = 0;
+        keyData.status = AuthorizationStatus.AUTHORIZED;
+
+        emit SessionAuthorized(_sessionKey);
+    }
 
     function verifyExecutableTransaction(
         bytes4 _callPrefix,

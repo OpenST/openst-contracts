@@ -39,30 +39,6 @@ function generateMasterCopySpySetupFunctionData(balance) {
     );
 }
 
-function generateTokenHolderSetupFunctionData(token, tokenRules, owner) {
-    return web3.eth.abi.encodeFunctionCall(
-        {
-            name: 'setup',
-            type: 'function',
-            inputs: [
-                {
-                    type: 'address',
-                    name: 'token',
-                },
-                {
-                    type: 'address',
-                    name: 'tokenRules',
-                },
-                {
-                    type: 'address',
-                    name: 'owner',
-                },
-            ],
-        },
-        [token, tokenRules, owner],
-    );
-}
-
 contract('UserWalletFactory::createWallet', async (accounts) => {
     const accountProvider = new AccountProvider(accounts);
 
@@ -77,6 +53,9 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                     accountProvider.get(), // token holder's master copy
                     accountProvider.get(), // token
                     accountProvider.get(), // token rules
+                    [], // session key addresses
+                    [], // session keys' spending limits
+                    [], // session keys' expiration heights
                 ),
                 'Should revert as the master copy address is null.',
                 'Master copy address is null.',
@@ -93,6 +72,9 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                     Utils.NULL_ADDRESS, // token holder's master copy
                     accountProvider.get(), // token
                     accountProvider.get(), // token rules
+                    [], // session key addresses
+                    [], // session keys' spending limits
+                    [], // session keys' expiration heights
                 ),
                 'Should revert as the master copy address is null.',
                 'Master copy address is null.',
@@ -113,6 +95,9 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                 accountProvider.get(), // token holder's master copy
                 accountProvider.get(), // token
                 accountProvider.get(), // token rules
+                [], // session key addresses
+                [], // session keys' spending limits
+                [], // session keys' expiration heights
             );
             await userWalletFactory.createWallet(
                 gnosisSafeMasterCopy,
@@ -120,6 +105,9 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                 accountProvider.get(), // token holder's master copy
                 accountProvider.get(), // token
                 accountProvider.get(), // token rules
+                [], // session key addresses
+                [], // session keys' spending limits
+                [], // session keys' expiration heights
             );
 
             const gnosisSafeProxy = await ProxyContract.at(returnData[0]);
@@ -147,6 +135,9 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                 accountProvider.get(), // token holder's master copy
                 accountProvider.get(), // token
                 accountProvider.get(), // token rules
+                [], // session key addresses
+                [], // session keys' spending limits
+                [], // session keys' expiration heights
             );
             await userWalletFactory.createWallet(
                 gnosisSafeMasterCopy.address,
@@ -154,6 +145,9 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                 accountProvider.get(), // token holder's master copy
                 accountProvider.get(), // token
                 accountProvider.get(), // token rules
+                [], // session key addresses
+                [], // session keys' spending limits
+                [], // session keys' expiration heights
             );
 
             const gnosisSafeProxy = await MasterCopySpy.at(returnData[0]);
@@ -183,6 +177,9 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                 tokenHolderMasterCopy, // token holder's master copy
                 accountProvider.get(), // token
                 accountProvider.get(), // token rules
+                [], // session key addresses
+                [], // session keys' spending limits
+                [], // session keys' expiration heights
             );
             await userWalletFactory.createWallet(
                 accountProvider.get(), // gnosis safe's master copy
@@ -190,6 +187,9 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                 tokenHolderMasterCopy, // token holder's master copy
                 accountProvider.get(), // token
                 accountProvider.get(), // token rules
+                [], // session key addresses
+                [], // session keys' spending limits
+                [], // session keys' expiration heights
             );
 
             const tokenHolderProxy = await ProxyContract.at(returnData[1]);
@@ -209,12 +209,25 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
             const token = accountProvider.get();
             const tokenRules = accountProvider.get();
 
+            const blockNumber = await web3.eth.getBlockNumber();
+
+            const sessionKeyAddress = accountProvider.get();
+            const sessionKeySpendingLimit = 11;
+            const sessionKeyExpirationHeight = blockNumber + 11;
+
+            const sessionKeys = [sessionKeyAddress];
+            const sessionKeysSpendingLimits = [sessionKeySpendingLimit];
+            const sessionKeysExpirationHeights = [sessionKeyExpirationHeight];
+
             const returnData = await userWalletFactory.createWallet.call(
                 gnosisSafeMasterCopy,
                 '0x', // gnosis safe's setup data
                 tokenHolderMasterCopy.address, // token holder's master copy
                 token, // token
                 tokenRules, // token rules
+                sessionKeys, // session key addresses
+                sessionKeysSpendingLimits, // session keys' spending limits
+                sessionKeysExpirationHeights, // session keys' expiration heights
             );
             await userWalletFactory.createWallet(
                 gnosisSafeMasterCopy,
@@ -222,6 +235,9 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                 tokenHolderMasterCopy.address, // token holder's master copy
                 token, // token
                 tokenRules, // token rules
+                sessionKeys, // session key addresses
+                sessionKeysSpendingLimits, // session keys' spending limits
+                sessionKeysExpirationHeights, // session keys' expiration heights
             );
 
             const gnosisSafeProxy = returnData[0];
@@ -241,6 +257,26 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                 await tokenHolderProxy.owner.call(),
                 gnosisSafeProxy,
             );
+
+            const sessionKeyData = await tokenHolderProxy.sessionKeys.call(
+                sessionKeyAddress,
+            );
+
+            assert.isOk(
+                sessionKeyData.spendingLimit.eqn(sessionKeySpendingLimit),
+            );
+
+            assert.isOk(
+                sessionKeyData.expirationHeight.eqn(sessionKeyExpirationHeight),
+            );
+
+            assert.isOk(
+                sessionKeyData.nonce.eqn(0),
+            );
+
+            assert.isOk(
+                sessionKeyData.status.eqn(1), // AUTHORIZED == 1
+            );
         });
     });
 
@@ -257,6 +293,9 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                 tokenHolderMasterCopy, // token holder's master copy
                 accountProvider.get(), // token
                 accountProvider.get(), // token rules
+                [], // session key addresses
+                [], // session keys' spending limits
+                [], // session keys' expiration heights
             );
             const transactionResponse = await userWalletFactory.createWallet(
                 gnosisSafeMasterCopy, // gnosis safe's master copy
@@ -264,6 +303,9 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                 tokenHolderMasterCopy, // token holder's master copy
                 accountProvider.get(), // token
                 accountProvider.get(), // token rules
+                [], // session key addresses
+                [], // session keys' spending limits
+                [], // session keys' expiration heights
             );
 
             const gnosisSafeProxy = returnData[0];
