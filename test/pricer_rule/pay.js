@@ -273,46 +273,40 @@ contract('PricerRule::pay', async () => {
                 amount2BN, oraclePriceBN, new BN(conversionRate), new BN(conversionRateDecimals),
             );
 
-
-            const actualFromAddress = await tokenRules.recordedFrom.call();
-
-            const actualToAddress1 = await tokenRules.recordedTransfersTo.call(0);
-            const actualToAddress2 = await tokenRules.recordedTransfersTo.call(1);
-            const actualTransfersToLength = await tokenRules.recordedTransfersToLength.call();
-
-            const actualAmount1 = await tokenRules.recordedTransfersAmount.call(0);
-            const actualAmount2 = await tokenRules.recordedTransfersAmount.call(1);
-            const actualTransfersAmountLength = await tokenRules.recordedTransfersAmountLength.call();
+            const transactionsLength = await tokenRules.transactionsLength.call();
+            assert.isOk(
+                transactionsLength.eqn(1),
+            );
 
             assert.strictEqual(
-                actualFromAddress,
+                await tokenRules.fromTransaction.call(0),
                 fromAddress,
             );
 
-            assert.isOk(
-                actualTransfersToLength.eqn(2),
-            );
-
+            const transfersToTransaction = await tokenRules.transfersToTransaction.call(0);
             assert.strictEqual(
-                actualToAddress1,
+                transfersToTransaction.length,
+                2,
+            );
+            assert.strictEqual(
+                transfersToTransaction[0],
                 to1,
             );
-
             assert.strictEqual(
-                actualToAddress2,
+                transfersToTransaction[1],
                 to2,
             );
 
-            assert.isOk(
-                actualTransfersAmountLength.eqn(2),
+            const transfersAmountTransaction = await tokenRules.transfersAmountTransaction.call(0);
+            assert.strictEqual(
+                transfersAmountTransaction.length,
+                2,
             );
-
             assert.isOk(
-                actualAmount1.eq(convertedAmount1BN),
+                (transfersAmountTransaction[0]).eq(convertedAmount1BN),
             );
-
             assert.isOk(
-                actualAmount2.eq(convertedAmount2BN),
+                (transfersAmountTransaction[1]).eq(convertedAmount2BN),
             );
         });
     });

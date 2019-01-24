@@ -30,7 +30,7 @@ contract('TransferRule::transferFrom', async (accounts) => {
         const expectedAmount = 10;
         const expectedTransfersAmountLength = 1;
 
-        const tokenRules = await TokenRulesSpy.new();
+        const tokenRules = await TokenRulesSpy.new(accountProvider.get());
 
         const transferRule = await TransferRule.new(tokenRules.address);
 
@@ -38,34 +38,33 @@ contract('TransferRule::transferFrom', async (accounts) => {
             expectedFromAddress, expectedToAddress, expectedAmount,
         );
 
-        const actualFromAddress = await tokenRules.recordedFrom.call();
-
-        const actualToAddress = await tokenRules.recordedTransfersTo.call(0);
-        const actualTransfersToLength = await tokenRules.recordedTransfersToLength.call();
-
-        const actualAmount = await tokenRules.recordedTransfersAmount.call(0);
-        const actualTransfersAmountLength = await tokenRules.recordedTransfersAmountLength.call();
+        const transactionsLength = await tokenRules.transactionsLength.call();
+        assert.isOk(
+            transactionsLength.eqn(1),
+        );
 
         assert.strictEqual(
-            actualFromAddress,
+            await tokenRules.fromTransaction.call(0),
             expectedFromAddress,
         );
 
-        assert.isOk(
-            actualTransfersToLength.eqn(expectedTransfersToLength),
-        );
-
+        const transfersToTransaction = await tokenRules.transfersToTransaction.call(0);
         assert.strictEqual(
-            actualToAddress,
+            transfersToTransaction.length,
+            expectedTransfersToLength,
+        );
+        assert.strictEqual(
+            transfersToTransaction[0],
             expectedToAddress,
         );
 
-        assert.isOk(
-            actualTransfersAmountLength.eqn(expectedTransfersAmountLength),
+        const transfersAmountTransaction = await tokenRules.transfersAmountTransaction.call(0);
+        assert.strictEqual(
+            transfersAmountTransaction.length,
+            expectedTransfersAmountLength,
         );
-
         assert.isOk(
-            actualAmount.eqn(expectedAmount),
+            (transfersAmountTransaction[0]).eqn(expectedAmount),
         );
     });
 });
