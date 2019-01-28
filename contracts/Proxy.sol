@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-// Copyright 2018 OpenST Ltd.
+// Copyright 2019 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,19 +50,14 @@ contract Proxy {
         external
         payable
     {
-        address mc = masterCopy;
-
         // solium-disable-next-line security/no-inline-assembly
         assembly {
-            let ptr := mload(0x40)
-            calldatacopy(ptr, 0, calldatasize)
-            let result := delegatecall(gas, mc, ptr, calldatasize, 0, 0)
-            let size := returndatasize
-            returndatacopy(ptr, 0, size)
-
-            switch result
-            case 0 { revert(ptr, size) }
-            default { return(ptr, size) }
+            let masterCopy := and(sload(0), 0xffffffffffffffffffffffffffffffffffffffff)
+            calldatacopy(0, 0, calldatasize())
+            let success := delegatecall(gas, masterCopy, 0, calldatasize(), 0, 0)
+            returndatacopy(0, 0, returndatasize())
+            if eq(success, 0) { revert(0, returndatasize()) }
+            return(0, returndatasize())
         }
     }
 }

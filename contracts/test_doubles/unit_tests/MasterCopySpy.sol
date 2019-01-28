@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-// Copyright 2018 OpenST Ltd.
+// Copyright 2019 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,14 @@ pragma solidity ^0.5.0;
 
 import "../../SafeMath.sol";
 
+/**
+ * @title A test double (spy) contract acting as a master copy for proxies
+ *        during testing.
+ *        Contract is a generic master copy implementation, that implements
+ *        setup() function to initialize proxy's storage layout, records
+ *        parameters, msg.value and msg.sender values once calling the pay()
+ *        function to test validity afterwards.
+ */
 contract MasterCopySpy {
 
     /* Usings */

@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-// Copyright 2018 OpenST Ltd.
+// Copyright 2019 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@ pragma solidity ^0.5.0;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "./ProxyFactory.sol";
+import "./Proxy.sol";
+
 
 /**
  * @title Allows to create a new gnosis safe proxy and executes a
- *        message call to the newly proxy. Afterwards, in the same
+ *        message call to the newly created proxy. Afterwards, in the same
  *        transaction, creates a new token holder proxy by specifying
  *        as an owner the newly created gnosis safe proxy contract.
  */
@@ -31,7 +32,7 @@ contract UserWalletFactory {
      *         function on success.
      *
      * @param _gnosisSafeProxy A newly created gnosis safe's proxy.
-     * @param _tokenHolderProxy A newly crated token holder's proxy.
+     * @param _tokenHolderProxy A newly created token holder's proxy.
      */
     event UserWalletCreated(
         Proxy _gnosisSafeProxy,
@@ -53,7 +54,7 @@ contract UserWalletFactory {
 
     /**
     * @notice Create a new gnosis safe proxy and executes a
-    *         message call to the newly proxy. Afterwards, in the same
+    *         message call to the newly created proxy. Afterwards, in the same
     *         transaction, creates a new token holder proxy by specifying
     *         as an owner the newly created gnosis safe proxy contract.
     *

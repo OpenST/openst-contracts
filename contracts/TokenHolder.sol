@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-// Copyright 2018 OpenST Ltd.
+// Copyright 2019 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -106,9 +106,9 @@ contract TokenHolder {
      * @dev THIS STORAGE VARIABLE *MUST* BE ALWAYS THE FIRST STORAGE
      *      ELEMENT FOR THIS CONTRACT.
      *
-     *      This contract is proxied and acts as a master copy for a proxy
-     *      contract. The proxing is done only for saving a gas during
-     *      deployment, and importantly proxying is not be upgradable.
+     *      This contract acts as a master copy for a proxy
+     *      contract. The proxy is applied to save gas during deployment,
+     *      and importantly the proxy is not be upgradable.
      */
     address reservedStorageSlotForProxy;
 
@@ -162,11 +162,8 @@ contract TokenHolder {
     /**
      * @notice Setups an already deployed contract.
      *
-     * @dev The function acts as a "constructor" to the contact and initializes
-     *      its internals. As this contract serves as a master copy for
-     *      TokenHolder proxy contracts, the proxy contracts should initialize
-     *      themselves by calling this function, which will initialize proxy
-     *      contracts storage internals.
+     * @dev The function acts as a "constructor" to the contract and initializes
+     *      the proxy's storage layout.
      *
      *      Function requires:
      *          - It can be called only once for this contract.
@@ -257,8 +254,6 @@ contract TokenHolder {
     )
         external
         onlyOwner
-        keyIsNotNull(_sessionKey)
-        keyDoesNotExist(_sessionKey)
     {
         _authorizeSession(_sessionKey, _spendingLimit, _expirationHeight);
     }
