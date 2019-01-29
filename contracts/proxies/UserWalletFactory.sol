@@ -28,7 +28,7 @@ contract UserWalletFactory {
     /* Events */
 
     /**
-     * @notice The event is emitted the from UserWalletFactory::createWallet
+     * @notice The event is emitted the from UserWalletFactory::createUserWallet
      *         function on success.
      *
      * @param _gnosisSafeProxy A newly created gnosis safe's proxy.
@@ -72,7 +72,7 @@ contract UserWalletFactory {
     * @return gnosisSafeProxy_ A newly created gnosis safe's proxy address.
     * @return tokenHolderProxy_ A newly created token holder's proxy address.
     */
-    function createWallet(
+    function createUserWallet(
         address _gnosisSafeMasterCopy,
         bytes calldata _gnosisSafeData,
         address _tokenHolderMasterCopy,
