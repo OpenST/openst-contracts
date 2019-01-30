@@ -110,7 +110,6 @@ contract('PricerRule::remove_acceptance_margin', async () => {
                 organizationWorker,
                 pricerRule,
                 quoteCurrencyCode,
-                priceOracle,
             } = await PricerRuleUtils.createTokenEconomy(accountProvider);
 
             const acceptanceMargin = 11;

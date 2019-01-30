@@ -21,6 +21,8 @@ const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 const MAX_UINT256 = new BN(2).pow(new BN(256)).sub(new BN(1));
 
+const NULL_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000';
+
 const generateExTxHash = (
     from, to, data, nonce, callPrefix,
 ) => web3.utils.soliditySha3(
@@ -68,6 +70,8 @@ const generateExTxHash = (
 module.exports = {
 
     NULL_ADDRESS,
+
+    NULL_BYTES32,
 
     MAX_UINT256,
 

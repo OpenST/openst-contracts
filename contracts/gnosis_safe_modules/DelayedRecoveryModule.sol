@@ -135,7 +135,7 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
      *          - Recovery owner's address is not null.
      *          - Recovery controller's address is not null.
      *          - Required number of blocks before a recovery can be executed
-     *            is greater than 4 * 84600.
+     *            is greater than or equal to 4 * 84600.
      *
      * @param _recoveryOwner  An address that signs the "recovery
      *                        initiation/execution/abortion" and
@@ -169,15 +169,8 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
         );
 
         require(
-            _recoveryBlockDelay > 4 * 84600,
-            "Recovery block delay is less than or equal to 4 * 84600 blocks."
-        );
-
-        // Setups module manager to the msg.sender.
-        // Module manager can only be 0 at initalization of a contract.
-        require(
-            address(moduleManager) == address(0),
-            "Module manager was already set."
+            _recoveryBlockDelay >= 4 * 84600,
+            "Recovery block delay is less than 4 * 84600 blocks."
         );
 
         domainSeparator = keccak256(

@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const BN = require('bn.js');
 const EthUtils = require('ethereumjs-util');
 const web3 = require('../test_lib/web3.js');
 const Utils = require('../test_lib/utils.js');
