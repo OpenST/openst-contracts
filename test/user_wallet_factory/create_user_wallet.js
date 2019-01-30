@@ -39,7 +39,7 @@ function generateMasterCopySpySetupFunctionData(balance) {
     );
 }
 
-contract('UserWalletFactory::createWallet', async (accounts) => {
+contract('UserWalletFactory::createUserWallet', async (accounts) => {
     const accountProvider = new AccountProvider(accounts);
 
     contract('Negative Tests', async () => {
@@ -47,7 +47,7 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
             const userWalletFactory = await UserWalletFactory.new();
 
             await Utils.expectRevert(
-                userWalletFactory.createWallet(
+                userWalletFactory.createUserWallet(
                     Utils.NULL_ADDRESS, // gnosis safe's master copy
                     '0x', // gnosis safe's setup data
                     accountProvider.get(), // token holder's master copy
@@ -66,7 +66,7 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
             const userWalletFactory = await UserWalletFactory.new();
 
             await Utils.expectRevert(
-                userWalletFactory.createWallet(
+                userWalletFactory.createUserWallet(
                     accountProvider.get(), // gnosis safe's master copy
                     '0x', // gnosis safe's setup data
                     Utils.NULL_ADDRESS, // token holder's master copy
@@ -89,7 +89,7 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
 
             const gnosisSafeMasterCopy = accountProvider.get();
 
-            const returnData = await userWalletFactory.createWallet.call(
+            const returnData = await userWalletFactory.createUserWallet.call(
                 gnosisSafeMasterCopy,
                 '0x', // gnosis safe's setup data
                 accountProvider.get(), // token holder's master copy
@@ -99,7 +99,7 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                 [], // session keys' spending limits
                 [], // session keys' expiration heights
             );
-            await userWalletFactory.createWallet(
+            await userWalletFactory.createUserWallet(
                 gnosisSafeMasterCopy,
                 '0x', // gnosis safe's setup data
                 accountProvider.get(), // token holder's master copy
@@ -129,7 +129,7 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                 initialBalanceInSetupCall,
             );
 
-            const returnData = await userWalletFactory.createWallet.call(
+            const returnData = await userWalletFactory.createUserWallet.call(
                 gnosisSafeMasterCopy.address,
                 gnosisSafeSetupData, // gnosis safe's setup data
                 accountProvider.get(), // token holder's master copy
@@ -139,7 +139,7 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                 [], // session keys' spending limits
                 [], // session keys' expiration heights
             );
-            await userWalletFactory.createWallet(
+            await userWalletFactory.createUserWallet(
                 gnosisSafeMasterCopy.address,
                 gnosisSafeSetupData, // gnosis safe's setup data
                 accountProvider.get(), // token holder's master copy
@@ -171,7 +171,7 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
 
             const tokenHolderMasterCopy = accountProvider.get();
 
-            const returnData = await userWalletFactory.createWallet.call(
+            const returnData = await userWalletFactory.createUserWallet.call(
                 accountProvider.get(), // gnosis safe's master copy
                 '0x', // gnosis safe's setup data
                 tokenHolderMasterCopy, // token holder's master copy
@@ -181,7 +181,7 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                 [], // session keys' spending limits
                 [], // session keys' expiration heights
             );
-            await userWalletFactory.createWallet(
+            await userWalletFactory.createUserWallet(
                 accountProvider.get(), // gnosis safe's master copy
                 '0x', // gnosis safe's setup data
                 tokenHolderMasterCopy, // token holder's master copy
@@ -219,7 +219,7 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
             const sessionKeysSpendingLimits = [sessionKeySpendingLimit];
             const sessionKeysExpirationHeights = [sessionKeyExpirationHeight];
 
-            const returnData = await userWalletFactory.createWallet.call(
+            const returnData = await userWalletFactory.createUserWallet.call(
                 gnosisSafeMasterCopy,
                 '0x', // gnosis safe's setup data
                 tokenHolderMasterCopy.address, // token holder's master copy
@@ -229,7 +229,7 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                 sessionKeysSpendingLimits, // session keys' spending limits
                 sessionKeysExpirationHeights, // session keys' expiration heights
             );
-            await userWalletFactory.createWallet(
+            await userWalletFactory.createUserWallet(
                 gnosisSafeMasterCopy,
                 '0x', // gnosis safe's setup data
                 tokenHolderMasterCopy.address, // token holder's master copy
@@ -287,7 +287,7 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
             const gnosisSafeMasterCopy = accountProvider.get();
             const tokenHolderMasterCopy = accountProvider.get();
 
-            const returnData = await userWalletFactory.createWallet.call(
+            const returnData = await userWalletFactory.createUserWallet.call(
                 gnosisSafeMasterCopy, // gnosis safe's master copy
                 '0x', // gnosis safe's setup data
                 tokenHolderMasterCopy, // token holder's master copy
@@ -297,7 +297,7 @@ contract('UserWalletFactory::createWallet', async (accounts) => {
                 [], // session keys' spending limits
                 [], // session keys' expiration heights
             );
-            const transactionResponse = await userWalletFactory.createWallet(
+            const transactionResponse = await userWalletFactory.createUserWallet(
                 gnosisSafeMasterCopy, // gnosis safe's master copy
                 '0x', // gnosis safe's setup data
                 tokenHolderMasterCopy, // token holder's master copy
