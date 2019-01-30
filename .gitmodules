@@ -1,0 +1,3 @@
+[submodule "external/gnosis/safe-contracts"]
+	path = external/gnosis/safe-contracts
+	url = git@github.com:OpenSTFoundation/safe-contracts.git

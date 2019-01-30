@@ -14,9 +14,9 @@ pragma solidity ^0.5.0;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "./SafeMath.sol";
+import "../external/SafeMath.sol";
 import "./EIP20TokenInterface.sol";
-import "./Organized.sol";
+import "../organization/Organized.sol";
 
 
 /**

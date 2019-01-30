@@ -14,11 +14,11 @@ pragma solidity ^0.5.0;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "./SafeMath.sol";
 import "./EIP20TokenInterface.sol";
-import "./UtilityTokenRequiredInterface.sol";
+import "../proxies/MasterCopyNonUpgradable.sol";
+import "../external/SafeMath.sol";
 import "./TokenRules.sol";
-
+import "./UtilityTokenRequiredInterface.sol";
 
 /**
  * @title TokenHolder contract.
@@ -28,7 +28,8 @@ import "./TokenRules.sol";
  *         session keys that dapps and mainstream applications can use to
  *         generate token events on-chain.
  */
-contract TokenHolder {
+contract TokenHolder is MasterCopyNonUpgradable
+{
 
     /* Usings */
 
@@ -101,16 +102,6 @@ contract TokenHolder {
 
 
     /* Storage */
-
-    /**
-     * @dev THIS STORAGE VARIABLE *MUST* BE ALWAYS THE FIRST STORAGE
-     *      ELEMENT FOR THIS CONTRACT.
-     *
-     *      This contract acts as a master copy for a proxy
-     *      contract. The proxy is applied to save gas during deployment,
-     *      and importantly the proxy is not be upgradable.
-     */
-    address reservedStorageSlotForProxy;
 
     EIP20TokenInterface public token;
 
