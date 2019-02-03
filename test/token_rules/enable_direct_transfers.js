@@ -12,67 +12,69 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+'use strict';
+
 const utils = require('../test_lib/utils.js');
 const { AccountProvider } = require('../test_lib/utils');
 const TokenRulesUtils = require('./utils.js');
 
 async function prepare(accountProvider) {
-    const {
-        organizationWorker,
-        tokenRules,
-        token,
-    } = await TokenRulesUtils.createTokenEconomy(accountProvider);
+  const {
+    organizationWorker,
+    tokenRules,
+    token,
+  } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
-    return {
-        organizationWorker,
-        tokenRules,
-        token,
-    };
+  return {
+    organizationWorker,
+    tokenRules,
+    token,
+  };
 }
 
 contract('TokenRules::enableDirectTransfers', async () => {
-    contract('Negative Tests', async (accounts) => {
-        const accountProvider = new AccountProvider(accounts);
+  contract('Negative Tests', async (accounts) => {
+    const accountProvider = new AccountProvider(accounts);
 
-        it('Reverts if a caller is not an organization worker.', async () => {
-            const {
-                tokenRules,
-            } = await prepare(accountProvider);
+    it('Reverts if a caller is not an organization worker.', async () => {
+      const {
+        tokenRules,
+      } = await prepare(accountProvider);
 
-            await utils.expectRevert(
-                tokenRules.enableDirectTransfers(
-                    { from: accountProvider.get() },
-                ),
-                'Should revert as a caller is not an organization worker.',
-                'Only whitelisted workers are allowed to call this method.',
-            );
-        });
+      await utils.expectRevert(
+        tokenRules.enableDirectTransfers(
+          { from: accountProvider.get() },
+        ),
+        'Should revert as a caller is not an organization worker.',
+        'Only whitelisted workers are allowed to call this method.',
+      );
     });
+  });
 
-    contract('Execution Validity', async (accounts) => {
-        const accountProvider = new AccountProvider(accounts);
+  contract('Execution Validity', async (accounts) => {
+    const accountProvider = new AccountProvider(accounts);
 
-        it('Checks that direct transfers are successfully enabled.', async () => {
-            const {
-                organizationWorker,
-                tokenRules,
-            } = await prepare(accountProvider);
+    it('Checks that direct transfers are successfully enabled.', async () => {
+      const {
+        organizationWorker,
+        tokenRules,
+      } = await prepare(accountProvider);
 
-            await tokenRules.disableDirectTransfers(
-                { from: organizationWorker },
-            );
+      await tokenRules.disableDirectTransfers(
+        { from: organizationWorker },
+      );
 
-            assert.isNotOk(
-                await tokenRules.areDirectTransfersEnabled.call(),
-            );
+      assert.isNotOk(
+        await tokenRules.areDirectTransfersEnabled.call(),
+      );
 
-            await tokenRules.enableDirectTransfers(
-                { from: organizationWorker },
-            );
+      await tokenRules.enableDirectTransfers(
+        { from: organizationWorker },
+      );
 
-            assert.isOk(
-                await tokenRules.areDirectTransfersEnabled.call(),
-            );
-        });
+      assert.isOk(
+        await tokenRules.areDirectTransfersEnabled.call(),
+      );
     });
+  });
 });

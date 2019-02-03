@@ -54,7 +54,7 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
     string public constant VERSION = "0.1.0";
 
     bytes32 public constant DOMAIN_SEPARATOR_TYPEHASH = keccak256(
-        "EIP712Domain(address delayedReoveryModule)"
+        "EIP712Domain(address delayedRecoveryModule)"
     );
 
     bytes32 public constant RECOVERY_STRUCT_TYPEHASH = keccak256(
@@ -117,7 +117,7 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
     {
         require(
             activeRecoveryInfo.recoveryHash == bytes32(0),
-            "There is an active recovery procedure."
+            "There is an active recovery process."
         );
 
         _;
@@ -292,7 +292,7 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
         emit RecoveryExecuted(recoveryHash);
     }
 
-    function abortRecoveryAccess(
+    function abortRecoveryByOwner(
         address _prevOwner,
         address _oldOwner,
         address _newOwner,
@@ -310,7 +310,7 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
 
         require(
             recoveryHash == activeRecoveryInfo.recoveryHash,
-            "Hash of recovery to execute does not match with active recovery's hash."
+            "Hash of recovery to abort does not match with active recovery's hash."
         );
 
         verify(recoveryHash, _r, _s, _v);
@@ -321,7 +321,7 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
     }
 
 
-    function abortRecovery(
+    function abortRecoveryByController(
         address _prevOwner,
         address _oldOwner,
         address _newOwner
@@ -337,7 +337,7 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
 
         require(
             recoveryHash == activeRecoveryInfo.recoveryHash,
-            "Hash of recovery to execute does not match with active recovery's hash."
+            "Hash of recovery to abort does not match with active recovery's hash."
         );
 
         delete activeRecoveryInfo;

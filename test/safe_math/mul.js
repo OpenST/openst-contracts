@@ -12,40 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+'use strict';
+
 const BN = require('bn.js');
 const utils = require('../test_lib/utils');
 
-const SafeMathTest = artifacts.require('SafeMathTest');
+const SafeMathLibraryDouble = artifacts.require('SafeMathLibraryDouble');
 
 contract('SafeMath::mul', async () => {
-    it('Checks that multiplication of non-zero args works correctly.', async () => {
-        const SafeMath = await SafeMathTest.new();
+  it('Checks that multiplication of non-zero args works correctly.', async () => {
+    const SafeMath = await SafeMathLibraryDouble.new();
 
-        const a = new BN(1234);
-        const b = new BN(5678);
+    const a = new BN(1234);
+    const b = new BN(5678);
 
-        const result = await SafeMath.mul.call(a, b);
+    const result = await SafeMath.mul.call(a, b);
 
-        assert(result.eq(a.mul(b)));
-    });
+    assert(result.eq(a.mul(b)));
+  });
 
-    it('Checks that multiplication of a zero arg works correctly.', async () => {
-        const SafeMath = await SafeMathTest.new();
+  it('Checks that multiplication of a zero arg works correctly.', async () => {
+    const SafeMath = await SafeMathLibraryDouble.new();
 
-        const a = new BN(0);
-        const b = new BN(5678);
+    const a = new BN(0);
+    const b = new BN(5678);
 
-        const result = await SafeMath.mul.call(a, b);
+    const result = await SafeMath.mul.call(a, b);
 
-        assert(result.eq(a.mul(b)));
-    });
+    assert(result.eq(a.mul(b)));
+  });
 
-    it('Checks that multiplication throws on overflow.', async () => {
-        const SafeMath = await SafeMathTest.new();
+  it('Checks that multiplication throws on overflow.', async () => {
+    const SafeMath = await SafeMathLibraryDouble.new();
 
-        const a = utils.MAX_UINT256;
-        const b = new BN(2);
+    const a = utils.MAX_UINT256;
+    const b = new BN(2);
 
-        await utils.expectRevert(SafeMath.mul(a, b));
-    });
+    await utils.expectRevert(SafeMath.mul(a, b));
+  });
 });

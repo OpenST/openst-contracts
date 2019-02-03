@@ -12,32 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+'use strict';
+
 const TokenRulesUtils = require('./utils.js');
 const { AccountProvider } = require('../test_lib/utils');
 
 contract('TokenRules::disallowTransfers', async (accounts) => {
-    const accountProvider = new AccountProvider(accounts);
-    it('Checks that transfer is disallowed.', async () => {
-        const {
-            tokenRules,
-        } = await TokenRulesUtils.createTokenEconomy(accountProvider);
+  const accountProvider = new AccountProvider(accounts);
+  it('Checks that transfer is disallowed.', async () => {
+    const {
+      tokenRules,
+    } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
-        const tokenHolder = accountProvider.get();
+    const tokenHolder = accountProvider.get();
 
-        await tokenRules.allowTransfers(
-            { from: tokenHolder },
-        );
+    await tokenRules.allowTransfers(
+      { from: tokenHolder },
+    );
 
-        assert.isOk(
-            await tokenRules.allowedTransfers.call(tokenHolder),
-        );
+    assert.isOk(
+      await tokenRules.allowedTransfers.call(tokenHolder),
+    );
 
-        await tokenRules.disallowTransfers(
-            { from: tokenHolder },
-        );
+    await tokenRules.disallowTransfers(
+      { from: tokenHolder },
+    );
 
-        assert.isNotOk(
-            await tokenRules.allowedTransfers.call(tokenHolder),
-        );
-    });
+    assert.isNotOk(
+      await tokenRules.allowedTransfers.call(tokenHolder),
+    );
+  });
 });

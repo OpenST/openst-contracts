@@ -12,29 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+'use strict';
+
 const BN = require('bn.js');
 const utils = require('../test_lib/utils');
 
-const SafeMathTest = artifacts.require('SafeMathTest');
+const SafeMathLibraryDouble = artifacts.require('SafeMathLibraryDouble');
 
 contract('SafeMath::sub', async () => {
-    it('Checks correctness of substract.', async () => {
-        const SafeMath = await SafeMathTest.new();
+  it('Checks correctness of substract.', async () => {
+    const SafeMath = await SafeMathLibraryDouble.new();
 
-        const a = new BN(5678);
-        const b = new BN(1234);
+    const a = new BN(5678);
+    const b = new BN(1234);
 
-        const result = await SafeMath.sub.call(a, b);
+    const result = await SafeMath.sub.call(a, b);
 
-        assert(result.eq(a.sub(b)));
-    });
+    assert(result.eq(a.sub(b)));
+  });
 
-    it('Checks that throws if subtraction result is negative.', async () => {
-        const SafeMath = await SafeMathTest.new();
+  it('Checks that throws if subtraction result is negative.', async () => {
+    const SafeMath = await SafeMathLibraryDouble.new();
 
-        const a = new BN(1234);
-        const b = new BN(5678);
+    const a = new BN(1234);
+    const b = new BN(5678);
 
-        await utils.expectRevert(SafeMath.sub.call(a, b));
-    });
+    await utils.expectRevert(SafeMath.sub.call(a, b));
+  });
 });

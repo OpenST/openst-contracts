@@ -12,29 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+'use strict';
+
 const BN = require('bn.js');
 const utils = require('../test_lib/utils');
 
-const SafeMathTest = artifacts.require('SafeMathTest');
+const SafeMathLibraryDouble = artifacts.require('SafeMathLibraryDouble');
 
 
 contract('SafeMath::add', async () => {
-    it('Checks that addition works correctly.', async () => {
-        const SafeMath = await SafeMathTest.new();
+  it('Checks that addition works correctly.', async () => {
+    const SafeMath = await SafeMathLibraryDouble.new();
 
-        const a = new BN(5678);
-        const b = new BN(1234);
+    const a = new BN(5678);
+    const b = new BN(1234);
 
-        const result = await SafeMath.add.call(a, b);
+    const result = await SafeMath.add.call(a, b);
 
-        assert(result.eq(a.add(b)));
-    });
+    assert(result.eq(a.add(b)));
+  });
 
-    it('Checks that addition throws on overflow.', async () => {
-        const SafeMath = await SafeMathTest.new();
+  it('Checks that addition throws on overflow.', async () => {
+    const SafeMath = await SafeMathLibraryDouble.new();
 
-        const a = utils.MAX_UINT256;
-        const b = new BN(1);
-        await utils.expectRevert(SafeMath.add(a, b));
-    });
+    const a = utils.MAX_UINT256;
+    const b = new BN(1);
+    await utils.expectRevert(SafeMath.add(a, b));
+  });
 });

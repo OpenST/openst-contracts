@@ -5,7 +5,7 @@ import "../../../external/SafeMath.sol";
 /**
  * It is used to test SafeMath contract.
  */
-contract SafeMathTest {
+contract SafeMathLibraryDouble {
 
     /* Public Functions */
 
