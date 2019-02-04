@@ -355,6 +355,11 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
         external
         onlyRecoveryController
     {
+        require(
+            _newRecoveryOwner != address(0),
+            "New recovery owner's address is null."
+        );
+
         bytes32 resetRecoveryOwnerHash = hashResetRecoveryOwner(
             recoveryOwner,
             _newRecoveryOwner

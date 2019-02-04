@@ -34,7 +34,7 @@ const RECOVERY_STRUCT_TYPEHASH = web3.utils.keccak256(
 );
 
 const RESET_RECOVERY_OWNER_STRUCT_TYPEHASH = web3.utils.keccak256(
-  'ResetRecoveryOwnerStruct(address oldRecoveryOwner,newRecoveryOwner)',
+  'ResetRecoveryOwnerStruct(address oldRecoveryOwner,address newRecoveryOwner)',
 );
 
 const RECOVERY_OWNER_ADDRESS = '0xC9EfFC17034eFA68b445db8618294e9500144D96';
@@ -159,8 +159,8 @@ function hashRecoveryModuleResetOwner(
   );
 
   return web3.utils.soliditySha3(
-    { t: 'byte1', v: '0x19' },
-    { t: 'byte1', v: '0x01' },
+    { t: 'bytes1', v: '0x19' },
+    { t: 'bytes1', v: '0x01' },
     { t: 'bytes32', v: domainSeparatorHash },
     { t: 'bytes32', v: resetOwnerStructHash },
   );
