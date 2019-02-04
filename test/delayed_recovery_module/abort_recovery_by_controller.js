@@ -25,7 +25,9 @@ async function prepare(accountProvider) {
     recoveryOwnerPrivateKey,
     recoveryControllerAddress,
     recoveryModule,
-  } = await RecoveryModuleUtils.createRecoveryModule(accountProvider);
+  } = await RecoveryModuleUtils.createRecoveryModule(
+    accountProvider,
+  );
 
   const prevOwner = accountProvider.get();
   const oldOwner = accountProvider.get();
@@ -99,7 +101,9 @@ contract('DelayedRecoveryModule::abortRecoveryByController', async () => {
       const {
         recoveryControllerAddress,
         recoveryModule,
-      } = await RecoveryModuleUtils.createRecoveryModule(accountProvider);
+      } = await RecoveryModuleUtils.createRecoveryModule(
+        accountProvider,
+      );
 
       const prevOwner = accountProvider.get();
       const oldOwner = accountProvider.get();

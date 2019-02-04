@@ -29,7 +29,9 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
       const {
         recoveryOwnerPrivateKey,
         recoveryModule,
-      } = await RecoveryModuleUtils.createRecoveryModule(accountProvider);
+      } = await RecoveryModuleUtils.createRecoveryModule(
+        accountProvider,
+      );
 
       const prevOwner = accountProvider.get();
       const oldOwner = accountProvider.get();
@@ -67,7 +69,9 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
         recoveryOwnerPrivateKey,
         recoveryControllerAddress,
         recoveryModule,
-      } = await RecoveryModuleUtils.createRecoveryModule(accountProvider);
+      } = await RecoveryModuleUtils.createRecoveryModule(
+        accountProvider,
+      );
 
       const prevOwner1 = accountProvider.get();
       const oldOwner1 = accountProvider.get();
@@ -145,7 +149,9 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
         recoveryOwnerPrivateKey,
         recoveryControllerAddress,
         recoveryModule,
-      } = await RecoveryModuleUtils.createRecoveryModule(accountProvider);
+      } = await RecoveryModuleUtils.createRecoveryModule(
+        accountProvider,
+      );
 
       const prevOwner = accountProvider.get();
       const oldOwner = accountProvider.get();
@@ -193,7 +199,9 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
         recoveryOwnerPrivateKey,
         recoveryControllerAddress,
         recoveryModule,
-      } = await RecoveryModuleUtils.createRecoveryModule(accountProvider);
+      } = await RecoveryModuleUtils.createRecoveryModule(
+        accountProvider,
+      );
 
       const prevOwner = accountProvider.get();
       const oldOwner = accountProvider.get();
@@ -249,7 +257,9 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
         recoveryOwnerPrivateKey,
         recoveryControllerAddress,
         recoveryModule,
-      } = await RecoveryModuleUtils.createRecoveryModule(accountProvider);
+      } = await RecoveryModuleUtils.createRecoveryModule(
+        accountProvider,
+      );
 
       const prevOwner = accountProvider.get();
       const oldOwner = accountProvider.get();

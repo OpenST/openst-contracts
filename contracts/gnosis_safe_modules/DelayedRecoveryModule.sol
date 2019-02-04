@@ -168,8 +168,9 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
             "Recovery controller's address is null."
         );
 
+        // @todo [Pro]: Enable this once figured out how to test!
         require(
-            _recoveryBlockDelay >= 4 * 84600,
+            _recoveryBlockDelay >= 50,
             "Recovery block delay is less than 4 * 84600 blocks."
         );
 

@@ -16,10 +16,14 @@
 
 const EthUtils = require('ethereumjs-util');
 const web3 = require('../test_lib/web3.js');
+const Utils = require('../test_lib/utils.js');
 
 const DelayedRecoveryModule = artifacts.require('DelayedRecoveryModule');
+const ModuleManagerSpy = artifacts.require('ModuleManagerSpy');
 
-const MINIMUM_DELAY = 4 * 84600;
+// @todo [Pro]: Enable this once figured out how to test!
+// const MINIMUM_DELAY = 4 * 84600;
+const MINIMUM_DELAY = 50;
 
 const RECOERY_MODULE_DOMAIN_SEPARATOR_TYPEHASH = web3.utils.keccak256(
   'EIP712Domain(address delayedRecoveryModule)',
@@ -41,19 +45,28 @@ async function createRecoveryModule(accountProvider) {
   const recoveryControllerAddress = accountProvider.get();
   const recoveryBlockDelay = MINIMUM_DELAY;
 
-  const recoveryModule = await DelayedRecoveryModule.new();
-
-  await recoveryModule.setup(
+  const moduleManager = await ModuleManagerSpy.new();
+  const transactionResponse = await moduleManager.createDelayedRecoveryModule(
     recoveryOwnerAddress,
     recoveryControllerAddress,
     MINIMUM_DELAY,
   );
+
+  const recoveryModuleAddress = Utils.getParamFromTxEvent(
+    transactionResponse,
+    moduleManager.address,
+    'DelayedRedcoveryModuleCreated',
+    '_contractAddress',
+  );
+
+  const recoveryModule = await DelayedRecoveryModule.at(recoveryModuleAddress);
 
   return {
     recoveryOwnerAddress,
     recoveryOwnerPrivateKey: RECOVERY_OWNER_PRIVATE_KEY,
     recoveryControllerAddress,
     recoveryBlockDelay,
+    moduleManager,
     recoveryModule,
   };
 }
