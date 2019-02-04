@@ -14,11 +14,25 @@ pragma solidity ^0.5.0;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-interface ModuleManagerInterface
+/**
+ * @title Contract contains the required, public interface by
+ *        gnosis/safe-contracts/contracts/base/ModuleManager.sol
+ *
+ * @dev Instead of inheriting from
+ *      gnosis/safe-contracts/contracts/base/ModuleManager.sol and pulling all
+ *      needed contracts by Module.sol into openst-contracts building process,
+ *      we define this contract, that contains only required, public interface
+ *      of ModuleManager.sol.
+ */
+interface GnosisSafeModuleManagerInterface
 {
 
     /* Enums */
 
+    /**
+     * @dev This enum mimics the "Operation" enum defined within:
+     *          gnosis/safe-contracts/contract/common/Enum.sol
+     */
     enum Operation {
         Call,
         DelegateCall,

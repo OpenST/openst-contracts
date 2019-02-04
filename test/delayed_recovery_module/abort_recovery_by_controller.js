@@ -34,9 +34,8 @@ async function prepare(accountProvider) {
   const newOwner = accountProvider.get();
 
   const {
-    recoveryHash,
     signature,
-  } = RecoveryModuleUtils.signRecovery(
+  } = RecoveryModuleUtils.signInitiateRecovery(
     recoveryModule.address,
     prevOwner,
     oldOwner,
@@ -61,8 +60,6 @@ async function prepare(accountProvider) {
     prevOwner,
     oldOwner,
     newOwner,
-    recoveryHash,
-    signature,
   };
 }
 
@@ -109,9 +106,8 @@ contract('DelayedRecoveryModule::abortRecoveryByController', async () => {
       const oldOwner = accountProvider.get();
       const newOwner = accountProvider.get();
 
-      assert.strictEqual(
-        (await recoveryModule.activeRecoveryInfo.call()).recoveryHash,
-        Utils.NULL_BYTES32,
+      assert.isNotOk(
+        (await recoveryModule.activeRecoveryInfo.call()).initiated,
       );
 
       await Utils.expectRevert(
@@ -122,7 +118,7 @@ contract('DelayedRecoveryModule::abortRecoveryByController', async () => {
           { from: recoveryControllerAddress },
         ),
         'Should revert as there is no active recovery process.',
-        'Hash of recovery to abort does not match with active recovery\'s hash.',
+        'There is no active recovery.',
       );
     });
 
@@ -147,7 +143,7 @@ contract('DelayedRecoveryModule::abortRecoveryByController', async () => {
           { from: recoveryControllerAddress },
         ),
         'Should revert as the abort request is not for the active recovery.',
-        'Hash of recovery to abort does not match with active recovery\'s hash.',
+        'The execution request\'s data does not match with the active one.',
       );
 
       await Utils.expectRevert(
@@ -158,7 +154,7 @@ contract('DelayedRecoveryModule::abortRecoveryByController', async () => {
           { from: recoveryControllerAddress },
         ),
         'Should revert as the abort request is not for the active recovery.',
-        'Hash of recovery to abort does not match with active recovery\'s hash.',
+        'The execution request\'s data does not match with the active one.',
       );
 
       await Utils.expectRevert(
@@ -169,7 +165,7 @@ contract('DelayedRecoveryModule::abortRecoveryByController', async () => {
           { from: recoveryControllerAddress },
         ),
         'Should revert as the abort request is not for the active recovery.',
-        'Hash of recovery to abort does not match with active recovery\'s hash.',
+        'The execution request\'s data does not match with the active one.',
       );
     });
   });
@@ -184,7 +180,6 @@ contract('DelayedRecoveryModule::abortRecoveryByController', async () => {
         prevOwner,
         oldOwner,
         newOwner,
-        recoveryHash,
       } = await prepare(accountProvider);
 
       const transactionResponse = await recoveryModule.abortRecoveryByController(
@@ -206,7 +201,9 @@ contract('DelayedRecoveryModule::abortRecoveryByController', async () => {
       Event.assertEqual(events[0], {
         name: 'RecoveryAborted',
         args: {
-          _recoveryHash: recoveryHash,
+          _prevOwner: prevOwner,
+          _oldOwner: oldOwner,
+          _newOwner: newOwner,
         },
       });
     });
@@ -222,7 +219,6 @@ contract('DelayedRecoveryModule::abortRecoveryByController', async () => {
         prevOwner,
         oldOwner,
         newOwner,
-        recoveryHash,
       } = await prepare(accountProvider);
 
       let activeRecoveryInfo = await recoveryModule.activeRecoveryInfo.call();
@@ -246,9 +242,8 @@ contract('DelayedRecoveryModule::abortRecoveryByController', async () => {
         activeRecoveryInfo.initiationBlockHeight.eqn(0),
       );
 
-      assert.strictEqual(
-        activeRecoveryInfo.recoveryHash,
-        recoveryHash,
+      assert.isOk(
+        activeRecoveryInfo.initiated,
       );
 
       await recoveryModule.abortRecoveryByController(
@@ -279,9 +274,8 @@ contract('DelayedRecoveryModule::abortRecoveryByController', async () => {
         activeRecoveryInfo.initiationBlockHeight.eqn(0),
       );
 
-      assert.strictEqual(
-        activeRecoveryInfo.recoveryHash,
-        Utils.NULL_BYTES32,
+      assert.isNotOk(
+        activeRecoveryInfo.initiated,
       );
     });
   });

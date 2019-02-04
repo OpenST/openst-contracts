@@ -14,10 +14,10 @@ pragma solidity ^0.5.0;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "../../../gnosis_safe_modules/ModuleManagerInterface.sol";
+import "../../../gnosis_safe_modules/GnosisSafeModuleManagerInterface.sol";
 import "../../../gnosis_safe_modules/DelayedRecoveryModule.sol";
 
-contract ModuleManagerSpy is ModuleManagerInterface
+contract GnosisSafeModuleManagerSpy is GnosisSafeModuleManagerInterface
 {
     /* Events */
 

@@ -14,31 +14,42 @@ pragma solidity ^0.5.0;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "./ModuleManagerInterface.sol";
-import "../proxies/MasterCopyNonUpgradable.sol";
+import "./GnosisSafeModule.sol";
+import "./GnosisSafeModuleManagerInterface.sol";
 
 /**
  * @title Allows to replace an owner without Safe confirmations
  *        if the recovery owner and the recovery controller approves
  *        replacement.
+ *
+ * @dev The contract is a module for gnosis safe multisig contract.
+ *      Gnosis safe multisig's modules assume a common interface which
+ *      in the current gnosis safe implementation is inside Module.sol
+ *      contract of Gnosis Safe. Instead of inheriting from this contract
+ *      (not to include gnosis contracts into build process)
+ *      GnosisSafeModule.sol and GnosisSafeModuleManagerInterface.sol contracts
+ *      are introduced that contains the required public interfaces.
  */
-contract DelayedRecoveryModule is MasterCopyNonUpgradable {
+contract DelayedRecoveryModule is GnosisSafeModule {
 
     /* Events */
 
     event RecoveryInitiated(
         address _prevOwner,
         address _oldOwner,
-        address _newOwner,
-        bytes32 _recoveryHash
+        address _newOwner
     );
 
     event RecoveryExecuted(
-        bytes32 _recoveryHash
+        address _prevOwner,
+        address _oldOwner,
+        address _newOwner
     );
 
     event RecoveryAborted(
-        bytes32 _recoveryHash
+        address _prevOwner,
+        address _oldOwner,
+        address _newOwner
     );
 
     event ResetRecoveryOwner(
@@ -57,8 +68,16 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
         "EIP712Domain(address delayedRecoveryModule)"
     );
 
-    bytes32 public constant RECOVERY_STRUCT_TYPEHASH = keccak256(
-        "RecoveryStruct(address prevOwner,address oldOwner,address newOwner)"
+    bytes32 public constant INITIATE_RECOVERY_STRUCT_TYPEHASH = keccak256(
+        "InitiateRecoveryStruct(address prevOwner,address oldOwner,address newOwner)"
+    );
+
+    bytes32 public constant EXECUTE_RECOVERY_STRUCT_TYPEHASH = keccak256(
+        "ExecuteRecoveryStruct(address prevOwner,address oldOwner,address newOwner)"
+    );
+
+    bytes32 public constant ABORT_RECOVERY_STRUCT_TYPEHASH = keccak256(
+        "AbortRecoveryStruct(address prevOwner,address oldOwner,address newOwner)"
     );
 
     bytes32 public constant RESET_RECOVERY_OWNER_STRUCT_TYPEHASH = keccak256(
@@ -73,15 +92,13 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
         address oldOwner;
         address newOwner;
         uint256 initiationBlockHeight;
-        bytes32 recoveryHash;
+        bool initiated;
     }
 
 
     /* Storage */
 
     bytes32 public domainSeparator;
-
-    ModuleManagerInterface public moduleManager;
 
     address public recoveryController;
 
@@ -94,15 +111,6 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
 
     /* Modifiers */
 
-    modifier authorized() {
-        require(
-            msg.sender == address(moduleManager),
-            "Only module manager is allowed to call."
-        );
-
-        _;
-    }
-
     modifier onlyRecoveryController()
     {
         require(
@@ -113,11 +121,37 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
         _;
     }
 
+    modifier activeRecovery()
+    {
+        require(
+            activeRecoveryInfo.initiated,
+            "There is no active recovery."
+        );
+
+        _;
+    }
+
     modifier noActiveRecovery()
     {
         require(
-            activeRecoveryInfo.recoveryHash == bytes32(0),
-            "There is an active recovery process."
+            !activeRecoveryInfo.initiated,
+            "There is an active recovery."
+        );
+
+        _;
+    }
+
+    modifier validRecovery(
+        address _prevOwner,
+        address _oldOwner,
+        address _newOwner
+    )
+    {
+        require(
+            activeRecoveryInfo.prevOwner == _prevOwner
+            && activeRecoveryInfo.oldOwner == _oldOwner
+            && activeRecoveryInfo.newOwner == _newOwner,
+            "The execution request's data does not match with the active one."
         );
 
         _;
@@ -129,13 +163,11 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
     /**
      * @notice Setups the contract initial storage.
      *
-     * @dev Function requires:
+     *      Function requires:
      *          - Function can be called only once. This is assured by
      *            checking domainSeparator not to be set previously (bytes32(0))
      *          - Recovery owner's address is not null.
      *          - Recovery controller's address is not null.
-     *          - Required number of blocks before a recovery can be executed
-     *            is greater than or equal to 4 * 84600.
      *
      * @param _recoveryOwner  An address that signs the "recovery
      *                        initiation/execution/abortion" and
@@ -168,12 +200,6 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
             "Recovery controller's address is null."
         );
 
-        // @todo [Pro]: Enable this once figured out how to test!
-        require(
-            _recoveryBlockDelay >= 50,
-            "Recovery block delay is less than 4 * 84600 blocks."
-        );
-
         domainSeparator = keccak256(
             abi.encode(
                 DOMAIN_SEPARATOR_TYPEHASH,
@@ -181,7 +207,7 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
             )
         );
 
-        moduleManager = ModuleManagerInterface(msg.sender);
+        manager = GnosisSafeModuleManagerInterface(msg.sender);
 
         recoveryOwner = _recoveryOwner;
 
@@ -197,8 +223,6 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
      *          - Only the recovery controller can call.
      *          - There is no active recovery procedural.
      *          - Recovery owner has signed message.
-     *      Function emits:
-     *          - RecoveryInitiated event on success.
      *
      * @param _prevOwner Owner that pointed to the owner to be replaced in the
      *                   linked list.
@@ -217,7 +241,7 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
         onlyRecoveryController
         noActiveRecovery
     {
-        bytes32 recoveryHash = hashRecovery(
+        bytes32 recoveryHash = hashInitiateRecovery(
             _prevOwner,
             _oldOwner,
             _newOwner
@@ -230,17 +254,26 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
             oldOwner: _oldOwner,
             newOwner: _newOwner,
             initiationBlockHeight: block.number,
-            recoveryHash: recoveryHash
+            initiated: true
         });
 
         emit RecoveryInitiated(
             _prevOwner,
             _oldOwner,
-            _newOwner,
-            recoveryHash
+            _newOwner
         );
     }
 
+    /**
+     * @notice Executes the initiated recovery.
+     *
+     * @dev Function requires:
+     *          - Only recovery controller can call.
+     *          - There is an initiated recovery with the same tuple of
+     *            addresses (prevOwner, oldOwner, newOwner).
+     *          - Recovery owner has signed execution message.
+     *          - The required (delay) block numbers has been progressed.
+     */
     function executeRecovery(
         address _prevOwner,
         address _oldOwner,
@@ -251,16 +284,13 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
     )
         external
         onlyRecoveryController
+        activeRecovery
+        validRecovery(_prevOwner, _oldOwner, _newOwner)
     {
-        bytes32 recoveryHash = hashRecovery(
+        bytes32 recoveryHash = hashExecuteRecovery(
             _prevOwner,
             _oldOwner,
             _newOwner
-        );
-
-        require(
-            recoveryHash == activeRecoveryInfo.recoveryHash,
-            "Hash of recovery to execute does not match with active recovery's hash."
         );
 
         verify(recoveryHash, _r, _s, _v);
@@ -279,20 +309,32 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
         );
 
         require(
-            moduleManager.execTransactionFromModule(
-                address(moduleManager),
+            manager.execTransactionFromModule(
+                address(manager),
                 0,
                 data,
-                ModuleManagerInterface.Operation.Call
+                GnosisSafeModuleManagerInterface.Operation.Call
             ),
             "Recovery execution failed."
         );
 
         delete activeRecoveryInfo;
 
-        emit RecoveryExecuted(recoveryHash);
+        emit RecoveryExecuted(
+            _prevOwner,
+            _oldOwner,
+            _newOwner
+        );
     }
 
+    /**
+     * @notice Aborts the initiated recovery.
+     *
+     * @dev Function requires:
+     *          - There is an initiated recovery with the same tuple of
+     *            addresses (prevOwner, oldOwner, newOwner).
+     *          - Recovery owner has signed execution message.
+     */
     function abortRecoveryByOwner(
         address _prevOwner,
         address _oldOwner,
@@ -302,26 +344,34 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
         uint8 _v
     )
         external
+        activeRecovery
+        validRecovery(_prevOwner, _oldOwner, _newOwner)
     {
-        bytes32 recoveryHash = hashRecovery(
+        bytes32 recoveryHash = hashAbortRecovery(
             _prevOwner,
             _oldOwner,
             _newOwner
-        );
-
-        require(
-            recoveryHash == activeRecoveryInfo.recoveryHash,
-            "Hash of recovery to abort does not match with active recovery's hash."
         );
 
         verify(recoveryHash, _r, _s, _v);
 
         delete activeRecoveryInfo;
 
-        emit RecoveryAborted(recoveryHash);
+        emit RecoveryAborted(
+            _prevOwner,
+            _oldOwner,
+            _newOwner
+        );
     }
 
-
+    /**
+     * @notice Aborts the initiated recovery.
+     *
+     * @dev Function requires:
+     *          - Only recovery controller can call.
+     *          - There is an initiated recovery with the same tuple of
+     *            addresses (prevOwner, oldOwner, newOwner).
+     */
     function abortRecoveryByController(
         address _prevOwner,
         address _oldOwner,
@@ -329,21 +379,16 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
     )
         external
         onlyRecoveryController
+        activeRecovery
+        validRecovery(_prevOwner, _oldOwner, _newOwner)
     {
-        bytes32 recoveryHash = hashRecovery(
+        delete activeRecoveryInfo;
+
+        emit RecoveryAborted(
             _prevOwner,
             _oldOwner,
             _newOwner
         );
-
-        require(
-            recoveryHash == activeRecoveryInfo.recoveryHash,
-            "Hash of recovery to abort does not match with active recovery's hash."
-        );
-
-        delete activeRecoveryInfo;
-
-        emit RecoveryAborted(recoveryHash);
     }
 
     function resetRecoveryOwner(
@@ -396,6 +441,7 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
     }
 
     function hashRecovery(
+        bytes32 _structTypeHash,
         address _prevOwner,
         address _oldOwner,
         address _newOwner
@@ -410,6 +456,7 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
                 "\x01",
                 domainSeparator,
                 hashRecoveryStruct(
+                    _structTypeHash,
                     _prevOwner,
                     _oldOwner,
                     _newOwner
@@ -418,7 +465,59 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
         );
     }
 
+    function hashInitiateRecovery(
+        address _prevOwner,
+        address _oldOwner,
+        address _newOwner
+    )
+        private
+        view
+        returns (bytes32 recoveryHash_ )
+    {
+        recoveryHash_ = hashRecovery(
+            INITIATE_RECOVERY_STRUCT_TYPEHASH,
+            _prevOwner,
+            _oldOwner,
+            _newOwner
+        );
+    }
+
+    function hashExecuteRecovery(
+        address _prevOwner,
+        address _oldOwner,
+        address _newOwner
+    )
+        private
+        view
+        returns (bytes32 recoveryHash_ )
+    {
+        recoveryHash_ = hashRecovery(
+            EXECUTE_RECOVERY_STRUCT_TYPEHASH,
+            _prevOwner,
+            _oldOwner,
+            _newOwner
+        );
+    }
+
+    function hashAbortRecovery(
+        address _prevOwner,
+        address _oldOwner,
+        address _newOwner
+    )
+        private
+        view
+        returns (bytes32 recoveryHash_ )
+    {
+        recoveryHash_ = hashRecovery(
+            ABORT_RECOVERY_STRUCT_TYPEHASH,
+            _prevOwner,
+            _oldOwner,
+            _newOwner
+        );
+    }
+
     function hashRecoveryStruct(
+        bytes32 _structTypeHash,
         address _prevOwner,
         address _oldOwner,
         address _newOwner
@@ -429,11 +528,62 @@ contract DelayedRecoveryModule is MasterCopyNonUpgradable {
     {
         recoveryStructHash_ = keccak256(
             abi.encode(
-                RECOVERY_STRUCT_TYPEHASH,
+                _structTypeHash,
                 _prevOwner,
                 _oldOwner,
                 _newOwner
             )
+        );
+    }
+
+    function hashInitiateRecoveryStruct(
+        address _prevOwner,
+        address _oldOwner,
+        address _newOwner
+    )
+        private
+        pure
+        returns (bytes32 recoveryStructHash_)
+    {
+        recoveryStructHash_ = hashRecoveryStruct(
+            INITIATE_RECOVERY_STRUCT_TYPEHASH,
+            _prevOwner,
+            _oldOwner,
+            _newOwner
+        );
+    }
+
+    function hashExecuteRecoveryStruct(
+        address _prevOwner,
+        address _oldOwner,
+        address _newOwner
+    )
+        private
+        pure
+        returns (bytes32 recoveryStructHash_)
+    {
+        recoveryStructHash_ = hashRecoveryStruct(
+            EXECUTE_RECOVERY_STRUCT_TYPEHASH,
+            _prevOwner,
+            _oldOwner,
+            _newOwner
+        );
+    }
+
+    function hashAbortRecoveryStruct(
+        address _prevOwner,
+        address _oldOwner,
+        address _newOwner
+    )
+        private
+        pure
+        returns (bytes32 recoveryStructHash_)
+    {
+        recoveryStructHash_ = hashRecoveryStruct(
+            ABORT_RECOVERY_STRUCT_TYPEHASH,
+            _prevOwner,
+            _oldOwner,
+            _newOwner
         );
     }
 

@@ -32,7 +32,7 @@ contract('DelayedRecoveryModule::setup', async () => {
         recoveryModule.setup(
           Utils.NULL_ADDRESS, // recovery owner's address
           accountProvider.get(), // recovery controller's address
-          DelayedRecoveryModuleUtils.MINIMUM_DELAY, // recovery block delays
+          DelayedRecoveryModuleUtils.BLOCK_RECOVERY_DELAY, // recovery block delays
         ),
         'Should revert as recovery owner\'s address is null.',
         'Recovery owner\'s address is null.',
@@ -46,24 +46,10 @@ contract('DelayedRecoveryModule::setup', async () => {
         recoveryModule.setup(
           accountProvider.get(), // recovery owner's address
           Utils.NULL_ADDRESS, // recovery controller's address
-          DelayedRecoveryModuleUtils.MINIMUM_DELAY, // recovery block delays
+          DelayedRecoveryModuleUtils.BLOCK_RECOVERY_DELAY, // recovery block delays
         ),
         'Should revert as recovery controlers\'s address is null.',
         'Recovery controller\'s address is null.',
-      );
-    });
-
-    it('Reverts if recovery block delay is less than minimal required delay.', async () => {
-      const recoveryModule = await DelayedRecoveryModule.new();
-
-      await Utils.expectRevert(
-        recoveryModule.setup(
-          accountProvider.get(), // recovery owner's address
-          accountProvider.get(), // recovery controller's address
-          DelayedRecoveryModuleUtils.MINIMUM_DELAY - 1, // recovery block delays
-        ),
-        'Should revert as recovery block delay is less than minimal required delay.',
-        'Recovery block delay is less than 4 * 84600 blocks.',
       );
     });
 
@@ -73,14 +59,14 @@ contract('DelayedRecoveryModule::setup', async () => {
       await recoveryModule.setup(
         accountProvider.get(), // recovery owner's address
         accountProvider.get(), // recovery controller's address
-        DelayedRecoveryModuleUtils.MINIMUM_DELAY, // recovery block delays
+        DelayedRecoveryModuleUtils.BLOCK_RECOVERY_DELAY, // recovery block delays
       );
 
       await Utils.expectRevert(
         recoveryModule.setup(
           accountProvider.get(), // recovery owner's address
           accountProvider.get(), // recovery controller's address
-          DelayedRecoveryModuleUtils.MINIMUM_DELAY, // recovery block delays
+          DelayedRecoveryModuleUtils.BLOCK_RECOVERY_DELAY, // recovery block delays
         ),
         'Should revert as setup is called second time.',
         'Domain separator was already set.',
@@ -96,7 +82,7 @@ contract('DelayedRecoveryModule::setup', async () => {
 
       const recoveryOwner = accountProvider.get();
       const recoveryController = accountProvider.get();
-      const recoveryBlockDelay = DelayedRecoveryModuleUtils.MINIMUM_DELAY;
+      const recoveryBlockDelay = DelayedRecoveryModuleUtils.BLOCK_RECOVERY_DELAY;
 
       const moduleManager = accountProvider.get();
 
@@ -133,7 +119,7 @@ contract('DelayedRecoveryModule::setup', async () => {
       );
 
       assert.strictEqual(
-        await recoveryModule.moduleManager.call(),
+        await recoveryModule.manager.call(),
         moduleManager,
       );
 
@@ -158,9 +144,8 @@ contract('DelayedRecoveryModule::setup', async () => {
         (activeRecoveryInfo.initiationBlockHeight).eqn(0),
       );
 
-      assert.strictEqual(
-        activeRecoveryInfo.recoveryHash,
-        Utils.NULL_BYTES32,
+      assert.isNotOk(
+        activeRecoveryInfo.initiated,
       );
     });
 
@@ -170,7 +155,7 @@ contract('DelayedRecoveryModule::setup', async () => {
 
       const recoveryOwner = accountProvider.get();
       const recoveryController = accountProvider.get();
-      const recoveryBlockDelay = DelayedRecoveryModuleUtils.MINIMUM_DELAY;
+      const recoveryBlockDelay = DelayedRecoveryModuleUtils.BLOCK_RECOVERY_DELAY;
 
       await recoveryModule.setup(
         recoveryOwner,

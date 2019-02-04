@@ -34,9 +34,8 @@ async function prepare(accountProvider) {
   const newOwner = accountProvider.get();
 
   const {
-    recoveryHash,
     signature,
-  } = RecoveryModuleUtils.signRecovery(
+  } = RecoveryModuleUtils.signInitiateRecovery(
     recoveryModule.address,
     prevOwner,
     oldOwner,
@@ -61,8 +60,6 @@ async function prepare(accountProvider) {
     prevOwner,
     oldOwner,
     newOwner,
-    recoveryHash,
-    signature,
   };
 }
 
@@ -84,13 +81,12 @@ contract('DelayedRecoveryModule::abortRecoveryByOwner', async () => {
 
       const {
         signature,
-      } = RecoveryModuleUtils.signRecovery(
+      } = RecoveryModuleUtils.signAbortRecovery(
         recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
       );
 
-      assert.strictEqual(
-        (await recoveryModule.activeRecoveryInfo.call()).recoveryHash,
-        Utils.NULL_BYTES32,
+      assert.isNotOk(
+        (await recoveryModule.activeRecoveryInfo.call()).initiated,
       );
 
       await Utils.expectRevert(
@@ -104,7 +100,7 @@ contract('DelayedRecoveryModule::abortRecoveryByOwner', async () => {
           { from: accountProvider.get() },
         ),
         'Should revert as there is no active recovery process.',
-        'Hash of recovery to abort does not match with active recovery\'s hash.',
+        'There is no active recovery.',
       );
     });
 
@@ -112,40 +108,92 @@ contract('DelayedRecoveryModule::abortRecoveryByOwner', async () => {
       const {
         recoveryOwnerPrivateKey,
         recoveryModule,
+        prevOwner,
+        oldOwner,
+        newOwner,
       } = await prepare(accountProvider);
 
-      const prevOwner = accountProvider.get();
-      const oldOwner = accountProvider.get();
-      const newOwner = accountProvider.get();
+      const anotherPrevOwner = accountProvider.get();
+      const anotherOldOwner = accountProvider.get();
+      const anotherNewOwner = accountProvider.get();
 
-      const {
-        recoveryHash,
-        signature,
-      } = RecoveryModuleUtils.signRecovery(
-        recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
+      assert.strictEqual(
+        (await recoveryModule.activeRecoveryInfo.call()).prevOwner,
+        prevOwner,
       );
 
-      assert.notStrictEqual(
-        recoveryHash,
-        (await recoveryModule.activeRecoveryInfo.call()).recoveryHash,
+      assert.strictEqual(
+        (await recoveryModule.activeRecoveryInfo.call()).oldOwner,
+        oldOwner,
+      );
+
+      assert.strictEqual(
+        (await recoveryModule.activeRecoveryInfo.call()).newOwner,
+        newOwner,
+      );
+
+      const {
+        signature: signature1,
+      } = RecoveryModuleUtils.signAbortRecovery(
+        recoveryModule.address, anotherPrevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
+      );
+
+      await Utils.expectRevert(
+        recoveryModule.abortRecoveryByOwner(
+          anotherPrevOwner,
+          oldOwner,
+          newOwner,
+          EthUtils.bufferToHex(signature1.r),
+          EthUtils.bufferToHex(signature1.s),
+          signature1.v,
+          { from: accountProvider.get() },
+        ),
+        'Should revert as the abort request is not for the active recovery.',
+        'The execution request\'s data does not match with the active one.',
+      );
+
+      const {
+        signature: signature2,
+      } = RecoveryModuleUtils.signAbortRecovery(
+        recoveryModule.address, prevOwner, anotherOldOwner, newOwner, recoveryOwnerPrivateKey,
+      );
+
+      await Utils.expectRevert(
+        recoveryModule.abortRecoveryByOwner(
+          prevOwner,
+          anotherOldOwner,
+          newOwner,
+          EthUtils.bufferToHex(signature2.r),
+          EthUtils.bufferToHex(signature2.s),
+          signature2.v,
+          { from: accountProvider.get() },
+        ),
+        'Should revert as the abort request is not for the active recovery.',
+        'The execution request\'s data does not match with the active one.',
+      );
+
+      const {
+        signature: signature3,
+      } = RecoveryModuleUtils.signAbortRecovery(
+        recoveryModule.address, prevOwner, oldOwner, anotherNewOwner, recoveryOwnerPrivateKey,
       );
 
       await Utils.expectRevert(
         recoveryModule.abortRecoveryByOwner(
           prevOwner,
           oldOwner,
-          newOwner,
-          EthUtils.bufferToHex(signature.r),
-          EthUtils.bufferToHex(signature.s),
-          signature.v,
+          anotherNewOwner,
+          EthUtils.bufferToHex(signature3.r),
+          EthUtils.bufferToHex(signature3.s),
+          signature3.v,
           { from: accountProvider.get() },
         ),
         'Should revert as the abort request is not for the active recovery.',
-        'Hash of recovery to abort does not match with active recovery\'s hash.',
+        'The execution request\'s data does not match with the active one.',
       );
     });
 
-    it('Reverts if an abort request is signed by invalid key.', async () => {
+    it('Reverts if an abort request is signed by an invalid key.', async () => {
       const {
         recoveryOwnerPrivateKey,
         recoveryModule,
@@ -156,21 +204,15 @@ contract('DelayedRecoveryModule::abortRecoveryByOwner', async () => {
 
       const privateKey = '0x038764453ef1dbdf9cfb3923f95d22a8974a1aa2f7351737b46d9ea25aaba50a';
 
-      assert.notStrictEqual(
+      assert.notEqual(
         recoveryOwnerPrivateKey,
         privateKey,
       );
 
       const {
-        recoveryHash,
         signature,
-      } = RecoveryModuleUtils.signRecovery(
+      } = RecoveryModuleUtils.signAbortRecovery(
         recoveryModule.address, prevOwner, oldOwner, newOwner, privateKey,
-      );
-
-      assert.strictEqual(
-        recoveryHash,
-        (await recoveryModule.activeRecoveryInfo.call()).recoveryHash,
       );
 
       await Utils.expectRevert(
@@ -202,9 +244,8 @@ contract('DelayedRecoveryModule::abortRecoveryByOwner', async () => {
       } = await prepare(accountProvider);
 
       const {
-        recoveryHash,
         signature,
-      } = RecoveryModuleUtils.signRecovery(
+      } = RecoveryModuleUtils.signAbortRecovery(
         recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
       );
 
@@ -230,7 +271,9 @@ contract('DelayedRecoveryModule::abortRecoveryByOwner', async () => {
       Event.assertEqual(events[0], {
         name: 'RecoveryAborted',
         args: {
-          _recoveryHash: recoveryHash,
+          _prevOwner: prevOwner,
+          _oldOwner: oldOwner,
+          _newOwner: newOwner,
         },
       });
     });
@@ -249,9 +292,8 @@ contract('DelayedRecoveryModule::abortRecoveryByOwner', async () => {
       } = await prepare(accountProvider);
 
       const {
-        recoveryHash,
         signature,
-      } = RecoveryModuleUtils.signRecovery(
+      } = RecoveryModuleUtils.signAbortRecovery(
         recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
       );
 
@@ -276,9 +318,8 @@ contract('DelayedRecoveryModule::abortRecoveryByOwner', async () => {
         activeRecoveryInfo.initiationBlockHeight.eqn(0),
       );
 
-      assert.strictEqual(
-        activeRecoveryInfo.recoveryHash,
-        recoveryHash,
+      assert.isOk(
+        activeRecoveryInfo.initiated,
       );
 
       await recoveryModule.abortRecoveryByOwner(
@@ -312,9 +353,8 @@ contract('DelayedRecoveryModule::abortRecoveryByOwner', async () => {
         activeRecoveryInfo.initiationBlockHeight.eqn(0),
       );
 
-      assert.strictEqual(
-        activeRecoveryInfo.recoveryHash,
-        Utils.NULL_BYTES32,
+      assert.isNotOk(
+        activeRecoveryInfo.initiated,
       );
     });
   });

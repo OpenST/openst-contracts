@@ -39,7 +39,7 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
 
       const {
         signature,
-      } = RecoveryModuleUtils.signRecovery(
+      } = RecoveryModuleUtils.signInitiateRecovery(
         recoveryModule.address,
         prevOwner,
         oldOwner,
@@ -79,7 +79,7 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
 
       const {
         signature: signature1,
-      } = RecoveryModuleUtils.signRecovery(
+      } = RecoveryModuleUtils.signInitiateRecovery(
         recoveryModule.address,
         prevOwner1,
         oldOwner1,
@@ -110,7 +110,7 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
           },
         ),
         'Should revert as there is an active recovery process.',
-        'There is an active recovery process.',
+        'There is an active recovery.',
       );
 
       const prevOwner2 = accountProvider.get();
@@ -119,7 +119,7 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
 
       const {
         signature: signature2,
-      } = RecoveryModuleUtils.signRecovery(
+      } = RecoveryModuleUtils.signInitiateRecovery(
         recoveryModule.address,
         prevOwner2,
         oldOwner2,
@@ -140,7 +140,7 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
           },
         ),
         'Should revert as there is an active recovery process.',
-        'There is an active recovery process.',
+        'There is an active recovery.',
       );
     });
 
@@ -166,14 +166,13 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
 
       const {
         signature,
-      } = RecoveryModuleUtils.signRecovery(
+      } = RecoveryModuleUtils.signInitiateRecovery(
         recoveryModule.address,
         prevOwner,
         oldOwner,
         newOwner,
         privateKey,
       );
-
 
       await Utils.expectRevert(
         recoveryModule.initiateRecovery(
@@ -208,9 +207,8 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
       const newOwner = accountProvider.get();
 
       const {
-        recoveryHash,
         signature,
-      } = RecoveryModuleUtils.signRecovery(
+      } = RecoveryModuleUtils.signInitiateRecovery(
         recoveryModule.address,
         prevOwner,
         oldOwner,
@@ -243,7 +241,6 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
           _prevOwner: prevOwner,
           _oldOwner: oldOwner,
           _newOwner: newOwner,
-          _recoveryHash: recoveryHash,
         },
       });
     });
@@ -266,9 +263,8 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
       const newOwner = accountProvider.get();
 
       const {
-        recoveryHash,
         signature,
-      } = RecoveryModuleUtils.signRecovery(
+      } = RecoveryModuleUtils.signInitiateRecovery(
         recoveryModule.address,
         prevOwner,
         oldOwner,
@@ -308,9 +304,8 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
         (activeRecoveryInfo.initiationBlockHeight).eqn(blockNumber),
       );
 
-      assert.strictEqual(
-        activeRecoveryInfo.recoveryHash,
-        recoveryHash,
+      assert.isOk(
+        activeRecoveryInfo.initiated,
       );
     });
   });

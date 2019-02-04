@@ -19,18 +19,26 @@ const web3 = require('../test_lib/web3.js');
 const Utils = require('../test_lib/utils.js');
 
 const DelayedRecoveryModule = artifacts.require('DelayedRecoveryModule');
-const ModuleManagerSpy = artifacts.require('ModuleManagerSpy');
+const GnosisSafeModuleManagerSpy = artifacts.require('GnosisSafeModuleManagerSpy');
 
 // @todo [Pro]: Enable this once figured out how to test!
-// const MINIMUM_DELAY = 4 * 84600;
-const MINIMUM_DELAY = 50;
+// const BLOCK_RECOVERY_DELAY = 4 * 84600;
+const BLOCK_RECOVERY_DELAY = 50;
 
 const RECOERY_MODULE_DOMAIN_SEPARATOR_TYPEHASH = web3.utils.keccak256(
   'EIP712Domain(address delayedRecoveryModule)',
 );
 
-const RECOVERY_STRUCT_TYPEHASH = web3.utils.keccak256(
-  'RecoveryStruct(address prevOwner,address oldOwner,address newOwner)',
+const INITIATE_RECOVERY_STRUCT_TYPEHASH = web3.utils.keccak256(
+  'InitiateRecoveryStruct(address prevOwner,address oldOwner,address newOwner)',
+);
+
+const EXECUTE_RECOVERY_STRUCT_TYPEHASH = web3.utils.keccak256(
+  'ExecuteRecoveryStruct(address prevOwner,address oldOwner,address newOwner)',
+);
+
+const ABORT_RECOVERY_STRUCT_TYPEHASH = web3.utils.keccak256(
+  'AbortRecoveryStruct(address prevOwner,address oldOwner,address newOwner)',
 );
 
 const RESET_RECOVERY_OWNER_STRUCT_TYPEHASH = web3.utils.keccak256(
@@ -43,13 +51,13 @@ const RECOVERY_OWNER_PRIVATE_KEY = '0xc5dff061ed33bf9fe42f8071d7bf6cd168bec5593e
 async function createRecoveryModule(accountProvider) {
   const recoveryOwnerAddress = RECOVERY_OWNER_ADDRESS;
   const recoveryControllerAddress = accountProvider.get();
-  const recoveryBlockDelay = MINIMUM_DELAY;
+  const recoveryBlockDelay = BLOCK_RECOVERY_DELAY;
 
-  const moduleManager = await ModuleManagerSpy.new();
+  const moduleManager = await GnosisSafeModuleManagerSpy.new();
   const transactionResponse = await moduleManager.createDelayedRecoveryModule(
     recoveryOwnerAddress,
     recoveryControllerAddress,
-    MINIMUM_DELAY,
+    BLOCK_RECOVERY_DELAY,
   );
 
   const recoveryModuleAddress = Utils.getParamFromTxEvent(
@@ -87,7 +95,7 @@ function hashRecoveryModuleDomainSeparator(recoveryModuleAddress) {
 }
 
 function hashRecoveryModuleRecoveryStruct(
-  prevOwner, oldOwner, newOwner,
+  structTypeHash, prevOwner, oldOwner, newOwner,
 ) {
   return web3.utils.keccak256(
     web3.eth.abi.encodeParameters(
@@ -98,7 +106,7 @@ function hashRecoveryModuleRecoveryStruct(
         'address',
       ],
       [
-        RECOVERY_STRUCT_TYPEHASH,
+        structTypeHash,
         prevOwner,
         oldOwner,
         newOwner,
@@ -107,10 +115,44 @@ function hashRecoveryModuleRecoveryStruct(
   );
 }
 
+function hashRecoveryModuleInitiateRecoveryStruct(
+  prevOwner, oldOwner, newOwner,
+) {
+  return hashRecoveryModuleRecoveryStruct(
+    INITIATE_RECOVERY_STRUCT_TYPEHASH,
+    prevOwner,
+    oldOwner,
+    newOwner,
+  );
+}
+
+function hashRecoveryModuleExecuteRecoveryStruct(
+  prevOwner, oldOwner, newOwner,
+) {
+  return hashRecoveryModuleRecoveryStruct(
+    EXECUTE_RECOVERY_STRUCT_TYPEHASH,
+    prevOwner,
+    oldOwner,
+    newOwner,
+  );
+}
+
+function hashRecoveryModuleAbortRecoveryStruct(
+  prevOwner, oldOwner, newOwner,
+) {
+  return hashRecoveryModuleRecoveryStruct(
+    ABORT_RECOVERY_STRUCT_TYPEHASH,
+    prevOwner,
+    oldOwner,
+    newOwner,
+  );
+}
+
 function hashRecoveryModuleRecovery(
-  recoveryModuleAddress, prevOwner, oldOwner, newOwner,
+  recoveryModuleAddress, structTypeHash, prevOwner, oldOwner, newOwner,
 ) {
   const recoveryStructHash = hashRecoveryModuleRecoveryStruct(
+    structTypeHash,
     prevOwner,
     oldOwner,
     newOwner,
@@ -125,6 +167,33 @@ function hashRecoveryModuleRecovery(
     { t: 'bytes1', v: '0x01' },
     { t: 'bytes32', v: domainSeparatorHash },
     { t: 'bytes32', v: recoveryStructHash },
+  );
+}
+
+function hashRecoveryModuleInitiateRecovery(
+  recoveryModuleAddress, prevOwner, oldOwner, newOwner,
+) {
+  return hashRecoveryModuleRecovery(
+    recoveryModuleAddress,
+    INITIATE_RECOVERY_STRUCT_TYPEHASH, prevOwner, oldOwner, newOwner,
+  );
+}
+
+function hashRecoveryModuleExecuteRecovery(
+  recoveryModuleAddress, prevOwner, oldOwner, newOwner,
+) {
+  return hashRecoveryModuleRecovery(
+    recoveryModuleAddress,
+    EXECUTE_RECOVERY_STRUCT_TYPEHASH, prevOwner, oldOwner, newOwner,
+  );
+}
+
+function hashRecoveryModuleAbortRecovery(
+  recoveryModuleAddress, prevOwner, oldOwner, newOwner,
+) {
+  return hashRecoveryModuleRecovery(
+    recoveryModuleAddress,
+    ABORT_RECOVERY_STRUCT_TYPEHASH, prevOwner, oldOwner, newOwner,
   );
 }
 
@@ -167,10 +236,10 @@ function hashRecoveryModuleResetOwner(
 }
 
 function signRecovery(
-  recoveryModuleAddress, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
+  recoveryModuleAddress, structTypeHash, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
 ) {
   const recoveryHash = hashRecoveryModuleRecovery(
-    recoveryModuleAddress, prevOwner, oldOwner, newOwner,
+    recoveryModuleAddress, structTypeHash, prevOwner, oldOwner, newOwner,
   );
 
   const signature = EthUtils.ecsign(
@@ -182,6 +251,33 @@ function signRecovery(
     recoveryHash,
     signature,
   };
+}
+
+function signInitiateRecovery(
+  recoveryModuleAddress, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
+) {
+  return signRecovery(
+    recoveryModuleAddress, INITIATE_RECOVERY_STRUCT_TYPEHASH,
+    prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
+  );
+}
+
+function signExecuteRecovery(
+  recoveryModuleAddress, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
+) {
+  return signRecovery(
+    recoveryModuleAddress, EXECUTE_RECOVERY_STRUCT_TYPEHASH,
+    prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
+  );
+}
+
+function signAbortRecovery(
+  recoveryModuleAddress, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
+) {
+  return signRecovery(
+    recoveryModuleAddress, ABORT_RECOVERY_STRUCT_TYPEHASH,
+    prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
+  );
 }
 
 function signResetRecoveryOwner(
@@ -204,21 +300,33 @@ function signResetRecoveryOwner(
 
 module.exports = {
 
-  MINIMUM_DELAY,
+  BLOCK_RECOVERY_DELAY,
 
   createRecoveryModule,
 
   hashRecoveryModuleDomainSeparator,
 
-  hashRecoveryModuleRecoveryStruct,
+  hashRecoveryModuleInitiateRecoveryStruct,
 
-  hashRecoveryModuleRecovery,
+  hashRecoveryModuleExecuteRecoveryStruct,
+
+  hashRecoveryModuleAbortRecoveryStruct,
+
+  hashRecoveryModuleInitiateRecovery,
+
+  hashRecoveryModuleExecuteRecovery,
+
+  hashRecoveryModuleAbortRecovery,
 
   hashRecoveryModuleResetOwnerStruct,
 
   hashRecoveryModuleResetOwner,
 
-  signRecovery,
+  signInitiateRecovery,
+
+  signExecuteRecovery,
+
+  signAbortRecovery,
 
   signResetRecoveryOwner,
 };

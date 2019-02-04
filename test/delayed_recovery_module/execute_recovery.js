@@ -38,9 +38,8 @@ async function prepare(accountProvider) {
   const newOwner = accountProvider.get();
 
   const {
-    recoveryHash,
     signature,
-  } = RecoveryModuleUtils.signRecovery(
+  } = RecoveryModuleUtils.signInitiateRecovery(
     recoveryModule.address,
     prevOwner,
     oldOwner,
@@ -67,28 +66,8 @@ async function prepare(accountProvider) {
     prevOwner,
     oldOwner,
     newOwner,
-    recoveryHash,
-    signature,
   };
 }
-
-
-function generateMockRuleFailFunctionData(value) {
-  return web3.eth.abi.encodeFunctionCall(
-    {
-      name: 'fail',
-      type: 'function',
-      inputs: [
-        {
-          type: 'address',
-          name: 'value',
-        },
-      ],
-    },
-    [value],
-  );
-}
-
 
 function generateSwapOwnerData(
   prevOwner, oldOwner, newOwner,
@@ -120,6 +99,49 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
   contract('Negative Tests', async (accounts) => {
     const accountProvider = new AccountProvider(accounts);
 
+    it('Reverts if a caller is not a controller.', async () => {
+      const {
+        recoveryOwnerPrivateKey,
+        recoveryBlockDelay,
+        recoveryModule,
+      } = await RecoveryModuleUtils.createRecoveryModule(
+        accountProvider,
+      );
+
+      for (let i = 0; i < recoveryBlockDelay; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        await Utils.advanceBlock();
+      }
+
+      const prevOwner = accountProvider.get();
+      const oldOwner = accountProvider.get();
+      const newOwner = accountProvider.get();
+
+      const {
+        signature,
+      } = RecoveryModuleUtils.signExecuteRecovery(
+        recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
+      );
+
+      assert.isNotOk(
+        (await recoveryModule.activeRecoveryInfo.call()).initiated,
+      );
+
+      await Utils.expectRevert(
+        recoveryModule.executeRecovery(
+          prevOwner,
+          oldOwner,
+          newOwner,
+          EthUtils.bufferToHex(signature.r),
+          EthUtils.bufferToHex(signature.s),
+          signature.v,
+          { from: accountProvider.get() },
+        ),
+        'Should revert as a caller is not a controller.',
+        'Only recovery controller is allowed to call.',
+      );
+    });
+
     it('Reverts if there is no active recovery process.', async () => {
       const {
         recoveryControllerAddress,
@@ -141,13 +163,12 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
 
       const {
         signature,
-      } = RecoveryModuleUtils.signRecovery(
+      } = RecoveryModuleUtils.signExecuteRecovery(
         recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
       );
 
-      assert.strictEqual(
-        (await recoveryModule.activeRecoveryInfo.call()).recoveryHash,
-        Utils.NULL_BYTES32,
+      assert.isNotOk(
+        (await recoveryModule.activeRecoveryInfo.call()).initiated,
       );
 
       await Utils.expectRevert(
@@ -161,7 +182,7 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
           { from: recoveryControllerAddress },
         ),
         'Should revert as there is no active recovery process.',
-        'Hash of recovery to execute does not match with active recovery\'s hash.',
+        'There is no active recovery.',
       );
     });
 
@@ -171,6 +192,9 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         recoveryOwnerPrivateKey,
         recoveryBlockDelay,
         recoveryModule,
+        prevOwner,
+        oldOwner,
+        newOwner,
       } = await prepare(accountProvider);
 
       for (let i = 0; i < recoveryBlockDelay; i += 1) {
@@ -183,33 +207,75 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
       const anotherNewOwner = accountProvider.get();
 
       const {
-        recoveryHash,
-        signature,
-      } = RecoveryModuleUtils.signRecovery(
+        signature: signature1,
+      } = RecoveryModuleUtils.signExecuteRecovery(
         recoveryModule.address,
         anotherPrevOwner,
-        anotherOldOwner,
-        anotherNewOwner,
+        oldOwner,
+        newOwner,
         recoveryOwnerPrivateKey,
-      );
-
-      assert.notStrictEqual(
-        recoveryHash,
-        (await recoveryModule.activeRecoveryInfo.call()).recoveryHash,
       );
 
       await Utils.expectRevert(
         recoveryModule.executeRecovery(
           anotherPrevOwner,
-          anotherOldOwner,
-          anotherNewOwner,
-          EthUtils.bufferToHex(signature.r),
-          EthUtils.bufferToHex(signature.s),
-          signature.v,
+          oldOwner,
+          newOwner,
+          EthUtils.bufferToHex(signature1.r),
+          EthUtils.bufferToHex(signature1.s),
+          signature1.v,
           { from: recoveryControllerAddress },
         ),
         'Should revert as the execute request is not for the active recovery.',
-        'Hash of recovery to execute does not match with active recovery\'s hash.',
+        'The execution request\'s data does not match with the active one.',
+      );
+
+      const {
+        signature: signature2,
+      } = RecoveryModuleUtils.signExecuteRecovery(
+        recoveryModule.address,
+        prevOwner,
+        anotherOldOwner,
+        newOwner,
+        recoveryOwnerPrivateKey,
+      );
+
+      await Utils.expectRevert(
+        recoveryModule.executeRecovery(
+          prevOwner,
+          anotherOldOwner,
+          newOwner,
+          EthUtils.bufferToHex(signature2.r),
+          EthUtils.bufferToHex(signature2.s),
+          signature2.v,
+          { from: recoveryControllerAddress },
+        ),
+        'Should revert as the execute request is not for the active recovery.',
+        'The execution request\'s data does not match with the active one.',
+      );
+
+      const {
+        signature: signature3,
+      } = RecoveryModuleUtils.signExecuteRecovery(
+        recoveryModule.address,
+        prevOwner,
+        oldOwner,
+        anotherNewOwner,
+        recoveryOwnerPrivateKey,
+      );
+
+      await Utils.expectRevert(
+        recoveryModule.executeRecovery(
+          prevOwner,
+          oldOwner,
+          anotherNewOwner,
+          EthUtils.bufferToHex(signature3.r),
+          EthUtils.bufferToHex(signature3.s),
+          signature3.v,
+          { from: recoveryControllerAddress },
+        ),
+        'Should revert as the execute request is not for the active recovery.',
+        'The execution request\'s data does not match with the active one.',
       );
     });
 
@@ -231,21 +297,15 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
 
       const privateKey = '0x038764453ef1dbdf9cfb3923f95d22a8974a1aa2f7351737b46d9ea25aaba50a';
 
-      assert.notStrictEqual(
+      assert.notEqual(
         recoveryOwnerPrivateKey,
         privateKey,
       );
 
       const {
-        recoveryHash,
         signature,
-      } = RecoveryModuleUtils.signRecovery(
+      } = RecoveryModuleUtils.signExecuteRecovery(
         recoveryModule.address, prevOwner, oldOwner, newOwner, privateKey,
-      );
-
-      assert.strictEqual(
-        recoveryHash,
-        (await recoveryModule.activeRecoveryInfo.call()).recoveryHash,
       );
 
       await Utils.expectRevert(
@@ -265,9 +325,9 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
 
     it('Reverts if required number of blocks to recover was not progressed.', async () => {
       const {
+        recoveryOwnerPrivateKey,
         recoveryControllerAddress,
         recoveryBlockDelay,
-        signature,
         recoveryModule,
         prevOwner,
         oldOwner,
@@ -292,6 +352,12 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         await Utils.advanceBlock();
       }
 
+      const {
+        signature,
+      } = RecoveryModuleUtils.signExecuteRecovery(
+        recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
+      );
+
       await Utils.expectRevert(
         recoveryModule.executeRecovery(
           prevOwner,
@@ -304,6 +370,46 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         ),
         'Should revert as required number of blocks to recover was not progressed.',
         'Required number of blocks to recover was not progressed.',
+      );
+    });
+
+    it('Reverts if ModuleManager fails to execute.', async () => {
+      const {
+        moduleManager,
+        recoveryOwnerPrivateKey,
+        recoveryControllerAddress,
+        recoveryBlockDelay,
+        recoveryModule,
+        prevOwner,
+        oldOwner,
+        newOwner,
+      } = await prepare(accountProvider);
+
+      for (let i = 0; i < recoveryBlockDelay; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        await Utils.advanceBlock();
+      }
+
+      const {
+        signature,
+      } = RecoveryModuleUtils.signExecuteRecovery(
+        recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
+      );
+
+      moduleManager.makeFail();
+
+      await Utils.expectRevert(
+        recoveryModule.executeRecovery(
+          prevOwner,
+          oldOwner,
+          newOwner,
+          EthUtils.bufferToHex(signature.r),
+          EthUtils.bufferToHex(signature.s),
+          signature.v,
+          { from: recoveryControllerAddress },
+        ),
+        'Should revert as the module manager fails to execute.',
+        'Recovery execution failed.',
       );
     });
   });
@@ -328,9 +434,8 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
       }
 
       const {
-        recoveryHash,
         signature,
-      } = RecoveryModuleUtils.signRecovery(
+      } = RecoveryModuleUtils.signExecuteRecovery(
         recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
       );
 
@@ -356,7 +461,9 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
       Event.assertEqual(events[0], {
         name: 'RecoveryExecuted',
         args: {
-          _recoveryHash: recoveryHash,
+          _prevOwner: prevOwner,
+          _oldOwner: oldOwner,
+          _newOwner: newOwner,
         },
       });
     });
@@ -383,9 +490,8 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
       }
 
       const {
-        recoveryHash,
         signature,
-      } = RecoveryModuleUtils.signRecovery(
+      } = RecoveryModuleUtils.signExecuteRecovery(
         recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
       );
 
@@ -410,9 +516,8 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         activeRecoveryInfo.initiationBlockHeight.eqn(0),
       );
 
-      assert.strictEqual(
-        activeRecoveryInfo.recoveryHash,
-        recoveryHash,
+      assert.isOk(
+        activeRecoveryInfo.initiated,
       );
 
       await recoveryModule.executeRecovery(
@@ -464,9 +569,8 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         activeRecoveryInfo.initiationBlockHeight.eqn(0),
       );
 
-      assert.strictEqual(
-        activeRecoveryInfo.recoveryHash,
-        Utils.NULL_BYTES32,
+      assert.isNotOk(
+        activeRecoveryInfo.initiated,
       );
     });
   });
