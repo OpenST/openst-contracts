@@ -16,8 +16,6 @@ pragma solidity ^0.5.0;
 
 import "./SafeMath.sol";
 import "./TokenRules.sol";
-import "./TokenHolder.sol";
-import "./EIP20TokenInterface.sol";
 
 contract CreditRule {
 
@@ -119,28 +117,25 @@ contract CreditRule {
     )
         external
     {
-        require(
-            credits[_from].inProgress,
-            "Crediting process is not in progress."
-        );
+        if (credits[_from].inProgress) {
+            uint256 sumAmount = 0;
 
-        uint256 sumAmount = 0;
+            for(uint256 i = 0; i < _transfersAmount.length; ++i) {
+                sumAmount = sumAmount.add(_transfersAmount[i]);
+            }
 
-        for(uint256 i = 0; i < _transfersAmount.length; ++i) {
-            sumAmount = sumAmount.add(_transfersAmount[i]);
+            uint256 creditAmount = credits[_from].amount;
+
+            uint256 amountToTransferFromBudgetHolder = (
+                sumAmount > creditAmount ? creditAmount : sumAmount
+            );
+
+            executeTransfer(
+                budgetHolder,
+                _from,
+                amountToTransferFromBudgetHolder
+            );
         }
-
-        uint256 creditAmount = credits[_from].amount;
-
-        uint256 amountToTransferFromBudgetHolder = (
-            sumAmount > creditAmount ? creditAmount : sumAmount
-        );
-
-        executeTransfer(
-            budgetHolder,
-            _from,
-            amountToTransferFromBudgetHolder
-        );
 
         tokenRules.executeTransfers(
             _from,
