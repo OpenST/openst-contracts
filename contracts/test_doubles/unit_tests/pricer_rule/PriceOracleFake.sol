@@ -14,7 +14,7 @@ pragma solidity ^0.5.0;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "../../../tokens/PriceOracleInterface.sol";
+import "../../../rules/PriceOracleInterface.sol";
 
 contract PriceOracleFake is PriceOracleInterface {
 

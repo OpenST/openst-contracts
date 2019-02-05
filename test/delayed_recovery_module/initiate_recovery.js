@@ -185,7 +185,7 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
           { from: recoveryControllerAddress },
         ),
         'Should revert as recovery message is not signed by the recovery owner.',
-        'The recovery owner does not sign the message.',
+        'Invalid signature for recovery owner.',
       );
     });
   });
@@ -253,6 +253,7 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
       const {
         recoveryOwnerPrivateKey,
         recoveryControllerAddress,
+        recoveryBlockDelay,
         recoveryModule,
       } = await RecoveryModuleUtils.createRecoveryModule(
         accountProvider,
@@ -301,11 +302,7 @@ contract('DelayedRecoveryModule::initiateRecovery', async () => {
       );
 
       assert.isOk(
-        (activeRecoveryInfo.initiationBlockHeight).eqn(blockNumber),
-      );
-
-      assert.isOk(
-        activeRecoveryInfo.initiated,
+        (activeRecoveryInfo.executionBlockHeight).eqn(blockNumber + recoveryBlockDelay),
       );
     });
   });

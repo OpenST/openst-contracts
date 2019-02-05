@@ -16,13 +16,11 @@
 
 const EthUtils = require('ethereumjs-util');
 const Utils = require('../test_lib/utils.js');
-const web3 = require('../test_lib/web3.js');
 const { Event } = require('../test_lib/event_decoder.js');
 const RecoveryModuleUtils = require('./utils.js');
 const { AccountProvider } = require('../test_lib/utils.js');
 
 const NEW_RECOVERY_OWNER_ADDRESS = '0x798c2Eaa13BaD12215ba71A3b71471042945B6fE';
-const NEW_RECOVERY_OWNER_PRIVATE_KEY = '0xe8c25ebc30640eaf59b72753fef330e5bc5f7b0afa542584ede77f88a7529962';
 
 contract('DelayedRecoveryModule::resetRecoveryOwner', async () => {
   contract('Negative Tests', async (accounts) => {
@@ -128,7 +126,7 @@ contract('DelayedRecoveryModule::resetRecoveryOwner', async () => {
           { from: recoveryControllerAddress },
         ),
         'Should revert as the message is not signed by the recovery owner.',
-        'The recovery owner does not sign the message.',
+        'Invalid signature for recovery owner.',
       );
     });
   });

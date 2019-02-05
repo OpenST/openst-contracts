@@ -72,10 +72,6 @@ contract DelayedRecoveryModule is GnosisSafeModule {
         "InitiateRecoveryStruct(address prevOwner,address oldOwner,address newOwner)"
     );
 
-    bytes32 public constant EXECUTE_RECOVERY_STRUCT_TYPEHASH = keccak256(
-        "ExecuteRecoveryStruct(address prevOwner,address oldOwner,address newOwner)"
-    );
-
     bytes32 public constant ABORT_RECOVERY_STRUCT_TYPEHASH = keccak256(
         "AbortRecoveryStruct(address prevOwner,address oldOwner,address newOwner)"
     );
@@ -91,8 +87,7 @@ contract DelayedRecoveryModule is GnosisSafeModule {
         address prevOwner;
         address oldOwner;
         address newOwner;
-        uint256 initiationBlockHeight;
-        bool initiated;
+        uint256 executionBlockHeight;
     }
 
 
@@ -124,7 +119,7 @@ contract DelayedRecoveryModule is GnosisSafeModule {
     modifier activeRecovery()
     {
         require(
-            activeRecoveryInfo.initiated,
+            activeRecoveryInfo.executionBlockHeight > 0,
             "There is no active recovery."
         );
 
@@ -134,7 +129,7 @@ contract DelayedRecoveryModule is GnosisSafeModule {
     modifier noActiveRecovery()
     {
         require(
-            !activeRecoveryInfo.initiated,
+            activeRecoveryInfo.executionBlockHeight == 0,
             "There is an active recovery."
         );
 
@@ -168,10 +163,12 @@ contract DelayedRecoveryModule is GnosisSafeModule {
      *            checking domainSeparator not to be set previously (bytes32(0))
      *          - Recovery owner's address is not null.
      *          - Recovery controller's address is not null.
+     *          - A required number of blocks to pass to be able to execute
+     *            a recovery shoudld be greater than 0.
      *
      * @param _recoveryOwner  An address that signs the "recovery
-     *                        initiation/execution/abortion" and
-     *                        "reset recovery owner" requests.
+     *                        initiation/abortion" and "reset recovery owner"
+     *                        requests.
      * @param _recoveryController An address that relays signed requests of
      *                            different types.
      * @param _recoveryBlockDelay A required number of blocks to pass to
@@ -200,6 +197,11 @@ contract DelayedRecoveryModule is GnosisSafeModule {
             "Recovery controller's address is null."
         );
 
+        require(
+            _recoveryBlockDelay > 0,
+            "Recovery block delay is 0."
+        );
+
         domainSeparator = keccak256(
             abi.encode(
                 DOMAIN_SEPARATOR_TYPEHASH,
@@ -217,12 +219,12 @@ contract DelayedRecoveryModule is GnosisSafeModule {
     }
 
     /**
-     * @notice Initiates a recovery procedural.
+     * @notice Initiates a recovery procedure.
      *
      * @dev Function requires:
      *          - Only the recovery controller can call.
-     *          - There is no active recovery procedural.
-     *          - Recovery owner has signed message.
+     *          - There is no active recovery procedure.
+     *          - Recovery owner has signed struct.
      *
      * @param _prevOwner Owner that pointed to the owner to be replaced in the
      *                   linked list.
@@ -241,7 +243,8 @@ contract DelayedRecoveryModule is GnosisSafeModule {
         onlyRecoveryController
         noActiveRecovery
     {
-        bytes32 recoveryHash = hashInitiateRecovery(
+        bytes32 recoveryHash = hashRecovery(
+            INITIATE_RECOVERY_STRUCT_TYPEHASH,
             _prevOwner,
             _oldOwner,
             _newOwner
@@ -253,8 +256,7 @@ contract DelayedRecoveryModule is GnosisSafeModule {
             prevOwner: _prevOwner,
             oldOwner: _oldOwner,
             newOwner: _newOwner,
-            initiationBlockHeight: block.number,
-            initiated: true
+            executionBlockHeight: block.number + recoveryBlockDelay
         });
 
         emit RecoveryInitiated(
@@ -271,33 +273,20 @@ contract DelayedRecoveryModule is GnosisSafeModule {
      *          - Only recovery controller can call.
      *          - There is an initiated recovery with the same tuple of
      *            addresses (prevOwner, oldOwner, newOwner).
-     *          - Recovery owner has signed execution message.
      *          - The required (delay) block numbers has been progressed.
      */
     function executeRecovery(
         address _prevOwner,
         address _oldOwner,
-        address _newOwner,
-        bytes32 _r,
-        bytes32 _s,
-        uint8 _v
+        address _newOwner
     )
         external
         onlyRecoveryController
         activeRecovery
         validRecovery(_prevOwner, _oldOwner, _newOwner)
     {
-        bytes32 recoveryHash = hashExecuteRecovery(
-            _prevOwner,
-            _oldOwner,
-            _newOwner
-        );
-
-        verify(recoveryHash, _r, _s, _v);
-
         require(
-            activeRecoveryInfo.initiationBlockHeight +
-                recoveryBlockDelay < block.number,
+            activeRecoveryInfo.executionBlockHeight < block.number,
             "Required number of blocks to recover was not progressed."
         );
 
@@ -333,7 +322,7 @@ contract DelayedRecoveryModule is GnosisSafeModule {
      * @dev Function requires:
      *          - There is an initiated recovery with the same tuple of
      *            addresses (prevOwner, oldOwner, newOwner).
-     *          - Recovery owner has signed execution message.
+     *          - Recovery owner has signed struct.
      */
     function abortRecoveryByOwner(
         address _prevOwner,
@@ -347,7 +336,8 @@ contract DelayedRecoveryModule is GnosisSafeModule {
         activeRecovery
         validRecovery(_prevOwner, _oldOwner, _newOwner)
     {
-        bytes32 recoveryHash = hashAbortRecovery(
+        bytes32 recoveryHash = hashRecovery(
+            ABORT_RECOVERY_STRUCT_TYPEHASH,
             _prevOwner,
             _oldOwner,
             _newOwner
@@ -436,7 +426,24 @@ contract DelayedRecoveryModule is GnosisSafeModule {
     {
         require(
             ecrecover(_digest, _v, _r, _s) == recoveryOwner,
-            "The recovery owner does not sign the message."
+            "Invalid signature for recovery owner."
+        );
+    }
+
+    function hashEIP712TypedData(
+        bytes32 _structHash
+    )
+        private
+        view
+        returns (bytes32 eip712TypedDataHash_)
+    {
+        eip712TypedDataHash_ = keccak256(
+            abi.encodePacked(
+                "\x19",
+                "\x01",
+                domainSeparator,
+                _structHash
+            )
         );
     }
 
@@ -450,83 +457,7 @@ contract DelayedRecoveryModule is GnosisSafeModule {
         view
         returns (bytes32 recoveryHash_ )
     {
-        recoveryHash_ = keccak256(
-            abi.encodePacked(
-                "\x19",
-                "\x01",
-                domainSeparator,
-                hashRecoveryStruct(
-                    _structTypeHash,
-                    _prevOwner,
-                    _oldOwner,
-                    _newOwner
-                )
-            )
-        );
-    }
-
-    function hashInitiateRecovery(
-        address _prevOwner,
-        address _oldOwner,
-        address _newOwner
-    )
-        private
-        view
-        returns (bytes32 recoveryHash_ )
-    {
-        recoveryHash_ = hashRecovery(
-            INITIATE_RECOVERY_STRUCT_TYPEHASH,
-            _prevOwner,
-            _oldOwner,
-            _newOwner
-        );
-    }
-
-    function hashExecuteRecovery(
-        address _prevOwner,
-        address _oldOwner,
-        address _newOwner
-    )
-        private
-        view
-        returns (bytes32 recoveryHash_ )
-    {
-        recoveryHash_ = hashRecovery(
-            EXECUTE_RECOVERY_STRUCT_TYPEHASH,
-            _prevOwner,
-            _oldOwner,
-            _newOwner
-        );
-    }
-
-    function hashAbortRecovery(
-        address _prevOwner,
-        address _oldOwner,
-        address _newOwner
-    )
-        private
-        view
-        returns (bytes32 recoveryHash_ )
-    {
-        recoveryHash_ = hashRecovery(
-            ABORT_RECOVERY_STRUCT_TYPEHASH,
-            _prevOwner,
-            _oldOwner,
-            _newOwner
-        );
-    }
-
-    function hashRecoveryStruct(
-        bytes32 _structTypeHash,
-        address _prevOwner,
-        address _oldOwner,
-        address _newOwner
-    )
-        private
-        pure
-        returns (bytes32 recoveryStructHash_)
-    {
-        recoveryStructHash_ = keccak256(
+        bytes32 recoveryStructHash = keccak256(
             abi.encode(
                 _structTypeHash,
                 _prevOwner,
@@ -534,57 +465,8 @@ contract DelayedRecoveryModule is GnosisSafeModule {
                 _newOwner
             )
         );
-    }
 
-    function hashInitiateRecoveryStruct(
-        address _prevOwner,
-        address _oldOwner,
-        address _newOwner
-    )
-        private
-        pure
-        returns (bytes32 recoveryStructHash_)
-    {
-        recoveryStructHash_ = hashRecoveryStruct(
-            INITIATE_RECOVERY_STRUCT_TYPEHASH,
-            _prevOwner,
-            _oldOwner,
-            _newOwner
-        );
-    }
-
-    function hashExecuteRecoveryStruct(
-        address _prevOwner,
-        address _oldOwner,
-        address _newOwner
-    )
-        private
-        pure
-        returns (bytes32 recoveryStructHash_)
-    {
-        recoveryStructHash_ = hashRecoveryStruct(
-            EXECUTE_RECOVERY_STRUCT_TYPEHASH,
-            _prevOwner,
-            _oldOwner,
-            _newOwner
-        );
-    }
-
-    function hashAbortRecoveryStruct(
-        address _prevOwner,
-        address _oldOwner,
-        address _newOwner
-    )
-        private
-        pure
-        returns (bytes32 recoveryStructHash_)
-    {
-        recoveryStructHash_ = hashRecoveryStruct(
-            ABORT_RECOVERY_STRUCT_TYPEHASH,
-            _prevOwner,
-            _oldOwner,
-            _newOwner
-        );
+        recoveryHash_ = hashEIP712TypedData(recoveryStructHash);
     }
 
     function hashResetRecoveryOwner(
@@ -595,33 +477,16 @@ contract DelayedRecoveryModule is GnosisSafeModule {
         view
         returns (bytes32 resetRecoveryOwnerHash_ )
     {
-        resetRecoveryOwnerHash_ = keccak256(
-            abi.encodePacked(
-                "\x19",
-                "\x01",
-                domainSeparator,
-                hashResetRecoveryOwnerStruct(
-                    _oldRecoverySigner,
-                    _newRecoverySigner
-                )
-            )
-        );
-    }
-
-    function hashResetRecoveryOwnerStruct(
-        address _oldRecoverySigner,
-        address _newRecoverySigner
-    )
-        private
-        pure
-        returns (bytes32 resetRecoveryOwnerStructHash_)
-    {
-        resetRecoveryOwnerStructHash_ = keccak256(
+        bytes32 resetRecoveryOwnerStructHash = keccak256(
             abi.encode(
                 RESET_RECOVERY_OWNER_STRUCT_TYPEHASH,
                 _oldRecoverySigner,
                 _newRecoverySigner
             )
+        );
+
+        resetRecoveryOwnerHash_ = hashEIP712TypedData(
+            resetRecoveryOwnerStructHash
         );
     }
 }

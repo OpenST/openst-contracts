@@ -239,11 +239,7 @@ contract('DelayedRecoveryModule::abortRecoveryByController', async () => {
       );
 
       assert.isNotOk(
-        activeRecoveryInfo.initiationBlockHeight.eqn(0),
-      );
-
-      assert.isOk(
-        activeRecoveryInfo.initiated,
+        activeRecoveryInfo.executionBlockHeight.eqn(0),
       );
 
       await recoveryModule.abortRecoveryByController(
@@ -271,7 +267,7 @@ contract('DelayedRecoveryModule::abortRecoveryByController', async () => {
       );
 
       assert.isOk(
-        activeRecoveryInfo.initiationBlockHeight.eqn(0),
+        activeRecoveryInfo.executionBlockHeight.eqn(0),
       );
 
       assert.isNotOk(

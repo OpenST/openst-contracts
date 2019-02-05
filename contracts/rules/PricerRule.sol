@@ -15,8 +15,8 @@ pragma solidity ^0.5.0;
 // limitations under the License.
 
 import "./PriceOracleInterface.sol";
-import "./EIP20TokenInterface.sol";
-import "./TokenRules.sol";
+import "../token/EIP20TokenInterface.sol";
+import "../token/TokenRules.sol";
 import "../external/SafeMath.sol";
 
 

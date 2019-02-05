@@ -85,8 +85,8 @@ contract('DelayedRecoveryModule::abortRecoveryByOwner', async () => {
         recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
       );
 
-      assert.isNotOk(
-        (await recoveryModule.activeRecoveryInfo.call()).initiated,
+      assert.isOk(
+        (await recoveryModule.activeRecoveryInfo.call()).executionBlockHeight.eqn(0),
       );
 
       await Utils.expectRevert(
@@ -226,7 +226,7 @@ contract('DelayedRecoveryModule::abortRecoveryByOwner', async () => {
           { from: accountProvider.get() },
         ),
         'Should revert as the abort request is signed by invalid key.',
-        'The recovery owner does not sign the message.',
+        'Invalid signature for recovery owner.',
       );
     });
   });
@@ -315,11 +315,7 @@ contract('DelayedRecoveryModule::abortRecoveryByOwner', async () => {
       );
 
       assert.isNotOk(
-        activeRecoveryInfo.initiationBlockHeight.eqn(0),
-      );
-
-      assert.isOk(
-        activeRecoveryInfo.initiated,
+        activeRecoveryInfo.executionBlockHeight.eqn(0),
       );
 
       await recoveryModule.abortRecoveryByOwner(
@@ -350,11 +346,7 @@ contract('DelayedRecoveryModule::abortRecoveryByOwner', async () => {
       );
 
       assert.isOk(
-        activeRecoveryInfo.initiationBlockHeight.eqn(0),
-      );
-
-      assert.isNotOk(
-        activeRecoveryInfo.initiated,
+        activeRecoveryInfo.executionBlockHeight.eqn(0),
       );
     });
   });

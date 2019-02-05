@@ -53,6 +53,20 @@ contract('DelayedRecoveryModule::setup', async () => {
       );
     });
 
+    it('Reverts if recovery block delay is 0.', async () => {
+      const recoveryModule = await DelayedRecoveryModule.new();
+
+      await Utils.expectRevert(
+        recoveryModule.setup(
+          accountProvider.get(), // recovery owner's address
+          accountProvider.get(), // recovery controller's address
+          0, // recovery block delays
+        ),
+        'Should revert as recovery block delay is 0.',
+        'Recovery block delay is 0.',
+      );
+    });
+
     it('Reverts if called second time.', async () => {
       const recoveryModule = await DelayedRecoveryModule.new();
 
@@ -141,7 +155,7 @@ contract('DelayedRecoveryModule::setup', async () => {
       );
 
       assert.isOk(
-        (activeRecoveryInfo.initiationBlockHeight).eqn(0),
+        (activeRecoveryInfo.executionBlockHeight).eqn(0),
       );
 
       assert.isNotOk(

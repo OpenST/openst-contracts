@@ -101,10 +101,9 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
 
     it('Reverts if a caller is not a controller.', async () => {
       const {
-        recoveryOwnerPrivateKey,
         recoveryBlockDelay,
         recoveryModule,
-      } = await RecoveryModuleUtils.createRecoveryModule(
+      } = await prepare(
         accountProvider,
       );
 
@@ -117,14 +116,8 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
       const oldOwner = accountProvider.get();
       const newOwner = accountProvider.get();
 
-      const {
-        signature,
-      } = RecoveryModuleUtils.signExecuteRecovery(
-        recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
-      );
-
       assert.isNotOk(
-        (await recoveryModule.activeRecoveryInfo.call()).initiated,
+        (await recoveryModule.activeRecoveryInfo.call()).executionBlockHeight.eqn(0),
       );
 
       await Utils.expectRevert(
@@ -132,9 +125,6 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
           prevOwner,
           oldOwner,
           newOwner,
-          EthUtils.bufferToHex(signature.r),
-          EthUtils.bufferToHex(signature.s),
-          signature.v,
           { from: accountProvider.get() },
         ),
         'Should revert as a caller is not a controller.',
@@ -145,7 +135,6 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
     it('Reverts if there is no active recovery process.', async () => {
       const {
         recoveryControllerAddress,
-        recoveryOwnerPrivateKey,
         recoveryBlockDelay,
         recoveryModule,
       } = await RecoveryModuleUtils.createRecoveryModule(
@@ -161,14 +150,8 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
       const oldOwner = accountProvider.get();
       const newOwner = accountProvider.get();
 
-      const {
-        signature,
-      } = RecoveryModuleUtils.signExecuteRecovery(
-        recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
-      );
-
-      assert.isNotOk(
-        (await recoveryModule.activeRecoveryInfo.call()).initiated,
+      assert.isOk(
+        (await recoveryModule.activeRecoveryInfo.call()).executionBlockHeight.eqn(0),
       );
 
       await Utils.expectRevert(
@@ -176,9 +159,6 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
           prevOwner,
           oldOwner,
           newOwner,
-          EthUtils.bufferToHex(signature.r),
-          EthUtils.bufferToHex(signature.s),
-          signature.v,
           { from: recoveryControllerAddress },
         ),
         'Should revert as there is no active recovery process.',
@@ -189,7 +169,6 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
     it('Reverts if the execute request is not for the active one.', async () => {
       const {
         recoveryControllerAddress,
-        recoveryOwnerPrivateKey,
         recoveryBlockDelay,
         recoveryModule,
         prevOwner,
@@ -206,38 +185,15 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
       const anotherOldOwner = accountProvider.get();
       const anotherNewOwner = accountProvider.get();
 
-      const {
-        signature: signature1,
-      } = RecoveryModuleUtils.signExecuteRecovery(
-        recoveryModule.address,
-        anotherPrevOwner,
-        oldOwner,
-        newOwner,
-        recoveryOwnerPrivateKey,
-      );
-
       await Utils.expectRevert(
         recoveryModule.executeRecovery(
           anotherPrevOwner,
           oldOwner,
           newOwner,
-          EthUtils.bufferToHex(signature1.r),
-          EthUtils.bufferToHex(signature1.s),
-          signature1.v,
           { from: recoveryControllerAddress },
         ),
         'Should revert as the execute request is not for the active recovery.',
         'The execution request\'s data does not match with the active one.',
-      );
-
-      const {
-        signature: signature2,
-      } = RecoveryModuleUtils.signExecuteRecovery(
-        recoveryModule.address,
-        prevOwner,
-        anotherOldOwner,
-        newOwner,
-        recoveryOwnerPrivateKey,
       );
 
       await Utils.expectRevert(
@@ -245,23 +201,10 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
           prevOwner,
           anotherOldOwner,
           newOwner,
-          EthUtils.bufferToHex(signature2.r),
-          EthUtils.bufferToHex(signature2.s),
-          signature2.v,
           { from: recoveryControllerAddress },
         ),
         'Should revert as the execute request is not for the active recovery.',
         'The execution request\'s data does not match with the active one.',
-      );
-
-      const {
-        signature: signature3,
-      } = RecoveryModuleUtils.signExecuteRecovery(
-        recoveryModule.address,
-        prevOwner,
-        oldOwner,
-        anotherNewOwner,
-        recoveryOwnerPrivateKey,
       );
 
       await Utils.expectRevert(
@@ -269,9 +212,6 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
           prevOwner,
           oldOwner,
           anotherNewOwner,
-          EthUtils.bufferToHex(signature3.r),
-          EthUtils.bufferToHex(signature3.s),
-          signature3.v,
           { from: recoveryControllerAddress },
         ),
         'Should revert as the execute request is not for the active recovery.',
@@ -279,55 +219,9 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
       );
     });
 
-    it('Reverts if the execute request is signed by invalid key.', async () => {
-      const {
-        recoveryControllerAddress,
-        recoveryOwnerPrivateKey,
-        recoveryBlockDelay,
-        recoveryModule,
-        prevOwner,
-        oldOwner,
-        newOwner,
-      } = await prepare(accountProvider);
-
-      for (let i = 0; i < recoveryBlockDelay; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
-        await Utils.advanceBlock();
-      }
-
-      const privateKey = '0x038764453ef1dbdf9cfb3923f95d22a8974a1aa2f7351737b46d9ea25aaba50a';
-
-      assert.notEqual(
-        recoveryOwnerPrivateKey,
-        privateKey,
-      );
-
-      const {
-        signature,
-      } = RecoveryModuleUtils.signExecuteRecovery(
-        recoveryModule.address, prevOwner, oldOwner, newOwner, privateKey,
-      );
-
-      await Utils.expectRevert(
-        recoveryModule.executeRecovery(
-          prevOwner,
-          oldOwner,
-          newOwner,
-          EthUtils.bufferToHex(signature.r),
-          EthUtils.bufferToHex(signature.s),
-          signature.v,
-          { from: recoveryControllerAddress },
-        ),
-        'Should revert as the execute request is signed by invalid key.',
-        'The recovery owner does not sign the message.',
-      );
-    });
-
     it('Reverts if required number of blocks to recover was not progressed.', async () => {
       const {
-        recoveryOwnerPrivateKey,
         recoveryControllerAddress,
-        recoveryBlockDelay,
         recoveryModule,
         prevOwner,
         oldOwner,
@@ -338,8 +232,7 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
 
       const blockNumber = (await web3.eth.getBlockNumber());
 
-      const delta = new BN(activeRecoveryInfo.initiationBlockHeight)
-        .add(new BN(recoveryBlockDelay))
+      const delta = new BN(activeRecoveryInfo.executionBlockHeight)
         .sub(new BN(blockNumber))
         .sub(new BN(1));
 
@@ -352,20 +245,11 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         await Utils.advanceBlock();
       }
 
-      const {
-        signature,
-      } = RecoveryModuleUtils.signExecuteRecovery(
-        recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
-      );
-
       await Utils.expectRevert(
         recoveryModule.executeRecovery(
           prevOwner,
           oldOwner,
           newOwner,
-          EthUtils.bufferToHex(signature.r),
-          EthUtils.bufferToHex(signature.s),
-          signature.v,
           { from: recoveryControllerAddress },
         ),
         'Should revert as required number of blocks to recover was not progressed.',
@@ -376,7 +260,6 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
     it('Reverts if ModuleManager fails to execute.', async () => {
       const {
         moduleManager,
-        recoveryOwnerPrivateKey,
         recoveryControllerAddress,
         recoveryBlockDelay,
         recoveryModule,
@@ -390,12 +273,6 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         await Utils.advanceBlock();
       }
 
-      const {
-        signature,
-      } = RecoveryModuleUtils.signExecuteRecovery(
-        recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
-      );
-
       moduleManager.makeFail();
 
       await Utils.expectRevert(
@@ -403,9 +280,6 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
           prevOwner,
           oldOwner,
           newOwner,
-          EthUtils.bufferToHex(signature.r),
-          EthUtils.bufferToHex(signature.s),
-          signature.v,
           { from: recoveryControllerAddress },
         ),
         'Should revert as the module manager fails to execute.',
@@ -420,7 +294,6 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
     it('Emits RecoveryExecuted.', async () => {
       const {
         recoveryControllerAddress,
-        recoveryOwnerPrivateKey,
         recoveryBlockDelay,
         recoveryModule,
         prevOwner,
@@ -433,19 +306,10 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         await Utils.advanceBlock();
       }
 
-      const {
-        signature,
-      } = RecoveryModuleUtils.signExecuteRecovery(
-        recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
-      );
-
       const transactionResponse = await recoveryModule.executeRecovery(
         prevOwner,
         oldOwner,
         newOwner,
-        EthUtils.bufferToHex(signature.r),
-        EthUtils.bufferToHex(signature.s),
-        signature.v,
         { from: recoveryControllerAddress },
       );
 
@@ -475,7 +339,6 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
     it('Checks that recovery is executed properly.', async () => {
       const {
         recoveryControllerAddress,
-        recoveryOwnerPrivateKey,
         recoveryBlockDelay,
         moduleManager,
         recoveryModule,
@@ -488,12 +351,6 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         // eslint-disable-next-line no-await-in-loop
         await Utils.advanceBlock();
       }
-
-      const {
-        signature,
-      } = RecoveryModuleUtils.signExecuteRecovery(
-        recoveryModule.address, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey,
-      );
 
       let activeRecoveryInfo = await recoveryModule.activeRecoveryInfo.call();
 
@@ -513,20 +370,13 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
       );
 
       assert.isNotOk(
-        activeRecoveryInfo.initiationBlockHeight.eqn(0),
-      );
-
-      assert.isOk(
-        activeRecoveryInfo.initiated,
+        activeRecoveryInfo.executionBlockHeight.eqn(0),
       );
 
       await recoveryModule.executeRecovery(
         prevOwner,
         oldOwner,
         newOwner,
-        EthUtils.bufferToHex(signature.r),
-        EthUtils.bufferToHex(signature.s),
-        signature.v,
         { from: recoveryControllerAddress },
       );
 
@@ -566,11 +416,7 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
       );
 
       assert.isOk(
-        activeRecoveryInfo.initiationBlockHeight.eqn(0),
-      );
-
-      assert.isNotOk(
-        activeRecoveryInfo.initiated,
+        activeRecoveryInfo.executionBlockHeight.eqn(0),
       );
     });
   });
