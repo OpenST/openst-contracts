@@ -208,7 +208,7 @@ contract('TokenHolder::redeem', async (accounts) => {
           },
         ),
         'Should revert as ExTx is signed with non-authorized key.',
-        'Session key is not active.',
+        'Session key is not authorized.',
       );
     });
 
@@ -263,7 +263,7 @@ contract('TokenHolder::redeem', async (accounts) => {
           },
         ),
         'Should revert as ExTx is signed with expired key.',
-        'Session key is not active.',
+        'Session key was expired.',
       );
     });
 
@@ -318,7 +318,61 @@ contract('TokenHolder::redeem', async (accounts) => {
           },
         ),
         'Should revert as ExTx is signed with a revoked key.',
-        'Session key is not active.',
+        'Session key was revoked.',
+      );
+    });
+
+    it('Reverts if ExTx is signed with logged-out key.', async () => {
+      const {
+        tokenHolderOwnerAddress,
+        tokenHolder,
+        coGateway,
+      } = await prepare(
+        accountProvider,
+        50 /* spendingLimit */,
+        100, /* deltaExpirationHeight */
+        sessionPublicKey1,
+      );
+
+      const tokenHolderNonce = 0;
+
+      const amount = 10;
+      const beneficiary = accountProvider.get();
+      const gasPrice = 10;
+      const gasLimit = 100;
+      const redeemerNonce = 1;
+      const hashLock = web3.utils.soliditySha3('hash-lock');
+
+      const {
+        coGatewayRedeemFunctionData,
+        exTxSignature,
+      } = await generateCoGatewayRedeemFunctionExTx(
+        tokenHolder,
+        tokenHolderNonce,
+        sessionPrivateKey1,
+        coGateway,
+        amount, beneficiary, gasPrice, gasLimit, redeemerNonce, hashLock,
+      );
+
+      await tokenHolder.logout(
+        { from: tokenHolderOwnerAddress },
+      );
+
+      await Utils.expectRevert(
+        tokenHolder.executeRedemption(
+          coGateway.address,
+          coGatewayRedeemFunctionData,
+          tokenHolderNonce,
+          EthUtils.bufferToHex(exTxSignature.r),
+          EthUtils.bufferToHex(exTxSignature.s),
+          exTxSignature.v,
+          {
+            from: accountProvider.get(),
+            value: 1 /* bounty */,
+          },
+        ),
+        'Should revert as ExTx is signed with logged-out key.',
+        'Session key was logged out.',
       );
     });
 

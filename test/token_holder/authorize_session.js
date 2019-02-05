@@ -282,7 +282,7 @@ contract('TokenHolder::authorizeSession', async () => {
 
       assert.isOk(
         // TokenHolder.AuthorizationStatus.NOT_AUTHORIZED == 0
-        keyData.status.eqn(0),
+        keyData.session.eqn(0),
       );
 
       assert.isOk(
@@ -311,8 +311,7 @@ contract('TokenHolder::authorizeSession', async () => {
       keyData = await tokenHolder.sessionKeys.call(sessionPublicKey2);
 
       assert.isOk(
-        // TokenHolder.AuthorizationStatus.AUTHORIZED == 1
-        keyData.status.eqn(1),
+        keyData.session.eqn(2),
       );
 
       assert.isOk(

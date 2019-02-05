@@ -46,6 +46,10 @@ contract TokenHolder is MasterCopyNonUpgradable
         address _sessionKey
     );
 
+    event SessionsLoggedOut(
+        uint256 _sessionWindow
+    );
+
     /**
      * @param _messageHash Executed rule message hash according to EIP-1077.
      * @param _status Rule execution's status.
@@ -70,7 +74,6 @@ contract TokenHolder is MasterCopyNonUpgradable
 
     enum AuthorizationStatus {
         NOT_AUTHORIZED,
-        AUTHORIZED,
         REVOKED
     }
 
@@ -82,7 +85,7 @@ contract TokenHolder is MasterCopyNonUpgradable
         uint256 spendingLimit;
         uint256 expirationHeight;
         uint256 nonce;
-        AuthorizationStatus status;
+        uint256 session;
     }
 
 
@@ -104,6 +107,8 @@ contract TokenHolder is MasterCopyNonUpgradable
     /* Storage */
 
     EIP20TokenInterface public token;
+
+    uint256 public sessionWindow;
 
     mapping(address /* key */ => SessionKeyData) public sessionKeys;
 
@@ -131,7 +136,7 @@ contract TokenHolder is MasterCopyNonUpgradable
     modifier keyIsAuthorized(address _key)
     {
         require(
-            sessionKeys[_key].status == AuthorizationStatus.AUTHORIZED,
+            sessionKeys[_key].session > uint256(AuthorizationStatus.REVOKED),
             "Key is not authorized."
         );
         _;
@@ -141,7 +146,9 @@ contract TokenHolder is MasterCopyNonUpgradable
     modifier keyDoesNotExist(address _key)
     {
         require(
-            sessionKeys[_key].status == AuthorizationStatus.NOT_AUTHORIZED,
+            sessionKeys[_key].session == uint256(
+                AuthorizationStatus.NOT_AUTHORIZED
+            ),
             "Key exists."
         );
         _;
@@ -216,6 +223,8 @@ contract TokenHolder is MasterCopyNonUpgradable
         tokenRules = _tokenRules;
         owner = _owner;
 
+        sessionWindow = 2;
+
         for (uint256 i = 0; i < _sessionKeys.length; ++i) {
             _authorizeSession(
                 _sessionKeys[i],
@@ -264,25 +273,24 @@ contract TokenHolder is MasterCopyNonUpgradable
         onlyOwner
         keyIsAuthorized(_sessionKey)
     {
-        sessionKeys[_sessionKey].status = AuthorizationStatus.REVOKED;
+        sessionKeys[_sessionKey].session = uint256(AuthorizationStatus.REVOKED);
 
         emit SessionRevoked(_sessionKey);
     }
 
     /**
-     * @notice Logout session of the msg.sender.
+     * @notice Logout all authorized sessions.
      *
-     * @dev Function revokes the key even if it has expired.
-     *      Function requires:
-     *          - The session key (msg.sender) is authorized.
+     * @dev Function requires:
+     *          - Only owner is allowed to call.
      */
     function logout()
         external
-        keyIsAuthorized(msg.sender)
+        onlyOwner
     {
-        sessionKeys[msg.sender].status = AuthorizationStatus.REVOKED;
+        sessionWindow = sessionWindow.add(1);
 
-        emit SessionRevoked(msg.sender);
+        emit SessionsLoggedOut(sessionWindow.sub(1));
     }
 
     /**
@@ -435,7 +443,7 @@ contract TokenHolder is MasterCopyNonUpgradable
         keyData.spendingLimit = _spendingLimit;
         keyData.expirationHeight = _expirationHeight;
         keyData.nonce = 0;
-        keyData.status = AuthorizationStatus.AUTHORIZED;
+        keyData.session = sessionWindow;
 
         emit SessionAuthorized(_sessionKey);
     }
@@ -463,14 +471,28 @@ contract TokenHolder is MasterCopyNonUpgradable
 
         SessionKeyData storage keyData = sessionKeys[key_];
 
-        // The following check appears here and not higher in the stack,
+        // The following checks appears here and not higher in the stack,
         // as session key is only retrieved here, after calculation
         // of message hash according EIP-1077 and retriving the key
         // from the signature (_r, _s, _v).
         require(
-            keyData.status == AuthorizationStatus.AUTHORIZED &&
+            keyData.session != 0,
+            "Session key is not authorized."
+        );
+
+        require(
+            keyData.session != 1,
+            "Session key was revoked."
+        );
+
+        require(
+            keyData.session == sessionWindow,
+            "Session key was logged out."
+        );
+
+        require(
             keyData.expirationHeight > block.number,
-            "Session key is not active."
+            "Session key was expired."
         );
 
         require(

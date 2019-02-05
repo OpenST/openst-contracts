@@ -184,8 +184,7 @@ contract('TokenHolder::revokeSession', async () => {
       let keyData = await tokenHolder.sessionKeys.call(sessionPublicKey);
 
       assert.isOk(
-        // TokenHolder.AuthorizationStatus.AUTHORIZED == 1
-        keyData.status.eqn(1),
+        keyData.session.eqn(2),
       );
 
       await tokenHolder.revokeSession(
@@ -196,8 +195,8 @@ contract('TokenHolder::revokeSession', async () => {
       keyData = await tokenHolder.sessionKeys.call(sessionPublicKey);
 
       assert.isOk(
-        // TokenHolder.AuthorizationStatus.REVOKED == 2
-        keyData.status.eqn(2),
+        // TokenHolder.AuthorizationStatus.REVOKED == 1
+        keyData.session.eqn(1),
       );
     });
   });
