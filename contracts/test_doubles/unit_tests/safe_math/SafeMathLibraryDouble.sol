@@ -1,11 +1,11 @@
 pragma solidity ^0.5.0;
 
-import "../../../SafeMath.sol";
+import "../../../external/SafeMath.sol";
 
 /**
  * It is used to test SafeMath contract.
  */
-contract SafeMathTest {
+contract SafeMathLibraryDouble {
 
     /* Public Functions */
 

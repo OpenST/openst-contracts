@@ -12,218 +12,220 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+'use strict';
+
 const BN = require('bn.js');
 const utils = require('../test_lib/utils.js');
 const { AccountProvider } = require('../test_lib/utils');
 const TokenRulesUtils = require('./utils.js');
 
 async function happyPath(accountProvider) {
-    const {
-        tokenRules,
-        organizationAddress,
-        token,
-        organizationWorker,
-    } = await TokenRulesUtils.createTokenEconomy(accountProvider);
+  const {
+    tokenRules,
+    organizationAddress,
+    token,
+    organizationWorker,
+  } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
-    const ruleAddress0 = accountProvider.get();
-    await tokenRules.registerRule(
-        'ruleName0',
+  const ruleAddress0 = accountProvider.get();
+  await tokenRules.registerRule(
+    'ruleName0',
+    ruleAddress0,
+    'ruleAbi0',
+    { from: organizationWorker },
+  );
+  await token.increaseBalance(ruleAddress0, 100);
+
+  const tokenHolder = accountProvider.get();
+  const spendingLimit = 100;
+  await token.increaseBalance(tokenHolder, 100);
+  await token.approve(
+    tokenRules.address,
+    spendingLimit,
+    { from: tokenHolder },
+  );
+
+  await tokenRules.allowTransfers(
+    { from: tokenHolder },
+  );
+
+  const transferTo0 = accountProvider.get();
+  const transferAmount0 = 1;
+
+  const transfersTo = [transferTo0];
+  const transfersAmount = [transferAmount0];
+
+  return {
+    tokenRules,
+    organizationAddress,
+    token,
+    tokenHolder,
+    ruleAddress0,
+    transfersTo,
+    transfersAmount,
+    organizationWorker,
+  };
+}
+
+contract('TokenRules::executeTransfers', async () => {
+  contract('Negative Tests', async (accounts) => {
+    const accountProvider = new AccountProvider(accounts);
+    it('Reverts if non-registered rule calls.', async () => {
+      const {
+        tokenRules,
+        tokenHolder,
+        transfersTo,
+        transfersAmount,
+      } = await happyPath(accountProvider);
+
+      const nonRegisteredRuleAddress = accountProvider.get();
+
+      await utils.expectRevert(
+        tokenRules.executeTransfers(
+          tokenHolder,
+          transfersTo,
+          transfersAmount,
+          {
+            from: nonRegisteredRuleAddress,
+          },
+        ),
+        'Should revert as non registered rule is calling.',
+        'Only registered rule is allowed to call.',
+      );
+    });
+
+    it('Reverts if "from" account has not allowed transfers.', async () => {
+      const {
+        tokenRules,
+        tokenHolder,
         ruleAddress0,
-        'ruleAbi0',
-        { from: organizationWorker },
-    );
-    await token.increaseBalance(ruleAddress0, 100);
+        transfersTo,
+        transfersAmount,
+      } = await happyPath(accountProvider);
 
-    const tokenHolder = accountProvider.get();
-    const spendingLimit = 100;
-    await token.increaseBalance(tokenHolder, 100);
-    await token.approve(
-        tokenRules.address,
-        spendingLimit,
+      await tokenRules.disallowTransfers(
         { from: tokenHolder },
-    );
+      );
 
-    await tokenRules.allowTransfers(
-        { from: tokenHolder },
-    );
+      await utils.expectRevert(
+        tokenRules.executeTransfers(
+          tokenHolder,
+          transfersTo,
+          transfersAmount,
+          { from: ruleAddress0 },
+        ),
+        'Should revert as "from" account has not allowed transfers.',
+        'Transfers from the address are not allowed.',
+      );
+    });
 
-    const transferTo0 = accountProvider.get();
-    const transferAmount0 = 1;
-
-    const transfersTo = [transferTo0];
-    const transfersAmount = [transferAmount0];
-
-    return {
+    it('Reverts if transfersTo and transferAmount array lengths are not equal.', async () => {
+      const {
         tokenRules,
-        organizationAddress,
+        tokenHolder,
+        ruleAddress0,
+      } = await happyPath(accountProvider);
+
+      const transferTo0 = accountProvider.get();
+      const transfersTo = [transferTo0];
+      const transfersAmount = [];
+
+      await utils.expectRevert(
+        tokenRules.executeTransfers(
+          tokenHolder,
+          transfersTo,
+          transfersAmount,
+          { from: ruleAddress0 },
+        ),
+        'Should revert as transfers "to" and "amount" arrays length '
+                + 'are not equal.',
+        '\'to\' and \'amount\' transfer arrays\' lengths are not equal.',
+      );
+    });
+  });
+
+  contract('Execution Validity', async (accounts) => {
+    const accountProvider = new AccountProvider(accounts);
+
+    it('Checks that token transferFrom function is called.', async () => {
+      const {
+        tokenRules,
         token,
         tokenHolder,
         ruleAddress0,
         transfersTo,
         transfersAmount,
-        organizationWorker,
-    };
-}
+      } = await happyPath(accountProvider);
 
-contract('TokenRules::executeTransfers', async () => {
-    contract('Negative Tests', async (accounts) => {
-        const accountProvider = new AccountProvider(accounts);
-        it('Reverts if non-registered rule calls.', async () => {
-            const {
-                tokenRules,
-                tokenHolder,
-                transfersTo,
-                transfersAmount,
-            } = await happyPath(accountProvider);
+      // For test validity perspective array should not be empty.
+      assert(transfersTo.length !== 0);
 
-            const nonRegisteredRuleAddress = accountProvider.get();
+      const tokenHolderInitialBalance = await token.balanceOf(tokenHolder);
+      const transfersToInitialBalances = [];
+      let transfersAmountSum = new BN(0);
+      for (let i = 0; i < transfersTo.length; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        const initialBalance = await token.balanceOf.call(transfersTo[i]);
+        transfersToInitialBalances.push(initialBalance);
 
-            await utils.expectRevert(
-                tokenRules.executeTransfers(
-                    tokenHolder,
-                    transfersTo,
-                    transfersAmount,
-                    {
-                        from: nonRegisteredRuleAddress,
-                    },
-                ),
-                'Should revert as non registered rule is calling.',
-                'Only registered rule is allowed to call.',
-            );
-        });
+        transfersAmountSum = transfersAmountSum.add(new BN(transfersAmount[i]));
+      }
 
-        it('Reverts if "from" account has not allowed transfers.', async () => {
-            const {
-                tokenRules,
-                tokenHolder,
-                ruleAddress0,
-                transfersTo,
-                transfersAmount,
-            } = await happyPath(accountProvider);
+      // For test validity perspective, we should not fail in this case.
+      assert(tokenHolderInitialBalance.gte(transfersAmountSum));
 
-            await tokenRules.disallowTransfers(
-                { from: tokenHolder },
-            );
+      await tokenRules.executeTransfers(
+        tokenHolder,
+        transfersTo,
+        transfersAmount,
+        { from: ruleAddress0 },
+      );
 
-            await utils.expectRevert(
-                tokenRules.executeTransfers(
-                    tokenHolder,
-                    transfersTo,
-                    transfersAmount,
-                    { from: ruleAddress0 },
-                ),
-                'Should revert as "from" account has not allowed transfers.',
-                'Transfers from the address are not allowed.',
-            );
-        });
+      assert.strictEqual(
+        (await token.balanceOf(tokenHolder)).cmp(
+          tokenHolderInitialBalance.sub(transfersAmountSum),
+        ),
+        0,
+      );
 
-        it('Reverts if transfersTo and transferAmount array lengths are not equal.', async () => {
-            const {
-                tokenRules,
-                tokenHolder,
-                ruleAddress0,
-            } = await happyPath(accountProvider);
+      for (let i = 0; i < transfersTo.length; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        const balance = await token.balanceOf.call(transfersTo[i]);
 
-            const transferTo0 = accountProvider.get();
-            const transfersTo = [transferTo0];
-            const transfersAmount = [];
-
-            await utils.expectRevert(
-                tokenRules.executeTransfers(
-                    tokenHolder,
-                    transfersTo,
-                    transfersAmount,
-                    { from: ruleAddress0 },
-                ),
-                'Should revert as transfers "to" and "amount" arrays length '
-                + 'are not equal.',
-                '\'to\' and \'amount\' transfer arrays\' lengths are not equal.',
-            );
-        });
+        assert.strictEqual(
+          balance.cmp(
+            transfersToInitialBalances[i].add(
+              new BN(transfersAmount[i]),
+            ),
+          ),
+          0,
+        );
+      }
     });
 
-    contract('Execution Validity', async (accounts) => {
-        const accountProvider = new AccountProvider(accounts);
+    it('Checks that at the end TokenRules disallow transfers.', async () => {
+      const {
+        tokenRules,
+        tokenHolder,
+        ruleAddress0,
+        transfersTo,
+        transfersAmount,
+      } = await happyPath(accountProvider);
 
-        it('Checks that token transferFrom function is called.', async () => {
-            const {
-                tokenRules,
-                token,
-                tokenHolder,
-                ruleAddress0,
-                transfersTo,
-                transfersAmount,
-            } = await happyPath(accountProvider);
+      await tokenRules.allowTransfers(
+        { from: tokenHolder },
+      );
 
-            // For test validity perspective array should not be empty.
-            assert(transfersTo.length !== 0);
+      await tokenRules.executeTransfers(
+        tokenHolder,
+        transfersTo,
+        transfersAmount,
+        { from: ruleAddress0 },
+      );
 
-            const tokenHolderInitialBalance = await token.balanceOf(tokenHolder);
-            const transfersToInitialBalances = [];
-            let transfersAmountSum = new BN(0);
-            for (let i = 0; i < transfersTo.length; i += 1) {
-                // eslint-disable-next-line no-await-in-loop
-                const initialBalance = await token.balanceOf.call(transfersTo[i]);
-                transfersToInitialBalances.push(initialBalance);
-
-                transfersAmountSum = transfersAmountSum.add(new BN(transfersAmount[i]));
-            }
-
-            // For test validity perspective, we should not fail in this case.
-            assert(tokenHolderInitialBalance.gte(transfersAmountSum));
-
-            await tokenRules.executeTransfers(
-                tokenHolder,
-                transfersTo,
-                transfersAmount,
-                { from: ruleAddress0 },
-            );
-
-            assert.strictEqual(
-                (await token.balanceOf(tokenHolder)).cmp(
-                    tokenHolderInitialBalance.sub(transfersAmountSum),
-                ),
-                0,
-            );
-
-            for (let i = 0; i < transfersTo.length; i += 1) {
-                // eslint-disable-next-line no-await-in-loop
-                const balance = await token.balanceOf.call(transfersTo[i]);
-
-                assert.strictEqual(
-                    balance.cmp(
-                        transfersToInitialBalances[i].add(
-                            new BN(transfersAmount[i]),
-                        ),
-                    ),
-                    0,
-                );
-            }
-        });
-
-        it('Checks that at the end TokenRules disallow transfers.', async () => {
-            const {
-                tokenRules,
-                tokenHolder,
-                ruleAddress0,
-                transfersTo,
-                transfersAmount,
-            } = await happyPath(accountProvider);
-
-            await tokenRules.allowTransfers(
-                { from: tokenHolder },
-            );
-
-            await tokenRules.executeTransfers(
-                tokenHolder,
-                transfersTo,
-                transfersAmount,
-                { from: ruleAddress0 },
-            );
-
-            assert.isNotOk(
-                await tokenRules.allowedTransfers.call(tokenHolder),
-            );
-        });
+      assert.isNotOk(
+        await tokenRules.allowedTransfers.call(tokenHolder),
+      );
     });
+  });
 });

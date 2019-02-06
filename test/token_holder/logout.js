@@ -12,163 +12,165 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+'use strict';
+
 const utils = require('../test_lib/utils.js');
 const { TokenHolderUtils } = require('./utils.js');
 const { Event } = require('../test_lib/event_decoder');
 const { AccountProvider } = require('../test_lib/utils.js');
 
 async function prepare(
-    accountProvider,
-    spendingLimit, deltaExpirationHeight,
+  accountProvider,
+  spendingLimit, deltaExpirationHeight,
 ) {
-    const { utilityToken } = await TokenHolderUtils.createUtilityMockToken();
+  const { utilityToken } = await TokenHolderUtils.createUtilityMockToken();
 
-    const { tokenRules } = await TokenHolderUtils.createMockTokenRules();
+  const { tokenRules } = await TokenHolderUtils.createMockTokenRules();
 
-    const authorizedSessionPublicKey = accountProvider.get();
+  const authorizedSessionPublicKey = accountProvider.get();
 
-    const {
-        tokenHolderOwnerAddress,
-        tokenHolder,
-    } = await TokenHolderUtils.createTokenHolder(
-        accountProvider,
-        utilityToken, tokenRules,
-        spendingLimit, deltaExpirationHeight,
-        authorizedSessionPublicKey,
-    );
+  const {
+    tokenHolderOwnerAddress,
+    tokenHolder,
+  } = await TokenHolderUtils.createTokenHolder(
+    accountProvider,
+    utilityToken, tokenRules,
+    spendingLimit, deltaExpirationHeight,
+    authorizedSessionPublicKey,
+  );
 
-    await TokenHolderUtils.authorizeSessionKey(
-        tokenHolder, tokenHolderOwnerAddress,
-        authorizedSessionPublicKey, spendingLimit, deltaExpirationHeight,
-    );
+  await TokenHolderUtils.authorizeSessionKey(
+    tokenHolder, tokenHolderOwnerAddress,
+    authorizedSessionPublicKey, spendingLimit, deltaExpirationHeight,
+  );
 
-    return {
-        utilityToken,
-        tokenRules,
-        tokenHolderOwnerAddress,
-        tokenHolder,
-        authorizedSessionPublicKey,
-    };
+  return {
+    utilityToken,
+    tokenRules,
+    tokenHolderOwnerAddress,
+    tokenHolder,
+    authorizedSessionPublicKey,
+  };
 }
 
 contract('TokenHolder::logout', async () => {
-    contract('Negative Tests', async (accounts) => {
-        const accountProvider = new AccountProvider(accounts);
+  contract('Negative Tests', async (accounts) => {
+    const accountProvider = new AccountProvider(accounts);
 
-        it('Reverts if caller is not a registered session key.', async () => {
-            const {
-                tokenHolder,
-            } = await prepare(
-                accountProvider,
-                10 /* spendingLimit */,
-                50 /* deltaExpirationHeight */,
-            );
+    it('Reverts if caller is not a registered session key.', async () => {
+      const {
+        tokenHolder,
+      } = await prepare(
+        accountProvider,
+        10 /* spendingLimit */,
+        50 /* deltaExpirationHeight */,
+      );
 
-            await utils.expectRevert(
-                tokenHolder.logout(
-                    {
-                        from: accountProvider.get(),
-                    },
-                ),
-                'Should revert as caller is not a registered session key.',
-                'Key is not authorized.',
-            );
-        });
-
-        it('Reverts if key to revoke is already revoked.', async () => {
-            const {
-                tokenHolder,
-                authorizedSessionPublicKey,
-            } = await prepare(
-                accountProvider,
-                10 /* spendingLimit */,
-                50 /* deltaExpirationHeight */,
-            );
-
-            await tokenHolder.logout(
-                { from: authorizedSessionPublicKey },
-            );
-
-            await utils.expectRevert(
-                tokenHolder.logout(
-                    { from: authorizedSessionPublicKey },
-                ),
-                'Should revert as key to revoke was already revoked.',
-                'Key is not authorized.',
-            );
-        });
+      await utils.expectRevert(
+        tokenHolder.logout(
+          {
+            from: accountProvider.get(),
+          },
+        ),
+        'Should revert as caller is not a registered session key.',
+        'Key is not authorized.',
+      );
     });
 
-    contract('Events', async (accounts) => {
-        const accountProvider = new AccountProvider(accounts);
+    it('Reverts if key to revoke is already revoked.', async () => {
+      const {
+        tokenHolder,
+        authorizedSessionPublicKey,
+      } = await prepare(
+        accountProvider,
+        10 /* spendingLimit */,
+        50 /* deltaExpirationHeight */,
+      );
 
-        it('Emits SessionRevoked event.', async () => {
-            const {
-                tokenHolder,
-                authorizedSessionPublicKey,
-            } = await prepare(
-                accountProvider,
-                10 /* spendingLimit */,
-                50 /* deltaExpirationHeight */,
-            );
+      await tokenHolder.logout(
+        { from: authorizedSessionPublicKey },
+      );
 
-            const transactionResponse = await tokenHolder.logout(
-                { from: authorizedSessionPublicKey },
-            );
-
-            const events = Event.decodeTransactionResponse(
-                transactionResponse,
-            );
-
-            assert.strictEqual(
-                events.length,
-                1,
-            );
-
-            // The only emitted event should be 'SessionRevoked'.
-            Event.assertEqual(events[0], {
-                name: 'SessionRevoked',
-                args: {
-                    _sessionKey: authorizedSessionPublicKey,
-                },
-            });
-        });
+      await utils.expectRevert(
+        tokenHolder.logout(
+          { from: authorizedSessionPublicKey },
+        ),
+        'Should revert as key to revoke was already revoked.',
+        'Key is not authorized.',
+      );
     });
+  });
 
-    contract('Storage', async (accounts) => {
-        const accountProvider = new AccountProvider(accounts);
+  contract('Events', async (accounts) => {
+    const accountProvider = new AccountProvider(accounts);
 
-        it('Checks that key is revoked after successfull revocation.', async () => {
-            const {
-                tokenHolder,
-                authorizedSessionPublicKey,
-            } = await prepare(
-                accountProvider,
-                10 /* spendingLimit */,
-                50 /* deltaExpirationHeight */,
-            );
+    it('Emits SessionRevoked event.', async () => {
+      const {
+        tokenHolder,
+        authorizedSessionPublicKey,
+      } = await prepare(
+        accountProvider,
+        10 /* spendingLimit */,
+        50 /* deltaExpirationHeight */,
+      );
 
-            let keyData = await tokenHolder.sessionKeys.call(
-                authorizedSessionPublicKey,
-            );
+      const transactionResponse = await tokenHolder.logout(
+        { from: authorizedSessionPublicKey },
+      );
 
-            assert.isOk(
-                // TokenHolder.AuthorizationStatus.AUTHORIZED == 1
-                keyData.status.eqn(1),
-            );
+      const events = Event.decodeTransactionResponse(
+        transactionResponse,
+      );
 
-            await tokenHolder.logout(
-                { from: authorizedSessionPublicKey },
-            );
+      assert.strictEqual(
+        events.length,
+        1,
+      );
 
-            keyData = await tokenHolder.sessionKeys.call(
-                authorizedSessionPublicKey,
-            );
-
-            assert.isOk(
-                // TokenHolder.AuthorizationStatus.REVOKED == 2
-                keyData.status.eqn(2),
-            );
-        });
+      // The only emitted event should be 'SessionRevoked'.
+      Event.assertEqual(events[0], {
+        name: 'SessionRevoked',
+        args: {
+          _sessionKey: authorizedSessionPublicKey,
+        },
+      });
     });
+  });
+
+  contract('Storage', async (accounts) => {
+    const accountProvider = new AccountProvider(accounts);
+
+    it('Checks that key is revoked after successfull revocation.', async () => {
+      const {
+        tokenHolder,
+        authorizedSessionPublicKey,
+      } = await prepare(
+        accountProvider,
+        10 /* spendingLimit */,
+        50 /* deltaExpirationHeight */,
+      );
+
+      let keyData = await tokenHolder.sessionKeys.call(
+        authorizedSessionPublicKey,
+      );
+
+      assert.isOk(
+        // TokenHolder.AuthorizationStatus.AUTHORIZED == 1
+        keyData.status.eqn(1),
+      );
+
+      await tokenHolder.logout(
+        { from: authorizedSessionPublicKey },
+      );
+
+      keyData = await tokenHolder.sessionKeys.call(
+        authorizedSessionPublicKey,
+      );
+
+      assert.isOk(
+        // TokenHolder.AuthorizationStatus.REVOKED == 2
+        keyData.status.eqn(2),
+      );
+    });
+  });
 });

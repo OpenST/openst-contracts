@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+'use strict';
+
 const web3 = require('../test_lib/web3.js');
 
 const EIP20TokenFake = artifacts.require('EIP20TokenFake');
@@ -28,30 +30,30 @@ const PriceOracleFake = artifacts.require('PriceOracleFake');
  *      - decimals: 1
  */
 module.exports.createEIP20Token = async () => {
-    const token = await EIP20TokenFake.new(
-        'OST', 'Open Simple Token', 1,
-    );
+  const token = await EIP20TokenFake.new(
+    'OST', 'Open Simple Token', 1,
+  );
 
-    return token;
+  return token;
 };
 
 module.exports.createOrganization = async (accountProvider) => {
-    const organizationOwner = accountProvider.get();
-    const organizationWorker = accountProvider.get();
+  const organizationOwner = accountProvider.get();
+  const organizationWorker = accountProvider.get();
 
-    const organization = await Organization.new(
-        organizationOwner,
-        organizationOwner,
-        [organizationWorker],
-        (await web3.eth.getBlockNumber()) + 100000,
-        { from: accountProvider.get() },
-    );
+  const organization = await Organization.new(
+    organizationOwner,
+    organizationOwner,
+    [organizationWorker],
+    (await web3.eth.getBlockNumber()) + 100000,
+    { from: accountProvider.get() },
+  );
 
-    return {
-        organization,
-        organizationOwner,
-        organizationWorker,
-    };
+  return {
+    organization,
+    organizationOwner,
+    organizationWorker,
+  };
 };
 
 /**
@@ -59,59 +61,59 @@ module.exports.createOrganization = async (accountProvider) => {
  *      (tokenRules, organizationAddress, token)
  */
 module.exports.createTokenEconomy = async (accountProvider) => {
-    const {
-        organization,
-        organizationOwner,
-        organizationWorker,
-    } = await this.createOrganization(accountProvider);
+  const {
+    organization,
+    organizationOwner,
+    organizationWorker,
+  } = await this.createOrganization(accountProvider);
 
-    const token = await this.createEIP20Token();
+  const token = await this.createEIP20Token();
 
-    const tokenRules = await TokenRulesSpy.new();
+  const tokenRules = await TokenRulesSpy.new();
 
-    const baseCurrencyCode = 'OST';
+  const baseCurrencyCode = 'OST';
 
-    const conversionRate = 315;
+  const conversionRate = 315;
 
-    const conversionRateDecimals = 2;
+  const conversionRateDecimals = 2;
 
-    const requiredPriceOracleDecimals = 7;
+  const requiredPriceOracleDecimals = 7;
 
-    const pricerRule = await PricerRule.new(
-        organization.address,
-        token.address,
-        web3.utils.stringToHex(baseCurrencyCode.toString()),
-        conversionRate,
-        conversionRateDecimals,
-        requiredPriceOracleDecimals,
-        tokenRules.address,
-    );
+  const pricerRule = await PricerRule.new(
+    organization.address,
+    token.address,
+    web3.utils.stringToHex(baseCurrencyCode.toString()),
+    conversionRate,
+    conversionRateDecimals,
+    requiredPriceOracleDecimals,
+    tokenRules.address,
+  );
 
-    const quoteCurrencyCode = 'EUR';
-    const priceOracleInitialPrice = 11;
-    const initialPriceExpirationHeight = (await web3.eth.getBlockNumber()) + 10000;
+  const quoteCurrencyCode = 'EUR';
+  const priceOracleInitialPrice = 11;
+  const initialPriceExpirationHeight = (await web3.eth.getBlockNumber()) + 10000;
 
-    const priceOracle = await PriceOracleFake.new(
-        web3.utils.stringToHex(baseCurrencyCode),
-        web3.utils.stringToHex(quoteCurrencyCode),
-        requiredPriceOracleDecimals,
-        priceOracleInitialPrice,
-        initialPriceExpirationHeight,
-    );
+  const priceOracle = await PriceOracleFake.new(
+    web3.utils.stringToHex(baseCurrencyCode),
+    web3.utils.stringToHex(quoteCurrencyCode),
+    requiredPriceOracleDecimals,
+    priceOracleInitialPrice,
+    initialPriceExpirationHeight,
+  );
 
-    return {
-        organization,
-        organizationOwner,
-        organizationWorker,
-        token,
-        tokenRules,
-        baseCurrencyCode,
-        conversionRate,
-        conversionRateDecimals,
-        requiredPriceOracleDecimals,
-        pricerRule,
-        quoteCurrencyCode,
-        priceOracleInitialPrice,
-        priceOracle,
-    };
+  return {
+    organization,
+    organizationOwner,
+    organizationWorker,
+    token,
+    tokenRules,
+    baseCurrencyCode,
+    conversionRate,
+    conversionRateDecimals,
+    requiredPriceOracleDecimals,
+    pricerRule,
+    quoteCurrencyCode,
+    priceOracleInitialPrice,
+    priceOracle,
+  };
 };

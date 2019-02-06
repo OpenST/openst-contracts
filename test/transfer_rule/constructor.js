@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+'use strict';
+
 const utils = require('../test_lib/utils.js');
 const { AccountProvider } = require('../test_lib/utils.js');
 
@@ -19,27 +21,27 @@ const TransferRule = artifacts.require('TransferRule');
 
 
 contract('TransferRule::constructor', async () => {
-    contract('Negative Tests', async () => {
-        it('Reverts if TokenRules address is null.', async () => {
-            await utils.expectRevert(
-                TransferRule.new(utils.NULL_ADDRESS),
-                'Should revert as TokenRules address is null.',
-                'Token rules address is null.',
-            );
-        });
+  contract('Negative Tests', async () => {
+    it('Reverts if TokenRules address is null.', async () => {
+      await utils.expectRevert(
+        TransferRule.new(utils.NULL_ADDRESS),
+        'Should revert as TokenRules address is null.',
+        'Token rules address is null.',
+      );
     });
+  });
 
-    contract('Storage', async (accounts) => {
-        const accountProvider = new AccountProvider(accounts);
-        it('Checks that passed arguments are set correctly.', async () => {
-            const tokenRules = accountProvider.get();
+  contract('Storage', async (accounts) => {
+    const accountProvider = new AccountProvider(accounts);
+    it('Checks that passed arguments are set correctly.', async () => {
+      const tokenRules = accountProvider.get();
 
-            const rule = await TransferRule.new(tokenRules);
+      const rule = await TransferRule.new(tokenRules);
 
-            assert.strictEqual(
-                await rule.tokenRules.call(),
-                tokenRules,
-            );
-        });
+      assert.strictEqual(
+        await rule.tokenRules.call(),
+        tokenRules,
+      );
     });
+  });
 });

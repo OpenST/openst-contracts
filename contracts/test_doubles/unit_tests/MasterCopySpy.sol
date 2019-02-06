@@ -14,7 +14,8 @@ pragma solidity ^0.5.0;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "../../SafeMath.sol";
+import "../../external/SafeMath.sol";
+import "../../proxies/MasterCopyNonUpgradable.sol";
 
 /**
  * @title A test double (spy) contract acting as a master copy for proxies
@@ -24,7 +25,7 @@ import "../../SafeMath.sol";
  *        parameters, msg.value and msg.sender values once calling the pay()
  *        function to test validity afterwards.
  */
-contract MasterCopySpy {
+contract MasterCopySpy is MasterCopyNonUpgradable {
 
     /* Usings */
 

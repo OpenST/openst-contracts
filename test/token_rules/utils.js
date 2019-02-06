@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+'use strict';
+
 const web3 = require('../test_lib/web3.js');
 
 const EIP20TokenFake = artifacts.require('EIP20TokenFake');
@@ -26,11 +28,11 @@ const Organization = artifacts.require('Organization');
  *      - decimals: 1
  */
 module.exports.createEIP20Token = async () => {
-    const token = await EIP20TokenFake.new(
-        'OST', 'Open Simple Token', 1,
-    );
+  const token = await EIP20TokenFake.new(
+    'OST', 'Open Simple Token', 1,
+  );
 
-    return token;
+  return token;
 };
 
 /**
@@ -38,31 +40,31 @@ module.exports.createEIP20Token = async () => {
  *      (tokenRules, organizationAddress, token)
  */
 module.exports.createTokenEconomy = async (accountProvider) => {
-    const organizationOwner = accountProvider.get();
-    const organizationWorker = accountProvider.get();
-    const organization = await Organization.new(
-        organizationOwner,
-        organizationOwner,
-        [organizationWorker],
-        (await web3.eth.getBlockNumber()) + 100000,
-        { from: accountProvider.get() },
-    );
+  const organizationOwner = accountProvider.get();
+  const organizationWorker = accountProvider.get();
+  const organization = await Organization.new(
+    organizationOwner,
+    organizationOwner,
+    [organizationWorker],
+    (await web3.eth.getBlockNumber()) + 100000,
+    { from: accountProvider.get() },
+  );
 
-    const token = await this.createEIP20Token();
+  const token = await this.createEIP20Token();
 
-    const tokenRules = await TokenRules.new(
-        organization.address, token.address,
-    );
+  const tokenRules = await TokenRules.new(
+    organization.address, token.address,
+  );
 
-    await tokenRules.enableDirectTransfers({ from: organizationWorker });
+  await tokenRules.enableDirectTransfers({ from: organizationWorker });
 
-    const organizationAddress = organization.address;
+  const organizationAddress = organization.address;
 
-    return {
-        tokenRules,
-        token,
-        organizationAddress,
-        organizationOwner,
-        organizationWorker,
-    };
+  return {
+    tokenRules,
+    token,
+    organizationAddress,
+    organizationOwner,
+    organizationWorker,
+  };
 };

@@ -1,4 +1,4 @@
-// Copyright 2018 OpenST Ltd.
+// Copyright 2019 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+'use strict';
 
 const Utils = require('../test_lib/utils.js');
 const web3 = require('../test_lib/web3.js');
@@ -23,128 +24,128 @@ const ProxyFactory = artifacts.require('ProxyFactory');
 const MasterCopySpy = artifacts.require('MasterCopySpy');
 
 function generateSetupFunctionData(balance) {
-    return web3.eth.abi.encodeFunctionCall(
+  return web3.eth.abi.encodeFunctionCall(
+    {
+      name: 'setup',
+      type: 'function',
+      inputs: [
         {
-            name: 'setup',
-            type: 'function',
-            inputs: [
-                {
-                    type: 'uint256',
-                    name: 'balance',
-                },
-            ],
+          type: 'uint256',
+          name: 'balance',
         },
-        [balance],
-    );
+      ],
+    },
+    [balance],
+  );
 }
 
 
 contract('ProxyFactory::createProxy', async (accounts) => {
-    const accountProvider = new AccountProvider(accounts);
+  const accountProvider = new AccountProvider(accounts);
 
-    contract('Negative Tests', async () => {
-        it('Reverts if master copy address is null.', async () => {
-            const proxyFactory = await ProxyFactory.new();
+  contract('Negative Tests', async () => {
+    it('Reverts if master copy address is null.', async () => {
+      const proxyFactory = await ProxyFactory.new();
 
-            await Utils.expectRevert(
-                proxyFactory.createProxy(
-                    Utils.NULL_ADDRESS,
-                    '0x',
-                ),
-                'Should revert as the master copy address is null.',
-                'Master copy address is null.',
-            );
-        });
+      await Utils.expectRevert(
+        proxyFactory.createProxy(
+          Utils.NULL_ADDRESS,
+          '0x',
+        ),
+        'Should revert as the master copy address is null.',
+        'Master copy address is null.',
+      );
+    });
+  });
+
+  contract('Proxy', async () => {
+    it('Checks that proxy constructor with master copy address is called.', async () => {
+      const proxyFactory = await ProxyFactory.new();
+
+      const masterCopy = accountProvider.get();
+
+      const proxyAddress = await proxyFactory.createProxy.call(
+        masterCopy,
+        '0x',
+      );
+      await proxyFactory.createProxy(
+        masterCopy,
+        '0x',
+      );
+
+      const proxy = await ProxyContract.at(proxyAddress);
+
+      assert.strictEqual(
+        await proxy.masterCopy.call(),
+        masterCopy,
+      );
     });
 
-    contract('Proxy', async () => {
-        it('Checks that proxy constructor with master copy address is called.', async () => {
-            const proxyFactory = await ProxyFactory.new();
+    it('Checks that if "data" is non-empty appropriate function on proxy is called.', async () => {
+      const proxyFactory = await ProxyFactory.new();
 
-            const masterCopy = accountProvider.get();
+      const initialBalance = 22;
+      const masterCopy = await MasterCopySpy.new(initialBalance);
 
-            const proxyAddress = await proxyFactory.createProxy.call(
-                masterCopy,
-                '0x',
-            );
-            await proxyFactory.createProxy(
-                masterCopy,
-                '0x',
-            );
+      const initialBalanceInSetupCall = 11;
+      const setupData = generateSetupFunctionData(
+        initialBalanceInSetupCall,
+      );
 
-            const proxy = await ProxyContract.at(proxyAddress);
+      const proxyAddress = await proxyFactory.createProxy.call(
+        masterCopy.address,
+        setupData,
+      );
+      await proxyFactory.createProxy(
+        masterCopy.address,
+        setupData,
+      );
 
-            assert.strictEqual(
-                await proxy.masterCopy.call(),
-                masterCopy,
-            );
-        });
+      const proxy = await MasterCopySpy.at(proxyAddress);
 
-        it('Checks that if "data" is non-empty appropriate function on proxy is called.', async () => {
-            const proxyFactory = await ProxyFactory.new();
-
-            const initialBalance = 22;
-            const masterCopy = await MasterCopySpy.new(initialBalance);
-
-            const initialBalanceInSetupCall = 11;
-            const setupData = generateSetupFunctionData(
-                initialBalanceInSetupCall,
-            );
-
-            const proxyAddress = await proxyFactory.createProxy.call(
-                masterCopy.address,
-                setupData,
-            );
-            await proxyFactory.createProxy(
-                masterCopy.address,
-                setupData,
-            );
-
-            const proxy = await MasterCopySpy.at(proxyAddress);
-
-            assert.isOk(
-                (await proxy.remainingBalance.call()).eqn(initialBalanceInSetupCall),
-            );
-        });
+      assert.isOk(
+        (await proxy.remainingBalance.call()).eqn(initialBalanceInSetupCall),
+      );
     });
+  });
 
-    contract('Events', async () => {
-        it('Checks that ProxyCreated event is emitted on success.', async () => {
-            const proxyFactory = await ProxyFactory.new();
+  contract('Events', async () => {
+    it('Checks that ProxyCreated event is emitted on success.', async () => {
+      const proxyFactory = await ProxyFactory.new();
 
-            const initialBalance = 22;
-            const masterCopy = await MasterCopySpy.new(initialBalance);
+      const initialBalance = 22;
+      const masterCopy = await MasterCopySpy.new(initialBalance);
 
-            const initialBalanceInSetupCall = 11;
-            const setupData = generateSetupFunctionData(
-                initialBalanceInSetupCall,
-            );
+      const initialBalanceInSetupCall = 11;
+      const setupData = generateSetupFunctionData(
+        initialBalanceInSetupCall,
+      );
 
 
-            const proxyAddress = await proxyFactory.createProxy.call(
-                masterCopy.address,
-                setupData,
-            );
-            const transactionResponse = await proxyFactory.createProxy(
-                masterCopy.address,
-                setupData,
-            );
+      const proxyAddress = await proxyFactory.createProxy.call(
+        masterCopy.address,
+        setupData,
+      );
+      const transactionResponse = await proxyFactory.createProxy(
+        masterCopy.address,
+        setupData,
+      );
 
-            const events = Event.decodeTransactionResponse(
-                transactionResponse,
-            );
+      const events = Event.decodeTransactionResponse(
+        transactionResponse,
+      );
 
-            assert.strictEqual(
-                events.length,
-                1,
-            );
+      assert.strictEqual(
+        events.length,
+        1,
+      );
 
-            Event.assertEqual(events[0], {
-                name: 'ProxyCreated',
-                args: {
-                    _proxy: proxyAddress,
-                },
-            });
-        });
+      Event.assertEqual(events[0], {
+        name: 'ProxyCreated',
+        args: {
+          _proxy: proxyAddress,
+        },
+      });
     });
+  });
 });
