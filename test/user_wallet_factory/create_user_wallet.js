@@ -276,7 +276,7 @@ contract('UserWalletFactory::createUserWallet', async (accounts) => {
       );
 
       assert.isOk(
-        sessionKeyData.status.eqn(1), // AUTHORIZED == 1
+        sessionKeyData.session.eqn(2),
       );
     });
   });

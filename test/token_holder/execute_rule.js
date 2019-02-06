@@ -343,7 +343,7 @@ contract('TokenHolder::executeRule', async () => {
           exTxSignature.v,
         ),
         'Should revert as ExTx is signed with non-authorized key.',
-        'Session key is not active.',
+        'Key\'s session is not equal to contract\'s session window.',
       );
     });
 
@@ -367,7 +367,7 @@ contract('TokenHolder::executeRule', async () => {
         mockRulePassFunctionData,
         exTxSignature,
       } = await generateMockRulePassFunctionExTx(
-        tokenHolder, nonce, sessionPrivateKey2,
+        tokenHolder, nonce, sessionPrivateKey1,
         mockRule,
         mockRuleValue,
       );
@@ -387,7 +387,7 @@ contract('TokenHolder::executeRule', async () => {
           exTxSignature.v,
         ),
         'Should revert as transaction is signed with expired key.',
-        'Session key is not active.',
+        'Session key was expired.',
       );
     });
 
@@ -412,8 +412,8 @@ contract('TokenHolder::executeRule', async () => {
       );
 
       assert.isOk(
-        // AuthorizationStatus.REVOKED == 2
-        keyData.status.eqn(2),
+        // AuthorizationStatus.REVOKED == 1
+        keyData.session.eqn(1),
       );
 
       const nonce = 0;
@@ -425,7 +425,7 @@ contract('TokenHolder::executeRule', async () => {
         mockRulePassFunctionData,
         exTxSignature,
       } = await generateMockRulePassFunctionExTx(
-        tokenHolder, nonce, sessionPrivateKey2,
+        tokenHolder, nonce, sessionPrivateKey1,
         mockRule,
         mockRuleValue,
       );
@@ -440,7 +440,50 @@ contract('TokenHolder::executeRule', async () => {
           exTxSignature.v,
         ),
         'Should revert as transaction is signed with revoked key.',
-        'Session key is not active.',
+        'Key\'s session is not equal to contract\'s session window.',
+      );
+    });
+
+    it('Reverts if ExTx is signed with logged out key.', async () => {
+      const {
+        tokenHolderOwnerAddress,
+        tokenHolder,
+      } = await prepare(
+        accountProvider,
+        10, // spendingLimit
+        10, // deltaExpirationHeight,
+        sessionPublicKey1,
+      );
+
+      const nonce = 0;
+
+      const mockRule = await CustomRuleDouble.new();
+      const mockRuleValue = accountProvider.get();
+
+      const {
+        mockRulePassFunctionData,
+        exTxSignature,
+      } = await generateMockRulePassFunctionExTx(
+        tokenHolder, nonce, sessionPrivateKey1,
+        mockRule,
+        mockRuleValue,
+      );
+
+      await tokenHolder.logout(
+        { from: tokenHolderOwnerAddress },
+      );
+
+      await Utils.expectRevert(
+        tokenHolder.executeRule(
+          mockRule.address,
+          mockRulePassFunctionData,
+          nonce,
+          EthUtils.bufferToHex(exTxSignature.r),
+          EthUtils.bufferToHex(exTxSignature.s),
+          exTxSignature.v,
+        ),
+        'Should revert as ExTx is signed with logged-out key.',
+        'Key\'s session is not equal to contract\'s session window.',
       );
     });
 

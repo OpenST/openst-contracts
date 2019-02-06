@@ -14,6 +14,7 @@
 
 'use strict';
 
+const BN = require('bn.js');
 const utils = require('../test_lib/utils.js');
 const { TokenHolderUtils } = require('./utils.js');
 const { Event } = require('../test_lib/event_decoder');
@@ -57,7 +58,7 @@ contract('TokenHolder::logout', async () => {
   contract('Negative Tests', async (accounts) => {
     const accountProvider = new AccountProvider(accounts);
 
-    it('Reverts if caller is not a registered session key.', async () => {
+    it('Reverts if is not called by owner.', async () => {
       const {
         tokenHolder,
       } = await prepare(
@@ -68,35 +69,10 @@ contract('TokenHolder::logout', async () => {
 
       await utils.expectRevert(
         tokenHolder.logout(
-          {
-            from: accountProvider.get(),
-          },
+          { from: accountProvider.get() },
         ),
-        'Should revert as caller is not a registered session key.',
-        'Key is not authorized.',
-      );
-    });
-
-    it('Reverts if key to revoke is already revoked.', async () => {
-      const {
-        tokenHolder,
-        authorizedSessionPublicKey,
-      } = await prepare(
-        accountProvider,
-        10 /* spendingLimit */,
-        50 /* deltaExpirationHeight */,
-      );
-
-      await tokenHolder.logout(
-        { from: authorizedSessionPublicKey },
-      );
-
-      await utils.expectRevert(
-        tokenHolder.logout(
-          { from: authorizedSessionPublicKey },
-        ),
-        'Should revert as key to revoke was already revoked.',
-        'Key is not authorized.',
+        'Should revert as caller is not an owner.',
+        'Only owner is allowed to call.',
       );
     });
   });
@@ -107,18 +83,18 @@ contract('TokenHolder::logout', async () => {
     it('Emits SessionRevoked event.', async () => {
       const {
         tokenHolder,
-        authorizedSessionPublicKey,
+        tokenHolderOwnerAddress,
       } = await prepare(
         accountProvider,
         10 /* spendingLimit */,
         50 /* deltaExpirationHeight */,
       );
 
-      const transactionResponse = await tokenHolder.logout(
-        { from: authorizedSessionPublicKey },
+      let transactionResponse = await tokenHolder.logout(
+        { from: tokenHolderOwnerAddress },
       );
 
-      const events = Event.decodeTransactionResponse(
+      let events = Event.decodeTransactionResponse(
         transactionResponse,
       );
 
@@ -127,11 +103,30 @@ contract('TokenHolder::logout', async () => {
         1,
       );
 
-      // The only emitted event should be 'SessionRevoked'.
       Event.assertEqual(events[0], {
-        name: 'SessionRevoked',
+        name: 'SessionsLoggedOut',
         args: {
-          _sessionKey: authorizedSessionPublicKey,
+          _sessionWindow: new BN(2),
+        },
+      });
+
+      transactionResponse = await tokenHolder.logout(
+        { from: tokenHolderOwnerAddress },
+      );
+
+      events = Event.decodeTransactionResponse(
+        transactionResponse,
+      );
+
+      assert.strictEqual(
+        events.length,
+        1,
+      );
+
+      Event.assertEqual(events[0], {
+        name: 'SessionsLoggedOut',
+        args: {
+          _sessionWindow: new BN(3),
         },
       });
     });
@@ -140,36 +135,26 @@ contract('TokenHolder::logout', async () => {
   contract('Storage', async (accounts) => {
     const accountProvider = new AccountProvider(accounts);
 
-    it('Checks that key is revoked after successfull revocation.', async () => {
+    it('Checks that logout request is handled correctly.', async () => {
       const {
         tokenHolder,
-        authorizedSessionPublicKey,
+        tokenHolderOwnerAddress,
       } = await prepare(
         accountProvider,
         10 /* spendingLimit */,
         50 /* deltaExpirationHeight */,
       );
 
-      let keyData = await tokenHolder.sessionKeys.call(
-        authorizedSessionPublicKey,
-      );
-
       assert.isOk(
-        // TokenHolder.AuthorizationStatus.AUTHORIZED == 1
-        keyData.status.eqn(1),
+        (await tokenHolder.sessionWindow.call()).eqn(2),
       );
 
       await tokenHolder.logout(
-        { from: authorizedSessionPublicKey },
-      );
-
-      keyData = await tokenHolder.sessionKeys.call(
-        authorizedSessionPublicKey,
+        { from: tokenHolderOwnerAddress },
       );
 
       assert.isOk(
-        // TokenHolder.AuthorizationStatus.REVOKED == 2
-        keyData.status.eqn(2),
+        (await tokenHolder.sessionWindow.call()).eqn(3),
       );
     });
   });

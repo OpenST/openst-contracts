@@ -283,6 +283,10 @@ contract('TokenHolder::setup', async () => {
         ownerAddress,
       );
 
+      assert.isOk(
+        (await tokenHolder.sessionWindow.call()).eqn(2),
+      );
+
       const sessionKeyData1 = await tokenHolder.sessionKeys.call(
         sessionKeyAddress1,
       );
@@ -300,7 +304,7 @@ contract('TokenHolder::setup', async () => {
       );
 
       assert.isOk(
-        sessionKeyData1.status.eqn(1), // AUTHORIZED == 1
+        sessionKeyData1.session.eqn(2), // REVOKED + 1
       );
 
       const sessionKeyData2 = await tokenHolder.sessionKeys.call(
@@ -320,7 +324,7 @@ contract('TokenHolder::setup', async () => {
       );
 
       assert.isOk(
-        sessionKeyData2.status.eqn(1), // AUTHORIZED == 1
+        sessionKeyData2.session.eqn(2), // REVOKED + 1
       );
     });
 
