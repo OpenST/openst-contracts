@@ -288,9 +288,9 @@ contract TokenHolder is MasterCopyNonUpgradable
         external
         onlyOwner
     {
-        sessionWindow = sessionWindow.add(1);
+        emit SessionsLoggedOut(sessionWindow);
 
-        emit SessionsLoggedOut(sessionWindow.sub(1));
+        sessionWindow = sessionWindow.add(1);
     }
 
     /**
@@ -476,18 +476,8 @@ contract TokenHolder is MasterCopyNonUpgradable
         // of message hash according EIP-1077 and retriving the key
         // from the signature (_r, _s, _v).
         require(
-            keyData.session != 0,
-            "Session key is not authorized."
-        );
-
-        require(
-            keyData.session != 1,
-            "Session key was revoked."
-        );
-
-        require(
             keyData.session == sessionWindow,
-            "Session key was logged out."
+            "Key's session is not equal to contract's session window."
         );
 
         require(

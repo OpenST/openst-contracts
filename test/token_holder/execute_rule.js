@@ -343,7 +343,7 @@ contract('TokenHolder::executeRule', async () => {
           exTxSignature.v,
         ),
         'Should revert as ExTx is signed with non-authorized key.',
-        'Session key is not authorized.',
+        'Key\'s session is not equal to contract\'s session window.',
       );
     });
 
@@ -440,7 +440,7 @@ contract('TokenHolder::executeRule', async () => {
           exTxSignature.v,
         ),
         'Should revert as transaction is signed with revoked key.',
-        'Session key was revoked.',
+        'Key\'s session is not equal to contract\'s session window.',
       );
     });
 
@@ -483,7 +483,7 @@ contract('TokenHolder::executeRule', async () => {
           exTxSignature.v,
         ),
         'Should revert as ExTx is signed with logged-out key.',
-        'Session key was logged out.',
+        'Key\'s session is not equal to contract\'s session window.',
       );
     });
 
