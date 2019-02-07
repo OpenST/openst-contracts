@@ -35,12 +35,6 @@ import "./OrganizationInterface.sol";
  */
 contract Organization is OrganizationInterface {
 
-
-    /* Using */
-
-    using SafeMath for uint256;
-
-
     /* Events */
 
     /** Emitted when a current owner initiates a change of ownership. */

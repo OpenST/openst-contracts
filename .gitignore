@@ -1,19 +1,39 @@
 # OSX
 .DS_Store
-.idea/
-
-# VS Code
-.vscode
 
 # Vagrant
 .vagrant/
 ubuntu-xenial-16.04-cloudimg-console.log
 
+# don't commit contract binaries in protocol
+# we do commit the contract binaries in platform
+contracts/bin/
+contracts/abi/
+
 # don't commit node_modules
 node_modules
 
+# Don't commit package-lock.json file
 package-lock.json
+
+# Do not track builds
 build/
 
-contracts/abi/
-contracts/bin/
+# Do not track IDE files
+.idea/
+.vscode/
+*.iml
+
+# LaTeX auxiliary files
+*.aux
+*.log
+
+# NPM package generated files:
+dist/contracts.json
+
+## Build tool auxiliary files:
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync

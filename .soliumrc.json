@@ -1,0 +1,19 @@
+{
+  "extends": "solium:recommended",
+  "plugins": [
+    "security"
+  ],
+  "rules": {
+    "error-reason": [
+      "error"
+    ],
+    "quotes": [
+      "error",
+      "double"
+    ],
+    "indentation": [
+      "error",
+      4
+    ]
+  }
+}

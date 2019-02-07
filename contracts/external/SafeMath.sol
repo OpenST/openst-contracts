@@ -24,6 +24,7 @@ pragma solidity ^0.5.0;
 // The MIT License.
 // ----------------------------------------------------------------------------
 
+/* solium-disable */
 
 /**
  * @title SafeMath
