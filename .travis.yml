@@ -7,6 +7,9 @@ branches:
   - develop
   - /^feature\/.*/
   - /^release-.*/
+git:
+  quiet: true
+  submodules: true
 notifications:
   email:
     recipients:
@@ -15,29 +18,25 @@ notifications:
     on_failure: always
 node_js:
   - "8"
-preparing-env:
+before-install:
   - sudo apt-get update
   - sudo apt-get install nodejs
   - sudo apt-get install npm
   - sudo apt-get install software-properties-common
   - sudo add-apt-repository -y ppa:ethereum/ethereum
-updating-git-submodules:
   - git submodule update --init --recursive
 install:
   - npm install
-after-install:
+before-script:
   - export PATH=./node_modules/.bin/:${PATH}
-lint-sol:
+script:
   - npm run lint:sol
-lint-js:
   - npm run lint:js
-compile:
   - npm run compile-all
+  - npm run build-package
 before_test:
   - ./tools/run_ganache_cli.sh </dev/null 1>/dev/null 2>&1 &
 test:
   - npm run test
 after_test:
   - kill $(ps aux | grep 'ganache-cli' | awk '{print $2}')
-build-package:
-  - npm run build-package
