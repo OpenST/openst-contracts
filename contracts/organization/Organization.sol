@@ -20,7 +20,6 @@ pragma solidity ^0.5.0;
 //
 // ----------------------------------------------------------------------------
 
-import "../external/SafeMath.sol";
 import "./OrganizationInterface.sol";
 
 /**
@@ -34,12 +33,6 @@ import "./OrganizationInterface.sol";
  *         of the `OrganizationInterface`, a notion of an admin does not exist.
  */
 contract Organization is OrganizationInterface {
-
-
-    /* Using */
-
-    using SafeMath for uint256;
-
 
     /* Events */
 

@@ -5,6 +5,11 @@ branches:
   only:
   - master
   - develop
+  - /^feature\/.*/
+  - /^release-.*/
+git:
+  quiet: true
+  submodules: true
 notifications:
   email:
     recipients:
@@ -19,12 +24,19 @@ before_install:
   - sudo apt-get install npm
   - sudo apt-get install software-properties-common
   - sudo add-apt-repository -y ppa:ethereum/ethereum
-  - sudo apt-get update
+  - git submodule update --init --recursive
 install:
-  - npm install
+  - npm install --quiet
+  - export PATH=./node_modules/.bin/:${PATH}
 before_script:
-  - nohup sh tools/runGanacheCli.sh </dev/null >/dev/null 2>&1 &
+  - ./tools/run_ganache_cli.sh </dev/null 1>/dev/null 2>&1 &
 script:
-  - truffle test
+  - npm build
+  - npm run lint:sol
+  - npm run lint:js
+  - npm run compile-all
+  - npm run build-package
+  - npm run test:contracts
+  - npm run test:package
 after_script:
-  - kill $(ps aux | grep 'testrpc' | awk '{print $2}')
+  - kill $(ps aux | grep 'ganache-cli' | awk '{print $2}')

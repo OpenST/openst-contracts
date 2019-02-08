@@ -1,15 +1,18 @@
 {
     "name": "@openstfoundation/openst-contracts",
-    "version": "0.10.0",
-    "description": "",
+    "version": "0.10.0-alpha.1",
+    "description": "Openst contracts provide ABIs and BINs for EVM smart contracts to enable developers to program token economies.",
+    "author": "OpenST Foundation Ltd.",
+    "license": "Apache v2.0",
     "keywords": [
+        "ethereum",
         "openst",
-        "OST",
-        "simpletoken"
+        "token economy",
+        "token holder",
+        "token rules",
+        "recovery"
     ],
     "homepage": "https://openst.org",
-    "author": "OpenST Foundation Ltd.",
-    "license": "LGPL-3.0",
     "repository": {
         "type": "git",
         "url": "https://github.com/OpenSTFoundation/openst-contracts.git"
@@ -17,25 +20,39 @@
     "bugs": {
         "url": "https://github.com/OpenSTFoundation/openst-contracts/issues"
     },
+    "files": [
+        "npm_package/dist"
+    ],
+    "main": "./npm_package/dist/index.js",
     "scripts": {
-        "compile": "node_modules/.bin/truffle compile"
+        "restart": "git submodule update --init --recursive && npm install",
+        "compile": "./node_modules/.bin/truffle compile",
+        "compile-all": "./node_modules/.bin/truffle compile --all --reset",
+        "lint:js": "find ./test -name \"*.js\" | xargs ./node_modules/.bin/eslint",
+        "lint:js:fix": "npm run lint:js -- --fix",
+        "lint:sol": "./node_modules/.bin/solium --dir contracts/",
+        "lint:sol:fix": "npm run lint:sol -- --fix",
+        "ganache-cli": "./tools/run_ganache_cli.sh",
+        "test:contracts": "./node_modules/.bin/truffle test",
+        "build-package": "node ./npm_package/build_package.js",
+        "test:package": "./npm_package/test/run_npm_package_test.sh",
+        "prepack": "npm run compile-all && npm run build-package",
+        "build": "npm-run-all restart lint:sol lint:js compile-all test:contracts build-package test:package"
     },
     "devDependencies": {
         "abi-decoder": "1.2.0",
         "assert": "1.4.1",
-        "bignumber.js": "4.1.0",
         "bn.js": "4.11.8",
         "eslint": "5.5.0",
         "eslint-config-airbnb-base": "13.1.0",
         "eslint-plugin-import": "2.14.0",
         "ethereumjs-util": "5.2.0",
+        "ethlint": "^1.2.2",
         "ganache-cli": "6.1.8",
+        "npm-run-all": "^4.1.5",
+        "nsp": "^3.2.1",
         "solc": "0.5.0",
-        "solidity-coverage": "0.5.11",
         "truffle": "beta",
         "web3": "1.0.0-beta.36"
-    },
-    "dependencies": {
-        "i": "^0.3.6"
     }
 }

@@ -1,34 +1,128 @@
-<h1 align="center">OpenST - Empowering Decentralized Economies</h1>
+# OpenST Contracts - Empowering Decentralized Economies
 
-[![Gitter: JOIN CHAT](https://img.shields.io/badge/gitter-JOIN%20CHAT-brightgreen.svg)](https://gitter.im/OpenSTFoundation/SimpleToken)
+OpenST Contracts is a collection of smart contracts that enable developers to
+program Token Economies.
 
-OpenST blockchain infrastructure empowers new economies for mainstream businesses and emerging (D)Apps. The central component of this infrastructure is the OpenST Protocol, a framework for tokenizing businesses.
+## Getting Started
 
-_While OpenST is available as-is for anyone to use, we caution that this is early stage software and under heavy ongoing development and improvement. Please report bugs and suggested improvements._
+These instructions will get you a copy of the project up and running on your
+local machine for development and testing purposes. See deployment for notes on
+how to deploy the project on a live system.
 
-OpenST-contracts is a collection of smart contracts that enable developers to program Token Economies.To participate in the discussion on technical matters, please join our [forum](https://discuss.openst.org/). The project also has a [Gitter](https://gitter.im/OpenSTFoundation/SimpleToken) channel in case you run into challenges and need help and we track our issues in GitHub.
+### Prerequisites
 
-The major components of this repository are the TokenHolder contracts, TokenRules contract, and the custom Rule contracts that can be registered with the TokenRules contracts to establish the economy specific payments and rewards.
+Project requires [node](https://nodejs.org/en/) and
+[npm](https://www.npmjs.com/get-npm) to be installed on dev machine.
 
-TokenHolder Contracts are multi-sig contracts with multiple ownership keys that are housed in different wallets that are controlled by a single human owner (say, a participant in the token economy). The multi-sig logic supports both custodial and fully decentralized key management, thus supporting a wide range of user profiles.
+### Cloning
 
-Ephemeral keys are introduced to sign transactions from within applications without requiring the user to manually sign every action. Ephemeral keys are temporary keys that can be authorized by the owner keys in accordance with the multi-sig requirements set by the user. 
+In case of fresh clone, use `--recursive-submodules` option while cloning:
 
-![Image 1](images/SessionKeyAuthorizationSequenceDiagram.png)
+```bash
+git clone --recursive-submodules git@github.com:OpenSTFoundation/openst-contracts.git
+```
 
-The addition of the TokenRules contract in OpenST v0.9.4 represents the decentralization of rule design and allows apps to design on-chain rules that map to their business logic. 
+To update git submodules for already cloned repos, run:
 
-Once an (d)App developer has set up their Token Economy using OpenST, their users can interact with it without explicitly  signing transactions that are triggered by the execution of a Rule registered with the TokenRules contract associated with the economy. 
+```bash
+git submodule update --init --recursive
+```
 
-The user can sign an executable transaction using an ephemeral key. Their TokenHolder Contract calls on a rule on their behalf. The TokenRules contract executes the Token transfers that are required to execute the rule 
+### Installing
 
-![Image2](images/ExecuteRuleSequenceDiagram.png)
+Install npm packages, by running:
 
-To incorporate OpenST in your (D)app, please use [openst.js](https://github.com/OpenSTFoundation/openst.js). 
-      
-#### Related Repositories
+```bash
+npm install
+```
 
-[openst.js](https://github.com/OpenSTFoundation/openst.js): OpenST.js is a library that enables interaction with openst-contracts to easily create token economies in (D)Apps. The library supports deploying and/or interacting with token, token holder, token rules, and token rule contracts.
+Afterwards, add `./node_modules/.bin` to `PATH` environment variable:
 
-[openst-js-examples](https://github.com/OpenSTFoundation/openst-js-examples): This repository contains an example usage of 
-OpenST.js where we walk you through registering rules, adding users, adding wallets to users, revoking ephemeral keys and other functionality in the context of a token economy. In order to make the best use of openst.js, we recommend working through the example to familiarize yourself with the functionality and usage of the library.
+```bash
+export PATH=./node_modules/.bin:${PATH}
+```
+
+## Compiling the contracts
+
+The following npm script compiles updated contracts from the last call:
+
+```bash
+npm run compile
+```
+
+, to compile all contracts, run:
+
+```bash
+npm run compile-all
+```
+
+## Linters
+
+### Solidity
+
+In `openst-contracts` to lint solidity files we use [Ethlint](https://github.com/duaraghav8/Ethlint).
+The following npm script lints all contracts within `./contracts` directory:
+
+```bash
+npm run lint:sol
+```
+
+[Ethlint](https://github.com/duaraghav8/Ethlint) is able to fix a subset of rules.
+The following npm script fixes (only a subset of rules) contracts within `./contracts` directory:
+
+```bash
+npm run lint:sol:fix
+```
+
+### JS
+
+[ESLint](https://eslint.org) is used to lint js files.
+
+To lint all js files within `./test` directory, run:
+
+```bash
+npm run lint:js
+```
+
+[ESLint](https://eslint.org) is able to fix a subset of rules.
+To fix js files, run:
+
+```bash
+npm run lint:js:fix
+```
+
+## Running the tests
+
+Before running the tests run `ganache-cli` by:
+
+```bash
+npm run ganache-cli
+```
+
+Run tests by calling:
+
+```bash
+npm run test
+```
+
+## Contributing
+
+Please read [CODE_OF_CONDUCT.md](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/CODE_OF_CONDUCT.md)
+for details on our code of conduct, and the process for submitting pull
+requests to us.
+
+## Versioning
+
+We use [SemVer](http://semver.org/) for versioning. For the versions available,
+see the [tags on this repository](https://github.com/OpenSTFoundation/openst-contracts/tags).
+
+## Authors
+
+See also the list of [contributors](https://github.com/OpenSTFoundation/openst-contracts/contributors)
+who participated in this project.
+
+## License
+
+This contracts are licensed under the Apache License Version 2.0 - see
+the [LICENSE.md](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/LICENSE.md)
+file for details.

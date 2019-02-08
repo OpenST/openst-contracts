@@ -14,10 +14,8 @@ pragma solidity ^0.5.0;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "../external/SafeMath.sol";
 import "./EIP20TokenInterface.sol";
 import "../organization/Organized.sol";
-
 
 /**
  * @notice Register of whitelisted rules that are allowed to initiate transfers
@@ -36,11 +34,6 @@ import "../organization/Organized.sol";
  *      function only once.
  */
 contract TokenRules is Organized {
-
-     /* Usings */
-
-    using SafeMath for uint256;
-
 
     /* Events */
 

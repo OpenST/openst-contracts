@@ -143,6 +143,7 @@ contract DelayedRecoveryModule is GnosisSafeModule {
     )
     {
         require(
+            // solium-disable-next-line operator-whitespace
             activeRecoveryInfo.prevOwner == _prevOwner
             && activeRecoveryInfo.oldOwner == _oldOwner
             && activeRecoveryInfo.newOwner == _newOwner,
