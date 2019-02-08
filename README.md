@@ -118,7 +118,7 @@ see the [tags on this repository](https://github.com/OpenSTFoundation/openst-con
 
 ## Authors
 
-See also the list of [contributors](https://github.com/your/project/contributors)
+See also the list of [contributors](https://github.com/OpenSTFoundation/openst-contracts/contributors)
 who participated in this project.
 
 ## License
