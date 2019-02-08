@@ -18,25 +18,32 @@ notifications:
     on_failure: always
 node_js:
   - "8"
-before-install:
-  - sudo apt-get update
-  - sudo apt-get install nodejs
-  - sudo apt-get install npm
-  - sudo apt-get install software-properties-common
-  - sudo add-apt-repository -y ppa:ethereum/ethereum
-  - git submodule update --init --recursive
-install:
-  - npm install
-before-script:
-  - export PATH=./node_modules/.bin/:${PATH}
-script:
-  - npm run lint:sol
-  - npm run lint:js
-  - npm run compile-all
-  - npm run build-package
-before_test:
-  - ./tools/run_ganache_cli.sh </dev/null 1>/dev/null 2>&1 &
-test:
-  - npm run test
-after_test:
-  - kill $(ps aux | grep 'ganache-cli' | awk '{print $2}')
+jobs:
+  include:
+    - stage: "Preparing Environment"
+      script:
+      - sudo apt-get update
+      - sudo apt-get install nodejs
+      - sudo apt-get install npm
+      - sudo apt-get install software-properties-common
+      - sudo add-apt-repository -y ppa:ethereum/ethereum
+      - git submodule update --init --recursive
+    - stage: "Installing Dependencies"
+      script:
+        - npm install --quiet
+        - export PATH=./node_modules/.bin/:${PATH}
+    - stage: "Linting"
+      script:
+      - npm run lint:sol
+      - npm run lint:js
+    - stage: "Compiling"
+      script:
+        - npm run compile-all
+        - npm run build-package
+    - stage: "Unit Testing"
+      before_script:
+        - ./tools/run_ganache_cli.sh </dev/null 1>/dev/null 2>&1 &
+      script:
+        - npm run test
+      after_script:
+        - kill $(ps aux | grep 'ganache-cli' | awk '{print $2}')
