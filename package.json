@@ -1,6 +1,6 @@
 {
     "name": "@openstfoundation/openst-contracts",
-    "version": "0.10.0",
+    "version": "0.10.0-alpha.1",
     "description": "Openst contracts provide ABIs and BINs for EVM smart contracts to enable developers to program token economies.",
     "author": "OpenST Foundation Ltd.",
     "license": "Apache v2.0",
@@ -20,6 +20,10 @@
     "bugs": {
         "url": "https://github.com/OpenSTFoundation/openst-contracts/issues"
     },
+    "files": [
+        "npm_package/dist"
+    ],
+    "main": "./npm_package/dist/index.js",
     "scripts": {
         "restart": "git submodule update --init --recursive && npm install",
         "compile": "./node_modules/.bin/truffle compile",
@@ -29,9 +33,11 @@
         "lint:sol": "./node_modules/.bin/solium --dir contracts/",
         "lint:sol:fix": "npm run lint:sol -- --fix",
         "ganache-cli": "./tools/run_ganache_cli.sh",
-        "test": "./node_modules/.bin/truffle test",
-        "build-package": "node tools/build_package.js",
-        "build": "npm-run-all restart lint:sol lint:js compile-all test build-package"
+        "test:contracts": "./node_modules/.bin/truffle test",
+        "build-package": "node ./npm_package/build_package.js",
+        "test:package": "./npm_package/test/run_npm_package_test.sh",
+        "prepack": "npm run compile-all && npm run build-package",
+        "build": "npm-run-all restart lint:sol lint:js compile-all test:contracts build-package test:package"
     },
     "devDependencies": {
         "abi-decoder": "1.2.0",

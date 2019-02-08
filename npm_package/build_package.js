@@ -21,29 +21,11 @@
  * extracts ABI and BIN of each contract. The extracted information is added to
  * a new object that is finally serialized to disk. That JSON file will be
  * exported by this package.
- *
- * To add a contract to the published package, add its name to array of contract
- * names.
  */
 
 const fs = require('fs');
 const path = require('path');
-
-const contractNames = [
-  'DelayedRecoveryModule',
-  'Proxy',
-  'ProxyFactory',
-  'UserWalletFactory',
-  'PriceOracleInterface',
-  'PricerRule',
-  'TransferRule',
-  'TokenHolder',
-  'TokenRules',
-  'EIP20TokenInterface',
-  'Organization',
-  'OrganizationInterface',
-  'Organized',
-];
+const { contractNames } = require('./contract_names.json');
 
 const contracts = {};
 
@@ -72,4 +54,4 @@ contractNames.forEach((contract) => {
   }
 });
 
-fs.writeFileSync('dist/contracts.json', JSON.stringify(contracts));
+fs.writeFileSync(path.join(__dirname, './dist/contracts.json'), JSON.stringify(contracts));

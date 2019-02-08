@@ -31,10 +31,12 @@ install:
 before_script:
   - ./tools/run_ganache_cli.sh </dev/null 1>/dev/null 2>&1 &
 script:
+  - npm build
   - npm run lint:sol
   - npm run lint:js
   - npm run compile-all
   - npm run build-package
-  - npm run test
+  - npm run test:contracts
+  - npm run test:package
 after_script:
   - kill $(ps aux | grep 'ganache-cli' | awk '{print $2}')

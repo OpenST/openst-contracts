@@ -10,6 +10,14 @@ ubuntu-xenial-16.04-cloudimg-console.log
 contracts/bin/
 contracts/abi/
 
+# npm_package
+openstfoundation-openst-contracts-*.tgz
+npm_package/dist/contracts.json
+npm_package/test/node_modules
+npm_package/test/openstfoundation-openst-contracts-*.tgz
+npm_package/test/package.json
+npm_package/test/package-lock.json
+
 # don't commit node_modules
 node_modules
 
