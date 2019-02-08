@@ -20,7 +20,6 @@ pragma solidity ^0.5.0;
 //
 // ----------------------------------------------------------------------------
 
-import "../external/SafeMath.sol";
 import "./OrganizationInterface.sol";
 
 /**
