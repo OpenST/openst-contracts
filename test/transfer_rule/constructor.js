@@ -1,4 +1,4 @@
-// Copyright 2018 OpenST Ltd.
+// Copyright 2019 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,35 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const web3 = require('../test_lib/web3.js');
+'use strict';
+
 const utils = require('../test_lib/utils.js');
 const { AccountProvider } = require('../test_lib/utils.js');
 
 const TransferRule = artifacts.require('TransferRule');
-const tokenRulesMock = artifacts.require('TokenRulesMock');
 
 
 contract('TransferRule::constructor', async () => {
-	contract('Negative tests for input parameters:', async (accounts) => {
-		
-		const accountProvider = new AccountProvider(accounts);
-		
-		it('fails when tokenrules address is null.', async () => {
-			
-			await utils.expectRevert(TransferRule.new(utils.NULL_ADDRESS),
-				'Should revert as token rule address is null',
-				'Token rules address is null.');
-			
-		});
-		
-		contract('Positive test cases', async (accounts) => {
-			it('sucessfully initializes when passed arguments are set correctly.', async () => {
-				
-				const tokenRulesMockInstance = await tokenRulesMock.new();
-				
-				assert.ok(await TransferRule.new(tokenRulesMockInstance.address));
-				
-			});
-		});
-	});
+  contract('Negative Tests', async () => {
+    it('Reverts if TokenRules address is null.', async () => {
+      await utils.expectRevert(
+        TransferRule.new(utils.NULL_ADDRESS),
+        'Should revert as TokenRules address is null.',
+        'Token rules address is null.',
+      );
+    });
+  });
+
+  contract('Storage', async (accounts) => {
+    const accountProvider = new AccountProvider(accounts);
+    it('Checks that passed arguments are set correctly.', async () => {
+      const tokenRules = accountProvider.get();
+
+      const rule = await TransferRule.new(tokenRules);
+
+      assert.strictEqual(
+        await rule.tokenRules.call(),
+        tokenRules,
+      );
+    });
+  });
 });

@@ -3,9 +3,10 @@
         "airbnb-base"
     ],
     "rules": {
-        "indent": ["error", 4],
         "no-console": "off",
-        "no-underscore-dangle": "off"
+        "no-underscore-dangle": "off",
+        "import/no-extraneous-dependencies": "off",
+        "strict": "off"
     },
     "env": {
         "mocha": true,

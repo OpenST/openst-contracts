@@ -1,4 +1,4 @@
-// Copyright 2018 OpenST Ltd.
+// Copyright 2019 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,46 +12,62 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const utils = require('../test_lib/utils.js');
+'use strict';
+
 const { AccountProvider } = require('../test_lib/utils.js');
 
 const TransferRule = artifacts.require('TransferRule');
-const tokenRulesMock = artifacts.require('TokenRulesMock');
+const TokenRulesSpy = artifacts.require('TokenRulesSpy');
 
-contract('TransferRule::transferFrom', async () => {
-    contract('Negative tests for input parameters:', async (accounts) => {
-        const accountProvider = new AccountProvider(accounts);
+contract('TransferRule::transferFrom', async (accounts) => {
+  const accountProvider = new AccountProvider(accounts);
 
-        it('Reverts when Token rules address is incorrect.', async () => {
-            const fromUser = accountProvider.get();
-            const toUser = accountProvider.get();
-            const amount = 10;
-            const incorrectTokenRulesAddress = accountProvider.get();
+  it('Checks that TokenRules::executeTransfers() is called. '
+        + 'with appropriate args.', async () => {
+    const expectedFromAddress = accountProvider.get();
 
-            const transferRuleInstance = await TransferRule.new(incorrectTokenRulesAddress);
-            await utils.expectRevert(
-                transferRuleInstance.transferFrom.call(fromUser, toUser, amount),
-            );
-        });
-    });
+    const expectedToAddress = accountProvider.get();
+    const expectedTransfersToLength = 1;
 
-    contract('Storage', async (accounts) => {
-        const accountProvider = new AccountProvider(accounts);
+    const expectedAmount = 10;
+    const expectedTransfersAmountLength = 1;
 
-        it('Validates successful transfer.', async () => {
-            const fromUser = accountProvider.get();
-            const toUser = accountProvider.get();
-            const amount = 10;
+    const tokenRules = await TokenRulesSpy.new();
 
-            const tokenRulesMockInstance = await tokenRulesMock.new();
+    const transferRule = await TransferRule.new(tokenRules.address);
 
-            const transferRuleInstance = await TransferRule.new(tokenRulesMockInstance.address);
-            assert.equal(await transferRuleInstance.transferFrom.call(fromUser, toUser, amount), true, 'transferFrom method failed');
-            await transferRuleInstance.transferFrom(fromUser, toUser, amount);
+    await transferRule.transferFrom(
+      expectedFromAddress, expectedToAddress, expectedAmount,
+    );
 
-            assert.equal(await tokenRulesMockInstance.from.call(), fromUser, 'From address not set correctly');
-            assert.equal(await tokenRulesMockInstance.transferTo.call(0), toUser, 'To address not set correctly');
-            assert.equal(await tokenRulesMockInstance.transferAmount.call(0), amount, 'Amount is not set correctly');
-        });
-    });
+    const actualFromAddress = await tokenRules.recordedFrom.call();
+
+    const actualToAddress = await tokenRules.recordedTransfersTo.call(0);
+    const actualTransfersToLength = await tokenRules.recordedTransfersToLength.call();
+
+    const actualAmount = await tokenRules.recordedTransfersAmount.call(0);
+    const actualTransfersAmountLength = await tokenRules.recordedTransfersAmountLength.call();
+
+    assert.strictEqual(
+      actualFromAddress,
+      expectedFromAddress,
+    );
+
+    assert.isOk(
+      actualTransfersToLength.eqn(expectedTransfersToLength),
+    );
+
+    assert.strictEqual(
+      actualToAddress,
+      expectedToAddress,
+    );
+
+    assert.isOk(
+      actualTransfersAmountLength.eqn(expectedTransfersAmountLength),
+    );
+
+    assert.isOk(
+      actualAmount.eqn(expectedAmount),
+    );
+  });
 });

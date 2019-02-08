@@ -1,4 +1,4 @@
-// Copyright 2018 OpenST Ltd.
+// Copyright 2019 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,28 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+'use strict';
+
 const TokenRulesUtils = require('./utils.js');
 const { AccountProvider } = require('../test_lib/utils');
 
 contract('TokenRules::allowTransfers', async (accounts) => {
-    const accountProvider = new AccountProvider(accounts);
-    it('Checks that transfer is allowed.', async () => {
-        const {
-            tokenRules,
-        } = await TokenRulesUtils.createTokenEconomy(accountProvider);
+  const accountProvider = new AccountProvider(accounts);
+  it('Checks that transfer is allowed.', async () => {
+    const {
+      tokenRules,
+    } = await TokenRulesUtils.createTokenEconomy(accountProvider);
 
-        const tokenHolder = accountProvider.get();
+    const tokenHolder = accountProvider.get();
 
-        assert.isNotOk(
-            await tokenRules.allowedTransfers.call(tokenHolder),
-        );
+    assert.isNotOk(
+      await tokenRules.allowedTransfers.call(tokenHolder),
+    );
 
-        await tokenRules.allowTransfers(
-            { from: tokenHolder },
-        );
+    await tokenRules.allowTransfers(
+      { from: tokenHolder },
+    );
 
-        assert.isOk(
-            await tokenRules.allowedTransfers.call(tokenHolder),
-        );
-    });
+    assert.isOk(
+      await tokenRules.allowedTransfers.call(tokenHolder),
+    );
+  });
 });
