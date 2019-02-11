@@ -38,6 +38,7 @@ script:
   - npm run lint:sol
   - npm run lint:js
   - npm run compile-all
+  - npm run slither
   - npm run build-package
   - npm run test:contracts
   - npm run test:package

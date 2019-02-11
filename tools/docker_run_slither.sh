@@ -8,7 +8,6 @@ container=$(docker run -it -d -v "${root_dir}":/share trailofbits/eth-security-t
 docker exec -it "${container}" bash -c \
     "   cd /share \
      && solc-select 0.5.0 \
-     && npm run compile-all \
      && slither . --exclude-medium --exclude-low --exclude-informational"
 slither_result=$?
 
