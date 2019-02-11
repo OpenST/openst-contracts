@@ -68,6 +68,7 @@ contract MasterCopySpy is MasterCopyNonUpgradable {
     function setup(uint256 _initialBalance)
         public
     {
+        contractShouldFail = false;
         remainingBalance = _initialBalance;
     }
 

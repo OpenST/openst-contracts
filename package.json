@@ -32,6 +32,7 @@
         "lint:js:fix": "npm run lint:js -- --fix",
         "lint:sol": "./node_modules/.bin/solium --dir contracts/",
         "lint:sol:fix": "npm run lint:sol -- --fix",
+        "slither": "./tools/docker_run_slither.sh",
         "ganache-cli": "./tools/run_ganache_cli.sh",
         "test:contracts": "./node_modules/.bin/truffle test",
         "build-package": "node ./npm_package/build_package.js",
