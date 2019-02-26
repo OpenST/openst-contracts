@@ -65,7 +65,7 @@ contract DelayedRecoveryModule is GnosisSafeModule {
     string public constant VERSION = "0.1.0";
 
     bytes32 public constant DOMAIN_SEPARATOR_TYPEHASH = keccak256(
-        "EIP712Domain(address delayedRecoveryModule)"
+        "EIP712Domain(address verifyingContract)"
     );
 
     bytes32 public constant INITIATE_RECOVERY_STRUCT_TYPEHASH = keccak256(
