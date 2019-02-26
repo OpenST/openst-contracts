@@ -26,7 +26,7 @@ const GnosisSafeModuleManagerSpy = artifacts.require('GnosisSafeModuleManagerSpy
 const BLOCK_RECOVERY_DELAY = 50;
 
 const RECOERY_MODULE_DOMAIN_SEPARATOR_TYPEHASH = web3.utils.keccak256(
-  'EIP712Domain(address delayedRecoveryModule)',
+  'EIP712Domain(address verifyingContract)',
 );
 
 const INITIATE_RECOVERY_STRUCT_TYPEHASH = web3.utils.keccak256(
