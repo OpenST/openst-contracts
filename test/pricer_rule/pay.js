@@ -46,10 +46,11 @@ async function prepare(accountProvider) {
 }
 
 function convertPayCurrencyToToken(
-  amount, price, conversionRate, conversionRateDecimals,
+  requiredPriceOracleDecimals, amount, price, conversionRate, conversionRateDecimals,
 ) {
+  const requiredPriceOracleDecimalsBN = (new BN(10)).pow(requiredPriceOracleDecimals);
   const conversionRateDecimalsBN = (new BN(10)).pow(conversionRateDecimals);
-  return ((amount.mul(conversionRate)).div(price)).div(conversionRateDecimalsBN);
+  return ((requiredPriceOracleDecimalsBN.mul(amount).mul(conversionRate)).div(price)).div(conversionRateDecimalsBN);
 }
 
 contract('PricerRule::pay', async () => {
@@ -269,10 +270,10 @@ contract('PricerRule::pay', async () => {
       );
 
       const convertedAmount1BN = convertPayCurrencyToToken(
-        amount1BN, oraclePriceBN, new BN(conversionRate), new BN(conversionRateDecimals),
+        new BN(requiredPriceOracleDecimals), amount1BN, oraclePriceBN, new BN(conversionRate), new BN(conversionRateDecimals),
       );
       const convertedAmount2BN = convertPayCurrencyToToken(
-        amount2BN, oraclePriceBN, new BN(conversionRate), new BN(conversionRateDecimals),
+        new BN(requiredPriceOracleDecimals), amount2BN, oraclePriceBN, new BN(conversionRate), new BN(conversionRateDecimals),
       );
 
 
