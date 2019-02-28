@@ -394,12 +394,12 @@ contract PricerRule is Organized {
         view
         returns (uint256)
     {
-        return (10 ** uint256(requiredPriceOracleDecimals))
-            .mul(
-                _payCurrencyAmount
-            )
+        return _payCurrencyAmount
             .mul(
                 conversionRateFromBaseCurrencyToToken
+            )
+            .mul(
+                (10 ** uint256(requiredPriceOracleDecimals))
             )
             .div(
                 10 ** conversionRateDecimalsFromBaseCurrencyToToken
