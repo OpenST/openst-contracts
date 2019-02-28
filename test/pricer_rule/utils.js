@@ -61,7 +61,7 @@ module.exports.createOrganization = async (accountProvider) => {
  * Creates and returns the tuple:
  *      (tokenRules, organizationAddress, token)
  */
-module.exports.createTokenEconomy = async (accountProvider) => {
+module.exports.createTokenEconomy = async (accountProvider, config = {}) => {
   const {
     organization,
     organizationOwner,
@@ -72,13 +72,13 @@ module.exports.createTokenEconomy = async (accountProvider) => {
 
   const tokenRules = await TokenRulesSpy.new();
 
-  const baseCurrencyCode = 'OST';
+  const baseCurrencyCode = config.baseCurrencyCode || 'OST';
 
   // (For 1 OST = 1 BT)
-  const conversionRate = 100000;
-  const conversionRateDecimals = 5;
+  const conversionRate = config.conversionRate || 100000;
+  const conversionRateDecimals = config.conversionRateDecimals || 5;
 
-  const requiredPriceOracleDecimals = 18;
+  const requiredPriceOracleDecimals = config.requiredPriceOracleDecimals || 18;
 
   const pricerRule = await PricerRule.new(
     organization.address,
