@@ -268,7 +268,7 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         newOwner,
       } = await prepare(accountProvider);
 
-      for (let i = 0; i < recoveryBlockDelay-1; i += 1) {
+      for (let i = 0; i < recoveryBlockDelay - 1; i += 1) {
         // eslint-disable-next-line no-await-in-loop
         await Utils.advanceBlock();
       }

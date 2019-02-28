@@ -15,7 +15,6 @@
 'use strict';
 
 const web3 = require('../test_lib/web3.js');
-const BN = require('bn.js');
 
 const EIP20TokenFake = artifacts.require('EIP20TokenFake');
 const TokenRulesSpy = artifacts.require('TokenRulesSpy');
@@ -90,11 +89,10 @@ module.exports.createTokenEconomy = async (accountProvider, config = {}) => {
     tokenRules.address,
   );
 
-  //console.log("pricerRule:", pricerRule.address);
-
   const quoteCurrencyCode = 'USD';
-  const priceOracleInitialPrice = (0.02 * (10 ** requiredPriceOracleDecimals)).toString(); // $0.02 = 2*10^16(in contract)
-  //console.log("priceOracleInitialPrice:", priceOracleInitialPrice);
+  // $0.02 = 0.02*10^18(in contract)
+  const priceOracleInitialPrice = (0.02 * (10 ** requiredPriceOracleDecimals))
+    .toString();
   const initialPriceExpirationHeight = (await web3.eth.getBlockNumber()) + 10000;
 
   const priceOracle = await PriceOracleFake.new(
