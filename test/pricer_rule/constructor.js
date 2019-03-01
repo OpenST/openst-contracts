@@ -113,12 +113,17 @@ contract('PricerRule::constructor', async () => {
         organization,
       } = await PricerRuleUtils.createOrganization(accountProvider);
 
-      const token = accountProvider.get();
+      const eip20TokenDecimals = 10;
+      const eip20TokenConfig = {
+        symbol: 'OST',
+        name:'Open Simple Token',
+        decimals: eip20TokenDecimals,
+      };
+      const token = await PricerRuleUtils.createEIP20Token(eip20TokenConfig);
       const tokenRules = accountProvider.get();
-
       const pricerRule = await PricerRule.new(
         organization.address,
-        token, // economy token address
+        token.address, // economy token address
         web3.utils.stringToHex('OST'), // base currency code
         10, // conversion rate
         1, // conversion rate decimals
@@ -138,7 +143,7 @@ contract('PricerRule::constructor', async () => {
 
       assert.strictEqual(
         (await pricerRule.eip20Token.call()),
-        token,
+        token.address,
       );
 
       assert.strictEqual(
@@ -156,6 +161,10 @@ contract('PricerRule::constructor', async () => {
 
       assert.isOk(
         (await pricerRule.requiredPriceOracleDecimals.call()).eqn(2),
+      );
+
+      assert.isOk(
+        (await pricerRule.eip20TokenDecimals.call()).eqn(eip20TokenDecimals),
       );
 
       assert.strictEqual(

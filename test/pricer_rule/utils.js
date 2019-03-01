@@ -29,9 +29,11 @@ const PriceOracleFake = artifacts.require('PriceOracleFake');
  *      - name: 'Open Simple Token'
  *      - decimals: 1
  */
-module.exports.createEIP20Token = async () => {
+module.exports.createEIP20Token = async (config) => {
   const token = await EIP20TokenFake.new(
-    'OST', 'Open Simple Token', 1,
+    config.symbol || 'OST',
+    config.name || 'Open Simple Token',
+    config.decimals || 1,
   );
 
   return token;
@@ -60,14 +62,20 @@ module.exports.createOrganization = async (accountProvider) => {
  * Creates and returns the tuple:
  *      (tokenRules, organizationAddress, token)
  */
-module.exports.createTokenEconomy = async (accountProvider, config = {}) => {
+module.exports.createTokenEconomy = async (accountProvider, config = {}, eip20TokenConfig = {}) => {
   const {
     organization,
     organizationOwner,
     organizationWorker,
   } = await this.createOrganization(accountProvider);
 
-  const token = await this.createEIP20Token();
+  const eip20TokenDecimals = eip20TokenConfig.decimals || 18;
+  const createEIP20TokenConfig = {
+    symbol: eip20TokenConfig.symbol || 'OST',
+    name: eip20TokenConfig.name || 'Open Simple Token',
+    decimals: eip20TokenDecimals,
+  };
+  const token = await this.createEIP20Token(createEIP20TokenConfig);
 
   const tokenRules = await TokenRulesSpy.new();
 
@@ -117,5 +125,6 @@ module.exports.createTokenEconomy = async (accountProvider, config = {}) => {
     quoteCurrencyCode,
     priceOracleInitialPrice,
     priceOracle,
+    eip20TokenDecimals,
   };
 };
