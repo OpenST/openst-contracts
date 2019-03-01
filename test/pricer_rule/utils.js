@@ -65,7 +65,7 @@ module.exports.createOrganization = async (accountProvider) => {
  *      (tokenRules, organizationAddress, token)
  * @param config {Object}
  *        config.requiredPriceOracleDecimals Configurable required price oracle decimals.
- * @param config {Object}
+ * @param eip20TokenConfig {Object}
  *        config.decimals Configurable token decimals value.
  */
 module.exports.createTokenEconomy = async (accountProvider, config = {}, eip20TokenConfig = {}) => {
