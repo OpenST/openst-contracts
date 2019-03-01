@@ -601,6 +601,5 @@ contract('PricerRule::pay', async () => {
         expectedTransferAmount2.eq(convertedAmount2BN),
       );
     });
-
   });
 });

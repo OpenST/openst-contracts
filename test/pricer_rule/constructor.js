@@ -116,7 +116,7 @@ contract('PricerRule::constructor', async () => {
       const eip20TokenDecimals = 10;
       const eip20TokenConfig = {
         symbol: 'OST',
-        name:'Open Simple Token',
+        name: 'Open Simple Token',
         decimals: eip20TokenDecimals,
       };
       const token = await PricerRuleUtils.createEIP20Token(eip20TokenConfig);
