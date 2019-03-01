@@ -71,8 +71,8 @@ contract PricerRule is Organized {
     uint256 public conversionRateDecimalsFromBaseCurrencyToToken;
 
     /**
-    * @dev Required decimals for EIP20Token. Pay method can be called multiple times.
-    *      For optimization it's fetched from eip20Token and stored.
+    * @dev Required decimals for EIP20Token. Since Pay method can be called multiple times,
+    *      for optimization it's fetched from eip20Token and stored.
     */
     uint8 public eip20TokenDecimals;
 
