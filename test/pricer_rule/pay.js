@@ -233,7 +233,7 @@ contract('PricerRule::pay', async () => {
   contract('Positive Paths', async (accounts) => {
     const accountProvider = new AccountProvider(accounts);
 
-    it('Checks that TokenRules executeTransfers is called with requiredPriceOracleDecimals = 18.', async () => {
+    it('Checks that TokenRules executeTransfers is called with requiredPriceOracleDecimals = 18 and eip20TokenDecimals = 18.', async () => {
       const config = {
         requiredPriceOracleDecimals: 18,
       };
@@ -353,7 +353,7 @@ contract('PricerRule::pay', async () => {
       );
     });
 
-    it('Checks that TokenRules executeTransfers is called with requiredPriceOracleDecimals = 5.', async () => {
+    it('Checks that TokenRules executeTransfers is called with requiredPriceOracleDecimals = 5 and eip20TokenDecimals = 18.', async () => {
       const config = {
         requiredPriceOracleDecimals: 5,
       };
