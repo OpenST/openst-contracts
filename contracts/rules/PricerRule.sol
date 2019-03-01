@@ -398,9 +398,6 @@ contract PricerRule is Organized {
             .mul(
                 conversionRateFromBaseCurrencyToToken
             )
-            .mul(
-                (10 ** uint256(requiredPriceOracleDecimals))
-            )
             .div(
                 10 ** conversionRateDecimalsFromBaseCurrencyToToken
             )
