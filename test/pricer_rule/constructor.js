@@ -113,11 +113,9 @@ contract('PricerRule::constructor', async () => {
         organization,
       } = await PricerRuleUtils.createOrganization(accountProvider);
 
-      const eip20TokenDecimals = 10;
+      const tokenDecimals = 10;
       const eip20TokenConfig = {
-        symbol: 'OST',
-        name: 'Open Simple Token',
-        decimals: eip20TokenDecimals,
+        decimals: tokenDecimals,
       };
       const token = await PricerRuleUtils.createEIP20Token(eip20TokenConfig);
       const tokenRules = accountProvider.get();
@@ -164,7 +162,7 @@ contract('PricerRule::constructor', async () => {
       );
 
       assert.isOk(
-        (await pricerRule.eip20TokenDecimals.call()).eqn(eip20TokenDecimals),
+        (await pricerRule.tokenDecimals.call()).eqn(tokenDecimals),
       );
 
       assert.strictEqual(

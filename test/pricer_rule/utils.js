@@ -28,11 +28,13 @@ const PriceOracleFake = artifacts.require('PriceOracleFake');
  *      - symbol: 'OST'
  *      - name: 'Open Simple Token'
  *      - decimals: 1
+ * @param config {Object}
+ *        config.decimals Configurable token decimals value.
  */
 module.exports.createEIP20Token = async (config) => {
   const token = await EIP20TokenFake.new(
-    config.symbol || 'OST',
-    config.name || 'Open Simple Token',
+    'OST',
+    'Open Simple Token',
     config.decimals || 1,
   );
 
@@ -61,6 +63,10 @@ module.exports.createOrganization = async (accountProvider) => {
 /**
  * Creates and returns the tuple:
  *      (tokenRules, organizationAddress, token)
+ * @param config {Object}
+ *        config.requiredPriceOracleDecimals Configurable required price oracle decimals.
+ * @param config {Object}
+ *        config.decimals Configurable token decimals value.
  */
 module.exports.createTokenEconomy = async (accountProvider, config = {}, eip20TokenConfig = {}) => {
   const {
@@ -69,21 +75,16 @@ module.exports.createTokenEconomy = async (accountProvider, config = {}, eip20To
     organizationWorker,
   } = await this.createOrganization(accountProvider);
 
-  const eip20TokenDecimals = eip20TokenConfig.decimals || 18;
-  const createEIP20TokenConfig = {
-    symbol: eip20TokenConfig.symbol || 'OST',
-    name: eip20TokenConfig.name || 'Open Simple Token',
-    decimals: eip20TokenDecimals,
-  };
-  const token = await this.createEIP20Token(createEIP20TokenConfig);
+  const tokenDecimals = eip20TokenConfig.decimals;
+  const token = await this.createEIP20Token(eip20TokenConfig);
 
   const tokenRules = await TokenRulesSpy.new();
 
-  const baseCurrencyCode = config.baseCurrencyCode || 'OST';
+  const baseCurrencyCode = 'OST';
 
-  // (For 1 OST = 1 BT)
-  const conversionRate = config.conversionRate || 100000;
-  const conversionRateDecimals = config.conversionRateDecimals || 5;
+  // To derive 1 OST = 1 BT, if conversionRateDecimals = 5, then conversionRate needs to be 10^5.
+  const conversionRate = 100000;
+  const conversionRateDecimals = 5;
 
   const requiredPriceOracleDecimals = config.requiredPriceOracleDecimals || 18;
 
@@ -98,7 +99,6 @@ module.exports.createTokenEconomy = async (accountProvider, config = {}, eip20To
   );
 
   const quoteCurrencyCode = 'USD';
-  // $0.02 = 0.02*10^18(in contract)
   const priceOracleInitialPrice = (0.02 * (10 ** requiredPriceOracleDecimals))
     .toString();
   const initialPriceExpirationHeight = (await web3.eth.getBlockNumber()) + 10000;
@@ -116,6 +116,7 @@ module.exports.createTokenEconomy = async (accountProvider, config = {}, eip20To
     organizationOwner,
     organizationWorker,
     token,
+    tokenDecimals,
     tokenRules,
     baseCurrencyCode,
     conversionRate,
@@ -125,6 +126,5 @@ module.exports.createTokenEconomy = async (accountProvider, config = {}, eip20To
     quoteCurrencyCode,
     priceOracleInitialPrice,
     priceOracle,
-    eip20TokenDecimals,
   };
 };

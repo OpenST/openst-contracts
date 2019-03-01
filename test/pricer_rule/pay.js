@@ -46,9 +46,9 @@ async function prepare(accountProvider, config = {}, eip20TokenConfig = {}) {
 }
 
 function convertPayCurrencyToToken(
-  eip20TokenDecimals, amount, price, conversionRate, conversionRateDecimals,
+  tokenDecimals, amount, price, conversionRate, conversionRateDecimals,
 ) {
-  const requiredPriceOracleDecimalsBN = (new BN(10)).pow(new BN(eip20TokenDecimals));
+  const requiredPriceOracleDecimalsBN = (new BN(10)).pow(new BN(tokenDecimals));
   const conversionRateDecimalsBN = (new BN(10)).pow(conversionRateDecimals);
   return ((requiredPriceOracleDecimalsBN
     .mul(amount)
@@ -233,258 +233,12 @@ contract('PricerRule::pay', async () => {
   contract('Positive Paths', async (accounts) => {
     const accountProvider = new AccountProvider(accounts);
 
-    it('Checks that TokenRules executeTransfers is called with requiredPriceOracleDecimals = 18 and eip20TokenDecimals = 18.', async () => {
-      const config = {
-        requiredPriceOracleDecimals: 18,
-      };
-      const {
-        organizationWorker,
-        tokenRules,
-        conversionRate,
-        conversionRateDecimals,
-        requiredPriceOracleDecimals,
-        pricerRule,
-        quoteCurrencyCode,
-        priceOracle,
-        fromAddress,
-        eip20TokenDecimals,
-      } = await prepare(accountProvider, config);
-
-      // $0.02 = 0.02*10^18(in contract)
-      const oraclePrice = (0.02 * (10 ** requiredPriceOracleDecimals))
-        .toString();
-      await priceOracle.setPrice(
-        oraclePrice,
-        (await web3.eth.getBlockNumber()) + 10000,
-      );
-      // $1 = 1*10^18(in contract)
-      const acceptanceMargin = (1 * (10 ** requiredPriceOracleDecimals))
-        .toString();
-      await pricerRule.setAcceptanceMargin(
-        web3.utils.stringToHex(quoteCurrencyCode),
-        acceptanceMargin,
-        { from: organizationWorker },
-      );
-
-      const to1 = accountProvider.get();
-      const to2 = accountProvider.get();
-      // Amount1 to transfer: $20 = 20*10^18(in contract)
-      const amount1BN = (20 * (10 ** requiredPriceOracleDecimals)).toString();
-      // Amount2 to transfer: $10 = 10*10^18(in contract)
-      const amount2BN = (10 * (10 ** requiredPriceOracleDecimals)).toString();
-
-      const intendedPrice = oraclePrice; // intendedPriceBN is Current PriceOracle price
-
-      await pricerRule.pay(
-        fromAddress,
-        [to1, to2], // 'to' addresses
-        [amount1BN, amount2BN], // amounts
-        web3.utils.stringToHex(quoteCurrencyCode),
-        intendedPrice,
-        { from: accountProvider.get() },
-      );
-      const convertedAmount1BN = convertPayCurrencyToToken(
-        eip20TokenDecimals,
-        new BN(amount1BN),
-        new BN(oraclePrice),
-        new BN(conversionRate),
-        new BN(conversionRateDecimals),
-      );
-      const convertedAmount2BN = convertPayCurrencyToToken(
-        eip20TokenDecimals,
-        new BN(amount2BN),
-        new BN(oraclePrice),
-        new BN(conversionRate),
-        new BN(conversionRateDecimals),
-      );
-      const actualFromAddress = await tokenRules.recordedFrom.call();
-
-      const actualToAddress1 = await tokenRules.recordedTransfersTo.call(0);
-      const actualToAddress2 = await tokenRules.recordedTransfersTo.call(1);
-      const actualTransfersToLength = await tokenRules.recordedTransfersToLength.call();
-
-      const tenPowerEIP20TokenDecimals = (new BN(10)).pow(new BN(eip20TokenDecimals));
-      // 1000 BTs = 1000*10^18 BTWei
-      const expectedTransferAmount1 = new BN(1000).mul(tenPowerEIP20TokenDecimals);
-      // 500 BTs = 500*10^18 BTWei
-      const expectedTransferAmount2 = new BN(500).mul(tenPowerEIP20TokenDecimals);
-      const transferredAmount1 = await tokenRules.recordedTransfersAmount.call(0);
-      const transferredAmount2 = await tokenRules.recordedTransfersAmount.call(1);
-
-      const actualTransfersAmountLength = await tokenRules.recordedTransfersAmountLength.call();
-
-      assert.strictEqual(
-        actualFromAddress,
-        fromAddress,
-      );
-
-      assert.isOk(
-        actualTransfersToLength.eqn(2),
-      );
-
-      assert.strictEqual(
-        actualToAddress1,
-        to1,
-      );
-
-      assert.strictEqual(
-        actualToAddress2,
-        to2,
-      );
-
-      assert.isOk(
-        actualTransfersAmountLength.eqn(2),
-      );
-
-      assert.isOk(
-        transferredAmount1.eq(expectedTransferAmount1),
-      );
-
-      assert.isOk(
-        expectedTransferAmount1.eq(convertedAmount1BN),
-      );
-
-      assert.isOk(
-        transferredAmount2.eq(expectedTransferAmount2),
-      );
-
-      assert.isOk(
-        expectedTransferAmount2.eq(convertedAmount2BN),
-      );
-    });
-
-    it('Checks that TokenRules executeTransfers is called with requiredPriceOracleDecimals = 5 and eip20TokenDecimals = 18.', async () => {
-      const config = {
-        requiredPriceOracleDecimals: 5,
-      };
-      const {
-        organizationWorker,
-        tokenRules,
-        conversionRate,
-        conversionRateDecimals,
-        requiredPriceOracleDecimals,
-        pricerRule,
-        quoteCurrencyCode,
-        priceOracle,
-        fromAddress,
-        eip20TokenDecimals,
-      } = await prepare(accountProvider, config);
-
-      // $0.02 = 0.02*10^5(in contract)
-      const oraclePrice = (0.02 * (10 ** requiredPriceOracleDecimals))
-        .toString();
-      await priceOracle.setPrice(
-        oraclePrice,
-        (await web3.eth.getBlockNumber()) + 10000,
-      );
-      // $1 = 1*10^5(in contract)
-      const acceptanceMargin = (1 * (10 ** requiredPriceOracleDecimals))
-        .toString();
-      await pricerRule.setAcceptanceMargin(
-        web3.utils.stringToHex(quoteCurrencyCode),
-        acceptanceMargin,
-        { from: organizationWorker },
-      );
-
-      const to1 = accountProvider.get();
-      const to2 = accountProvider.get();
-      // Amount1 to transfer: $20 = 20*10^5(in contract)
-      const amount1BN = (20 * (10 ** requiredPriceOracleDecimals)).toString();
-      // Amount2 to transfer: $10 = 10*10^5(in contract)
-      const amount2BN = (10 * (10 ** requiredPriceOracleDecimals)).toString();
-      // intendedPriceBN being passed is current PriceOracle price
-      const intendedPrice = oraclePrice;
-
-      await pricerRule.pay(
-        fromAddress,
-        [to1, to2], // 'to' addresses
-        [amount1BN, amount2BN], // amounts
-        web3.utils.stringToHex(quoteCurrencyCode),
-        intendedPrice,
-        { from: accountProvider.get() },
-      );
-      const convertedAmount1BN = convertPayCurrencyToToken(
-        eip20TokenDecimals,
-        new BN(amount1BN),
-        new BN(oraclePrice),
-        new BN(conversionRate),
-        new BN(conversionRateDecimals),
-      );
-      const convertedAmount2BN = convertPayCurrencyToToken(
-        eip20TokenDecimals,
-        new BN(amount2BN),
-        new BN(oraclePrice),
-        new BN(conversionRate),
-        new BN(conversionRateDecimals),
-      );
-      const actualFromAddress = await tokenRules.recordedFrom.call();
-
-      const actualToAddress1 = await tokenRules.recordedTransfersTo.call(0);
-      const actualToAddress2 = await tokenRules.recordedTransfersTo.call(1);
-      const actualTransfersToLength = await tokenRules.recordedTransfersToLength.call();
-
-      // Number of bt needs to be transferred for a payment shouldn’t depend on
-      // requiredPriceOracleDecimals.
-      // requiredPriceOracleDecimals simply decides minimum value in currency(say USD)
-      // that can be transferred.
-      // 1000 BTs = 1000*10^18 BTWei
-      const tenPowerEIP20TokenDecimals = (new BN(10)).pow(new BN(eip20TokenDecimals));
-      const expectedTransferAmount1 = new BN(1000).mul(tenPowerEIP20TokenDecimals);
-      // 500 BTs = 500*10^18 BTWei
-      const expectedTransferAmount2 = new BN(500).mul(tenPowerEIP20TokenDecimals);
-      const transferredAmount1 = await tokenRules.recordedTransfersAmount.call(0);
-      const transferredAmount2 = await tokenRules.recordedTransfersAmount.call(1);
-
-      const actualTransfersAmountLength = await tokenRules.recordedTransfersAmountLength.call();
-
-      assert.strictEqual(
-        actualFromAddress,
-        fromAddress,
-      );
-
-      assert.isOk(
-        actualTransfersToLength.eqn(2),
-      );
-
-      assert.strictEqual(
-        actualToAddress1,
-        to1,
-      );
-
-      assert.strictEqual(
-        actualToAddress2,
-        to2,
-      );
-
-      assert.isOk(
-        actualTransfersAmountLength.eqn(2),
-      );
-
-      assert.isOk(
-        expectedTransferAmount1.eq(convertedAmount1BN),
-      );
-
-      assert.isOk(
-        transferredAmount1.eq(expectedTransferAmount1),
-      );
-
-      assert.isOk(
-        expectedTransferAmount2.eq(convertedAmount2BN),
-      );
-
-      assert.isOk(
-        transferredAmount2.eq(expectedTransferAmount2),
-      );
-    });
-
-    it('Checks that TokenRules executeTransfers is called with requiredPriceOracleDecimals = 18 and eip20TokenDecimals = 5.', async () => {
+    it('Checks that TokenRules executeTransfers is called with requiredPriceOracleDecimals = 18 and tokenDecimals = 18.', async () => {
       const config = {
         requiredPriceOracleDecimals: 18,
       };
       const eip20TokenConfig = {
-        symbol: 'OST',
-        name: 'Open Simple Token',
-        decimals: 5,
+        decimals: 18,
       };
       const {
         organizationWorker,
@@ -496,7 +250,7 @@ contract('PricerRule::pay', async () => {
         quoteCurrencyCode,
         priceOracle,
         fromAddress,
-        eip20TokenDecimals,
+        tokenDecimals,
       } = await prepare(accountProvider, config, eip20TokenConfig);
 
       // $0.02 = 0.02*10^18(in contract)
@@ -533,14 +287,14 @@ contract('PricerRule::pay', async () => {
         { from: accountProvider.get() },
       );
       const convertedAmount1BN = convertPayCurrencyToToken(
-        eip20TokenDecimals,
+        tokenDecimals,
         new BN(amount1BN),
         new BN(oraclePrice),
         new BN(conversionRate),
         new BN(conversionRateDecimals),
       );
       const convertedAmount2BN = convertPayCurrencyToToken(
-        eip20TokenDecimals,
+        tokenDecimals,
         new BN(amount2BN),
         new BN(oraclePrice),
         new BN(conversionRate),
@@ -552,7 +306,257 @@ contract('PricerRule::pay', async () => {
       const actualToAddress2 = await tokenRules.recordedTransfersTo.call(1);
       const actualTransfersToLength = await tokenRules.recordedTransfersToLength.call();
 
-      const tenPowerEIP20TokenDecimal = (new BN(10)).pow(new BN(eip20TokenDecimals));
+      const tenPowerTokenDecimals = (new BN(10)).pow(new BN(tokenDecimals));
+      // 1000 BTs = 1000*10^18 BTWei
+      const expectedTransferAmount1 = new BN(1000).mul(tenPowerTokenDecimals);
+      // 500 BTs = 500*10^18 BTWei
+      const expectedTransferAmount2 = new BN(500).mul(tenPowerTokenDecimals);
+      const transferredAmount1 = await tokenRules.recordedTransfersAmount.call(0);
+      const transferredAmount2 = await tokenRules.recordedTransfersAmount.call(1);
+
+      const actualTransfersAmountLength = await tokenRules.recordedTransfersAmountLength.call();
+
+      assert.strictEqual(
+        actualFromAddress,
+        fromAddress,
+      );
+
+      assert.isOk(
+        actualTransfersToLength.eqn(2),
+      );
+
+      assert.strictEqual(
+        actualToAddress1,
+        to1,
+      );
+
+      assert.strictEqual(
+        actualToAddress2,
+        to2,
+      );
+
+      assert.isOk(
+        actualTransfersAmountLength.eqn(2),
+      );
+
+      assert.isOk(
+        transferredAmount1.eq(expectedTransferAmount1),
+      );
+
+      assert.isOk(
+        expectedTransferAmount1.eq(convertedAmount1BN),
+      );
+
+      assert.isOk(
+        transferredAmount2.eq(expectedTransferAmount2),
+      );
+
+      assert.isOk(
+        expectedTransferAmount2.eq(convertedAmount2BN),
+      );
+    });
+
+    it('Checks that TokenRules executeTransfers is called with requiredPriceOracleDecimals = 5 and tokenDecimals = 18.', async () => {
+      const config = {
+        requiredPriceOracleDecimals: 5,
+      };
+      const eip20TokenConfig = {
+        decimals: 18,
+      };
+      const {
+        organizationWorker,
+        tokenRules,
+        conversionRate,
+        conversionRateDecimals,
+        requiredPriceOracleDecimals,
+        pricerRule,
+        quoteCurrencyCode,
+        priceOracle,
+        fromAddress,
+        tokenDecimals,
+      } = await prepare(accountProvider, config, eip20TokenConfig);
+
+      // $0.02 = 0.02*10^5(in contract)
+      const oraclePrice = (0.02 * (10 ** requiredPriceOracleDecimals))
+        .toString();
+      await priceOracle.setPrice(
+        oraclePrice,
+        (await web3.eth.getBlockNumber()) + 10000,
+      );
+      // $1 = 1*10^5(in contract)
+      const acceptanceMargin = (1 * (10 ** requiredPriceOracleDecimals))
+        .toString();
+      await pricerRule.setAcceptanceMargin(
+        web3.utils.stringToHex(quoteCurrencyCode),
+        acceptanceMargin,
+        { from: organizationWorker },
+      );
+
+      const to1 = accountProvider.get();
+      const to2 = accountProvider.get();
+      // Amount1 to transfer: $20 = 20*10^5(in contract)
+      const amount1BN = (20 * (10 ** requiredPriceOracleDecimals)).toString();
+      // Amount2 to transfer: $10 = 10*10^5(in contract)
+      const amount2BN = (10 * (10 ** requiredPriceOracleDecimals)).toString();
+      // intendedPriceBN being passed is current PriceOracle price
+      const intendedPrice = oraclePrice;
+
+      await pricerRule.pay(
+        fromAddress,
+        [to1, to2], // 'to' addresses
+        [amount1BN, amount2BN], // amounts
+        web3.utils.stringToHex(quoteCurrencyCode),
+        intendedPrice,
+        { from: accountProvider.get() },
+      );
+      const convertedAmount1BN = convertPayCurrencyToToken(
+        tokenDecimals,
+        new BN(amount1BN),
+        new BN(oraclePrice),
+        new BN(conversionRate),
+        new BN(conversionRateDecimals),
+      );
+      const convertedAmount2BN = convertPayCurrencyToToken(
+        tokenDecimals,
+        new BN(amount2BN),
+        new BN(oraclePrice),
+        new BN(conversionRate),
+        new BN(conversionRateDecimals),
+      );
+      const actualFromAddress = await tokenRules.recordedFrom.call();
+
+      const actualToAddress1 = await tokenRules.recordedTransfersTo.call(0);
+      const actualToAddress2 = await tokenRules.recordedTransfersTo.call(1);
+      const actualTransfersToLength = await tokenRules.recordedTransfersToLength.call();
+
+      // Number of bt needs to be transferred for a payment shouldn’t depend on
+      // requiredPriceOracleDecimals.
+      // requiredPriceOracleDecimals simply decides minimum value in currency(say USD)
+      // that can be transferred.
+      // 1000 BTs = 1000*10^18 BTWei
+      const tenPowerTokenDecimals = (new BN(10)).pow(new BN(tokenDecimals));
+      const expectedTransferAmount1 = new BN(1000).mul(tenPowerTokenDecimals);
+      // 500 BTs = 500*10^18 BTWei
+      const expectedTransferAmount2 = new BN(500).mul(tenPowerTokenDecimals);
+      const transferredAmount1 = await tokenRules.recordedTransfersAmount.call(0);
+      const transferredAmount2 = await tokenRules.recordedTransfersAmount.call(1);
+
+      const actualTransfersAmountLength = await tokenRules.recordedTransfersAmountLength.call();
+
+      assert.strictEqual(
+        actualFromAddress,
+        fromAddress,
+      );
+
+      assert.isOk(
+        actualTransfersToLength.eqn(2),
+      );
+
+      assert.strictEqual(
+        actualToAddress1,
+        to1,
+      );
+
+      assert.strictEqual(
+        actualToAddress2,
+        to2,
+      );
+
+      assert.isOk(
+        actualTransfersAmountLength.eqn(2),
+      );
+
+      assert.isOk(
+        expectedTransferAmount1.eq(convertedAmount1BN),
+      );
+
+      assert.isOk(
+        transferredAmount1.eq(expectedTransferAmount1),
+      );
+
+      assert.isOk(
+        expectedTransferAmount2.eq(convertedAmount2BN),
+      );
+
+      assert.isOk(
+        transferredAmount2.eq(expectedTransferAmount2),
+      );
+    });
+
+    it('Checks that TokenRules executeTransfers is called with requiredPriceOracleDecimals = 18 and tokenDecimals = 5.', async () => {
+      const config = {
+        requiredPriceOracleDecimals: 18,
+      };
+      const eip20TokenConfig = {
+        decimals: 5,
+      };
+      const {
+        organizationWorker,
+        tokenRules,
+        conversionRate,
+        conversionRateDecimals,
+        requiredPriceOracleDecimals,
+        pricerRule,
+        quoteCurrencyCode,
+        priceOracle,
+        fromAddress,
+        tokenDecimals,
+      } = await prepare(accountProvider, config, eip20TokenConfig);
+
+      // $0.02 = 0.02*10^18(in contract)
+      const oraclePrice = (0.02 * (10 ** requiredPriceOracleDecimals))
+        .toString();
+      await priceOracle.setPrice(
+        oraclePrice,
+        (await web3.eth.getBlockNumber()) + 10000,
+      );
+      // $1 = 1*10^18(in contract)
+      const acceptanceMargin = (1 * (10 ** requiredPriceOracleDecimals))
+        .toString();
+      await pricerRule.setAcceptanceMargin(
+        web3.utils.stringToHex(quoteCurrencyCode),
+        acceptanceMargin,
+        { from: organizationWorker },
+      );
+
+      const to1 = accountProvider.get();
+      const to2 = accountProvider.get();
+      // Amount1 to transfer: $20 = 20*10^18(in contract)
+      const amount1BN = (20 * (10 ** requiredPriceOracleDecimals)).toString();
+      // Amount2 to transfer: $10 = 10*10^18(in contract)
+      const amount2BN = (10 * (10 ** requiredPriceOracleDecimals)).toString();
+
+      const intendedPrice = oraclePrice; // intendedPriceBN is Current PriceOracle price
+
+      await pricerRule.pay(
+        fromAddress,
+        [to1, to2], // 'to' addresses
+        [amount1BN, amount2BN], // amounts
+        web3.utils.stringToHex(quoteCurrencyCode),
+        intendedPrice,
+        { from: accountProvider.get() },
+      );
+      const convertedAmount1BN = convertPayCurrencyToToken(
+        tokenDecimals,
+        new BN(amount1BN),
+        new BN(oraclePrice),
+        new BN(conversionRate),
+        new BN(conversionRateDecimals),
+      );
+      const convertedAmount2BN = convertPayCurrencyToToken(
+        tokenDecimals,
+        new BN(amount2BN),
+        new BN(oraclePrice),
+        new BN(conversionRate),
+        new BN(conversionRateDecimals),
+      );
+      const actualFromAddress = await tokenRules.recordedFrom.call();
+
+      const actualToAddress1 = await tokenRules.recordedTransfersTo.call(0);
+      const actualToAddress2 = await tokenRules.recordedTransfersTo.call(1);
+      const actualTransfersToLength = await tokenRules.recordedTransfersToLength.call();
+
+      const tenPowerEIP20TokenDecimal = (new BN(10)).pow(new BN(tokenDecimals));
       // 1000 BTs = 1000*10^5 BTWei
       const expectedTransferAmount1 = new BN(1000).mul(tenPowerEIP20TokenDecimal);
       // 500 BTs = 500*10^5 BTWei
