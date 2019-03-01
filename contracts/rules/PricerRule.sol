@@ -71,6 +71,12 @@ contract PricerRule is Organized {
     uint256 public conversionRateDecimalsFromBaseCurrencyToToken;
 
     /**
+     * @dev Token decimals of EIP20Token. Since Pay method can be called multiple
+     *      times, for optimization it's fetched from eip20Token and stored.
+     */
+    uint8 public tokenDecimals;
+
+    /**
      * @dev Required decimals for price oracles.
      */
     uint8 public requiredPriceOracleDecimals;
@@ -149,6 +155,8 @@ contract PricerRule is Organized {
         );
 
         eip20Token = EIP20TokenInterface(_eip20Token);
+
+        tokenDecimals = EIP20TokenInterface(_eip20Token).decimals();
 
         baseCurrencyCode = _baseCurrencyCode;
 
@@ -397,6 +405,9 @@ contract PricerRule is Organized {
         return _payCurrencyAmount
             .mul(
                 conversionRateFromBaseCurrencyToToken
+            )
+            .mul(
+                10 ** uint256(tokenDecimals)
             )
             .div(
                 10 ** conversionRateDecimalsFromBaseCurrencyToToken

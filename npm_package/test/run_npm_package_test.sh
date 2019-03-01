@@ -33,7 +33,7 @@ node "${script_dir_path}/index.js" || exit 1
 
 echo "Cleaning up generated files."
 rm -r "${script_dir_path}/node_modules" || exit 1
-rm openstfoundation-openst-contracts-0.10.0-beta.1.tgz || exit 1
+rm openstfoundation-openst-contracts-0.10.0-beta.2.tgz || exit 1
 rm package.json || exit 1
 rm package-lock.json || exit 1
 
