@@ -25,9 +25,10 @@
     ],
     "main": "./npm_package/dist/index.js",
     "scripts": {
-        "restart": "git submodule update --init --recursive && npm install",
-        "compile": "./node_modules/.bin/truffle compile",
-        "compile-all": "./node_modules/.bin/truffle compile --all --reset",
+        "restart": "git submodule update --init --recursive && npm i && cd ./external/gnosis/safe-contracts && npm ci && cd -",
+        "compile": "./node_modules/.bin/truffle compile --all --reset",
+        "compile:gnosis": "cd ./external/gnosis/safe-contracts && ./node_modules/.bin/truffle compile --all --reset && cd -",
+        "compile-all": "npm-run-all compile compile:gnosis",
         "lint:js": "find ./test -name \"*.js\" | xargs ./node_modules/.bin/eslint",
         "lint:js:fix": "npm run lint:js -- --fix",
         "lint:sol": "./node_modules/.bin/solium --dir contracts/",
@@ -36,7 +37,7 @@
         "test:contracts": "./node_modules/.bin/truffle test",
         "build-package": "node ./npm_package/build_package.js",
         "test:package": "./npm_package/test/run_npm_package_test.sh",
-        "prepack": "npm run compile-all && npm run build-package",
+        "prepack": "npm-run-all compile-all build-package",
         "build": "npm-run-all restart lint:sol lint:js compile-all test:contracts build-package test:package"
     },
     "devDependencies": {
