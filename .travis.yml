@@ -3,10 +3,10 @@ language: node_js
 sudo: required
 branches:
   only:
-  - master
-  - develop
-  - /^feature\/.*/
-  - /^release-.*/
+    - master
+    - develop
+    - /^feature\/.*/
+    - /^release-.*/
 git:
   quiet: true
   submodules: true
@@ -31,7 +31,7 @@ install:
 before_script:
   - ./tools/run_ganache_cli.sh </dev/null 1>/dev/null 2>&1 &
 script:
-  - npm build
+  - npm run build
   - npm run lint:sol
   - npm run lint:js
   - npm run compile-all
