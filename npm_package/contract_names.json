@@ -1,17 +1,23 @@
 {
-    "contractNames": [
-        "DelayedRecoveryModule",
-        "Proxy",
-        "ProxyFactory",
-        "UserWalletFactory",
-        "PriceOracleInterface",
-        "PricerRule",
-        "TransferRule",
-        "TokenHolder",
-        "TokenRules",
-        "EIP20TokenInterface",
-        "Organization",
-        "OrganizationInterface",
-        "Organized"
-    ]
+    "contractNames": {
+        "openst": [
+            "DelayedRecoveryModule",
+            "Proxy",
+            "ProxyFactory",
+            "UserWalletFactory",
+            "PriceOracleInterface",
+            "PricerRule",
+            "TransferRule",
+            "TokenHolder",
+            "TokenRules",
+            "EIP20TokenInterface",
+            "Organization",
+            "OrganizationInterface",
+            "Organized"
+        ],
+        "gnosis": [
+            "CreateAndAddModules",
+            "GnosisSafe"
+        ]
+    }
 }

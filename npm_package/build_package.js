@@ -27,31 +27,53 @@ const fs = require('fs');
 const path = require('path');
 const { contractNames } = require('./contract_names.json');
 
-const contracts = {};
-
-contractNames.forEach((contract) => {
-  const contractPath = path.join(
-    __dirname,
-    `../build/contracts/${contract}.json`,
-  );
-
+/**
+ * Retrieves the contract's metadata (abi & bin) from the provided file path.
+ * @param {String} contractPath Contract's file path.
+ *
+ * @returns {Object} Contract's abi and bin.
+ */
+function retrieveContractMetaData(contractPath) {
   if (!fs.existsSync(contractPath)) {
     throw new Error(
-      `Cannot read file ${contractPath}.`
-            + 'Truffle compile must be run before building the package.'
-            + 'That should be done automatically when running `npm publish`.',
+      `Cannot read file ${contractPath}.`,
     );
   }
 
   const contractFile = fs.readFileSync(contractPath);
   const metaData = JSON.parse(contractFile);
 
-  contracts[contract] = {};
-  contracts[contract].abi = metaData.abi;
+  const contract = {};
+  contract.abi = metaData.abi;
 
   if (metaData.bytecode !== '0x') {
-    contracts[contract].bin = metaData.bytecode;
+    contract.bin = metaData.bytecode;
   }
+
+  return contract;
+}
+
+const contracts = {
+  openst: {},
+  gnosis: {},
+};
+
+contractNames.openst.forEach((contract) => {
+  const contractPath = path.join(
+    __dirname,
+    `../build/contracts/${contract}.json`,
+  );
+
+  contracts.openst[contract] = retrieveContractMetaData(contractPath);
+});
+
+contractNames.gnosis.forEach((contract) => {
+  const contractPath = path.join(
+    __dirname,
+    `../external/gnosis/safe-contracts/build/contracts/${contract}.json`,
+  );
+
+  contracts.gnosis[contract] = retrieveContractMetaData(contractPath);
 });
 
 fs.writeFileSync(path.join(__dirname, './dist/contracts.json'), JSON.stringify(contracts));
