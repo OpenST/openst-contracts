@@ -19,7 +19,7 @@ Project requires [node](https://nodejs.org/en/) and
 In case of fresh clone, use `--recursive-submodules` option while cloning:
 
 ```bash
-git clone --recursive-submodules git@github.com:OpenSTFoundation/openst-contracts.git
+git clone --recursive-submodules git@github.com:openst/openst-contracts.git
 ```
 
 To update git submodules for already cloned repos, run:
@@ -107,22 +107,22 @@ npm run test
 
 ## Contributing
 
-Please read [CODE_OF_CONDUCT.md](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/CODE_OF_CONDUCT.md)
+Please read [CODE_OF_CONDUCT.md](https://github.com/openst/openst-contracts/blob/develop/CODE_OF_CONDUCT.md)
 for details on our code of conduct, and the process for submitting pull
 requests to us.
 
 ## Versioning
 
 We use [SemVer](http://semver.org/) for versioning. For the versions available,
-see the [tags on this repository](https://github.com/OpenSTFoundation/openst-contracts/tags).
+see the [tags on this repository](https://github.com/openst/openst-contracts/tags).
 
 ## Authors
 
-See also the list of [contributors](https://github.com/OpenSTFoundation/openst-contracts/contributors)
+See also the list of [contributors](https://github.com/openst/openst-contracts/contributors)
 who participated in this project.
 
 ## License
 
 This contracts are licensed under the Apache License Version 2.0 - see
-the [LICENSE.md](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/LICENSE.md)
+the [LICENSE.md](https://github.com/openst/openst-contracts/blob/develop/LICENSE.md)
 file for details.
