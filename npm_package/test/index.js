@@ -1,5 +1,5 @@
 const assert = require('assert');
-const contracts = require('@openstfoundation/openst-contracts');
+const contracts = require('@openst/openst-contracts');
 const { contractNames } = require('../contract_names.json');
 
 contractNames.openst.forEach((name) => {
