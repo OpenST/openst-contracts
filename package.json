@@ -1,6 +1,6 @@
 {
-    "name": "@openstfoundation/openst-contracts",
-    "version": "0.10.0-beta.2",
+    "name": "@openst/openst-contracts",
+    "version": "0.10.0-rc.1",
     "description": "Openst contracts provide ABIs and BINs for EVM smart contracts to enable developers to program token economies.",
     "author": "OpenST Foundation Ltd.",
     "license": "Apache v2.0",
@@ -15,10 +15,10 @@
     "homepage": "https://openst.org",
     "repository": {
         "type": "git",
-        "url": "https://github.com/OpenSTFoundation/openst-contracts.git"
+        "url": "https://github.com/OpenST/openst-contracts.git"
     },
     "bugs": {
-        "url": "https://github.com/OpenSTFoundation/openst-contracts/issues"
+        "url": "https://github.com/OpenST/openst-contracts/issues"
     },
     "files": [
         "npm_package/dist"
