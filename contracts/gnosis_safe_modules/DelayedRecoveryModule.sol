@@ -291,6 +291,9 @@ contract DelayedRecoveryModule is GnosisSafeModule {
             "Required number of blocks to recover was not progressed."
         );
 
+        // prevent re-entry by deleting activeRecoveryInfo early.
+        delete activeRecoveryInfo;
+
         bytes memory data = abi.encodeWithSignature(
             "swapOwner(address,address,address)",
             _prevOwner,
@@ -307,8 +310,6 @@ contract DelayedRecoveryModule is GnosisSafeModule {
             ),
             "Recovery execution failed."
         );
-
-        delete activeRecoveryInfo;
 
         emit RecoveryExecuted(
             _prevOwner,
