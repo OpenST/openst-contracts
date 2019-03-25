@@ -45,13 +45,13 @@ function generateTokenHolderexecuteRedemptionFunctionCallPrefix() {
         type: 'uint256', name: '',
       },
       {
+        type: 'bytes32', name: '',
+      },
+      {
+        type: 'bytes32', name: '',
+      },
+      {
         type: 'uint8', name: '',
-      },
-      {
-        type: 'bytes32', name: '',
-      },
-      {
-        type: 'bytes32', name: '',
       },
     ],
   });
