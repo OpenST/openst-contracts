@@ -93,13 +93,13 @@ contract TokenHolder is MasterCopyNonUpgradable
 
     bytes4 public constant EXECUTE_RULE_CALLPREFIX = bytes4(
         keccak256(
-            "executeRule(address,bytes,uint256,uint8,bytes32,bytes32)"
+            "executeRule(address,bytes,uint256,bytes32,bytes32,uint8)"
         )
     );
 
     bytes4 public constant EXECUTE_REDEMPTION_CALLPREFIX = bytes4(
         keccak256(
-            "executeRedemption(address,bytes,uint256,uint8,bytes32,bytes32)"
+            "executeRedemption(address,bytes,uint256,bytes32,bytes32,uint8)"
         )
     );
 
