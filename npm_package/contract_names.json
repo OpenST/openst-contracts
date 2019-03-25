@@ -7,7 +7,6 @@
             "UserWalletFactory",
             "PriceOracleInterface",
             "PricerRule",
-            "TransferRule",
             "TokenHolder",
             "TokenRules",
             "EIP20TokenInterface",
