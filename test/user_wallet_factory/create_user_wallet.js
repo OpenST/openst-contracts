@@ -330,4 +330,16 @@ contract('UserWalletFactory::createUserWallet', async (accounts) => {
       });
     });
   });
+
+  contract('Verify call prefix constants', async () => {
+    it('Verify TOKENHOLDER_SETUP_CALLPREFIX constant', async () => {
+
+      const userWalletFactory = await UserWalletFactory.new();
+      const tokenHolderSetupCallPrefix = await userWalletFactory.TOKENHOLDER_SETUP_CALLPREFIX();
+      const methodName = "setup";
+
+      Utils.verifyCallPrefixConstant(methodName, tokenHolderSetupCallPrefix, "TokenHolder");
+
+    });
+  });
 });

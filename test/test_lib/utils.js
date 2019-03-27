@@ -167,6 +167,31 @@ module.exports = {
     return { exTxHash, exTxSignature };
   },
 
+  verifyCallPrefixConstant(methodName, callPrefix, contractName) {
+    const contract = artifacts.require(contractName);
+
+    let methodConcat = methodName.concat('(');
+    let input, abiMethod;
+
+    for(let i = 0; i < contract.abi.length; i++) {
+      abiMethod = contract.abi[i];
+      if(abiMethod.name === methodName) {
+        for(let j=0; j < abiMethod.inputs.length - 1; j ++) {
+          input = abiMethod.inputs[j].type;
+          methodConcat = methodConcat.concat(input,',');
+       }
+        input = abiMethod.inputs[abiMethod.inputs.length - 1].type;
+        methodConcat += input;
+      }
+    }
+    methodConcat = methodConcat.concat(')');
+
+    const expectedPrefix = web3.utils.soliditySha3(methodConcat).substring(0, 10);
+
+    assert.strictEqual(expectedPrefix, callPrefix, `Expected ${methodName} callprefix is ${callPrefix} but got ${expectedPrefix}`);
+
+  },
+
   getParamFromTxEvent: (
     transaction, contractAddress, eventName, paramName,
   ) => {
@@ -194,5 +219,5 @@ module.exports = {
     assert(typeof param !== 'undefined');
 
     return param;
-  },
+  }
 };
