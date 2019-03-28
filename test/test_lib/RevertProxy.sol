@@ -1,6 +1,6 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.0;
 
-// Copyright 2018 OpenST Ltd.
+// Copyright 2019 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ contract RevertProxy {
      * @return `true` if the call was successful and did not revert, `false` if
      *         it reverted.
      */
-    function execute() external returns (bool) {
+    function execute() external returns (bool, bytes memory) {
         // solium-disable-next-line security/no-low-level-calls
         return target.call(data);
     }
