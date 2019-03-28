@@ -21,6 +21,8 @@ const { TokenHolderUtils } = require('./utils.js');
 const { Event } = require('../test_lib/event_decoder');
 const { AccountProvider } = require('../test_lib/utils.js');
 
+const TokenHolder = artifacts.require('./TokenHolder.sol');
+
 const CustomRuleDouble = artifacts.require('CustomRuleDouble');
 
 const sessionPublicKey1 = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
@@ -956,6 +958,24 @@ contract('TokenHolder::executeRule', async () => {
       assert.isOk(
         (await tokenHolder.sessionKeys.call(sessionPublicKey1)).nonce.eqn(1),
       );
+    });
+  });
+
+  contract('Verify call prefix constants', async () => {
+    it('Verify EXECUTE_RULE_CALLPREFIX constant', async () => {
+      const tokenHolder = await TokenHolder.new();
+      const tokenHolderExecuteRuleCallPrefix = await tokenHolder.EXECUTE_RULE_CALLPREFIX();
+      const methodName = 'executeRule';
+
+      Utils.verifyCallPrefixConstant(methodName, tokenHolderExecuteRuleCallPrefix, 'TokenHolder');
+    });
+
+    it('Verify EXECUTE_REDEMPTION_CALLPREFIX constant', async () => {
+      const tokenHolder = await TokenHolder.new();
+      const tokenHolderExecuteRuleCallPrefix = await tokenHolder.EXECUTE_REDEMPTION_CALLPREFIX();
+      const methodName = 'executeRedemption';
+
+      Utils.verifyCallPrefixConstant(methodName, tokenHolderExecuteRuleCallPrefix, 'TokenHolder');
     });
   });
 });
