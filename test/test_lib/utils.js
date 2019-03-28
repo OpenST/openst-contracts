@@ -171,15 +171,16 @@ module.exports = {
     const contract = artifacts.require(contractName);
 
     let methodConcat = methodName.concat('(');
-    let input, abiMethod;
+    let input;
+    let abiMethod;
 
-    for(let i = 0; i < contract.abi.length; i++) {
+    for (let i = 0; i < contract.abi.length; i += 1) {
       abiMethod = contract.abi[i];
-      if(abiMethod.name === methodName) {
-        for(let j=0; j < abiMethod.inputs.length - 1; j ++) {
+      if (abiMethod.name === methodName) {
+        for (let j = 0; j < abiMethod.inputs.length - 1; j += 1) {
           input = abiMethod.inputs[j].type;
-          methodConcat = methodConcat.concat(input,',');
-       }
+          methodConcat = methodConcat.concat(input, ',');
+        }
         input = abiMethod.inputs[abiMethod.inputs.length - 1].type;
         methodConcat += input;
       }
@@ -189,7 +190,6 @@ module.exports = {
     const expectedPrefix = web3.utils.soliditySha3(methodConcat).substring(0, 10);
 
     assert.strictEqual(expectedPrefix, callPrefix, `Expected ${methodName} callprefix is ${callPrefix} but got ${expectedPrefix}`);
-
   },
 
   getParamFromTxEvent: (
@@ -219,5 +219,5 @@ module.exports = {
     assert(typeof param !== 'undefined');
 
     return param;
-  }
+  },
 };
