@@ -121,21 +121,24 @@ module.exports = {
     assert(false, displayMessage);
   },
 
-  advanceBlock: () => new Promise((resolve, reject) => {
-    web3.currentProvider.send({
-      jsonrpc: '2.0',
-      method: 'evm_mine',
-      id: new Date().getTime(),
-    }, (err) => {
-      if (err) {
-        return reject(err);
-      }
+  advanceBlock() {
+    return web3.currentProvider.send(
+      'evm_mine',
+    );
+  },
 
-      const newBlockHash = web3.eth.getBlock('latest').hash;
+  async advanceBlocks(blocksAmount) {
+    assert(typeof blocksAmount === 'number');
 
-      return resolve(newBlockHash);
-    });
-  }),
+    for (let i = 0; i < blocksAmount; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      await this.advanceBlock();
+    }
+  },
+
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  },
 
   /** Receives accounts list and gives away each time one. */
   AccountProvider: class AccountProvider {

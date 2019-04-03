@@ -347,7 +347,7 @@ contract('TokenHolder::setup', async () => {
 
       assert.strictEqual(
         (await web3.eth.getStorageAt(tokenHolder.address, 0)),
-        '0x00',
+        '0x0',
       );
     });
   });

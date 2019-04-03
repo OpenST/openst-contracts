@@ -180,7 +180,7 @@ contract('DelayedRecoveryModule::setup', async () => {
 
       assert.strictEqual(
         (await web3.eth.getStorageAt(recoveryModule.address, 0)),
-        '0x00',
+        '0x0',
       );
     });
   });

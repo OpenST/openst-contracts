@@ -43,6 +43,7 @@ contract UtilityTokenFake is EIP20TokenFake {
     )
         EIP20TokenFake(_symbol, _name, _decimals)
         public
+    // solium-disable-next-line no-empty-blocks
     {
     }
 
