@@ -8,7 +8,11 @@ container=$(docker run -it -d -v "${root_dir}":/share trailofbits/eth-security-t
 docker exec -it "${container}" bash -c \
     "   cd /share \
      && solc-select 0.5.0 \
-     && slither . --exclude-medium --exclude-low --exclude-informational"
+     && slither . \
+        --exclude-low \
+        --exclude-informational \
+        --exclude incorrect-equality,locked-ether \
+    "
 slither_result=$?
 
 docker kill "${container}" || exit 1

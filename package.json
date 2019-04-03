@@ -33,13 +33,13 @@
         "lint:js:fix": "npm run lint:js -- --fix",
         "lint:sol": "./node_modules/.bin/solium --dir contracts/",
         "lint:sol:fix": "npm run lint:sol -- --fix",
-        "slither": "./tools/docker_run_slither.sh",
+        "slither": "./node_modules/.bin/truffle compile --all --reset && ./tools/docker_run_slither.sh",
         "ganache-cli": "./tools/run_ganache_cli.sh",
         "test:contracts": "./node_modules/.bin/truffle test",
         "build-package": "node ./npm_package/build_package.js",
         "test:package": "./npm_package/test/run_npm_package_test.sh",
         "prepack": "npm-run-all compile-all build-package",
-        "build": "npm-run-all update lint:sol lint:js compile-all test:contracts build-package test:package"
+        "build": "npm-run-all update lint:sol lint:js compile-all slither test:contracts build-package test:package"
     },
     "devDependencies": {
         "abi-decoder": "1.2.0",

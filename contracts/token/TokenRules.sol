@@ -307,10 +307,13 @@ contract TokenRules is Organized {
         );
 
         for(uint256 i = 0; i < _transfersTo.length; ++i) {
-            token.transferFrom(
-                _from,
-                _transfersTo[i],
-                _transfersAmount[i]
+            require(
+                token.transferFrom(
+                    _from,
+                    _transfersTo[i],
+                    _transfersAmount[i]
+                ),
+                "Failed to transfer from '_from' address."
             );
         }
     }

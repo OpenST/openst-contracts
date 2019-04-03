@@ -42,8 +42,6 @@ contract MasterCopySpy is MasterCopyNonUpgradable {
 
     /* Storage */
 
-    address public reservedStorageSlotForProxy;
-
     address public recordedMsgSender;
 
     address public recordedBeneficiary;
@@ -53,8 +51,6 @@ contract MasterCopySpy is MasterCopyNonUpgradable {
     uint256 public recordedMsgValue;
 
     uint256 public remainingBalance;
-
-    bool public contractShouldFail;
 
 
     /* Special Functions */
@@ -68,7 +64,6 @@ contract MasterCopySpy is MasterCopyNonUpgradable {
     function setup(uint256 _initialBalance)
         public
     {
-        contractShouldFail = false;
         remainingBalance = _initialBalance;
     }
 
@@ -80,10 +75,6 @@ contract MasterCopySpy is MasterCopyNonUpgradable {
         payable
         returns (uint256)
     {
-        if (contractShouldFail) {
-            revert("Contract has been marked to fail.");
-        }
-
         recordedMsgSender = msg.sender;
 
         recordedCurrencyCode = _currencyCode;

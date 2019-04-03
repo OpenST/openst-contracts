@@ -358,16 +358,23 @@ contract TokenHolder is MasterCopyNonUpgradable
 
         TokenRules(tokenRules).allowTransfers();
 
-        token.approve(
-            tokenRules,
-            sessionKeyData.spendingLimit
+        require(
+            token.approve(
+                tokenRules,
+                sessionKeyData.spendingLimit
+            ),
+            "Failed to approve token rules as a spender."
         );
 
         bytes memory returnData;
         // solium-disable-next-line security/no-call-value
         (executionStatus_, returnData) = _to.call.value(msg.value)(_data);
 
-        token.approve(tokenRules, 0);
+        require(
+            token.approve(tokenRules, 0),
+            "Failed to remove token rules as a spender."
+        );
+
 
         TokenRules(tokenRules).disallowTransfers();
 
@@ -407,13 +414,19 @@ contract TokenHolder is MasterCopyNonUpgradable
 
         SessionKeyData storage sessionKeyData = sessionKeys[sessionKey];
 
-        token.approve(_to, sessionKeyData.spendingLimit);
+        require(
+            token.approve(_to, sessionKeyData.spendingLimit),
+            "Failed to approve a co-gateway as a spender."
+        );
 
         bytes memory returnData;
         // solium-disable-next-line security/no-call-value
         (executionStatus_, returnData) = _to.call.value(msg.value)(_data);
 
-        token.approve(_to, 0);
+        require(
+            token.approve(_to, 0),
+            "Failed to remove a co-gateway as a spender."
+        );
 
         emit RedemptionExecuted(
             messageHash,

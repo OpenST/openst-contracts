@@ -275,6 +275,11 @@ contract PricerRule is Organized {
             "Price oracle decimals number is difference from the required one."
         );
 
+        require(
+            _priceOracle.baseCurrency() == baseCurrencyCode,
+            "Price oracle's base currency code does not match."
+        );
+
         bytes3 payCurrencyCode = _priceOracle.quoteCurrency();
 
         require(
@@ -282,10 +287,6 @@ contract PricerRule is Organized {
             "Price oracle already exists."
         );
 
-        require(
-            _priceOracle.baseCurrency() == baseCurrencyCode,
-            "Price oracle's base currency code does not match."
-        );
 
         baseCurrencyPriceOracles[payCurrencyCode] = _priceOracle;
 
