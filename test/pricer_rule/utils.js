@@ -28,10 +28,14 @@ const PriceOracleFake = artifacts.require('PriceOracleFake');
  *      - symbol: 'OST'
  *      - name: 'Open Simple Token'
  *      - decimals: 1
+ * @param config {Object}
+ *        config.decimals Configurable token decimals value.
  */
-module.exports.createEIP20Token = async () => {
+module.exports.createEIP20Token = async (config) => {
   const token = await EIP20TokenFake.new(
-    'OST', 'Open Simple Token', 1,
+    'OST',
+    'Open Simple Token',
+    config.decimals || 1,
   );
 
   return token;
@@ -59,25 +63,30 @@ module.exports.createOrganization = async (accountProvider) => {
 /**
  * Creates and returns the tuple:
  *      (tokenRules, organizationAddress, token)
+ * @param config {Object}
+ *        config.requiredPriceOracleDecimals Configurable required price oracle decimals.
+ * @param eip20TokenConfig {Object}
+ *        config.decimals Configurable token decimals value.
  */
-module.exports.createTokenEconomy = async (accountProvider) => {
+module.exports.createTokenEconomy = async (accountProvider, config = {}, eip20TokenConfig = {}) => {
   const {
     organization,
     organizationOwner,
     organizationWorker,
   } = await this.createOrganization(accountProvider);
 
-  const token = await this.createEIP20Token();
+  const tokenDecimals = eip20TokenConfig.decimals;
+  const token = await this.createEIP20Token(eip20TokenConfig);
 
   const tokenRules = await TokenRulesSpy.new();
 
   const baseCurrencyCode = 'OST';
 
-  const conversionRate = 315;
+  // To derive 1 OST = 1 BT, if conversionRateDecimals = 5, then conversionRate needs to be 10^5.
+  const conversionRate = 100000;
+  const conversionRateDecimals = 5;
 
-  const conversionRateDecimals = 2;
-
-  const requiredPriceOracleDecimals = 7;
+  const requiredPriceOracleDecimals = config.requiredPriceOracleDecimals || 18;
 
   const pricerRule = await PricerRule.new(
     organization.address,
@@ -89,8 +98,9 @@ module.exports.createTokenEconomy = async (accountProvider) => {
     tokenRules.address,
   );
 
-  const quoteCurrencyCode = 'EUR';
-  const priceOracleInitialPrice = 11;
+  const quoteCurrencyCode = 'USD';
+  const priceOracleInitialPrice = (0.02 * (10 ** requiredPriceOracleDecimals))
+    .toString();
   const initialPriceExpirationHeight = (await web3.eth.getBlockNumber()) + 10000;
 
   const priceOracle = await PriceOracleFake.new(
@@ -106,6 +116,7 @@ module.exports.createTokenEconomy = async (accountProvider) => {
     organizationOwner,
     organizationWorker,
     token,
+    tokenDecimals,
     tokenRules,
     baseCurrencyCode,
     conversionRate,

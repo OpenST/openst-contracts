@@ -1,7 +1,11 @@
 const assert = require('assert');
-const contracts = require('@openstfoundation/openst-contracts');
+const contracts = require('@openst/openst-contracts');
 const { contractNames } = require('../contract_names.json');
 
-contractNames.forEach((name) => {
-  assert(contracts[name].abi !== undefined);
+contractNames.openst.forEach((name) => {
+  assert(contracts.openst[name].abi !== undefined);
+});
+
+contractNames.gnosis.forEach((name) => {
+  assert(contracts.gnosis[name].abi !== undefined);
 });

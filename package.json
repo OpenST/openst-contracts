@@ -1,9 +1,9 @@
 {
-    "name": "@openstfoundation/openst-contracts",
-    "version": "0.10.0-alpha.1",
+    "name": "@openst/openst-contracts",
+    "version": "0.10.0",
     "description": "Openst contracts provide ABIs and BINs for EVM smart contracts to enable developers to program token economies.",
     "author": "OpenST Foundation Ltd.",
-    "license": "Apache v2.0",
+    "license": "Apache-2.0",
     "keywords": [
         "ethereum",
         "openst",
@@ -15,19 +15,20 @@
     "homepage": "https://openst.org",
     "repository": {
         "type": "git",
-        "url": "https://github.com/OpenSTFoundation/openst-contracts.git"
+        "url": "https://github.com/OpenST/openst-contracts.git"
     },
     "bugs": {
-        "url": "https://github.com/OpenSTFoundation/openst-contracts/issues"
+        "url": "https://github.com/OpenST/openst-contracts/issues"
     },
     "files": [
         "npm_package/dist"
     ],
     "main": "./npm_package/dist/index.js",
     "scripts": {
-        "restart": "git submodule update --init --recursive && npm install",
-        "compile": "./node_modules/.bin/truffle compile",
-        "compile-all": "./node_modules/.bin/truffle compile --all --reset",
+        "update": "git submodule update --init --recursive && npm i && cd ./external/gnosis/safe-contracts && npm ci && cd -",
+        "compile": "./node_modules/.bin/truffle compile --all --reset",
+        "compile:gnosis": "cd ./external/gnosis/safe-contracts && ./node_modules/.bin/truffle compile --all --reset && cd -",
+        "compile-all": "npm-run-all compile compile:gnosis",
         "lint:js": "find ./test -name \"*.js\" | xargs ./node_modules/.bin/eslint",
         "lint:js:fix": "npm run lint:js -- --fix",
         "lint:sol": "./node_modules/.bin/solium --dir contracts/",
@@ -37,8 +38,8 @@
         "test:contracts": "./node_modules/.bin/truffle test",
         "build-package": "node ./npm_package/build_package.js",
         "test:package": "./npm_package/test/run_npm_package_test.sh",
-        "prepack": "npm run compile-all && npm run build-package",
-        "build": "npm-run-all restart lint:sol lint:js compile-all test:contracts build-package test:package"
+        "prepack": "npm-run-all compile-all build-package",
+        "build": "npm-run-all update lint:sol lint:js compile-all test:contracts build-package test:package"
     },
     "devDependencies": {
         "abi-decoder": "1.2.0",

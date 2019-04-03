@@ -65,7 +65,7 @@ contract DelayedRecoveryModule is GnosisSafeModule {
     string public constant VERSION = "0.1.0";
 
     bytes32 public constant DOMAIN_SEPARATOR_TYPEHASH = keccak256(
-        "EIP712Domain(address delayedRecoveryModule)"
+        "EIP712Domain(address verifyingContract)"
     );
 
     bytes32 public constant INITIATE_RECOVERY_STRUCT_TYPEHASH = keccak256(
@@ -291,6 +291,9 @@ contract DelayedRecoveryModule is GnosisSafeModule {
             "Required number of blocks to recover was not progressed."
         );
 
+        // prevent re-entry by deleting activeRecoveryInfo early.
+        delete activeRecoveryInfo;
+
         bytes memory data = abi.encodeWithSignature(
             "swapOwner(address,address,address)",
             _prevOwner,
@@ -307,8 +310,6 @@ contract DelayedRecoveryModule is GnosisSafeModule {
             ),
             "Recovery execution failed."
         );
-
-        delete activeRecoveryInfo;
 
         emit RecoveryExecuted(
             _prevOwner,

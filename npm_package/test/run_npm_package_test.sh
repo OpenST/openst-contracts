@@ -19,21 +19,21 @@ version="${temp#\"}"
 [[ "${version}" == "null" ]] && exit 1
 
 echo "Copying npm tarball into the test directory."
-cp "${root_dir}/openstfoundation-openst-contracts-${version}.tgz" . || exit 1
+cp "${root_dir}/openst-openst-contracts-${version}.tgz" . || exit 1
 
 echo "Initiating npm project for test."
 npm init -y || exit 1
 npm install assert || exit 1
 
 echo "Installing openst-contract npm package into newly created project."
-npm install "openstfoundation-openst-contracts-${version}.tgz" || exit 1
+npm install "openst-openst-contracts-${version}.tgz" || exit 1
 
 echo "Running ${script_dir_path}/index.js"
 node "${script_dir_path}/index.js" || exit 1
 
 echo "Cleaning up generated files."
 rm -r "${script_dir_path}/node_modules" || exit 1
-rm openstfoundation-openst-contracts-0.10.0-alpha.1.tgz || exit 1
+rm openst-openst-contracts-${version}.tgz || exit 1
 rm package.json || exit 1
 rm package-lock.json || exit 1
 

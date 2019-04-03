@@ -297,6 +297,10 @@ contract TokenRules is Organized {
             "Transfers from the address are not allowed."
         );
 
+        // prevent possible re-entry by the external call to token
+        // by early-on setting the stateful check to false.
+        allowedTransfers[_from] = false;
+
         require(
             _transfersTo.length == _transfersAmount.length,
             "'to' and 'amount' transfer arrays' lengths are not equal."
@@ -309,7 +313,5 @@ contract TokenRules is Organized {
                 _transfersAmount[i]
             );
         }
-
-        allowedTransfers[_from] = false;
     }
 }

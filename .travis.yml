@@ -5,10 +5,10 @@ services:
   - docker
 branches:
   only:
-  - master
-  - develop
-  - /^feature\/.*/
-  - /^release-.*/
+    - master
+    - develop
+    - /^feature\/.*/
+    - /^release-.*/
 git:
   quiet: true
   submodules: true
@@ -34,7 +34,7 @@ before_script:
   - docker pull trailofbits/eth-security-toolbox
   - ./tools/run_ganache_cli.sh </dev/null 1>/dev/null 2>&1 &
 script:
-  - npm build
+  - npm run update
   - npm run lint:sol
   - npm run lint:js
   - npm run compile-all
