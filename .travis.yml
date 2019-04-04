@@ -32,6 +32,6 @@ install:
 before_script:
   - ./tools/run_ganache_cli.sh </dev/null 1>/dev/null 2>&1 &
 script:
-  - npm run build
+  - npm run make:all
 after_script:
   - kill $(ps aux | grep 'ganache-cli' | awk '{print $2}')
