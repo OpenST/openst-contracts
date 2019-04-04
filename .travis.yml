@@ -29,7 +29,6 @@ before_install:
 install:
   - export PATH=./node_modules/.bin/:${PATH}
 before_script:
-  - docker pull trailofbits/eth-security-toolbox
   - ./tools/run_ganache_cli.sh </dev/null 1>/dev/null 2>&1 &
 script:
   - npm run build

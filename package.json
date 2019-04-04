@@ -39,7 +39,7 @@
         "build-package": "node ./npm_package/build_package.js",
         "test:package": "./npm_package/test/run_npm_package_test.sh",
         "prepack": "npm-run-all compile-all build-package",
-        "build": "npm run update && npm-run-all lint:sol lint:js compile-all slither test:contracts build-package test:package"
+        "build": "npm run update && npm-run-all lint:sol lint:js compile-all test:contracts build-package test:package"
     },
     "devDependencies": {
         "abi-decoder": "^1.2.0",
