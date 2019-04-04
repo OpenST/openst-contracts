@@ -27,6 +27,7 @@ before_install:
   - sudo apt-get install software-properties-common
   - sudo add-apt-repository -y ppa:ethereum/ethereum
 install:
+  - npm run update
   - export PATH=./node_modules/.bin/:${PATH}
 before_script:
   - ./tools/run_ganache_cli.sh </dev/null 1>/dev/null 2>&1 &
