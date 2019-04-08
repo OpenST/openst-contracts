@@ -1,0 +1,7 @@
+{
+    "detectors_to_exclude": "locked-ether,incorrect-equality",
+    "exclude_informational": true,
+    "exclude_low": true,
+    "filter_paths": "test_doubles,external,truffle",
+    "ignore_truffle_compile": true
+}

@@ -178,10 +178,7 @@ contract('TokenHolder::authorizeSession', async () => {
         sessionPublicKey1,
       );
 
-      for (let i = 0; i < deltaExpirationHeight1; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
-        await utils.advanceBlock();
-      }
+      await utils.advanceBlocks(deltaExpirationHeight1);
 
       const spendingLimit2 = 12;
       const deltaExpirationHeight2 = 52;

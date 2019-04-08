@@ -107,10 +107,7 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         accountProvider,
       );
 
-      for (let i = 0; i < recoveryBlockDelay; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
-        await Utils.advanceBlock();
-      }
+      await Utils.advanceBlocks(recoveryBlockDelay);
 
       const prevOwner = accountProvider.get();
       const oldOwner = accountProvider.get();
@@ -141,10 +138,7 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         accountProvider,
       );
 
-      for (let i = 0; i < recoveryBlockDelay; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
-        await Utils.advanceBlock();
-      }
+      await Utils.advanceBlocks(recoveryBlockDelay);
 
       const prevOwner = accountProvider.get();
       const oldOwner = accountProvider.get();
@@ -176,10 +170,7 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         newOwner,
       } = await prepare(accountProvider);
 
-      for (let i = 0; i < recoveryBlockDelay; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
-        await Utils.advanceBlock();
-      }
+      await Utils.advanceBlocks(recoveryBlockDelay);
 
       const anotherPrevOwner = accountProvider.get();
       const anotherOldOwner = accountProvider.get();
@@ -240,10 +231,7 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         delta.isNeg(),
       );
 
-      for (let i = 0; i < delta; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
-        await Utils.advanceBlock();
-      }
+      await Utils.advanceBlocks(delta.toNumber());
 
       await Utils.expectRevert(
         recoveryModule.executeRecovery(
@@ -268,12 +256,9 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         newOwner,
       } = await prepare(accountProvider);
 
-      for (let i = 0; i < recoveryBlockDelay; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
-        await Utils.advanceBlock();
-      }
+      await Utils.advanceBlocks(recoveryBlockDelay);
 
-      moduleManager.makeFail();
+      await moduleManager.makeFail();
 
       await Utils.expectRevert(
         recoveryModule.executeRecovery(
@@ -301,10 +286,7 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         newOwner,
       } = await prepare(accountProvider);
 
-      for (let i = 0; i < recoveryBlockDelay; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
-        await Utils.advanceBlock();
-      }
+      await Utils.advanceBlocks(recoveryBlockDelay);
 
       const transactionResponse = await recoveryModule.executeRecovery(
         prevOwner,
@@ -347,10 +329,7 @@ contract('DelayedRecoveryModule::executeRecovery', async () => {
         newOwner,
       } = await prepare(accountProvider);
 
-      for (let i = 0; i < recoveryBlockDelay; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
-        await Utils.advanceBlock();
-      }
+      await Utils.advanceBlocks(recoveryBlockDelay);
 
       let activeRecoveryInfo = await recoveryModule.activeRecoveryInfo.call();
 

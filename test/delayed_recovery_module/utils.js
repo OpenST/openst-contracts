@@ -57,7 +57,7 @@ async function createRecoveryModule(accountProvider) {
   const transactionResponse = await moduleManager.createDelayedRecoveryModule(
     recoveryOwnerAddress,
     recoveryControllerAddress,
-    BLOCK_RECOVERY_DELAY,
+    recoveryBlockDelay,
   );
 
   const recoveryModuleAddress = Utils.getParamFromTxEvent(

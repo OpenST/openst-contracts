@@ -244,10 +244,7 @@ contract('TokenHolder::redeem', async (accounts) => {
         amount, beneficiary, gasPrice, gasLimit, redeemerNonce, hashLock,
       );
 
-      for (let i = 0; i < deltaExpirationHeight; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
-        await Utils.advanceBlock();
-      }
+      await Utils.advanceBlocks(deltaExpirationHeight);
 
       await Utils.expectRevert(
         tokenHolder.executeRedemption(
