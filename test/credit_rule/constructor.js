@@ -18,52 +18,52 @@ const { AccountProvider } = require('../test_lib/utils');
 const CreditRule = artifacts.require('CreditRule');
 
 contract('CreditRule::constructor', async () => {
-    contract('Negative Tests', async (accounts) => {
-        const accountProvider = new AccountProvider(accounts);
+  contract('Negative Tests', async (accounts) => {
+    const accountProvider = new AccountProvider(accounts);
 
-        it('Reverts if the credit budget holder\'s address is null.', async () => {
-            await Utils.expectRevert(
-                CreditRule.new(
-                    Utils.NULL_ADDRESS, // credit budget holder's address
-                    accountProvider.get(), // token rules's address
-                ),
-                'Should revert as the credit budget holder\'s address is null.',
-                'Budget holder\'s address is null.',
-            );
-        });
-
-        it('Reverts if the token rules\'s address is null.', async () => {
-            await Utils.expectRevert(
-                CreditRule.new(
-                    accountProvider.get(), // credit budget holder's address
-                    Utils.NULL_ADDRESS, // token rules's address
-                ),
-                'Should revert as the token rules\'s address is null.',
-                'Token rules\'s address is null.',
-            );
-        });
+    it('Reverts if the credit budget holder\'s address is null.', async () => {
+      await Utils.expectRevert(
+        CreditRule.new(
+          Utils.NULL_ADDRESS, // credit budget holder's address
+          accountProvider.get(), // token rules's address
+        ),
+        'Should revert as the credit budget holder\'s address is null.',
+        'Budget holder\'s address is null.',
+      );
     });
 
-    contract('Storage', async (accounts) => {
-        const accountProvider = new AccountProvider(accounts);
-        it('Checks that passed arguments are set correctly.', async () => {
-            const creditBudgetHolder = accountProvider.get();
-            const tokenRules = accountProvider.get();
-
-            const creditRule = await CreditRule.new(
-                creditBudgetHolder,
-                tokenRules,
-            );
-
-            assert.strictEqual(
-                (await creditRule.budgetHolder.call()),
-                creditBudgetHolder,
-            );
-
-            assert.strictEqual(
-                (await creditRule.tokenRules.call()),
-                tokenRules,
-            );
-        });
+    it('Reverts if the token rules\'s address is null.', async () => {
+      await Utils.expectRevert(
+        CreditRule.new(
+          accountProvider.get(), // credit budget holder's address
+          Utils.NULL_ADDRESS, // token rules's address
+        ),
+        'Should revert as the token rules\'s address is null.',
+        'Token rules\'s address is null.',
+      );
     });
+  });
+
+  contract('Storage', async (accounts) => {
+    const accountProvider = new AccountProvider(accounts);
+    it('Checks that passed arguments are set correctly.', async () => {
+      const creditBudgetHolder = accountProvider.get();
+      const tokenRules = accountProvider.get();
+
+      const creditRule = await CreditRule.new(
+        creditBudgetHolder,
+        tokenRules,
+      );
+
+      assert.strictEqual(
+        (await creditRule.budgetHolder.call()),
+        creditBudgetHolder,
+      );
+
+      assert.strictEqual(
+        (await creditRule.tokenRules.call()),
+        tokenRules,
+      );
+    });
+  });
 });

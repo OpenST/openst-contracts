@@ -29,8 +29,8 @@ class TokenHolderUtils {
     return { utilityToken };
   }
 
-  static async createMockTokenRules() {
-    const tokenRules = await TokenRulesSpy.new();
+  static async createMockTokenRules(tokenAddress) {
+    const tokenRules = await TokenRulesSpy.new(tokenAddress);
 
     return { tokenRules };
   }
