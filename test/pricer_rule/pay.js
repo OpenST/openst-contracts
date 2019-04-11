@@ -297,29 +297,33 @@ contract('PricerRule::pay', async () => {
         new BN(conversionRate),
         new BN(conversionRateDecimals),
       );
-      const actualFromAddress = await tokenRules.recordedFrom.call();
 
-      const actualToAddress1 = await tokenRules.recordedTransfersTo.call(0);
-      const actualToAddress2 = await tokenRules.recordedTransfersTo.call(1);
-      const actualTransfersToLength = await tokenRules.recordedTransfersToLength.call();
+      const recordedTxLength = await tokenRules.transactionsLength.call();
+      assert.isOk(recordedTxLength.eqn(1));
+
+      const actualFromAddress = await tokenRules.fromTransaction.call(0);
+
+      const transfersToTransaction = await tokenRules.transfersToTransaction.call(0);
+      assert.strictEqual(transfersToTransaction.length, 2);
+
+      const actualToAddress1 = transfersToTransaction[0];
+      const actualToAddress2 = transfersToTransaction[1];
 
       const tenPowerTokenDecimals = (new BN(10)).pow(new BN(tokenDecimals));
       // 1000 BTs = 1000*10^18 BTWei
       const expectedTransferAmount1 = new BN(1000).mul(tenPowerTokenDecimals);
       // 500 BTs = 500*10^18 BTWei
       const expectedTransferAmount2 = new BN(500).mul(tenPowerTokenDecimals);
-      const transferredAmount1 = await tokenRules.recordedTransfersAmount.call(0);
-      const transferredAmount2 = await tokenRules.recordedTransfersAmount.call(1);
 
-      const actualTransfersAmountLength = await tokenRules.recordedTransfersAmountLength.call();
+      const transfersAmountTransaction = await tokenRules.transfersAmountTransaction.call(0);
+      assert.strictEqual(transfersAmountTransaction.length, 2);
+
+      const transferredAmount1 = transfersAmountTransaction[0];
+      const transferredAmount2 = transfersAmountTransaction[1];
 
       assert.strictEqual(
         actualFromAddress,
         fromAddress,
-      );
-
-      assert.isOk(
-        actualTransfersToLength.eqn(2),
       );
 
       assert.strictEqual(
@@ -330,10 +334,6 @@ contract('PricerRule::pay', async () => {
       assert.strictEqual(
         actualToAddress2,
         to2,
-      );
-
-      assert.isOk(
-        actualTransfersAmountLength.eqn(2),
       );
 
       assert.isOk(
@@ -420,11 +420,17 @@ contract('PricerRule::pay', async () => {
         new BN(conversionRate),
         new BN(conversionRateDecimals),
       );
-      const actualFromAddress = await tokenRules.recordedFrom.call();
 
-      const actualToAddress1 = await tokenRules.recordedTransfersTo.call(0);
-      const actualToAddress2 = await tokenRules.recordedTransfersTo.call(1);
-      const actualTransfersToLength = await tokenRules.recordedTransfersToLength.call();
+      const recordedTxLength = await tokenRules.transactionsLength.call();
+      assert.isOk(recordedTxLength.eqn(1));
+
+      const actualFromAddress = await tokenRules.fromTransaction.call(0);
+
+      const transfersToTransaction = await tokenRules.transfersToTransaction.call(0);
+      assert.strictEqual(transfersToTransaction.length, 2);
+
+      const actualToAddress1 = transfersToTransaction[0];
+      const actualToAddress2 = transfersToTransaction[1];
 
       // Number of bt needs to be transferred for a payment shouldn’t depend on
       // requiredPriceOracleDecimals.
@@ -435,18 +441,16 @@ contract('PricerRule::pay', async () => {
       const expectedTransferAmount1 = new BN(1000).mul(tenPowerTokenDecimals);
       // 500 BTs = 500*10^18 BTWei
       const expectedTransferAmount2 = new BN(500).mul(tenPowerTokenDecimals);
-      const transferredAmount1 = await tokenRules.recordedTransfersAmount.call(0);
-      const transferredAmount2 = await tokenRules.recordedTransfersAmount.call(1);
 
-      const actualTransfersAmountLength = await tokenRules.recordedTransfersAmountLength.call();
+      const transfersAmountTransaction = await tokenRules.transfersAmountTransaction.call(0);
+      assert.strictEqual(transfersAmountTransaction.length, 2);
+
+      const transferredAmount1 = transfersAmountTransaction[0];
+      const transferredAmount2 = transfersAmountTransaction[1];
 
       assert.strictEqual(
         actualFromAddress,
         fromAddress,
-      );
-
-      assert.isOk(
-        actualTransfersToLength.eqn(2),
       );
 
       assert.strictEqual(
@@ -457,10 +461,6 @@ contract('PricerRule::pay', async () => {
       assert.strictEqual(
         actualToAddress2,
         to2,
-      );
-
-      assert.isOk(
-        actualTransfersAmountLength.eqn(2),
       );
 
       assert.isOk(
@@ -547,29 +547,33 @@ contract('PricerRule::pay', async () => {
         new BN(conversionRate),
         new BN(conversionRateDecimals),
       );
-      const actualFromAddress = await tokenRules.recordedFrom.call();
 
-      const actualToAddress1 = await tokenRules.recordedTransfersTo.call(0);
-      const actualToAddress2 = await tokenRules.recordedTransfersTo.call(1);
-      const actualTransfersToLength = await tokenRules.recordedTransfersToLength.call();
+      const recordedTxLength = await tokenRules.transactionsLength.call();
+      assert.isOk(recordedTxLength.eqn(1));
+
+      const actualFromAddress = await tokenRules.fromTransaction.call(0);
+
+      const transfersToTransaction = await tokenRules.transfersToTransaction.call(0);
+      assert.strictEqual(transfersToTransaction.length, 2);
+
+      const actualToAddress1 = transfersToTransaction[0];
+      const actualToAddress2 = transfersToTransaction[1];
 
       const tenPowerEIP20TokenDecimal = (new BN(10)).pow(new BN(tokenDecimals));
       // 1000 BTs = 1000*10^5 BTWei
       const expectedTransferAmount1 = new BN(1000).mul(tenPowerEIP20TokenDecimal);
       // 500 BTs = 500*10^5 BTWei
       const expectedTransferAmount2 = new BN(500).mul(tenPowerEIP20TokenDecimal);
-      const transferredAmount1 = await tokenRules.recordedTransfersAmount.call(0);
-      const transferredAmount2 = await tokenRules.recordedTransfersAmount.call(1);
 
-      const actualTransfersAmountLength = await tokenRules.recordedTransfersAmountLength.call();
+      const transfersAmountTransaction = await tokenRules.transfersAmountTransaction.call(0);
+      assert.strictEqual(transfersAmountTransaction.length, 2);
+
+      const transferredAmount1 = transfersAmountTransaction[0];
+      const transferredAmount2 = transfersAmountTransaction[1];
 
       assert.strictEqual(
         actualFromAddress,
         fromAddress,
-      );
-
-      assert.isOk(
-        actualTransfersToLength.eqn(2),
       );
 
       assert.strictEqual(
@@ -580,10 +584,6 @@ contract('PricerRule::pay', async () => {
       assert.strictEqual(
         actualToAddress2,
         to2,
-      );
-
-      assert.isOk(
-        actualTransfersAmountLength.eqn(2),
       );
 
       assert.isOk(

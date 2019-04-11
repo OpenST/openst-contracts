@@ -25,7 +25,6 @@ class TokenHolderUtils {
     const utilityToken = await UtilityTokenFake.new(
       'OST', 'Open Simple Token', 1,
     );
-
     return { utilityToken };
   }
 

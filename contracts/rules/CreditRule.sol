@@ -14,8 +14,8 @@ pragma solidity ^0.5.0;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "./SafeMath.sol";
-import "./TokenRules.sol";
+import "../external/SafeMath.sol";
+import "../token/TokenRules.sol";
 
 contract CreditRule {
 
