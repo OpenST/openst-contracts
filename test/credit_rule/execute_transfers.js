@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const web3 = require('../test_lib/web3.js');
 const Utils = require('../test_lib/utils.js');
 const { AccountProvider } = require('../test_lib/utils');
 const { TokenHolderUtils } = require('../token_holder/utils.js');
 
+const TokenHolder = artifacts.require('TokenHolder');
 const CreditRule = artifacts.require('CreditRule');
 const CustomRuleWithCredit = artifacts.require('CustomRuleWithCredit');
 
@@ -98,31 +98,9 @@ async function prepare(
   };
 }
 
-function generateTokenHolderExecuteRuleCallPrefix() {
-  return web3.eth.abi.encodeFunctionSignature({
-    name: 'executeRule',
-    type: 'function',
-    inputs: [
-      {
-        type: 'address', name: '',
-      },
-      {
-        type: 'bytes', name: '',
-      },
-      {
-        type: 'uint256', name: '',
-      },
-      {
-        type: 'uint8', name: '',
-      },
-      {
-        type: 'bytes32', name: '',
-      },
-      {
-        type: 'bytes32', name: '',
-      },
-    ],
-  });
+async function tokenHolderExecuteRuleCallPrefix() {
+  const tokenHolder = await TokenHolder.new();
+  return tokenHolder.EXECUTE_RULE_CALLPREFIX.call();
 }
 
 async function checkTransactions(
@@ -230,13 +208,14 @@ contract('Credit::execute_transfers', async () => {
       const beneficiaryAddress = accountProvider.get();
       const amount = 11;
 
-      const customRuleWithCreditPayFunctionData = customRule.contract.methods.pay(
-        beneficiaryAddress, amount,
-      ).encodeABI();
 
       const tokenHolderSessionKeyData = await tokenHolder.sessionKeys.call(
         tokenHolderSessionPublicKey,
       );
+
+      const customRuleWithCreditPayFunctionData = customRule.contract.methods.pay(
+        beneficiaryAddress, amount,
+      ).encodeABI();
 
       const {
         exTxSignature: customRuleExTxSignature,
@@ -245,7 +224,7 @@ contract('Credit::execute_transfers', async () => {
         customRule.address,
         customRuleWithCreditPayFunctionData,
         tokenHolderSessionKeyData.nonce.toNumber(),
-        generateTokenHolderExecuteRuleCallPrefix(),
+        await tokenHolderExecuteRuleCallPrefix(),
         tokenHolderSessionPrivateKey,
       );
 
@@ -277,29 +256,27 @@ contract('Credit::execute_transfers', async () => {
         creditRule.address,
         creditRuleExecuteRuleFunctionData,
         budgetHolderSessionKeyData.nonce.toNumber(),
-        generateTokenHolderExecuteRuleCallPrefix(),
+        await tokenHolderExecuteRuleCallPrefix(),
         budgetHolderSessionPrivateKey,
       );
 
-      // @TODO: Fix tests.
+      await budgetHolder.executeRule(
+        creditRule.address,
+        creditRuleExecuteRuleFunctionData,
+        budgetHolderSessionKeyData.nonce.toNumber(),
+        tokenHolderExecuteRuleExTxSignature.r,
+        tokenHolderExecuteRuleExTxSignature.s,
+        tokenHolderExecuteRuleExTxSignature.v,
+      );
 
-      // await budgetHolder.executeRule(
-      //   creditRule.address,
-      //   creditRuleExecuteRuleFunctionData,
-      //   budgetHolderSessionKeyData.nonce.toNumber(),
-      //   tokenHolderExecuteRuleExTxSignature.r,
-      //   tokenHolderExecuteRuleExTxSignature.s,
-      //   tokenHolderExecuteRuleExTxSignature.v,
-      // );
-
-      // await checkTransactions(
-      //   tokenRules,
-      //   budgetHolder.address,
-      //   creditAmount,
-      //   tokenHolder.address,
-      //   [beneficiaryAddress],
-      //   [amount],
-      // );
+      await checkTransactions(
+        tokenRules,
+        budgetHolder.address,
+        creditAmount,
+        tokenHolder.address,
+        [beneficiaryAddress],
+        [amount],
+      );
     });
   });
 });

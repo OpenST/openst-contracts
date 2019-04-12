@@ -54,6 +54,7 @@ contract CreditRule {
     }
 
 
+
     /* Special Functions */
 
     constructor(
@@ -90,7 +91,10 @@ contract CreditRule {
         onlyBudgetHolder
         returns(bool executionStatus_)
     {
-        require(_to != address(0));
+        require(
+            _to != address(0),
+            "To (token holder) address is null."
+        );
 
         CreditInfo storage c = credits[_to];
 
