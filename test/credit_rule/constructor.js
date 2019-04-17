@@ -32,14 +32,14 @@ contract('CreditRule::constructor', async () => {
       );
     });
 
-    it('Reverts if the token rules\'s address is null.', async () => {
+    it('Reverts if the transfers agent\'s address is null.', async () => {
       await Utils.expectRevert(
         CreditRule.new(
           accountProvider.get(), // credit budget holder's address
-          Utils.NULL_ADDRESS, // token rules's address
+          Utils.NULL_ADDRESS, // transfers agent's address
         ),
-        'Should revert as the token rules\'s address is null.',
-        'Token rules\'s address is null.',
+        'Should revert as the transfers agent\'s address is null.',
+        'Transfers agent\'s address is null.',
       );
     });
   });
@@ -48,11 +48,11 @@ contract('CreditRule::constructor', async () => {
     const accountProvider = new AccountProvider(accounts);
     it('Checks that passed arguments are set correctly.', async () => {
       const creditBudgetHolder = accountProvider.get();
-      const tokenRules = accountProvider.get();
+      const transfersAgent = accountProvider.get();
 
       const creditRule = await CreditRule.new(
         creditBudgetHolder,
-        tokenRules,
+        transfersAgent,
       );
 
       assert.strictEqual(
@@ -61,8 +61,8 @@ contract('CreditRule::constructor', async () => {
       );
 
       assert.strictEqual(
-        (await creditRule.tokenRules.call()),
-        tokenRules,
+        (await creditRule.transfersAgent.call()),
+        transfersAgent,
       );
     });
   });

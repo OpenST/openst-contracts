@@ -208,7 +208,6 @@ contract('Credit::execute_transfers', async () => {
       const beneficiaryAddress = accountProvider.get();
       const amount = 11;
 
-
       const tokenHolderSessionKeyData = await tokenHolder.sessionKeys.call(
         tokenHolderSessionPublicKey,
       );

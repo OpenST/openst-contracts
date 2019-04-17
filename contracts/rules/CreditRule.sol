@@ -15,30 +15,39 @@ pragma solidity ^0.5.0;
 // limitations under the License.
 
 import "../external/SafeMath.sol";
-import "../token/TokenRules.sol";
+import "../token/TransfersAgent.sol";
 
-contract CreditRule {
+
+/**
+ * Credit rules allows a budget holder to credit a user with an amount
+ * that the user can *only* spents in a token economy. A custom rule
+ * is deployed with a CreditRule acting as a TransfersAgent to execute
+ * transfers. CreditRule first transfers a minimum of credited amount and
+ * needed transfer amount, afterwards delegate the transfer execution to
+ * TransfersAgent itself.
+ *
+ * Steps to utilize CreditRule:
+ *  - A custom rule is deployed by passing a CreditRule address to act as
+ *    a transfers agent for the rule.
+ *  - A token holder signs an executable transaction to execute the custom rule.
+ *  - The budget holder signs an executable transaction to execute
+ *    CreditRule::executeRule function with a credit amount, and the token
+ *    holder's address and executeRule's function data as an argument.
+ */
+contract CreditRule is TransfersAgent {
 
     /* Usings */
 
     using SafeMath for uint256;
 
 
-    /* Struct */
-
-    struct CreditInfo {
-        uint256 amount;
-        bool inProgress;
-    }
-
-
     /* Storage */
 
     address public budgetHolder;
 
-    TokenRules public tokenRules;
+    TransfersAgent public transfersAgent;
 
-    mapping(address => CreditInfo) public credits;
+    mapping(address => uint256) public credits;
 
 
     /* Modifiers */
@@ -54,12 +63,11 @@ contract CreditRule {
     }
 
 
-
     /* Special Functions */
 
     constructor(
         address _budgetHolder,
-        address _tokenRules
+        address _transfersAgent
     )
         public
     {
@@ -69,13 +77,13 @@ contract CreditRule {
         );
 
         require(
-            _tokenRules != address(0),
-            "Token rules's address is null."
+            _transfersAgent != address(0),
+            "Transfers agent's address is null."
         );
 
         budgetHolder = _budgetHolder;
 
-        tokenRules = TokenRules(_tokenRules);
+        transfersAgent = TransfersAgent(_transfersAgent);
     }
 
 
@@ -89,29 +97,32 @@ contract CreditRule {
         external
         payable
         onlyBudgetHolder
-        returns(bool executionStatus_)
+        returns(
+            bool executionStatus_,
+            bytes memory returnData_
+        )
     {
+        require(
+            _creditAmount != 0,
+            "Credit amount is 0."
+        );
+
         require(
             _to != address(0),
             "To (token holder) address is null."
         );
 
-        CreditInfo storage c = credits[_to];
-
         require(
-            !c.inProgress,
+            credits[_to] == 0,
             "Re-entrancy occured in crediting process."
         );
 
-        c.inProgress = true;
-        c.amount = _creditAmount;
+        credits[_to] = _creditAmount;
 
-        bytes memory returnData;
         // solium-disable-next-line security/no-call-value
-        (executionStatus_, returnData) = address(_to).call.value(msg.value)(_data);
+        (executionStatus_, returnData_) = _to.call.value(msg.value)(_data);
 
-        c.amount = 0;
-        c.inProgress = false;
+        delete credits[_to];
     }
 
     function executeTransfers(
@@ -121,14 +132,13 @@ contract CreditRule {
     )
         external
     {
-        if (credits[_from].inProgress) {
+        uint256 creditAmount = credits[_from];
+        if (creditAmount > 0) {
             uint256 sumAmount = 0;
 
             for(uint256 i = 0; i < _transfersAmount.length; ++i) {
                 sumAmount = sumAmount.add(_transfersAmount[i]);
             }
-
-            uint256 creditAmount = credits[_from].amount;
 
             uint256 amountToTransferFromBudgetHolder = (
                 sumAmount > creditAmount ? creditAmount : sumAmount
@@ -141,7 +151,7 @@ contract CreditRule {
             );
         }
 
-        tokenRules.executeTransfers(
+        transfersAgent.executeTransfers(
             _from,
             _transfersTo,
             _transfersAmount
@@ -164,11 +174,10 @@ contract CreditRule {
         uint256[] memory transfersAmount = new uint256[](1);
         transfersAmount[0] = _amount;
 
-        tokenRules.executeTransfers(
+        transfersAgent.executeTransfers(
             _from,
             transfersTo,
             transfersAmount
         );
     }
-
 }
