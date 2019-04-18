@@ -41,13 +41,21 @@ contract CreditRule is TransfersAgent {
     using SafeMath for uint256;
 
 
+    /** Structs */
+
+    struct CreditInfo {
+        uint256 amount;
+        bool inProgress;
+    }
+
+
     /* Storage */
 
     address public budgetHolder;
 
     TransfersAgent public transfersAgent;
 
-    mapping(address => uint256) public credits;
+    mapping(address => CreditInfo) public credits;
 
 
     /* Modifiers */
@@ -113,16 +121,15 @@ contract CreditRule is TransfersAgent {
         );
 
         require(
-            credits[_to] == 0,
+            credits[_to].inProgress == false,
             "Re-entrancy occured in crediting process."
         );
 
-        credits[_to] = _creditAmount;
+        credits[_to].amount = _creditAmount;
+        credits[_to].inProgress = true;
 
         // solium-disable-next-line security/no-call-value
         (executionStatus_, returnData_) = _to.call.value(msg.value)(_data);
-
-        delete credits[_to];
     }
 
     function executeTransfers(
@@ -132,8 +139,10 @@ contract CreditRule is TransfersAgent {
     )
         external
     {
-        uint256 creditAmount = credits[_from];
-        if (creditAmount > 0) {
+        if (credits[_from].inProgress) {
+            uint256 creditAmount = credits[_from].amount;
+            delete credits[_from];
+
             uint256 sumAmount = 0;
 
             for(uint256 i = 0; i < _transfersAmount.length; ++i) {

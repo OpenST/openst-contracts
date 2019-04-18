@@ -11,8 +11,10 @@ docker exec -it "${container}" bash -c \
     "   cd /share \
      && solc-select 0.5.7 \
      && slither . \
+        --truffle-ignore-compile \
         --config-file slither.conf.json \
     "
+
 slither_result=$?
 
 docker kill "${container}" || exit 1
