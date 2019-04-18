@@ -14,8 +14,10 @@ pragma solidity ^0.5.0;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "./EIP20TokenInterface.sol";
 import "../organization/Organized.sol";
+
+import "./EIP20TokenInterface.sol";
+import "./TransfersAgent.sol";
 
 /**
  * @notice Register of whitelisted rules that are allowed to initiate transfers
@@ -33,7 +35,7 @@ import "../organization/Organized.sol";
  *      During a execution, rule can call TokenRules.executeTransfers()
  *      function only once.
  */
-contract TokenRules is Organized {
+contract TokenRules is Organized, TransfersAgent {
 
     /* Events */
 

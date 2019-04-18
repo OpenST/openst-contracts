@@ -25,12 +25,11 @@ class TokenHolderUtils {
     const utilityToken = await UtilityTokenFake.new(
       'OST', 'Open Simple Token', 1,
     );
-
     return { utilityToken };
   }
 
-  static async createMockTokenRules() {
-    const tokenRules = await TokenRulesSpy.new();
+  static async createMockTokenRules(tokenAddress) {
+    const tokenRules = await TokenRulesSpy.new(tokenAddress);
 
     return { tokenRules };
   }

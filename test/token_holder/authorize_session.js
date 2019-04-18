@@ -29,8 +29,9 @@ async function prepare(
   sessionPublicKeyToAuthorize,
 ) {
   const { utilityToken } = await TokenHolderUtils.createUtilityMockToken();
-
-  const { tokenRules } = await TokenHolderUtils.createMockTokenRules();
+  const { tokenRules } = await TokenHolderUtils.createMockTokenRules(
+    utilityToken.address,
+  );
 
   const {
     tokenHolderOwnerAddress,

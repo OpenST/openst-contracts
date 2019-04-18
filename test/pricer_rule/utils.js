@@ -78,7 +78,7 @@ module.exports.createTokenEconomy = async (accountProvider, config = {}, eip20To
   const tokenDecimals = eip20TokenConfig.decimals;
   const token = await this.createEIP20Token(eip20TokenConfig);
 
-  const tokenRules = await TokenRulesSpy.new();
+  const tokenRules = await TokenRulesSpy.new(token.address);
 
   const baseCurrencyCode = 'OST';
 
