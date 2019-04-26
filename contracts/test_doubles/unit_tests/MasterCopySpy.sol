@@ -14,7 +14,7 @@ pragma solidity ^0.5.0;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "../../external/SafeMath.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../../proxies/MasterCopyNonUpgradable.sol";
 
 /**

@@ -16,7 +16,7 @@ pragma solidity ^0.5.0;
 // limitations under the License.
 
 import "../../token/EIP20TokenInterface.sol";
-import "../../external/SafeMath.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 contract EIP20TokenFake is EIP20TokenInterface {

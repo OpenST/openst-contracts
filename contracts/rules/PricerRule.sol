@@ -17,7 +17,7 @@ pragma solidity ^0.5.0;
 import "./PriceOracleInterface.sol";
 import "../token/EIP20TokenInterface.sol";
 import "../token/TokenRules.sol";
-import "../external/SafeMath.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 contract PricerRule is Organized {
