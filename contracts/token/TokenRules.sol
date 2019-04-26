@@ -15,7 +15,7 @@ pragma solidity ^0.5.0;
 // limitations under the License.
 
 import "./EIP20TokenInterface.sol";
-import "../organization/Organized.sol";
+import "../organization/contracts/Organized.sol";
 
 /**
  * @notice Register of whitelisted rules that are allowed to initiate transfers
