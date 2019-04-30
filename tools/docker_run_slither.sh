@@ -9,7 +9,6 @@ container=$(docker run -it -d -v "${root_dir}":/share trailofbits/eth-security-t
 
 docker exec -it "${container}" bash -c \
     "   cd /share \
-     && sudo npm install -g npx \
      && solc-select 0.5.7 \
      && slither . \
         --config-file slither.conf.json \
