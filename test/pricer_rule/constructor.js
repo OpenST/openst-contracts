@@ -28,7 +28,7 @@ contract('PricerRule::constructor', async () => {
     it('Reverts if the token economy address is null.', async () => {
       const {
         organization,
-      } = await PricerRuleUtils.createOrganization(accountProvider);
+      } = await Utils.createOrganization(accountProvider);
 
       await Utils.expectRevert(
         PricerRule.new(
@@ -48,7 +48,7 @@ contract('PricerRule::constructor', async () => {
     it('Reverts if the base currency code is empty.', async () => {
       const {
         organization,
-      } = await PricerRuleUtils.createOrganization(accountProvider);
+      } = await Utils.createOrganization(accountProvider);
 
       await Utils.expectRevert(
         PricerRule.new(
@@ -68,7 +68,7 @@ contract('PricerRule::constructor', async () => {
     it('Reverts if the conversion rate from the base currency to the token is 0.', async () => {
       const {
         organization,
-      } = await PricerRuleUtils.createOrganization(accountProvider);
+      } = await Utils.createOrganization(accountProvider);
 
       await Utils.expectRevert(
         PricerRule.new(
@@ -88,7 +88,7 @@ contract('PricerRule::constructor', async () => {
     it('Reverts if the token rules address is null.', async () => {
       const {
         organization,
-      } = await PricerRuleUtils.createOrganization(accountProvider);
+      } = await Utils.createOrganization(accountProvider);
 
       await Utils.expectRevert(
         PricerRule.new(
@@ -111,7 +111,7 @@ contract('PricerRule::constructor', async () => {
     it('Checks that passed arguments are set correctly.', async () => {
       const {
         organization,
-      } = await PricerRuleUtils.createOrganization(accountProvider);
+      } = await Utils.createOrganization(accountProvider);
 
       const tokenDecimals = 10;
       const eip20TokenConfig = {
