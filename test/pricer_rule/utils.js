@@ -15,10 +15,10 @@
 'use strict';
 
 const web3 = require('../test_lib/web3.js');
+const Utils = require('../test_lib/utils');
 
 const EIP20TokenFake = artifacts.require('EIP20TokenFake');
 const TokenRulesSpy = artifacts.require('TokenRulesSpy');
-const Organization = artifacts.require('Organization');
 const PricerRule = artifacts.require('PricerRule');
 const PriceOracleFake = artifacts.require('PriceOracleFake');
 
@@ -41,25 +41,6 @@ module.exports.createEIP20Token = async (config) => {
   return token;
 };
 
-module.exports.createOrganization = async (accountProvider) => {
-  const organizationOwner = accountProvider.get();
-  const organizationWorker = accountProvider.get();
-
-  const organization = await Organization.new(
-    organizationOwner,
-    organizationOwner,
-    [organizationWorker],
-    (await web3.eth.getBlockNumber()) + 100000,
-    { from: accountProvider.get() },
-  );
-
-  return {
-    organization,
-    organizationOwner,
-    organizationWorker,
-  };
-};
-
 /**
  * Creates and returns the tuple:
  *      (tokenRules, organizationAddress, token)
@@ -73,7 +54,7 @@ module.exports.createTokenEconomy = async (accountProvider, config = {}, eip20To
     organization,
     organizationOwner,
     organizationWorker,
-  } = await this.createOrganization(accountProvider);
+  } = await Utils.createOrganization(accountProvider);
 
   const tokenDecimals = eip20TokenConfig.decimals;
   const token = await this.createEIP20Token(eip20TokenConfig);

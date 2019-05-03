@@ -38,7 +38,7 @@
         "test:package": "./npm_package/test/run_npm_package_test.sh",
         "make:package": "node ./npm_package/make_package.js",
         "prepack": "npm-run-all compile:all make:package",
-        "make:all": "npm-run-all lint:sol:solium lint:js lint:sol:slither compile:all test:contracts make:package test:package",
+        "make:all": "npm-run-all lint:sol:solium lint:js compile:all test:contracts make:package test:package",
         "ganache-cli": "./tools/run_ganache_cli.sh"
     },
     "devDependencies": {

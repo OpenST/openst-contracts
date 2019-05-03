@@ -19,6 +19,8 @@ const assert = require('assert');
 const EthUtils = require('ethereumjs-util');
 const web3 = require('./web3.js');
 
+const Organization = artifacts.require('Organization');
+
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 const MAX_UINT256 = new BN(2).pow(new BN(256)).sub(new BN(1));
@@ -200,8 +202,8 @@ module.exports = {
   ) => {
     assert(
       typeof transaction === 'object'
-            && !Array.isArray(transaction)
-            && transaction !== null,
+      && !Array.isArray(transaction)
+      && transaction !== null,
     );
     assert(eventName !== '');
     assert(contractAddress !== '');
@@ -222,5 +224,24 @@ module.exports = {
     assert(typeof param !== 'undefined');
 
     return param;
+  },
+
+  createOrganization: async (accountProvider) => {
+    const organizationOwner = accountProvider.get();
+    const organizationWorker = accountProvider.get();
+
+    const organization = await Organization.new(
+      organizationOwner,
+      organizationOwner,
+      [organizationWorker],
+      (await web3.eth.getBlockNumber()) + 100000,
+      { from: accountProvider.get() },
+    );
+
+    return {
+      organization,
+      organizationOwner,
+      organizationWorker,
+    };
   },
 };
