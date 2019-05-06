@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "../../../external/SafeMath.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
  * It is used to test SafeMath contract.

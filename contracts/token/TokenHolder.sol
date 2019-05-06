@@ -16,7 +16,7 @@ pragma solidity ^0.5.0;
 
 import "./EIP20TokenInterface.sol";
 import "../proxies/MasterCopyNonUpgradable.sol";
-import "../external/SafeMath.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./TokenRules.sol";
 import "./UtilityTokenRequiredInterface.sol";
 

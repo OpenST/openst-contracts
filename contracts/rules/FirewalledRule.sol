@@ -14,8 +14,8 @@ pragma solidity ^0.5.0;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "../organization/OrganizationInterface.sol";
-import "../organization/Organized.sol";
+import "../organization/contracts/Organized.sol";
+import "../organization/contracts/OrganizationInterface.sol";
 
 /**
  * @title Extend this rule in order to restrict relayers of a meta-transaction.

@@ -1,3 +1,6 @@
 [submodule "external/gnosis/safe-contracts"]
 	path = external/gnosis/safe-contracts
 	url = https://github.com/OpenST/safe-contracts.git
+[submodule "contracts/organization"]
+	path = contracts/organization
+	url = https://github.com/OpenST/organization-contracts.git
