@@ -25,19 +25,8 @@ const MasterCopySpy = artifacts.require('MasterCopySpy');
 const TokenHolder = artifacts.require('TokenHolder');
 
 function generateMasterCopySpySetupFunctionData(balance) {
-  return web3.eth.abi.encodeFunctionCall(
-    {
-      name: 'setup',
-      type: 'function',
-      inputs: [
-        {
-          type: 'uint256',
-          name: 'balance',
-        },
-      ],
-    },
-    [balance],
-  );
+  const masterCopySpy = new web3.eth.Contract(MasterCopySpy.abi);
+  return masterCopySpy.methods.setup(balance).encodeABI();
 }
 
 contract('UserWalletFactory::createUserWallet', async (accounts) => {
