@@ -21,7 +21,7 @@ contract GnosisSafeModuleManagerSpy is GnosisSafeModuleManagerInterface
 {
     /* Events */
 
-    event DelayedRedcoveryModuleCreated(address _contractAddress);
+    event DelayedRecoveryModuleCreated(address _contractAddress);
 
 
     /* Storage */
@@ -60,7 +60,7 @@ contract GnosisSafeModuleManagerSpy is GnosisSafeModuleManagerInterface
             _recoveryBlockDelay
         );
 
-        emit DelayedRedcoveryModuleCreated(address(module));
+        emit DelayedRecoveryModuleCreated(address(module));
 
         return module;
     }

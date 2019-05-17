@@ -69,6 +69,14 @@ async function prepare(accountProvider) {
   };
 }
 
+/**
+ * The swapOwner() function is an inherited function
+ * (safe-contracts/contracts/base/OwnerManager.sol) of GnosisSade contract
+ * (safe-contracts/contracts/GnosisSafe.sol). However, as we do not
+ * compile safe-contracts external repository
+ * (<projet-root>/external/gnosis/safe-contracts) during a development of this
+ * project, we should explicitly use the function abi to generate call data.
+ */
 function generateSwapOwnerData(
   prevOwner, oldOwner, newOwner,
 ) {

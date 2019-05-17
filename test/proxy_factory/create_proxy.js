@@ -24,19 +24,8 @@ const ProxyFactory = artifacts.require('ProxyFactory');
 const MasterCopySpy = artifacts.require('MasterCopySpy');
 
 function generateSetupFunctionData(balance) {
-  return web3.eth.abi.encodeFunctionCall(
-    {
-      name: 'setup',
-      type: 'function',
-      inputs: [
-        {
-          type: 'uint256',
-          name: 'balance',
-        },
-      ],
-    },
-    [balance],
-  );
+  const masterCopySpy = new web3.eth.Contract(MasterCopySpy.abi);
+  return masterCopySpy.methods.setup(balance).encodeABI();
 }
 
 
@@ -88,7 +77,7 @@ contract('ProxyFactory::createProxy', async (accounts) => {
       const masterCopy = await MasterCopySpy.new(initialBalance);
 
       const initialBalanceInSetupCall = 11;
-      const setupData = generateSetupFunctionData(
+      const setupData = await generateSetupFunctionData(
         initialBalanceInSetupCall,
       );
 

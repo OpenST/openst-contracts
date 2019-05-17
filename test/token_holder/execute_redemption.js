@@ -23,6 +23,7 @@ const { Event } = require('../test_lib/event_decoder');
 const { AccountProvider } = require('../test_lib/utils.js');
 
 const CoGatewaySpy = artifacts.require('CoGatewaySpy.sol');
+const TokenHolder = artifacts.require('TokenHolder.sol');
 
 const sessionPublicKey1 = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
 const sessionPrivateKey1 = '0xa8225c01ceeaf01d7bc7c1b1b929037bd4050967c5730c0b854263121b8399f3';
@@ -31,32 +32,14 @@ const sessionPrivateKey2 = '0x6817f551bbc3e12b8fe36787ab192c921390d6176a3324ed02
 
 
 function generateTokenHolderexecuteRedemptionFunctionCallPrefix() {
-  return web3.eth.abi.encodeFunctionSignature({
-    name: 'executeRedemption',
-    type: 'function',
-    inputs: [
-      {
-        type: 'address', name: '',
-      },
-      {
-        type: 'bytes', name: '',
-      },
-      {
-        type: 'uint256', name: '',
-      },
-      {
-        type: 'bytes32', name: '',
-      },
-      {
-        type: 'bytes32', name: '',
-      },
-      {
-        type: 'uint8', name: '',
-      },
-    ],
-  });
+  const tokenHolder = new web3.eth.Contract(TokenHolder.abi);
+  return tokenHolder.jsonInterface.abi.methods.executeRedemption.signature;
 }
 
+/**
+ * CoGateway contract is not part of this project, hence, we should explicitly
+ * use CoGateway::redeem function abi to generated call data.
+ */
 function generateCoGatewayRedeemFunctionData(
   amount, beneficiary, gasPrice, gasLimit, nonce, hashLock,
 ) {

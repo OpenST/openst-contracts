@@ -22,7 +22,7 @@ const { Event } = require('../test_lib/event_decoder');
 const { AccountProvider } = require('../test_lib/utils.js');
 
 const TokenHolder = artifacts.require('./TokenHolder.sol');
-
+const UtilityTokenFake = artifacts.require('UtilityTokenFake');
 const CustomRuleDouble = artifacts.require('CustomRuleDouble');
 
 const sessionPublicKey1 = '0x62502C4DF73935D0D10054b0Fb8cC036534C6fb0';
@@ -33,124 +33,40 @@ const sessionPrivateKey2 = '0x6817f551bbc3e12b8fe36787ab192c921390d6176a3324ed02
 function generateTokenHolderAuthorizeSessionFunctionData(
   sessionKey, spendingLimit, expirationHeight,
 ) {
-  return web3.eth.abi.encodeFunctionCall(
-    {
-
-      name: 'authorizeSession',
-      type: 'function',
-      inputs: [
-        {
-          type: 'address',
-          name: 'sessionKey',
-        },
-        {
-          type: 'uint256',
-          name: 'spendingLimit',
-        },
-        {
-          type: 'uint256',
-          name: 'expirationHeight',
-        },
-      ],
-    },
-    [sessionKey, spendingLimit, expirationHeight],
-  );
+  const tokenHolder = new web3.eth.Contract(TokenHolder.abi);
+  return tokenHolder.methods.authorizeSession(
+    sessionKey,
+    spendingLimit,
+    expirationHeight,
+  ).encodeABI();
 }
 
 function generateUtilityTokenApproveFunctionData(spender, value) {
-  return web3.eth.abi.encodeFunctionCall(
-    {
-
-      name: 'approve',
-      type: 'function',
-      inputs: [
-        {
-          type: 'address',
-          name: 'spender',
-        },
-        {
-          type: 'uint256',
-          name: 'value',
-        },
-      ],
-    },
-    [spender, value],
-  );
+  const utilityToken = new web3.eth.Contract(UtilityTokenFake.abi);
+  return utilityToken.methods.approve(
+    spender,
+    value,
+  ).encodeABI();
 }
 
 function generateMockRulePassFunctionData(value) {
-  return web3.eth.abi.encodeFunctionCall(
-    {
-      name: 'pass',
-      type: 'function',
-      inputs: [
-        {
-          type: 'address',
-          name: 'value',
-        },
-      ],
-    },
-    [value],
-  );
+  const mockRule = new web3.eth.Contract(CustomRuleDouble.abi);
+  return mockRule.methods.pass(value).encodeABI();
 }
 
 function generateMockRulePassPayableFunctionData(value) {
-  return web3.eth.abi.encodeFunctionCall(
-    {
-      name: 'passPayable',
-      type: 'function',
-      inputs: [
-        {
-          type: 'address',
-          name: 'value',
-        },
-      ],
-    },
-    [value],
-  );
+  const mockRule = new web3.eth.Contract(CustomRuleDouble.abi);
+  return mockRule.methods.passPayable(value).encodeABI();
 }
 
 function generateMockRuleFailFunctionData(value) {
-  return web3.eth.abi.encodeFunctionCall(
-    {
-      name: 'fail',
-      type: 'function',
-      inputs: [
-        {
-          type: 'address',
-          name: 'value',
-        },
-      ],
-    },
-    [value],
-  );
+  const mockRule = new web3.eth.Contract(CustomRuleDouble.abi);
+  return mockRule.methods.fail(value).encodeABI();
 }
 
 function generateTokenHolderExecuteRuleCallPrefix() {
-  return web3.eth.abi.encodeFunctionSignature({
-    name: 'executeRule',
-    type: 'function',
-    inputs: [
-      {
-        type: 'address', name: '',
-      },
-      {
-        type: 'bytes', name: '',
-      },
-      {
-        type: 'uint256', name: '',
-      },
-      {
-        type: 'bytes32', name: '',
-      },
-      {
-        type: 'bytes32', name: '',
-      },
-      {
-        type: 'uint8', name: '',
-      },
-    ],
-  });
+  const tokenHolder = new web3.eth.Contract(TokenHolder.abi);
+  return tokenHolder.jsonInterface.abi.methods.executeRule.signature;
 }
 
 async function generateTokenHolderAuthorizeSessionFunctionExTx(
