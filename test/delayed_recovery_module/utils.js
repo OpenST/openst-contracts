@@ -25,7 +25,7 @@ const GnosisSafeModuleManagerSpy = artifacts.require('GnosisSafeModuleManagerSpy
 // const BLOCK_RECOVERY_DELAY = 4 * 84600;
 const BLOCK_RECOVERY_DELAY = 50;
 
-const RECOERY_MODULE_DOMAIN_SEPARATOR_TYPEHASH = web3.utils.keccak256(
+const RECOVERY_MODULE_DOMAIN_SEPARATOR_TYPEHASH = web3.utils.keccak256(
   'EIP712Domain(address verifyingContract)',
 );
 
@@ -63,7 +63,7 @@ async function createRecoveryModule(accountProvider) {
   const recoveryModuleAddress = Utils.getParamFromTxEvent(
     transactionResponse,
     moduleManager.address,
-    'DelayedRedcoveryModuleCreated',
+    'DelayedRecoveryModuleCreated',
     '_contractAddress',
   );
 
@@ -87,7 +87,7 @@ function hashRecoveryModuleDomainSeparator(recoveryModuleAddress) {
         'address',
       ],
       [
-        RECOERY_MODULE_DOMAIN_SEPARATOR_TYPEHASH,
+        RECOVERY_MODULE_DOMAIN_SEPARATOR_TYPEHASH,
         recoveryModuleAddress,
       ],
     ),

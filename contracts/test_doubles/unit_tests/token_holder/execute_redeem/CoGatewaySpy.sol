@@ -75,7 +75,7 @@ contract CoGatewaySpy {
         recordedBeneficiary = _beneficiary;
 
         recordedGasPrice = _gasPrice;
-    
+
         recordedGasLimit = _gasLimit;
 
         recordedNonce = _nonce;
