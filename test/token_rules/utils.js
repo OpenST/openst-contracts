@@ -14,6 +14,7 @@
 
 'use strict';
 
+const testConfig = require('../test_lib/config');
 const web3 = require('../test_lib/web3.js');
 
 const EIP20TokenFake = artifacts.require('EIP20TokenFake');
@@ -25,11 +26,10 @@ const Organization = artifacts.require('Organization');
  * function's testing with the following defaults:
  *      - symbol: 'OST'
  *      - name: 'Open Simple Token'
- *      - decimals: 1
  */
 module.exports.createEIP20Token = async () => {
   const token = await EIP20TokenFake.new(
-    'OST', 'Open Simple Token', 1,
+    'OST', 'Open Simple Token', testConfig.decimals,
   );
 
   return token;

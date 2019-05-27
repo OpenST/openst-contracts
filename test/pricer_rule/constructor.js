@@ -14,6 +14,7 @@
 
 'use strict';
 
+const testConfig = require('../test_lib/config');
 const web3 = require('../test_lib/web3.js');
 const Utils = require('../test_lib/utils');
 const PricerRuleUtils = require('./utils.js');
@@ -37,7 +38,7 @@ contract('PricerRule::constructor', async () => {
           web3.utils.stringToHex('OST'), // base currency code
           1, // conversion rate
           0, // conversion rate decimals
-          0, // price oracles required decimals number
+          testConfig.decimals, // price oracles required decimals number
           accountProvider.get(), // token rules
         ),
         'Should revert as the economy token address is null.',
@@ -57,7 +58,7 @@ contract('PricerRule::constructor', async () => {
           web3.utils.stringToHex(''), // base currency code
           1, // conversion rate
           0, // conversion rate decimals
-          0, // price oracles required decimals number
+          testConfig.decimals, // price oracles required decimals number
           accountProvider.get(), // token rules
         ),
         'Should revert as the base currency code is null.',
@@ -77,7 +78,7 @@ contract('PricerRule::constructor', async () => {
           web3.utils.stringToHex('OST'), // base currency code
           0, // conversion rate
           0, // conversion rate decimals
-          0, // price oracles required decimals number
+          testConfig.decimals, // price oracles required decimals number
           accountProvider.get(), // token rules
         ),
         'Should revert as the conversion rate from the base currency to the token is 0.',
@@ -97,7 +98,7 @@ contract('PricerRule::constructor', async () => {
           web3.utils.stringToHex('OST'), // base currency code
           1, // conversion rate
           0, // conversion rate decimals
-          0, // price oracles required decimals number
+          testConfig.decimals, // price oracles required decimals number
           Utils.NULL_ADDRESS, // token rules
         ),
         'Should revert as token rules is null.',
@@ -113,9 +114,8 @@ contract('PricerRule::constructor', async () => {
         organization,
       } = await Utils.createOrganization(accountProvider);
 
-      const tokenDecimals = 10;
       const eip20TokenConfig = {
-        decimals: tokenDecimals,
+        decimals: testConfig.decimals,
       };
       const token = await PricerRuleUtils.createEIP20Token(eip20TokenConfig);
       const tokenRules = accountProvider.get();
@@ -125,7 +125,7 @@ contract('PricerRule::constructor', async () => {
         web3.utils.stringToHex('OST'), // base currency code
         10, // conversion rate
         1, // conversion rate decimals
-        2, // price oracles required decimals number
+        testConfig.decimals, // price oracles required decimals number
         tokenRules, // token rules
       );
 
@@ -158,11 +158,11 @@ contract('PricerRule::constructor', async () => {
       );
 
       assert.isOk(
-        (await pricerRule.requiredPriceOracleDecimals.call()).eqn(2),
+        (await pricerRule.requiredPriceOracleDecimals.call()).eqn(testConfig.decimals),
       );
 
       assert.isOk(
-        (await pricerRule.tokenDecimals.call()).eqn(tokenDecimals),
+        (await pricerRule.tokenDecimals.call()).eqn(testConfig.decimals),
       );
 
       assert.strictEqual(

@@ -36,6 +36,7 @@
         "lint:sol:slither": "npm run compile && ./tools/docker_run_slither.sh",
         "test:contracts": "./node_modules/.bin/truffle test",
         "test:package": "./npm_package/test/run_npm_package_test.sh",
+        "test:range": "./tools/test_range.sh",
         "make:package": "node ./npm_package/make_package.js",
         "prepack": "npm-run-all compile:all make:package",
         "make:all": "npm-run-all lint:sol:solium lint:js compile:all test:contracts make:package test:package",

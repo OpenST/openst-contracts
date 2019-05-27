@@ -14,6 +14,7 @@
 
 'use strict';
 
+const testConfig = require('../test_lib/config');
 const web3 = require('../test_lib/web3.js');
 const Utils = require('../test_lib/utils');
 
@@ -27,7 +28,6 @@ const PriceOracleFake = artifacts.require('PriceOracleFake');
  * function's testing with the following defaults:
  *      - symbol: 'OST'
  *      - name: 'Open Simple Token'
- *      - decimals: 1
  * @param config {Object}
  *        config.decimals Configurable token decimals value.
  */
@@ -35,7 +35,7 @@ module.exports.createEIP20Token = async (config) => {
   const token = await EIP20TokenFake.new(
     'OST',
     'Open Simple Token',
-    config.decimals || 1,
+    config.decimals,
   );
 
   return token;
@@ -56,8 +56,10 @@ module.exports.createTokenEconomy = async (accountProvider, config = {}, eip20To
     organizationWorker,
   } = await Utils.createOrganization(accountProvider);
 
-  const tokenDecimals = eip20TokenConfig.decimals;
-  const token = await this.createEIP20Token(eip20TokenConfig);
+  const tokenDecimals = eip20TokenConfig.decimals || testConfig.decimals;
+  const token = await this.createEIP20Token({
+    decimals: tokenDecimals,
+  });
 
   const tokenRules = await TokenRulesSpy.new();
 
@@ -67,7 +69,7 @@ module.exports.createTokenEconomy = async (accountProvider, config = {}, eip20To
   const conversionRate = 100000;
   const conversionRateDecimals = 5;
 
-  const requiredPriceOracleDecimals = config.requiredPriceOracleDecimals || 18;
+  const requiredPriceOracleDecimals = config.requiredPriceOracleDecimals || testConfig.decimals;
 
   const pricerRule = await PricerRule.new(
     organization.address,
