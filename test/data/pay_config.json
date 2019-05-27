@@ -1,0 +1,14 @@
+[
+  {
+    "priceOracleDecimals":"18",
+    "eip20TokenDecimals":"18"
+  },
+  {
+    "priceOracleDecimals":"18",
+    "eip20TokenDecimals":"5"
+  },
+  {
+    "priceOracleDecimals":"5",
+    "eip20TokenDecimals":"18"
+  }
+]
