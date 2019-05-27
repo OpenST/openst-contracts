@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/* eslint-disable no-await-in-loop, no-plusplus */
+
 'use strict';
 
 const BN = require('bn.js');
@@ -230,106 +232,103 @@ contract('PricerRule::pay', async () => {
 
   contract('Positive Path with requiredPriceOracleDecimals and tokenDecimals variations',
     async (accounts) => {
-    const accountProvider = new AccountProvider(accounts);
-    let config;
+      const accountProvider = new AccountProvider(accounts);
+      let config;
 
-    it('Checks that TokenRules executeTransfers is called with different config values ' +
-      'of requiredPriceOracleDecimals and tokenDecimals.', async () => {
-      // In command line export example:
+      it('Checks that TokenRules executeTransfers is called with different config values '
+      + 'of requiredPriceOracleDecimals and tokenDecimals.', async () => {
+      // Command line export example:
       // export PAY_CONFIG='[{"priceOracleDecimals":"18","eip20TokenDecimals":"18"}]'
-      config = JSON.parse(process.env.PAY_CONFIG) || payConfig;
+        config = JSON.parse(process.env.PAY_CONFIG) || payConfig;
 
-      for (let i = 0; i < config.length; i++) {
-        const currentPayConfig = config[i];
-        const priceOracleDecimalsConfig = {
-          requiredPriceOracleDecimals: currentPayConfig.priceOracleDecimals,
-        };
-        const eip20TokenConfig = {
-          decimals: currentPayConfig.eip20TokenDecimals,
-        };
-        const {
-          organizationWorker,
-          tokenRules,
-          conversionRate,
-          conversionRateDecimals,
-          requiredPriceOracleDecimals,
-          pricerRule,
-          quoteCurrencyCode,
-          priceOracle,
-          fromAddress,
-          tokenDecimals,
-        } = await prepare(accountProvider, priceOracleDecimalsConfig, eip20TokenConfig);
+        for (let i = 0; i < config.length; i++) {
+          const currentPayConfig = config[i];
+          const priceOracleDecimalsConfig = {
+            requiredPriceOracleDecimals: currentPayConfig.priceOracleDecimals,
+          };
+          const eip20TokenConfig = {
+            decimals: currentPayConfig.eip20TokenDecimals,
+          };
+          const {
+            organizationWorker,
+            tokenRules,
+            conversionRate,
+            conversionRateDecimals,
+            requiredPriceOracleDecimals,
+            pricerRule,
+            quoteCurrencyCode,
+            priceOracle,
+            fromAddress,
+            tokenDecimals,
+          } = await prepare(accountProvider, priceOracleDecimalsConfig, eip20TokenConfig);
 
-        // $0.02 = 0.02*10^requiredPriceOracleDecimals(in contract)
-        const oraclePrice = (0.02 * (10 ** requiredPriceOracleDecimals)).toString();
-        await priceOracle.setPrice(oraclePrice, (await web3.eth.getBlockNumber()) + 10000);
+          // $0.02 = 0.02*10^requiredPriceOracleDecimals(in contract)
+          const oraclePrice = (0.02 * (10 ** requiredPriceOracleDecimals)).toString();
+          await priceOracle.setPrice(oraclePrice, (await web3.eth.getBlockNumber()) + 10000);
 
-        // $1 = 1*10^requiredPriceOracleDecimals(in contract)
-        const acceptanceMargin = (1 * (10 ** requiredPriceOracleDecimals)).toString();
-        await pricerRule.setAcceptanceMargin(web3.utils.stringToHex(quoteCurrencyCode),
-          acceptanceMargin,
-          { from: organizationWorker },
-        );
+          // $1 = 1*10^requiredPriceOracleDecimals(in contract)
+          const acceptanceMargin = (1 * (10 ** requiredPriceOracleDecimals)).toString();
+          await pricerRule.setAcceptanceMargin(web3.utils.stringToHex(quoteCurrencyCode),
+            acceptanceMargin,
+            { from: organizationWorker });
 
-        const to1 = accountProvider.get();
-        const to2 = accountProvider.get();
-        // Amount1 to transfer: $20 = 20*10^requiredPriceOracleDecimals(in contract)
-        const amount1BN = (20 * (10 ** requiredPriceOracleDecimals)).toString();
-        // Amount2 to transfer: $10 = 10*10^requiredPriceOracleDecimals(in contract)
-        const amount2BN = (10 * (10 ** requiredPriceOracleDecimals)).toString();
+          const to1 = accountProvider.get();
+          const to2 = accountProvider.get();
+          // Amount1 to transfer: $20 = 20*10^requiredPriceOracleDecimals(in contract)
+          const amount1BN = (20 * (10 ** requiredPriceOracleDecimals)).toString();
+          // Amount2 to transfer: $10 = 10*10^requiredPriceOracleDecimals(in contract)
+          const amount2BN = (10 * (10 ** requiredPriceOracleDecimals)).toString();
 
-        const intendedPrice = oraclePrice; // intendedPriceBN is Current PriceOracle price.
+          const intendedPrice = oraclePrice; // intendedPriceBN is Current PriceOracle price.
 
-        await pricerRule.pay(
-          fromAddress,
-          [to1, to2], // 'to' addresses
-          [amount1BN, amount2BN], // amounts
-          web3.utils.stringToHex(quoteCurrencyCode),
-          intendedPrice,
-          { from: accountProvider.get() },
-        );
+          await pricerRule.pay(
+            fromAddress,
+            [to1, to2], // 'to' addresses
+            [amount1BN, amount2BN], // amounts
+            web3.utils.stringToHex(quoteCurrencyCode),
+            intendedPrice,
+            { from: accountProvider.get() },
+          );
 
-        const convertedAmount1BN = convertPayCurrencyToToken(
-          tokenDecimals,
-          new BN(amount1BN),
-          new BN(oraclePrice),
-          new BN(conversionRate),
-          new BN(conversionRateDecimals),
-        );
-        const convertedAmount2BN = convertPayCurrencyToToken(
-          tokenDecimals,
-          new BN(amount2BN),
-          new BN(oraclePrice),
-          new BN(conversionRate),
-          new BN(conversionRateDecimals),
-        );
-        const actualFromAddress = await tokenRules.recordedFrom.call();
+          const convertedAmount1BN = convertPayCurrencyToToken(
+            tokenDecimals,
+            new BN(amount1BN),
+            new BN(oraclePrice),
+            new BN(conversionRate),
+            new BN(conversionRateDecimals),
+          );
+          const convertedAmount2BN = convertPayCurrencyToToken(
+            tokenDecimals,
+            new BN(amount2BN),
+            new BN(oraclePrice),
+            new BN(conversionRate),
+            new BN(conversionRateDecimals),
+          );
+          const actualFromAddress = await tokenRules.recordedFrom.call();
 
-        const actualToAddress1 = await tokenRules.recordedTransfersTo.call(0);
-        const actualToAddress2 = await tokenRules.recordedTransfersTo.call(1);
-        const actualTransfersToLength = await tokenRules.recordedTransfersToLength.call();
+          const actualToAddress1 = await tokenRules.recordedTransfersTo.call(0);
+          const actualToAddress2 = await tokenRules.recordedTransfersTo.call(1);
+          const actualTransfersToLength = await tokenRules.recordedTransfersToLength.call();
 
-        const tenPowerTokenDecimals = (new BN(10)).pow(new BN(tokenDecimals));
-        // 1000 BTs = 1000*10^tokenDecimals BTWei
-        const expectedTransferAmount1 = new BN(1000).mul(tenPowerTokenDecimals);
-        // 500 BTs = 500*10^tokenDecimals BTWei
-        const expectedTransferAmount2 = new BN(500).mul(tenPowerTokenDecimals);
-        const transferredAmount1 = await tokenRules.recordedTransfersAmount.call(0);
-        const transferredAmount2 = await tokenRules.recordedTransfersAmount.call(1);
-        const actualTransfersAmountLength = await tokenRules.recordedTransfersAmountLength.call();
+          const tenPowerTokenDecimals = (new BN(10)).pow(new BN(tokenDecimals));
+          // 1000 BTs = 1000*10^tokenDecimals BTWei
+          const expectedTransferAmount1 = new BN(1000).mul(tenPowerTokenDecimals);
+          // 500 BTs = 500*10^tokenDecimals BTWei
+          const expectedTransferAmount2 = new BN(500).mul(tenPowerTokenDecimals);
+          const transferredAmount1 = await tokenRules.recordedTransfersAmount.call(0);
+          const transferredAmount2 = await tokenRules.recordedTransfersAmount.call(1);
+          const actualTransfersAmountLength = await tokenRules.recordedTransfersAmountLength.call();
 
-        assert.strictEqual(actualFromAddress, fromAddress);
-        assert.isOk(actualTransfersToLength.eqn(2));
-        assert.strictEqual(actualToAddress1, to1);
-        assert.strictEqual(actualToAddress2, to2);
-        assert.isOk(actualTransfersAmountLength.eqn(2));
-        assert.isOk(transferredAmount1.eq(expectedTransferAmount1));
-        assert.isOk(expectedTransferAmount1.eq(convertedAmount1BN));
-        assert.isOk(transferredAmount2.eq(expectedTransferAmount2));
-        assert.isOk(expectedTransferAmount2.eq(convertedAmount2BN));
-
-      } // Loop ends here
-
+          assert.strictEqual(actualFromAddress, fromAddress);
+          assert.isOk(actualTransfersToLength.eqn(2));
+          assert.strictEqual(actualToAddress1, to1);
+          assert.strictEqual(actualToAddress2, to2);
+          assert.isOk(actualTransfersAmountLength.eqn(2));
+          assert.isOk(transferredAmount1.eq(expectedTransferAmount1));
+          assert.isOk(expectedTransferAmount1.eq(convertedAmount1BN));
+          assert.isOk(transferredAmount2.eq(expectedTransferAmount2));
+          assert.isOk(expectedTransferAmount2.eq(convertedAmount2BN));
+        } // Loop ends here
+      });
     });
-  });
 });
