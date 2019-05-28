@@ -239,7 +239,7 @@ contract('PricerRule::pay', async () => {
       + 'of requiredPriceOracleDecimals and tokenDecimals.', async () => {
       // Command line export example:
       // export PAY_CONFIG='[{"priceOracleDecimals":"18","eip20TokenDecimals":"18"}]'
-        config = JSON.parse(process.env.PAY_CONFIG) || payConfig;
+        config = process.env.PAY_CONFIG ? JSON.parse(process.env.PAY_CONFIG) : payConfig;
 
         for (let i = 0; i < config.length; i++) {
           const currentPayConfig = config[i];
